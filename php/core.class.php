@@ -181,7 +181,6 @@ class Core {
 		$name = ($hash) ? 'public_token' : 'token';
 		$expires = ($hash) ? time() + 60 * 60 : time() + 60 * 60 * 24 * 7; // 1h for public, otherwise 1 week
 
-		// PUT TOKEN IN INSTALL-DIR!
 		if ($token &&
 			setcookie($name, $token, $expires, "/") &&
 			$this->db->session_start($token, $user, $hash, $expires))
@@ -202,7 +201,7 @@ class Core {
 
 	public function login($username, $pass) {
 		$username = strtolower($username);
-		$user = $this->db->user_get($username);
+		$user = $this->db->user_get_by_name($username);
 		$res = "Wrong username/password";
 
 		// User unknown

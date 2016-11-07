@@ -166,7 +166,7 @@ class Database {
 		return array('user' => $db_user, 'pass' => $db_pass);
 	}
 
-	public function backup_info($uid) {
+	public function user_backup_info($uid) {
 		$stmt = $this->link->prepare('SELECT pass, encrypt_filename FROM sd_backup WHERE id = ?');
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
@@ -183,28 +183,63 @@ class Database {
 		return null;
 	}
 
-	public function user_get($username) {
-		$stmt = $this->link->prepare('SELECT id, user, pass, salt, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan FROM sd_users WHERE user = ?');
-		$stmt->bind_param('s', $username);
+	public function user_get_by_name($username, $discrete = false) {
+		return $this->user_get("user", $username, $discrete);
+	}
+
+	public function user_get_by_id($uid, $discrete = false) {
+		return $this->user_get("id", $uid, $discrete);
+	}
+
+	public function user_get_by_token($token, $discrete = false) {
+		if ($uid = $this->user_get_id_by_token($token)) {
+			return $this->user_get("id", $uid, $discrete);
+		}
+		return null;
+	}
+
+	private function user_get($column, $value, $discrete = false) {
+		$stmt = $this->link->prepare('SELECT id, user, pass, salt, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan FROM sd_users WHERE ' . $column . ' = ?');
+		if (ctype_digit($value)) {
+			$stmt->bind_param('i', $value);
+		}
+		else {
+			$stmt->bind_param('s', $value);
+		}
+		$stmt->store_result();
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($id, $username, $pass, $salt, $admin, $max_storage, $color, $fileview, $login_attempts, $last_login_attempt, $last_login, $autoscan);
 
 		if ($stmt->fetch()) {
-			return array(
-				'id'					=> $id,
-				'username'				=> strtolower($username),
-				'pass'					=> $pass,
-				'salt'					=> $salt,
-				'admin'					=> $admin,
-				'max_storage'			=> $max_storage,
-				'color'					=> $color,
-				'fileview'				=> $fileview,
-				'login_attempts'		=> $login_attempts,
-				'last_login_attempt'	=> $last_login_attempt,
-				'last_login'			=> $last_login,
-				'autoscan'				=> $autoscan
-			);
+			if ($discrete) {
+				// Filter user data
+				return array(
+					'id'			=> $id,
+					'username'		=> strtolower($username),
+					'color'			=> $color,
+					'fileview'		=> $fileview,
+					'admin'			=> $admin,
+					'last_login'	=> $last_login,
+					'autoscan'		=> $autoscan
+				);
+			}
+			else {
+				return array(
+					'id'					=> $id,
+					'username'				=> strtolower($username),
+					'pass'					=> $pass,
+					'salt'					=> $salt,
+					'admin'					=> $admin,
+					'max_storage'			=> $max_storage,
+					'color'					=> $color,
+					'fileview'				=> $fileview,
+					'login_attempts'		=> $login_attempts,
+					'last_login_attempt'	=> $last_login_attempt,
+					'last_login'			=> $last_login,
+					'autoscan'				=> $autoscan
+				);
+			}
 		}
 
 		return null;
@@ -217,36 +252,24 @@ class Database {
 	 */
 
 	public function user_get_all() {
-		$stmt = $this->link->prepare('SELECT id, user, admin, max_storage, color, fileview, last_login FROM sd_users');
+		$stmt = $this->link->prepare('SELECT id, user, admin, color, fileview, last_login FROM sd_users');
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $username, $admin, $max_storage, $color, $fileview, $last_login);
+		$stmt->bind_result($id, $username, $admin, $color, $fileview, $last_login);
 
 		$user_array = array();
 		while ($stmt->fetch()) {
 			array_push($user_array, array(
-				'id'					=> $id,
-				'username'				=> strtolower($username),
-				'admin'					=> $admin,
-				'max_storage'			=> $max_storage,
-				'color'					=> $color,
-				'fileview'				=> $fileview,
-				'last_login'			=> $last_login
+				'id'			=> $id,
+				'username'		=> strtolower($username),
+				'admin'			=> $admin,
+				'color'			=> $color,
+				'fileview'		=> $fileview,
+				'last_login'	=> $last_login
 			));
 		}
 
 		return $user_array;
-	}
-
-	public function user_get_name($uid) {
-		$stmt = $this->link->prepare('SELECT user FROM sd_users WHERE id = ?');
-		$stmt->bind_param('i', $uid);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($username);
-		$stmt->fetch();
-
-		return ($stmt->affected_rows != 0 && strlen($username) > 0) ? $username : null;
 	}
 
 	/**
@@ -255,7 +278,7 @@ class Database {
 	 * @return string username
 	 */
 
-	public function get_user_from_token($token) {
+	private function user_get_id_by_token($token) {
 		$time = time();
 		$stmt = $this->link->prepare('SELECT user FROM sd_session WHERE token = ? AND fingerprint = ? AND expires > ?');
 		$stmt->bind_param('ssi', $token, $this->fingerprint, $time);
@@ -274,7 +297,7 @@ class Database {
 	 */
 
 	public function user_is_admin($token) {
-		$uid = $this->get_user_from_token($token);
+		$uid = $this->user_get_id_by_token($token);
 		$stmt = $this->link->prepare('SELECT admin FROM sd_users WHERE id = ? AND admin = 1');
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
@@ -309,9 +332,9 @@ class Database {
 	 * @param user
 	 */
 
-	public function user_remove($username) {
-		$stmt = $this->link->prepare('DELETE FROM sd_users WHERE user = ?');
-		$stmt->bind_param('s', $username);
+	public function user_remove($uid) {
+		$stmt = $this->link->prepare('DELETE FROM sd_users WHERE id = ?');
+		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 	}
 
@@ -345,10 +368,10 @@ class Database {
 	 * @return boolean true if successful
 	 */
 
-	public function user_set_admin($username, $admin) {
+	public function user_set_admin($uid, $admin) {
 		// Check if real changes (update-error when trying to update exact same values)
-		$stmt1 = $this->link->prepare('SELECT user FROM sd_users WHERE user = ? AND admin = ? LIMIT 1');
-		$stmt1->bind_param('si', $username, $admin);
+		$stmt1 = $this->link->prepare('SELECT user FROM sd_users WHERE id = ? AND admin = ? LIMIT 1');
+		$stmt1->bind_param('ii', $uid, $admin);
 		$stmt1->execute();
 		$stmt1->store_result();
 		$stmt1->fetch();
@@ -363,22 +386,16 @@ class Database {
 		return ($stmt2->affected_rows != 0);
 	}
 
-	public function user_set_autoscan($username, $enable) {
+	public function user_set_autoscan($uid, $enable) {
 		// Check if real changes (update-error when trying to update exact same values)
-		$stmt1 = $this->link->prepare('SELECT user FROM sd_users WHERE user = ? AND autoscan = ? LIMIT 1');
-		$stmt1->bind_param('si', $username, $enable);
-		$stmt1->execute();
-		$stmt1->store_result();
-		$stmt1->fetch();
-
-		if ($stmt1->affected_rows == 1) {
+		if ($this->user_autoscan) {
 			return true;
 		}
 
-		$stmt2 = $this->link->prepare('UPDATE sd_users SET autoscan = ? WHERE user = ?');
-		$stmt2->bind_param('is', $enable, $username);
-		$stmt2->execute();
-		return ($stmt2->affected_rows != 0);
+		$stmt = $this->link->prepare('UPDATE sd_users SET autoscan = ? WHERE id = ?');
+		$stmt->bind_param('ii', $enable, $uid);
+		$stmt->execute();
+		return ($stmt->affected_rows != 0);
 	}
 
 	public function user_autoscan($uid) {
@@ -398,7 +415,7 @@ class Database {
 	 * @return boolean true if successful
 	 */
 
-	public function user_set_storage_max($username, $max_storage) {
+	public function user_set_storage_max($uid, $max_storage) {
 		// Check if real changes (update-error when trying to update exact same values)
 		$stmt1 = $this->link->prepare('SELECT user FROM sd_users WHERE user = ? AND max_storage = ? LIMIT 1');
 		$stmt1->bind_param('ss', $username, $max_storage);
@@ -440,9 +457,9 @@ class Database {
 	 * @param fileview
 	 */
 
-	public function user_set_fileview($username, $fileview) {
-		$stmt = $this->link->prepare('UPDATE sd_users SET fileview = ? WHERE user = ?');
-		$stmt->bind_param('ss', $fileview, $username);
+	public function user_set_fileview($uid, $fileview) {
+		$stmt = $this->link->prepare('UPDATE sd_users SET fileview = ? WHERE id = ?');
+		$stmt->bind_param('si', $fileview, $uid);
 		$stmt->execute();
 	}
 
@@ -452,9 +469,9 @@ class Database {
 	 * @param color
 	 */
 
-	public function user_set_color($username, $color) {
-		$stmt = $this->link->prepare('UPDATE sd_users SET color = ? WHERE user = ?');
-		$stmt->bind_param('ss', $color, $username);
+	public function user_set_color($uid, $color) {
+		$stmt = $this->link->prepare('UPDATE sd_users SET color = ? WHERE id = ?');
+		$stmt->bind_param('si', $color, $uid);
 		$stmt->execute();
 	}
 
@@ -1175,6 +1192,7 @@ class Database {
 		while ($stmt->fetch()) {
 			$force_delete = $lastscan < $start && !$this->cache_trashed($id);
 
+			// Only go into recursion if user explicitly it (really slow!) or on deletion (to avoid loose links)
 			if (($recursive || $force_delete) && $type == "folder") {
 				$this->cache_clean($id, $owner, $start, $recursive, $force_delete);
 			}

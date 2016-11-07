@@ -19,8 +19,9 @@ class Backup {
 
 	public function __construct($token) {
 		$this->db				= Database::getInstance();
-		$this->uid				= $this->db->get_user_from_token($token);
-		$this->username			= $this->db->user_get_name($this->uid);
+		$this->user				= $this->db->user_get_by_token($token);
+		$this->uid				= ($this->user) ? $this->user['id'] : null;
+		$this->username			= ($this->user) ? $this->user['username'] : "";
 		$this->config			= json_decode(file_get_contents(dirname(__DIR__) . '/config/config.json'), true);
 
 		$this->lock				= dirname(__FILE__) . '/../config/locks/backup_' . $this->username;
@@ -38,7 +39,6 @@ class Backup {
 	}
 
 	public function set_token($code) {
-		file_put_contents(LOG, "set token: " . $code . "\n", FILE_APPEND);
 		$header = array('Content-Type: application/x-www-form-urlencoded');
 
 		$params = array(
@@ -96,7 +96,6 @@ class Backup {
 	}
 
 	public function start() {
-		file_put_contents(LOG, "start\n", FILE_APPEND);
 		$path = $this->config['datadir'] . $this->username . "/";
 
 		// Check if backup is already running
@@ -121,10 +120,7 @@ class Backup {
 		$backup_folder = $this->exists('simpledrive', "root");
 		$folder_id = ($backup_folder) ? $backup_folder['id'] : $this->create_folder('simpledrive', "root");
 
-		$backup_info = $this->db->backup_info($this->uid);
-
-		file_put_contents(LOG, "uid: " . $this->uid . "\n", FILE_APPEND);
-		file_put_contents(LOG, "backup info: " . print_r($backup_info, true) . "\n", FILE_APPEND);
+		$backup_info = $this->db->user_backup_info($this->uid);
 
 		if (!$backup_info || !$folder_id) {
 			header('HTTP/1.1 500 An error occured');
@@ -255,22 +251,18 @@ class Backup {
 	}
 
 	public function enable($pass, $enc_filename) {
-		file_put_contents(LOG, "enable | pass: " . $pass . " | enc_filename: " . $enc_filename . "\n", FILE_APPEND);
 		if (strlen($pass) == 0) {
 			header('HTTP/1.1 400 Password not set');
 			return null;
 		}
 		else if ($pass && !$this->db->backup_enable($this->uid, $pass, intval($enc_filename))) {
-			file_put_contents(LOG, "Else if 1\n", FILE_APPEND);
 			header('HTTP/1.1 500 Could not set backup password');
 			return null;
 		}
 		else if ($AUTH_URL = $this->create_auth_url()) {
-			file_put_contents(LOG, "Else if 2\n", FILE_APPEND);
 			return $AUTH_URL;
 		}
 
-		file_put_contents(LOG, "unknown\n", FILE_APPEND);
 		header('HTTP/1.1 500 Unknown error occured');
 		return null;
 	}

@@ -18,7 +18,7 @@
 	<link rel="stylesheet" href="assets/css/fileviews.css" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
-<body class="light">
+<body class="<?php echo $user['color']; ?>">
 	<!-- Header -->
 	<div id="header">
 		<div id="logo" title="Return to files"><div class="menu-thumb icon-cloud"><a href="files"></div>simpleDrive</a></div>
@@ -185,7 +185,7 @@
 	</div>
 
 	<script>
-		var username	= "<?php echo $user; ?>";
+		var username	= "<?php echo $user['username']; ?>";
 		var token		= "<?php echo $token;?>";
 		var view		= "<?php echo $view; ?>";
 	</script>

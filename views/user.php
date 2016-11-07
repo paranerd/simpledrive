@@ -20,7 +20,7 @@
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 
-<body class="light">
+<body class="<?php echo $user['color']; ?>">
 	<!-- Header -->
 	<div id="header">
 		<div id="logo" title="Return to files"><div class="menu-thumb icon-cloud"><a href="files"></div>simpleDrive</a></div>
@@ -30,7 +30,7 @@
 
 	<!-- Sidebar -->
 	<div id="sidebar">
-		<div id="sidebar-general" class="menu-item focus" title="Status info" onclick="getStatus();"><div class="menu-thumb icon-info"></div><div class="sidebar-text">General</div></div>
+		<div id="sidebar-general" class="menu-item focus" title="Status info" onclick="General.load();"><div class="menu-thumb icon-info"></div><div class="sidebar-text">General</div></div>
 	</div>
 
 	<!-- Content -->
@@ -88,7 +88,7 @@
 	<!-- Menu -->
 	<div id="menu" class="popup hidden">
 		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
-		<?php if($admin) { echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-users"></div>System</a></div>'; } ?>
+		<?php if($user['admin']) { echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-users"></div>System</a></div>'; } ?>
 		<div class="menu-item"><a href="logout?t=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div>Logout</a></div>
 	</div>
 
@@ -136,7 +136,7 @@
 	</div>
 
 	<script>
-		var username	= "<?php echo $user; ?>";
+		var username	= "<?php echo $user['username']; ?>";
 		var code		= '<?php echo $code; ?>';
 		var token		= "<?php echo $token;?>";
 	</script>

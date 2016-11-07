@@ -32,11 +32,9 @@ else if (!file_exists('config/config.json')) {
 	require_once 'views/setup.php';
 }
 else if (!preg_match('/(\.|\.\.\/)/', $view) && file_exists('views/' . $view . '.php')) {
-	$token	= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-	$db		= Database::getInstance();
-	$uid	= $db->get_user_from_token($token);
-	$user	= $db->user_get_name($uid);
-	$admin	= $db->user_is_admin($token);
+	$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
+	$db			= Database::getInstance();
+	$user		= $db->user_get_by_token($token, true);
 	require_once 'views/' . $view . '.php';
 }
 else {

@@ -146,14 +146,6 @@
 			<div id="context-delete" class="menu-item hidden" onclick="FileManager.remove();"><div class="menu-thumb icon-trash"></div><?php echo $lang['delete']; ?></div>
 		</div>
 
-		<!-- Menu -->
-		<div id="menu" class="popup hidden">
-			<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div><?php echo $lang['settings']; ?></a></div>
-			<?php if($admin) { echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-users"></div>System</a></div>'; } ?>
-			<div class="menu-item" onclick="FileManager.showInfo();"><a href="#"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></a></div>
-			<div class="menu-item"><a href="logout?t=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
-		</div>
-
 		<!-- Drag status -->
 		<div id="dragstatus" class="hidden"></div>
 

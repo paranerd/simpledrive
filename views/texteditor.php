@@ -57,9 +57,9 @@
 	</div>
 
 	<script>
-		var username = "<?php echo $user; ?>";
-		var file = '<?php echo $_POST['file']; ?>';
-		var token = "<?php echo $token; ?>";
+		var username	= "<?php echo $user ? $user['username'] : ''; ?>";
+		var file		= '<?php echo $_POST['file']; ?>';
+		var token		= "<?php echo $token; ?>";
 	</script>
 
 	<script type="text/javascript" src="lib/jquery/jquery-1.11.3.min.js"></script>

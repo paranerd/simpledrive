@@ -26,12 +26,13 @@ class File {
 	 */
 
 	public function __construct($token) {
+		$this->token				= $token;
 		$this->config				= json_decode(file_get_contents(dirname(__DIR__) . '/config/config.json'), true);
 		$this->db					= Database::getInstance();
-		$this->uid					= $this->db->get_user_from_token($token);
-		$this->username				= $this->db->user_get_name($this->uid);
+		$this->user					= $this->db->user_get_by_token($token);
+		$this->uid					= ($this->user) ? $this->user['id'] : null;
+		$this->username				= ($this->user) ? $this->user['username'] : "";
 		$this->core					= new Core();
-		$this->token				= $token;
 		$this->scan_lock			= dirname(__FILE__) . '/../config/locks/scan_';
 	}
 
@@ -431,8 +432,6 @@ class File {
 			return "Filename not allowed";
 		}
 
-		file_put_contents(LOG, "rename " . $id . " to " . $newname . "\n", FILE_APPEND);
-
 		$file = $this->get_cached($id, self::$PERMISSION_WRITE);
 
 		if (!$file) {
@@ -535,7 +534,7 @@ class File {
 
 	public function share($target, $userto, $mail, $write, $public, $key) {
 		$file = $this->get_cached($target, self::$PERMISSION_WRITE);
-		$user = $this->db->user_get($userto);
+		$user = $this->db->user_get_by_name($userto);
 		$userto_uid = ($user) ? $user['id'] : null;
 
 		if (!$file) {

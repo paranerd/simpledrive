@@ -214,6 +214,7 @@ var General = {
 			data: {token: token, user: username},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
+			console.log(data.msg);
 			$("#fileview").val(data.msg.fileview);
 			$("#color").val(data.msg.color);
 			if (data.msg.autoscan) { $("#autoscan").addClass("checkbox-checked"); }

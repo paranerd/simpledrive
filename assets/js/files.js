@@ -47,7 +47,6 @@ $(document).ready(function() {
 
 	if (username) {
 		Util.getVersion();
-		FileManager.loadView();
 		$("#username").html(Util.escape(username) + " &#x25BE");
 	}
 
@@ -885,31 +884,6 @@ var FileManager = {
 			}
 		});
 	},
-
-	/**
-	 * Sets color theme and fileview
-	 */
-
-	 loadView: function() {
-		$.ajax({
-			url: 'api/users/gettheme',
-			type: 'post',
-			data: {token: token},
-			dataType: "json"
-		}).done(function(data, statusText, xhr) {
-			$('body').removeClass().addClass(data.msg.color);
-			$("#files").removeClass().addClass(data.msg.fileview);
-
-			if (data.msg.fileview == 'grid') {
-				$(".list-header").addClass('hidden');
-			}
-			else {
-				$(".list-header").removeClass('hidden');
-			}
-		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
-		});
-	 },
 
 	move: function(target) {
 		Util.updateWorker(1);

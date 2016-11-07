@@ -128,7 +128,7 @@ $("#users-filter-input").on('input', function(e) {
 
 $(document).on('keyup', function(e) {
 	// Filter
-	if (!e.shiftKey && !$(e.target).is('input') && !e.ctrlKey &&
+	if ((view == "log" || view == "users") && !e.shiftKey && !$(e.target).is('input') && !e.ctrlKey &&
 		((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 96 && e.keyCode <= 105)))
 	{
 		if (!$("#log").hasClass('hidden') && $("#log-filter").hasClass('hidden')) {
@@ -184,6 +184,8 @@ $(document).on('mouseup', '#users', function(e) {
 
 var Status = {
 	fetch: function(pushState) {
+		view = "status";
+
 		if (pushState) {
 			window.history.pushState(null, '', '?v=status');
 		}
@@ -298,6 +300,8 @@ var Log = {
 	pageTotal: 0,
 
 	fetch: function(pushState, page) {
+		view = "log";
+
 		if (pushState) {
 			window.history.pushState(null, '', '?v=log');
 		}
@@ -324,9 +328,9 @@ var Log = {
 
 			for (var i in Log.log) {
 				if (Log.log[i].msg.toLowerCase().indexOf(needle) != -1 ||
-					Log.log[i].type.toLowerCase().indexOf(needle) != -1 ||
 					Log.log[i].source.toLowerCase().indexOf(needle) != -1 ||
-					Log.log[i].user.toLowerCase().indexOf(needle) != -1) {
+					Log.log[i].user.toLowerCase().indexOf(needle) != -1)
+				{
 					Log.filteredLog.push(Log.log[i]);
 				}
 			}
@@ -379,7 +383,6 @@ var Log = {
 			listItem.appendChild(thumbnailWrapper);
 
 			var thumbnail = document.createElement('span');
-			var ty
 			thumbnail.id = "thumbnail" + i;
 			thumbnail.value = i;
 			thumbnail.className = "item-elem thumbnail icon-" + type;
@@ -433,6 +436,8 @@ var Log = {
 
 var Plugins = {
 	fetch: function(pushState) {
+		view = "plugins";
+
 		if (pushState) {
 			window.history.pushState(null, '', '?v=plugins');
 		}
@@ -556,7 +561,7 @@ var Users = {
 			var username = document.createElement("span");
 			username.className = "item-elem col1";
 			username.value = i;
-			username.innerHTML = Util.escape(item.user);
+			username.innerHTML = Util.escape(item.username);
 			$("#item" + i).append(username);
 
 			var admin = document.createElement("span");
@@ -600,7 +605,7 @@ var Users = {
 			quotaUsed.innerHTML = "calculating...";
 			$("#item" + i).append(quotaUsed);
 
-			Users.getQuota(item.user, i);
+			Users.getQuota(item.username, i);
 
 			var lastUpdate = document.createElement("span");
 			lastUpdate.className = "item-elem col5";
@@ -612,6 +617,8 @@ var Users = {
 	},
 
 	fetch: function(pushState) {
+		view = "users";
+
 		if (pushState) {
 			window.history.pushState(null, '', '?v=users');
 		}
@@ -634,9 +641,9 @@ var Users = {
 		if (Users.all.length > 0) {
 			Users.filtered = [];
 
-			for (var i in Usersall) {
-				if (Users.all[i].user.toLowerCase().indexOf(needle) != -1) {
-					Users.filtered.push(all[i]);
+			for (var i in Users.all) {
+				if (Users.all[i].username.toLowerCase().indexOf(needle) != -1) {
+					Users.filtered.push(Users.all[i]);
 				}
 			}
 			Users.display();

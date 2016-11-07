@@ -19,7 +19,7 @@
 	<link rel="stylesheet" href="assets/css/fileviews.css" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
-<body class="light">
+<body class="<?php echo $user['color']; ?>">
 	<!-- Header -->
 	<div id="header">
 		<div id="logo"><div class="menu-thumb icon-cloud"><a href="files"></div>simpleDrive</a></div>
@@ -94,7 +94,7 @@
 			<input id="files-filter-input" class="list-filter-input" placeholder="Filter..."/>
 			<span class="close" onclick="FileManager.closeFilter();"> &times;</span>
 		</div>
-		<div class="list-header">
+		<div class="list-header <?php if ($user['fileview'] == 'grid') echo 'hidden'; ?>">
 			<span class="col0 checkbox"><span id="fSelect" class="checkbox-box"></span></span>
 			<span class="col1" onclick="FileManager.sortByName();"><span><?php echo $lang['name']; ?> </span><span id="fName-ord"></span></span>
 			<span class="col2"><span><?php echo $lang['owner']; ?></span><span id="fOwner-ord"></span></span>
@@ -103,7 +103,7 @@
 			<span class="col5" onclick="FileManager.sortByEdit();"><span id="fEdit-ord"></span><span><?php echo $lang['edit']; ?> </span></span>
 		</div>
 
-		<div id="files" class="list"></div>
+		<div id="files" class="<?php echo $user['fileview']; ?>"></div>
 
 		<div id="progressShield" class="hidden">
 			<div id="loading" class="center">
@@ -165,7 +165,7 @@
 	<!-- Menu -->
 	<div id="menu" class="popup hidden">
 		<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div><?php echo $lang['settings']; ?></a></div>
-		<?php if($admin) { echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>'; } ?>
+		<?php if ($user['admin']) echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>'; ?>
 		<div class="menu-item" onclick="FileManager.showInfo();"><a href="#"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></a></div>
 		<div class="menu-item"><a href="logout?t=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
 	</div>
@@ -255,11 +255,11 @@
 	<script src="assets/js/files.js"></script>
 
 	<script>
-		var username = "<?php echo $user;?>";
-		var token = "<?php echo $token;?>";
+		var username		= "<?php echo $user['username']; ?>";
+		var token			= "<?php echo $token;?>";
 
-		FileManager.view = "<?php echo $view;?>";
-		FileManager.id = "<?php echo $id;?>";
+		FileManager.view	= "<?php echo $view;?>";
+		FileManager.id		= "<?php echo $id;?>";
 	</script>
 </body>
 </html>

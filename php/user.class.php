@@ -11,65 +11,38 @@ class User {
 		$this->config	= json_decode(file_get_contents(dirname(__DIR__) . '/config/config.json'), true);
 		$this->token	= $token;
 		$this->db		= Database::getInstance();
-		$this->uid		= $this->db->get_user_from_token($token);
-		$this->username	= $this->db->user_get_name($this->uid);
+		$this->user		= $this->db->user_get_by_token($token);
+		$this->uid		= ($this->user) ? $this->user['id'] : null;
+		$this->username	= ($this->user) ? $this->user['username'] : "";
 		$this->c		= new Core();
 	}
 
 	public function get($username) {
-		$is_admin = $this->db->user_is_admin($this->token);
-		$user_raw = $this->db->user_get($username);
-		$users = [];
+		$user = $this->db->user_get_by_id($this->uid, true);
 
-		if ($username != $this->username && !$is_admin) {
-			header('HTTP/1.1 403 Permission denied');
-			return "Permission denied";
-		}
+		if ($user) {
+			if ($username != $this->username && !$user['admin']) {
+				header('HTTP/1.1 403 Permission denied');
+				return "Permission denied";
+			}
 
-		// Filter user data
-		if ($user_raw) {
-			return array(
-				'id'			=> $user_raw['id'],
-				'user'			=> $user_raw['username'],
-				'color'			=> $user_raw['color'],
-				'fileview'		=> $user_raw['fileview'],
-				'admin'			=> ($user_raw['admin'] == "1") ? "1" : "0",
-				'last_login'	=> $user_raw['last_login'],
-				'autoscan'		=> $user_raw['autoscan']
-			);
+			return $user;
 		}
 
 		return null;
 	}
 
 	public function get_all() {
-		$is_admin = $this->db->user_is_admin($this->token);
-		$users_raw = $this->db->user_get_all();
-		$users = [];
-
-		if (!$is_admin) {
+		if (!$this->uid || !$this->user['admin']) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
 
-		for ($i = 0; $i < sizeof($users_raw); $i++) {
-			$user = $users_raw[$i];
-
-			array_push($users, array(
-				'id'			=> $user['id'],
-				'user'			=> $user['username'],
-				'color'			=> $user['color'],
-				'fileview'		=> $user['fileview'],
-				'admin'			=> ($user['admin'] == "1") ? "1" : "0",
-				'last_login'	=> $user['last_login']
-			));
-		}
-
-		return $users;
+		return $this->db->user_get_all();
 	}
 
 	public function create($user, $pass, $admin, $mail) {
-		if (!$this->db->user_is_admin($this->token)) {
+		if (!$this->uid || !$this->user['admin']) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -80,25 +53,25 @@ class User {
 			return "Username not allowed";
 		}
 
-		$user = strtolower(str_replace(' ', '', $user));
-		$user = preg_replace("/[^a-zA-Z0-9_\-]+/", "", $user);
+		$username = strtolower(str_replace(' ', '', $username));
+		$username = preg_replace("/[^a-zA-Z0-9_\-]+/", "", $username);
 
-		if (!$this->db->user_get($user)) {
+		if (!$this->db->user_get_by_name($username)) {
 			$salt = uniqid(mt_rand(), true);
 			$crypt_pass = hash('sha256', $pass . $salt);
 
-			if (!$this->db->user_create($user, $crypt_pass, $salt, $admin, $mail)) {
+			if (!$this->db->user_create($username, $crypt_pass, $salt, $admin, $mail)) {
 				header('HTTP/1.1 500 Could not create user');
 				return "Could not create user";
 			}
 
-			if (!file_exists($this->config['datadir'] . $user) && !mkdir($this->config['datadir'] . $user, 0755)) {
+			if (!file_exists($this->config['datadir'] . $username) && !mkdir($this->config['datadir'] . $username, 0755)) {
 				header('HTTP/1.1 500 Could not create user directory');
 				return "Could not create user directory";
 			}
 
 			if ($mail != '' && filter_var($mail, FILTER_VALIDATE_EMAIL)) {
-				$message = "Thank you " . $user . ",<BR> you successfully created a new user account!";
+				$message = "Thank you " . $username . ",<BR> you successfully created a new user account!";
 				Util::send_mail("New user account", $mail, $message);
 			}
 			return true;
@@ -109,7 +82,7 @@ class User {
 	}
 
 	public function set_fileview($value) {
-		if (!$this->username) {
+		if (!$this->uid) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -117,7 +90,7 @@ class User {
 		$supported = array('list', 'grid');
 
 		if (in_array($value, $supported)) {
-			$this->db->user_set_fileview($this->username, $value);
+			$this->db->user_set_fileview($this->uid, $value);
 			return null;
 		}
 
@@ -126,7 +99,7 @@ class User {
 	}
 
 	public function set_color($value) {
-		if (!$this->username) {
+		if (!$this->uid) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -134,7 +107,7 @@ class User {
 		$supported = array('light', 'dark');
 
 		if (in_array($value, $supported)) {
-			$this->db->user_set_color($this->username, $value);
+			$this->db->user_set_color($this->uid, $value);
 			return null;
 		}
 
@@ -142,8 +115,9 @@ class User {
 		return "Theme not found";
 	}
 
-	public function set_quota_max($user, $max) {
-		if (!$this->db->user_is_admin($this->token) || !$this->db->user_get($user)) {
+	public function set_quota_max($username, $max) {
+		$user = $this->db->user_get_by_name($username);
+		if (!$user || !$user['admin']) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -151,7 +125,7 @@ class User {
 		$max_storage = strval($max);
 
 		//$diskspace = (disk_free_space(dirname(__FILE__)) != undefined) ? disk_free_space(dirname(__FILE__)) : disk_free_space('/');
-		$usedspace = Util::dir_size($this->config['datadir'] . $user);
+		$usedspace = Util::dir_size($this->config['datadir'] . $username);
 
 		if ($usedspace > $max_storage && $max_storage != 0) {
 			header('HTTP/1.1 403 Max storage < used storage');
@@ -161,7 +135,7 @@ class User {
 			$max_storage = $diskspace;
 		}*/
 
-		if ($this->db->user_set_storage_max($user, $max)) {
+		if ($this->db->user_set_storage_max($user['id'], $max)) {
 			return null;
 		}
 
@@ -169,19 +143,20 @@ class User {
 		return 'Error updating user';
 	}
 
-	public function set_admin($user, $admin) {
-		$admin = ($admin == "1") ? 1 : 0;
-		if (!$this->db->user_is_admin($this->token) || !$this->db->user_get($user)) {
+	public function set_admin($username, $admin) {
+		$be_admin = ($admin == "1") ? 1 : 0;
+		$user = $this->db->user_get_by_name($username);
+		if (!$user || !$user['admin']) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
 
-		if ($user == $this->username && !$admin) {
+		if ($username == $this->username && !$be_admin) {
 			header('HTTP/1.1 400 Can not revoke your own admin rights');
 			return "Can not revoke your own admin rights";
 		}
 
-		if ($this->db->user_set_admin($user, $admin)) {
+		if ($this->db->user_set_admin($user['id'], $be_admin)) {
 			return null;
 		}
 
@@ -191,12 +166,12 @@ class User {
 
 	public function set_autoscan($enable) {
 		$enable = ($enable == "1") ? 1 : 0;
-		if (!$this->username) {
+		if (!$this->uid) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
 
-		if ($this->db->user_set_autoscan($this->username, $enable)) {
+		if ($this->db->user_set_autoscan($this->uid, $enable)) {
 			return null;
 		}
 
@@ -205,14 +180,15 @@ class User {
 	}
 
 	public function delete($username) {
-		if (!$this->db->user_is_admin($this->token)) {
+		$user = $db->user_get_by_name($username);
+		if (!$user['admin']) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
 
 		if ($username != $this->username) {
 			$this->db->share_remove_all($username);
-			$this->db->user_remove($username);
+			$this->db->user_remove($user['id']);
 
 			Util::delete_dir($this->config['datadir'] . $username);
 			return null;
@@ -223,7 +199,7 @@ class User {
 	}
 
 	public function check_quota($username, $add) {
-		$user = $this->db->user_get($username);
+		$user = $this->db->user_get_by_name($username);
 
 		if (!$user || ($username != $this->username && $username != $this->db->get_owner_from_token($this->token))) {
 			return false;
@@ -234,10 +210,9 @@ class User {
 	}
 
 	public function get_quota($username) {
-		$is_admin = $this->db->user_is_admin($this->token);
-		$user = $this->db->user_get($username);
+		$user = $this->db->user_get_by_name($username);
 
-		if (!$user || ($username != $this->username && !$is_admin)) {
+		if (!$user || ($username != $this->username && !$user['admin'])) {
 			header('HTTP/1.1 403 Permission denied');
 			return ($internal) ? null : "Permission denied";
 		}
@@ -250,10 +225,9 @@ class User {
 	}
 
 	public function change_password($currpass, $newpass) {
-		$is_admin = $this->db->user_is_admin($this->token);
-		$user = $this->db->user_get($this->username);
+		$user = $this->db->user_get_by_name($this->username);
 
-		if ($user || ($user['user'] != $this->username && !$is_admin)) {
+		if (!$user || ($user['username'] != $this->username && !$user['admin'])) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -262,8 +236,8 @@ class User {
 			$salt = uniqid(mt_rand(), true);
 			$crypt_pass = hash('sha256', $newpass . $salt);
 
-			if ($this->db->user_change_password($user['user'], $salt, $crypt_pass)) {
-				return $this->c->generate_token($user['user']);
+			if ($this->db->user_change_password($user['username'], $salt, $crypt_pass)) {
+				return $this->c->generate_token($user['username']);
 			}
 			else {
 				header('HTTP/1.1 500 Error updating password');
@@ -276,7 +250,7 @@ class User {
 	}
 
 	public function clear_temp() {
-		if (!$this->username) {
+		if (!$this->uid) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -298,11 +272,11 @@ class User {
 	 */
 
 	public function load_view() {
-		$user = $this->db->user_get($this->username);
+		$user = $this->db->user_get_by_name($this->username);
 		return array('color' => $user['color'], 'fileview' => $user['fileview']);
 	}
 
 	public function is_admin() {
-		return $this->db->user_is_admin($this->token);
+		return $this->user && $this->user['admin'];
 	}
 }
