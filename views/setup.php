@@ -1,7 +1,7 @@
 <?php
 	if(file_exists('config/config.json')) {
-		//header('Location: login');
-		//exit();
+		header('Location: login');
+		exit();
 	}
 
 	$enabled = isset($_SERVER['HTACCESS']);
