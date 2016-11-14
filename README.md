@@ -14,9 +14,10 @@ Enable htaccess by setting AllowOverride All in your apache2.conf
 
 Enable mod_rewrite by executing:
 $ sudo a2enmod rewrite
-$ sudo apache2 restart
+$ sudo a2enmod headers
+$ sudo service apache2 restart
 
-Then, in your browser, navigate to the setup.php, fill out the required fields and you are good to go.
+Then, in your browser, navigate to the simpledrive/setup, fill out the required fields and you are good to go.
 
 simpleDrive is made to be highly intuitive, so if you ever used any file manager, you should be comfortable right away.
 

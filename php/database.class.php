@@ -1248,8 +1248,6 @@ class Database {
 
 	public function cache_clean_trash($uid, $existing) {
 		$escaped_existing = $this->escape_array($existing);
-		file_put_contents(LOG, "uid: " . $uid . "\n", FILE_APPEND);
-		file_put_contents(LOG, "escaped: " . implode($escaped_existing, '", "') . "\n", FILE_APPEND);
 		$stmt = $this->link->prepare('DELETE t FROM sd_trash t LEFT JOIN sd_cache f ON t.id = f.id WHERE f.owner = ? AND t.hash NOT IN ("' . implode($escaped_existing, '","') . '")');
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();

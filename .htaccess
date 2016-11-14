@@ -14,7 +14,7 @@ php_flag log_errors on
 php_value error_log /var/www/html/simpledrive/logs/error.log
 </IfModule>
 
-#<IfModule mod_header.c>
+<IfModule mod_header.c>
 Header set X-Content-Type-Options "nosniff"
 Header set X-XSS-Protection "1; mode=block"
 Header set X-Robots-Tag "none"
@@ -23,7 +23,7 @@ Header set X-Download-Options "noopen"
 Header set X-Permitted-Cross-Domain-Policies "none"
 Header set X-Content-Security-Policy "default-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'"
 Header set Content-Security-Policy "default-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'"
-#</IfModule>
+</IfModule>
 
 <IfModule mod_rewrite.c>
 RewriteEngine on
