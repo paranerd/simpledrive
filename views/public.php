@@ -26,23 +26,21 @@
 
 		<!-- Sidebar -->
 		<div id="sidebar">
-			<input id="upload-file" class="hidden" type="file" enctype="multipart/form-data" name="files[]" onchange="FileManager.addUpload(this);" multiple="">
-			<input id="upload-folder" class="hidden" type="file" enctype="multipart/form-data" name="files[]" onchange="FileManager.addUpload(this);" multiple="" directory="" webkitdirectory="" mozdirectory="">
+			<input id="upload-file" class="hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="">
+			<input id="upload-folder" class="hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="" directory="" webkitdirectory="" mozdirectory="">
 
 			<div id="sidebar-create" class="menu-item" title="Create new element"><div class="menu-thumb icon-add"></div><div class="menu-text"><?php echo $lang['new']; ?></div></div>
 			<div id="sidebar-upload" class="menu-item" title="Upload file(s)"><div class="menu-thumb icon-upload"></div><div class="menu-text">Upload</div></div>
-			<div class="divider"></div>
-			<div class="divider"></div>
 
 			<!-- Upload -->
 			<div id="upload" class="sidebar-widget hidden">
-				<div id="upload-title" class="widget-title">Upload</div>
+				<div id="upload-title" class="widget-title"></div>
 				<div class="divider"></div>
-				<div id="upload-filename">testfile.jpg</div>
+				<div id="upload-filename"></div>
 				<div class="divider"></div>
-				<div id="upload-progress" style="width: 54%;"></div>
+				<div id="upload-progress"></div>
 				<div id="upload-percent"></div>
-				<span id="upload-cancel" class="close" onclick="FileManager.finishUpload(true);"> &times; </span>
+				<span id="upload-cancel" class="close"> &times; </span>
 			</div>
 
 			<!-- Audio Player -->
@@ -58,25 +56,24 @@
 				<div id="audio-duration">00:00</div>
 
 
-				<div id="audio-prev" class="audio-controls icon-prev" onclick="AudioManager.prev();"></div>
-				<div id="audio-play" class="audio-controls icon-play" onclick="AudioManager.togglePlay();"></div>
-				<div id="audio-next" class="audio-controls icon-next" onclick="AudioManager.next(false);"></div>
+				<div id="audio-prev" class="audio-controls icon-prev"></div>
+				<div id="audio-play" class="audio-controls icon-play"></div>
+				<div id="audio-next" class="audio-controls icon-next"></div>
 
-				<span class="close" onclick="AudioManager.stopAudio();"> &times; </span>
+				<span class="close"> &times; </span>
 			</div>
 
 			<div id="clipboard" class="sidebar-widget hidden">
-				<span class="close" onclick="FileManager.emptyClipboard();"> &times; </span>
+				<span class="close"> &times; </span>
 				<div id="clipboard-title" class="widget-title">Clipboard</div>
 				<div class="divider"></div>
 				<div id="clipboard-content" class="clipboard-content">1</div>
 				<div id="clipboard-count" class="clipboard-content hidden">2</div>
-
 			</div>
 
 			<!-- Folder size -->
 			<div id="sidebar-footer">
-				<span id="scan" class="menu-thumb icon-sync" onclick="FileManager.scan();"></span>
+				<span id="scan" class="menu-thumb icon-sync"></span>
 				<span id="foldersize"></span>
 			</div>
 		</div>
@@ -85,18 +82,18 @@
 		<div id="content">
 			<div id="files-filter" class="list-filter hidden">
 				<input id="files-filter-input" class="list-filter-input" placeholder="Filter..."/>
-				<span class="close" onclick="FileManager.closeFilter();"> &times;</span>
+				<span class="close"> &times;</span>
 			</div>
-			<div class="list-header">
+			<div id="list-header" class="list-header <?php if ($user['fileview'] == 'grid') echo 'hidden'; ?>">
 				<span class="col0 checkbox"><span id="fSelect" class="checkbox-box"></span></span>
-				<span class="col1" onclick="FileManager.sortByName();"><span><?php echo $lang['name']; ?> </span><span id="fName-ord"></span></span>
+				<span class="col1"><span><?php echo $lang['name']; ?> </span><span id="fName-ord"></span></span>
 				<span class="col2"><span><?php echo $lang['owner']; ?></span><span id="fOwner-ord"></span></span>
-				<span class="col3" onclick="FileManager.sortByType();"><span><?php echo $lang['type']; ?> </span><span id="fType-ord"></span></span>
-				<span class="col4" onclick="FileManager.sortBySize();"><span><?php echo $lang['size']; ?> </span><span id="fSize-ord"></span></span>
-				<span class="col5" onclick="FileManager.sortByEdit();"><span id="fEdit-ord"></span><span><?php echo $lang['edit']; ?> </span></span>
+				<span class="col3"><span><?php echo $lang['type']; ?> </span><span id="fType-ord"></span></span>
+				<span class="col4"><span><?php echo $lang['size']; ?> </span><span id="fSize-ord"></span></span>
+				<span class="col5"><span id="fEdit-ord"></span><span><?php echo $lang['edit']; ?> </span></span>
 			</div>
 
-			<div id="files" class="list"></div>
+			<div id="files" class="<?php echo $user['fileview']; ?>"></div>
 		</div>
 
 		<!-- Upload menu -->
@@ -107,13 +104,13 @@
 
 		<!-- Create menu -->
 		<div id="create-menu" class="popup hidden">
-			<div class="menu-item" onclick="FileManager.showCreate('file');"><div class="menu-thumb icon-unknown"></div><?php echo $lang['file']; ?></div>
-			<div class="menu-item" onclick="FileManager.showCreate('folder');"><div class="menu-thumb icon-folder"></div><?php echo $lang['folder']; ?></div>
+			<div id="create-file" class="menu-item"><div class="menu-thumb icon-unknown"></div><?php echo $lang['file']; ?></div>
+			<div id="create-folder" class="menu-item"><div class="menu-thumb icon-folder"></div><?php echo $lang['folder']; ?></div>
 		</div>
 
 		<!-- File Info Panel -->
 		<div id="fileinfo" class="hidden">
-			<span class="close" onclick="FileManager.toggleFileInfo();"> &times;</span>
+			<span class="close"> &times;</span>
 
 			<div id="fileinfo-title">
 				<span id="fileinfo-icon" class="menu-thumb"></span>
@@ -131,19 +128,19 @@
 
 		<!-- Context menu -->
 		<div id="contextmenu" class="popup hidden">
-			<div id="context-gallery" class="menu-item hidden" onclick="ImageManager.openGallery();"><div class="menu-thumb icon-image"></div><?php echo $lang['gallery']; ?></div>
-			<div id="context-restore" class="menu-item hidden" onclick="FileManager.restore();"><div class="menu-thumb icon-restore"></div><?php echo $lang['restore']; ?></div>
-			<div id="context-copy" class="menu-item hidden" onclick="FileManager.copy();"><div class="menu-thumb icon-copy"></div><?php echo $lang['copy']; ?></div>
-			<div id="context-cut" class="menu-item hidden" onclick="FileManager.cut();"><div class="menu-thumb icon-cut"></div><?php echo $lang['cut']; ?></div>
-			<div id="context-paste" class="menu-item hidden" onclick="FileManager.paste();"><div class="menu-thumb icon-paste"></div><?php echo $lang['paste']; ?></div>
-			<div id="context-share" class="menu-item hidden" onclick="FileManager.showShare();"><div class="menu-thumb icon-share"></div><?php echo $lang['share']; ?></div>
-			<div id="context-unshare" class="menu-item hidden" onclick="FileManager.unshare();"><div class="menu-thumb icon-share"></div><?php echo $lang['unshare']; ?></div>
+			<div id="context-gallery" class="menu-item hidden"><div class="menu-thumb icon-image"></div><?php echo $lang['gallery']; ?></div>
+			<div id="context-restore" class="menu-item hidden"><div class="menu-thumb icon-restore"></div><?php echo $lang['restore']; ?></div>
+			<div id="context-copy" class="menu-item hidden"><div class="menu-thumb icon-copy"></div><?php echo $lang['copy']; ?></div>
+			<div id="context-cut" class="menu-item hidden"><div class="menu-thumb icon-cut"></div><?php echo $lang['cut']; ?></div>
+			<div id="context-paste" class="menu-item hidden"><div class="menu-thumb icon-paste"></div><?php echo $lang['paste']; ?></div>
+			<div id="context-share" class="menu-item hidden"><div class="menu-thumb icon-share"></div><?php echo $lang['share']; ?></div>
+			<div id="context-unshare" class="menu-item hidden"><div class="menu-thumb icon-share"></div><?php echo $lang['unshare']; ?></div>
 			<div class="divider hidden"></div>
-			<div id="context-rename" class="menu-item hidden" onclick="FileManager.showRename(this);"><div class="menu-thumb icon-rename"></div><?php echo $lang['rename']; ?></div>
-			<div id="context-zip" class="menu-item hidden" onclick="FileManager.zip();"><div class="menu-thumb icon-zip"></div><?php echo $lang['zip']; ?></div>
-			<div id="context-download" class="menu-item hidden" onclick="FileManager.download();"><div class="menu-thumb icon-download"></div><?php echo $lang['download']; ?></div>
+			<div id="context-rename" class="menu-item hidden"><div class="menu-thumb icon-rename"></div><?php echo $lang['rename']; ?></div>
+			<div id="context-zip" class="menu-item hidden"><div class="menu-thumb icon-zip"></div><?php echo $lang['zip']; ?></div>
+			<div id="context-download" class="menu-item hidden"><div class="menu-thumb icon-download"></div><?php echo $lang['download']; ?></div>
 			<div class="divider hidden"></div>
-			<div id="context-delete" class="menu-item hidden" onclick="FileManager.remove();"><div class="menu-thumb icon-trash"></div><?php echo $lang['delete']; ?></div>
+			<div id="context-delete" class="menu-item hidden"><div class="menu-thumb icon-trash"></div><?php echo $lang['delete']; ?></div>
 		</div>
 
 		<!-- Drag status -->
@@ -153,8 +150,8 @@
 		<div id="shield" class="overlay hidden"></div>
 
 		<!-- Create popup -->
-		<form id="create" class="popup input-popup center hidden" action="javascript:FileManager.create()">
-			<span class="close" onclick="Util.closePopup();"> &times;</span>
+		<form id="create" class="popup input-popup center hidden" action="#">
+			<span class="close"> &times;</span>
 			<div class="popup-title"><?php echo $lang['create']; ?></div>
 			<div class="input-header"><?php echo $lang['filename']; ?></div>
 			<input id="create-type" type="hidden" name="type" />
@@ -163,8 +160,8 @@
 		</form>
 
 		<!-- Share popup -->
-		<form id="share" class="popup input-popup center hidden" action="javascript:FileManager.share()">
-			<span class="close" onclick="Util.closePopup();"> &times;</span>
+		<form id="share" class="popup input-popup center hidden" action="#">
+			<span class="close"> &times;</span>
 			<div class="popup-title"><?php echo $lang['share']; ?></div>
 
 			<div class="input-header"><?php echo $lang['username']; ?></div>
@@ -181,7 +178,7 @@
 				<div class="checkbox-label"><?php echo $lang['write']; ?></div>
 			</div>
 			<div class="checkbox">
-				<div id="share-public" class="checkbox-box" onclick="FileManager.toggleShareLink();"></div>
+				<div id="share-public" class="checkbox-box"></div>
 				<div class="checkbox-label"><?php echo $lang['public']; ?></div>
 			</div>
 
@@ -190,20 +187,19 @@
 
 		<!-- Image Viewer -->
 		<div id="img-viewer" class="overlay hidden">
-			<button id="img-close" class="img-control icon-cross" onclick="ImageManager.close();"></button>
-			<button id="img-delete" class="img-control icon-trash" onclick="ImageManager.remove();"></button>
-			<button id="img-slideshow" class="img-control icon-play" onclick="ImageManager.slideshow(false);"></button>
-			<button id="img-prev" class="img-control icon-prev" onclick="ImageManager.prev();"></button>
-			<button id="img-next" class="img-control icon-next" onclick="ImageManager.next();"></button>
+			<button id="img-close" class="img-control icon-cross"></button>
+			<button id="img-delete" class="img-control icon-trash"></button>
+			<button id="img-slideshow" class="img-control icon-play"></button>
+			<button id="img-prev" class="img-control icon-prev"></button>
+			<button id="img-next" class="img-control icon-next"></button>
 			<div id="img-title"></div>
 		</div>
 
 		<!-- Notification -->
-		<div id="notification" class="popup hidden">
+		<div id="notification" class="center-hor notification-info light hidden">
 			<div id="note-icon" class="icon-info"></div>
-			<div id="note-title"></div>
 			<div id="note-msg"></div>
-			<span class="close" onclick="Util.hideNotification();"> &times;</span>
+			<span class="light close"> &times;</span>
 		</div>
 
 		<!-- Version info -->
@@ -211,7 +207,7 @@
 			<div id="info-title">simpleDrive</div>
 			<div id="info-subtitle">Private. Secure. Simple.</div>
 			<div class="clearer"></div>
-			<div id="info-footer">paranerd 2013-2016 | <a style="color: #2E8B57;" href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+			<div id="info-footer">paranerd 2013-2016 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 		</div>
 
 		<!-- Video player -->
@@ -219,33 +215,31 @@
 			<video id="video" controls></video>
 		</div>
 
-		<!-- Loading indicator -->
-		<div id="loading" class="center-hor hidden">
-			<div class="loadIndicator up" style="opacity: 1;"></div>
-			<div class="loadIndicator up" style="opacity: 0.75;"></div>
-			<div class="loadIndicator up" style="opacity: 0.5;"></div>
-			<div class="loadIndicator up" style="opacity: 0.25;"></div>
-			<div class="loadIndicator up" style="opacity: 0;"></div>
-		</div>
-
 		<!-- Dropzone -->
 		<div id="dropzone" class="hidden">Drop to upload</div>
 	</div>
 
 	<div id="pubfile" class="major-wrapper hidden">
-		<div class="major-title">simpleDrive</div>
-		<div class="major-subtitle">Private. Secure. Simple.</div>
+		<div class="major-logo menu-item" title="Create new element"><div class="menu-thumb icon-cloud"></div><div class="menu-text">simpleDrive</div></div>
 
-		<form class="popup input-popup major-popup center-hor" action="javascript:FileManager.loadPublic('')">
-			<div class="popup-title">Public share</div>
-			<div id="pub-header" class="input-header hidden">Password</div>
-			<input id="pub-key" class="input-wide hidden" placeholder="Password" autocomplete="off" autofocus />
-			<input id="unlock" class="button" type="submit" value="Unlock" />
-			<div id="pub-error" class="error hidden"></div>
+		<form id="load-public" class="center">
+			<div class="major-title">Public share</div>
+			<div id="pub-filename" class="major-subtitle"></div>
+			<input id="pub-key" class="major-input hidden" placeholder="Password" autocomplete="off" autofocus />
+			<div id="pub-error" class="major-error hidden"></div>
+			<input id="unlock" class="major-submit" type="submit" value="Unlock" />
 		</form>
 
 		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>
 	</div>
+
+	<!-- Progress circle -->
+	<div id="busy" class="busy-animation">busy</div>
+
+	<input id="data-username" type="hidden" value=""/>
+	<input id="data-token" type="hidden" value="<?php echo $token;?>"/>
+	<input id="data-id" type="hidden" value="<?php echo $id;?>"/>
+	<input id="data-publichash" type="hidden" value="<?php echo $hash;?>"/>
 
 	<script src="lib/jquery/jquery-1.11.3.min.js"></script>
 	<script src="lib/jquery/simplescroll.js"></script>
@@ -254,12 +248,5 @@
 	<script src="assets/js/audioplayer.js"></script>
 	<script src="assets/js/videoplayer.js"></script>
 	<script src="assets/js/files.js"></script>
-
-	<script>
-		var username = "";
-		var token = "<?php echo $token ?>";
-		FileManager.publicHash = "<?php echo $hash; ?>";
-		FileManager.id = "<?php echo $id;?>";
-	</script>
 </body>
 </html>

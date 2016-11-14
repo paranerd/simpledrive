@@ -23,9 +23,25 @@ var AudioManager = {
 			AudioManager.aborted = false;
 		}
 		catch (e) {
-			Util.notify("Error", "Browser does not support audio", true, true);
+			Util.notify("Browser does not support audio", true, true);
 			return;
 		}
+
+		$("#audio-prev").on('click', function(e) {
+			AudioManager.prev();
+		});
+
+		$("#audio-play").on('click', function(e) {
+			AudioManager.togglePlay();
+		});
+
+		$("#audio-next").on('click', function(e) {
+			AudioManager.next(false);
+		});
+
+		$("#audioplayer .close").on('click', function(e) {
+			AudioManager.stopAudio();
+		});
 
 		$("#audioplayer").removeClass("hidden");
 		$(window).resize();
@@ -51,7 +67,7 @@ var AudioManager = {
 
 		AudioManager.sound.addEventListener('error', function(e) {
 			if (!AudioManager.aborted) {
-				Util.notify("Error", "Error playing audio", true, true);
+				Util.notify("Error playing audio", true, true);
 			}
 		});
 
@@ -97,7 +113,7 @@ var AudioManager = {
 
 		AudioManager.active = parseInt(id);
 
-		AudioManager.sound.src = 'api/files/get?target=' + encodeURIComponent(JSON.stringify([elem])).replace('(', '%28').replace(')', '%29') + '&token=' + token;
+		AudioManager.sound.src = 'api/files/get?target=' + encodeURIComponent(JSON.stringify([elem.id])).replace('(', '%28').replace(')', '%29') + '&token=' + token;
 		AudioManager.sound.load();
 		$("#audio-title").removeClass("hidden").text(elem.filename);
 	},

@@ -14,7 +14,7 @@
 	<div id="header">
 		<!-- Filename -->
 		<div id="logo" title="Return to files"><div class="menu-thumb icon-cloud"><a href="files"></div>simpleDrive</a></div>
-		<div id="path" title="Click to rename" onclick="Editor.showRename();">
+		<div id="path" title="Click to rename">
 			<div id="doc-name" class="path-element path-current"></div>
 			<span id="doc-savestatus" class="path-element"></span>
 		</div>
@@ -40,8 +40,8 @@
 	</div>
 
 	<!-- Rename popup -->
-	<form id="rename" class="popup input-popup center hidden" action="javascript:Editor.rename()">
-		<div class="close" onclick="closePopup();"> &times;</div>
+	<form id="rename" class="popup input-popup center hidden" action="#">
+		<div class="close"> &times;</div>
 		<div class="popup-title">Rename</div>
 		<div class="input-header">New filename</div>
 		<input id="rename-filename" type="text" class="input-wide" placeholder="Filename" autofocus autocomplete="off">
@@ -49,18 +49,15 @@
 	</form>
 
 	<!-- Notification -->
-	<div id="notification" class="popup hidden">
+	<div id="notification" class="center-hor notification-info light hidden">
 		<div id="note-icon" class="icon-info"></div>
-		<div id="note-title"></div>
 		<div id="note-msg"></div>
-		<div class="close" onclick="Util.hideNotification();"> &times;</div>
+		<span class="light close"> &times;</span>
 	</div>
 
-	<script>
-		var username	= "<?php echo $user ? $user['username'] : ''; ?>";
-		var file		= '<?php echo $_POST['file']; ?>';
-		var token		= "<?php echo $token; ?>";
-	</script>
+	<input id="data-username" type="hidden" value="<?php echo $user['username']; ?>"/>
+	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
+	<input id="data-file" type="hidden" value="<?php echo $_POST['file']; ?>"/>
 
 	<script type="text/javascript" src="lib/jquery/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="assets/js/util.js"></script>

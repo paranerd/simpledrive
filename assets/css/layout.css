@@ -42,14 +42,11 @@ button::-moz-focus-inner {
 input {
 	font-family: robotolight, sans-serif;
 	font-size: 1rem;
-	outline: 0px solid transparent;
-	border: 1px solid grey;
 	border-radius: 3px;
 }
 
 button {
 	border: none;
-	outline: 0px solid transparent;
 	cursor: pointer;
 }
 
@@ -72,66 +69,63 @@ select {
 	position: relative;
 	top: 0;
 	left: 0;
-	height: 50px;
+	height: 80px;
 	width: 100%;
 }
 
 #path {
 	position: absolute;
 	top: 0px;
-	left: 210px;
+	left: 220px;
 }
 
 .path-seperator {
-	height: 50px;
+	height: 80px;
 	margin-left: 5px;
 	margin-right: 5px;
-	margin-top: 5px;
 	float: left;
 	font-family: robotolight, sans-serif;
-	font-size: 1.1rem;
-	line-height: 40px;
+	line-height: 80px;
 }
 
 .path-element {
 	margin: 0;
-	margin-top: 5px;
 	padding: 0;
 	float: left;
 	cursor: pointer;
-	font-size: 1.4rem;
+	font-size: 1.7rem;
 	font-family: robotolight, sans-serif;
-	line-height: 40px;
+	line-height: 80px;
 }
 
 #logo {
 	width: 200px;
-	height: 50px;
-	font-size: 1rem;
+	height: 80px;
+	font-size: 1.7rem;
 	cursor: pointer;
-	border-left: 4px solid transparent;
+	line-height: 80px;
 }
 
 #logo .menu-thumb {
 	font-size: 1rem;
-	height: 50px;
-	line-height: 50px;
+	height: 80px;
+	line-height: 80px;
+	display: none;
 }
 
 #logo a {
-	line-height: 50px;
-	font-family: robotoregular, sans-serif;
-	font-size: 1.1rem;
-	color: white;
+	margin-left: 20px;
+	font-family: robotolight, sans-serif;
+	font-size: 1.7rem;
 }
 
 #username {
 	position: absolute;
-	top: 0px;
+	top: 0;
 	right: 2%;
-	line-height: 50px;
+	line-height: 80px;
 	font-family: robotolight, sans-serif;
-	font-size: 1.1rem;
+	font-size: 1.3rem;
 	cursor: pointer;
 }
 
@@ -140,8 +134,8 @@ select {
 }
 
 #menu {
-	top: 50px;
-	right: 0px;
+	top: 65px;
+	right: 2%;
 	font-size: 13px;
 	z-index: 100;
 	width: 200px;
@@ -157,8 +151,16 @@ select {
 	float: left;
 }
 
+#sidebar .menu-item {
+	width: 200px;
+}
+
 #sidebar .menu-thumb {
 	font-size: 0.7rem;
+}
+
+#sidebar .menu-text {
+	font-size: 1.1rem;
 }
 
 .focus {
@@ -180,12 +182,12 @@ select {
 }
 
 #create-menu {
-	top: 90px;
+	top: 130px;
 	left: 54px;
 }
 
 #upload-menu {
-	top: 130px;
+	top: 180px;
 	left: 54px;
 }
 
@@ -248,7 +250,6 @@ select {
 	padding-left: 1%;
 	border: none;
 	border-radius: 0px;
-	background-color: rgba(0,0,0,0);
 }
 
 #content {
@@ -259,72 +260,62 @@ select {
 	overflow: hidden;
 }
 
-#progressShield {
+.progress-shield {
 	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
+	z-index: 101;
 }
 
 /* Notification */
 
 #notification {
-	bottom: 30px;
-	right: 30px;
-	height: 80px;
-	width: 400px;
-	font-family: robotolight, sans-serif;
-	font-size: 13px;
-	overflow: hidden;
+	position: absolute;
+	top: 20px;
+	height: 20px;
+	font-family: robotoregular, sans-serif;
+	font-size: 1rem;
+	border-radius: 2px;
+	padding: 10px;
+	padding-right: 30px;
+	user-select: text;
+	-webkit-user-select: text;
+	z-index: 1003;
 }
 
 #note-icon {
-	position: absolute;
-	height: 100%;
-	width: 80px;
-	font-family: 'icomoon';
-	text-align: center;
-	font-size: 36px;
-	line-height: 80px;
-}
-
-#note-title {
-	position: absolute;
-	left: 80px;
-	height: 50%;
-	width: 320px;
-	margin-top: 5px;
-	line-height: 40px;
-	font-weight: bold;
-	font-family: robotolight, sans-serif;
-	font-size: 16px;
-	vertical-align: bottom;
+	position: relative;
+	line-height: 20px;
+	float: left;
 }
 
 #note-msg {
-	position: absolute;
-	top: 50%;
-	left: 80px;
-	height: 50%;
-	width: 80%;
+	position: relative;
+	margin-left: 10px;
 	line-height: 20px;
 	font-size: 16px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	float: left;
 }
 
 /* Info panel */
 
 #fileinfo {
 	position: absolute;
-	top: 50px;
+	top: 80px;
 	right: 0;
 	padding-left: 20px;
 	width: 200px;
 	height: 100%;
 	font-family: robotolight, sans-serif;
+}
+
+#fileinfo .table-cell {
+	margin-bottom: 0;
 }
 
 #fileinfo-icon {
@@ -352,6 +343,10 @@ select {
 	cursor: pointer;
 }
 
+#fileinfo-link:hover {
+	font-family: robotoregular, sans-serif;
+}
+
 /* Version info */
 
 #info {
@@ -363,7 +358,6 @@ select {
 }
 
 #info-title {
-	color: #2E8B57;
 	font-size: 40px;
 }
 
@@ -520,8 +514,16 @@ select {
 		margin-top: 30px;
 	}
 
+	#logo {
+		width: 54px;
+	}
+
 	#logo a {
 		display: none;
+	}
+
+	#logo .menu-thumb {
+		display: block;
 	}
 
 	#sidebar {
@@ -533,10 +535,14 @@ select {
 	}
 
 	#sidebar .menu-item {
-		width: 49px;
+		width: 54px;
 	}
 
-	#path, #log-footer {
+	#path {
+		left: 74px;
+	}
+
+	#log-footer {
 		left: 54px;
 	}
 
@@ -609,9 +615,9 @@ select {
 #sidebar-footer {
 	position: absolute;
 	bottom: 0px;
-	height: 40px;
+	height: 50px;
 	width: 200px;
-	line-height: 40px;
+	line-height: 50px;
 	font-size: 1rem;
 	font-family: robotolight, sans-serif;
 }
@@ -629,7 +635,6 @@ select {
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background-color: black;
 	background-position: center;
 	background-repeat: no-repeat;
 	z-index: 100;
@@ -669,7 +674,6 @@ select {
 	font-size: 28px;
 	line-height: 50px;
 	text-align: center;
-	color: grey;
 	cursor: pointer;
 	z-index: 1;
 }
@@ -680,8 +684,6 @@ select {
 	bottom: 0;
 	width: 100%;
 	height: 60px;
-	background-color: rgba(0,0,0,0.3);
-	color: #aaa;
 	line-height: 60px;
 	font-family: robotoregular, sans-serif;
 	font-size: 1.25rem;
@@ -706,7 +708,6 @@ select {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	background-color: rgba(0,0,0,0.5);
 	font-family: robotolight, sans-serif;
 	font-size: 1rem;
 	z-index: 100;
@@ -717,7 +718,6 @@ select {
 	height: 250px;
 	width: 250px;
 	margin: 2px;
-	background-color: rgba(255,255,255,0.1);
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: cover;
@@ -725,7 +725,6 @@ select {
 	text-align: center;
 	font-size: 32px;
 	line-height: 200px;
-	color: white;
 	-webkit-transition: all .1s ease-in-out;
 	-moz-transition: all .1s ease-in-out;
 	-o-transition: all .1s ease-in-out;
@@ -745,7 +744,6 @@ select {
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background-color: black;
 }
 
 #video {
@@ -761,18 +759,27 @@ select {
 
 .checkbox-box {
 	position: absolute;
-	top: 12px;
+	top: 17px;
 	height: 15px;
 	width: 15px;
 	border-radius: 2px;
 	float: left;
+	font-family: icomoon;
+	font-size: 0.7rem;
+	text-align: center;
+	line-height: 15px;
+	cursor: pointer;
+}
+
+.checkbox-checked:before {
+	content: "\e936";
 }
 
 .checkbox-label {
 	position: absolute;
 	left: 30px;
-	height: 40px;
-	line-height: 40px;
+	height: 50px;
+	line-height: 50px;
 	float: left;
 	font-size: 1rem;
 }
@@ -780,9 +787,9 @@ select {
 .popup {
 	position: absolute;
 	width: 200px;
-	border-radius: 2px;
+	border-radius: 3px;
 	font-family: robotoregular, sans-serif;
-	font-size: 13px;
+	font-size: 1rem;
 	z-index: 1003;
 }
 
@@ -793,19 +800,14 @@ select {
 
 .major-popup {
 	margin-top: 50px;
-	border: none;
-	box-shadow: 0px 0px 30px 3px rgba(0,0,0,0.45) !important;
-	background-color: rgba(0,0,0,0.15) !important;
 }
 
 .major-popup .popup-title {
 	width: 100%;
 	text-align: center;
-	color: #eee;
 }
 
 .major-popup .input-header {
-	color: #eee;
 	text-align: center;
 }
 
@@ -821,12 +823,7 @@ select {
 .major-popup .button {
 	left: 0;
 	width: 100%;
-	border: 1px solid rgba(255,255,255,0.25);
-}
-
-.major-popup .button:hover {
-	color: white;
-	background-color: #3da070;
+	font-size: 1.1rem;
 }
 
 .input-popup {
@@ -844,16 +841,14 @@ select {
 	text-align: left;
 	font-family: robotoregular, sans-serif;
 	font-size: 1rem;
-	color: grey;
 }
 
 .menu-item {
 	width: 196px;
-	height: 40px;
-	line-height: 40px;
+	height: 50px;
+	line-height: 50px;
 	font-family: robotolight, sans-serif;
-	font-size: 0.9rem;
-	border-left: 4px solid transparent;
+	font-size: 1rem;
 	cursor: pointer;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -862,7 +857,9 @@ select {
 
 .menu-item a {
 	font-family: robotolight, sans-serif;
+/*
 	font-size: 0.9rem;
+*/
 	display: block;
 }
 
@@ -873,9 +870,9 @@ select {
 }
 
 .menu-thumb {
-	width: 50px;
-	height: 40px;
-	line-height: 40px;
+	width: 54px;
+	height: 50px;
+	line-height: 50px;
 	font-family: icomoon;
 	text-align: center;
 	font-size: 1rem;
@@ -896,10 +893,6 @@ select {
 	-ms-transform: scale(1.05);
 }
 
-.highlight {
-	background-color: #FF7722;
-}
-
 .button {
 	position: relative;
 	margin: 0;
@@ -909,7 +902,7 @@ select {
 	text-align: center;
 	font-family: robotoregular, sans-serif;
 	font-size: 1rem;
-	border-radius: 2px;
+	border-radius: 3px;
 	font-weight: normal;
 	cursor: pointer;
 }
@@ -919,34 +912,15 @@ select {
 	font-size: 1rem;
 }
 
-.button:hover a {
-	color: #2e8b5e;
-}
-
-.button:hover {
-	background-color: white;
-	color: #2e8b5e;
-	border: 1px solid #2e8b5e;
-}
-
-.button.button-disabled {
-	background-color: grey !important;
-	cursor: default;
-}
-
 .button.button-disabled, .button.button-disabled:hover {
-	color: white;
-	background-color: grey;
-	border: 1px solid grey;
 	cursor: default;
 }
 
 .input-popup .error {
-	margin-top: 30px;
+	margin-top: 10px;
+	margin-bottom: 10px;
 	width: 100%;
-	color: white;
 	text-align: center;
-	background-color: red;
 	font-family: robotoregular, sans-serif;
 	font-size: 1rem;
 	border-radius: 3px;
@@ -1013,6 +987,22 @@ select {
 	float: left;
 }
 
+#loader0 {
+	opacity: 1.0;
+}
+
+#loader1 {
+	opacity: 0.75;
+}
+
+#loader2 {
+	opacity: 0.25;
+}
+
+#loader3 {
+	opacity: 0.5;
+}
+
 #dragstatus {
 	position: absolute;
 	height: 20px;
@@ -1031,7 +1021,6 @@ select {
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background-color: rgba(242,242,242,0.7);
 	z-index: 1001;
 }
 
@@ -1055,12 +1044,10 @@ select {
 	top: 0;
 	right: 5px;
 	width: 10px;
-	background-color: rgba(170,170,170,0.4);
 	border-radius: 3px;
 }
 
 .scrollbar:hover {
-	background-color: rgba(170,170,170,1);
 	width: 15px;
 }
 
@@ -1075,7 +1062,6 @@ select {
 
 #texteditor {
 	position: relative;
-	color: black;
 	padding-top: 20px;
 	padding-left: 1%;
 	padding-right: 1%;
@@ -1084,10 +1070,9 @@ select {
 	outline: 0px solid transparent;
 	font-family: monospace;
 	border: none;
-	background-color: white;
 }
 
-/* Login */
+/* Login, Setup, Public */
 
 .major-wrapper {
 	position: absolute;
@@ -1096,32 +1081,71 @@ select {
 	height: 100%;
 	width: 100%;
 	font-family: robotolight, sans-serif;
-	text-align: center;
 	overflow: auto;
 }
 
+.major-wrapper form {
+	position: absolute;
+	margin-top: -20px;
+	width: 335px;
+}
+
+.major-logo {
+	position: absolute;
+	left: 20px;
+	top: 10px;
+	font-size: 1.5rem;
+	line-height: 50px;
+}
+
 .major-title {
-	position: relative;
-	margin-top: 130px;
-	font-size: 3.15rem;
-	width: 100%;
+	font-size: 2rem;
 	font-family: robotolight, sans-serif;
-	text-align: center;
 }
 
 .major-subtitle {
-	position: relative;
-	font-size: 2rem;
-	width: 100%;
+	margin-top: 35px;
+	font-size: 1.5rem;
 	font-family: robotolight, sans-serif;
+}
+
+.major-input {
+	margin-top: 15px;
+	width: 100%;
+	height: 55px;
+	outline: hidden;
+	border-radius: 0px;
+	font-size: 2rem;
+	font-family: robotolight, sans-serif;
+}
+
+.major-input-small {
+	margin-top: 0;
+	font-size: 1.5rem;
+}
+
+.major-error {
+	margin-top: 25px;
 	text-align: center;
+	font-family: robotoregular, sans-serif;
+	font-size: 1.3rem;
+}
+
+.major-submit {
+	margin-left: 67px;
+	margin-top: 45px;
+	width: 200px;
+	height: 50px;
+	font-family: robotolight, sans-serif;
+	font-size: 1.3rem;
+	cursor: pointer;
 }
 
 .footer {
 	position: absolute;
 	bottom: 10px;
 	width: 100%;
-	font-size: 1rem;
+	font-size: 1.3rem;
 	font-family: robotolight, sans-serif;
 	text-align: center;
 }
@@ -1145,11 +1169,9 @@ select {
 	width: 98%;
 	font-size: 1.2rem;
 	font-family: robotolight, sans-serif;
-	color: #555;
 }
 
-.plugin-title {
-	color: #2e8b5e;
+.settings-title {
 	font-family: robotoregular, sans-serif;
 }
 
@@ -1161,12 +1183,17 @@ select {
 	float: left;
 }
 
+#upload-max, #domain {
+	width: 200px;
+	padding-left: 10px;
+}
+
 #plugins .table-cell {
 	height: 100px;
 }
 
-#fileinfo .table-cell {
-	margin-bottom: 0;
+.settings-info {
+	font-size: 1.1rem;
 }
 
 #log-footer {
@@ -1175,9 +1202,6 @@ select {
 	left: 200px;
 	height: 50px;
 	width: 85%;
-	background-color: #e3e3e3;
-	border-top: 1px solid lightgrey;
-	border-left: 1px solid lightgrey;
 }
 
 #log-pages-label {
@@ -1186,7 +1210,6 @@ select {
 	height: 50px;
 	line-height: 50px;
 	font-family: robotoregular, sans-serif;
-	color: #555;
 	font-size: 1rem;
 }
 
@@ -1196,7 +1219,6 @@ select {
 	right: 10px;
 	height: 30px;
 	width: 40px;
-	border: 1px solid #2e8b5e;
 	text-align: center;
 }
 
@@ -1214,10 +1236,57 @@ select {
 	width: 100%;
 	text-align: center;
 	font-size: 1.5rem;
-	color: white;
 }
 
 #error-not-found a {
-	color: white;
 	font-weight: bold;
+}
+
+#setupbackup-pass1 {
+	margin-top: 10px;
+}
+
+@keyframes flip-animation {
+	0% { transform: scale(1); }
+	25% { transform: rotateY(-180deg); }
+	75% { transform: rotateY(180deg); }
+	100% { transform: scale(1); }
+}
+
+@keyframes fade-animation {
+	0% { opacity: 0.2; transform: scale(1); }
+	25% { opacity: 0.5; transform: scale(1.1); }
+	50% { opacity: 1; transform: scale(1.2); }
+	75% { opacity: 0.5; transform: scale(1.1); }
+	100% { opacity: 0.2; transform: scale(1); }
+}
+
+.busy-animation {
+	animation-name: flip-animation;
+	animation-duration: 2000ms;
+	transform-origin: 50% 50%;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+}
+
+#busy {
+	position: absolute;
+	right: 20px;
+	bottom: 20px;
+	width: 50px;
+	height: 50px;
+	border-radius: 30px;
+	text-align: center;
+	line-height: 50px;
+	font-family: robotoregular, sans-serif;
+	font-size: 0.9rem;
+	z-index: 103;
+}
+
+#editor-container {
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+	z-index: 0;
 }

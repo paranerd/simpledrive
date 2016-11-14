@@ -1,6 +1,17 @@
 var Util = {
-	workThreads: 0,
-	loader: null,
+	busyCount: 0,
+
+	busy: function(start) {
+		Util.busyCount = (start) ? ++Util.busyCount : --Util.busyCount;
+		Util.busyCount = (Util.busyCount < 0) ? 0 : Util.busyCount;
+
+		if (Util.busyCount > 0) {
+			$("#busy").removeClass("hidden");
+		}
+		else {
+			$("#busy").addClass("hidden");
+		}
+	},
 
 	copyToClipboard: function(text) {
 		var textArea = document.createElement('textarea');
@@ -10,33 +21,6 @@ var Util = {
 		textArea.select();
 		document.execCommand('copy');
 		document.body.removeChild(textArea);
-	},
-
-	animateLoadingIndicator: function() {
-		if (this.workThreads > 0) {
-			$('.loadIndicator').each(function(i, obj) {
-				var add = ($(this).hasClass('up')) ? '+=0.1' : '-=0.1';
-				$(this).css('opacity', add);
-
-				if ($(this).hasClass('up')) {
-					$(this).css('opacity', '+=0.1');
-				}
-				else {
-					$(this).css('opacity', '-=0.1');
-				}
-
-				if ($(this).css('opacity') == 1) {
-					$(this).removeClass('up').addClass('down');
-				}
-				else if ($(this).css('opacity') == 0) {
-					$(this).removeClass('down').addClass('up');
-				}
-			});
-		}
-		else {
-			clearTimeout(loader);
-			$("#progressShield").addClass("hidden");
-		}
 	},
 
 	byteToString: function(size) {
@@ -53,6 +37,27 @@ var Util = {
 		else {
 			return size + " Byte";
 		}
+	},
+
+	checkPasswordStrength: function(password) {
+		var score = 0;
+
+		// Longer than 6 chars
+		if (password.length > 6) score++;
+
+		// Longer than 12 chars
+		if (password.length > 12) score++;
+
+		// Contains digit
+		if (password.match(/[0-9]/)) score++;
+
+		// Contains lowercase and uppercase
+		if (password.match(/[a-z]/) && password.match(/[A-Z]/)) score++
+
+		// Contains special char
+		if (password.match(/[\ -\/\:-\@\[-\`\{-\~]/)) score++;
+
+		return (password.length <= 6) ? Math.min(score, 1) : score;
 	},
 
 	closePopup: function() {
@@ -90,11 +95,11 @@ var Util = {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			if (data.msg.recent) {
-				Util.notify("Update available", "Get " + data.msg.recent + " from simpledrive.org", false);
+				Util.notify("Update available! Get " + data.msg.recent + " from simpledrive.org", false, false);
 			}
 			$("#info-title").append(" " + data.msg.current);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -107,16 +112,16 @@ var Util = {
 		return ('webkitdirectory' in tmpInput || 'mozdirectory' in tmpInput || 'odirectory' in tmpInput || 'msdirectory' in tmpInput || 'directory' in tmpInput);
 	},
 
-	notify: function(title, msg, autohide, error) {
-		var icon = (error) ? "icon-warning" : "icon-info";
-		$("#note-icon").removeClass().addClass(icon);
-		$("#note-title").text(title);
-		$("#note-msg").html(msg);
-		$("#notification").removeClass("hidden");
+	notify: function(msg, autohide, error) {
+		var type = (error) ? "warning" : "info";
+		$("#note-icon").removeClass().addClass("icon-" + type);
+		$("#note-msg").text(msg);
+		$("#notification").removeClass().addClass("light center-hor notification-" + type);
 
 		if (autohide) {
 			setTimeout(function() { Util.hideNotification(); }, 3000);
 		}
+		$(window).resize();
 	},
 
 	refreshWarning: function() {
@@ -179,19 +184,5 @@ var Util = {
 		var minutes = parseInt(duration / 60) % 60;
 		var seconds = duration % 60;
 		return (hours > 0 ?(hours < 10 ? "0" + hours + ":" : hours + ":") : "") + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
-	},
-
-	updateWorker: function(value) {
-		// Can't be < 0
-		this.workThreads = (this.workThreads <= 0 && value < 0) ? 0 : this.workThreads + value;
-
-		if (value > 0 && this.workThreads == 1) {
-			setTimeout(function() {
-				if (Util.workThreads > 0) {
-					$("#progressShield").removeClass("hidden");
-					loader = setInterval(function() { Util.animateLoadingIndicator(); }, 100);
-				}
-			}, 500);
-		}
 	}
 }

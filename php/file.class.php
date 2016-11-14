@@ -1,9 +1,5 @@
 <?php
 
-/* TO-DO
- * Only load displayed thumbnails in files.js
- */
-
 /**
  * Copyright (c) 2016, Kevin Schulz <paranerd.development@gmail.com>
  * This file is licensed under the Affero General Public License version 3 or later.
@@ -402,8 +398,8 @@ class File {
 			$filename .= " (" . $i . ")";
 		}
 		else if (file_exists($path . "/" . $filename)) {
-			header('HTTP/1.1 403 File exists');
-			return "File exists";
+			header('HTTP/1.1 403 This file already exists');
+			return "This file already exists";
 		}
 
 		// Create file/folder
@@ -492,6 +488,7 @@ class File {
 			// Fully delete
 			if ($file['trash']) {
 				$trash_path = $trashdir . $file['filename'] . $file['trash'];
+				file_put_contents(LOG, "trash path: " . $trash_path . "\n", FILE_APPEND);
 
 				if (is_dir($trash_path) && $this->recursive_remove($file['ownerid'], $source, $trash_path) ||
 					(file_exists($trash_path) && unlink($trash_path) && $this->db->cache_remove($source)))
@@ -607,13 +604,9 @@ class File {
 			return "Access denied";
 		}
 
-		$hash = $this->db->share_get_hash($id);
-
-		if ($hash) {
-			$share = $this->db->share_get($hash);
-
+		if ($share = $this->db->share_get_by_id($id)) {
 			if ($share['public']) {
-				return $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "public?r=" . $hash;
+				return $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "public?r=" . $share['hash'];
 			}
 		}
 
@@ -684,7 +677,7 @@ class File {
 		}
 
 		if (!extension_loaded("zip")) {
-			$this->db->log_write($this->username, 2, "Zip", "Extension not installed");
+			$this->db->log_write($this->uid, 2, "Zip", "Extension not installed");
 			header('HTTP/1.1 500 Zip extension not installed');
 			return ($for_download) ? null : "Zip extension not installed";
 		}
@@ -819,7 +812,7 @@ class File {
 			}
 
 			if (file_exists($targetpath . "/" . $sourcefile['filename']) || !rename($sourcepath, $targetpath . "/" . $sourcefile['filename'])) {
-				$this->db->log_write($this->username, 2, "Move", "Error moving");
+				$this->db->log_write($this->uid, 2, "Move", "Error moving");
 				$errors++;
 				continue;
 			}
@@ -828,8 +821,9 @@ class File {
 		}
 
 		if ($errors == 0) {
-			$state = (count($sources) == 1) ? " file " : " files ";
-			return count($sources) . $state . "moved";
+			$targetname = ($targetfile['filename'] == "0") ? "Homefolder" : $targetfile['filename'];
+			$msg = (count($sources) == 1) ? $sourcefile['filename'] . " moved to " . $targetname : count($sources) .  " files moved";
+			return $msg;
 		}
 
 		header('HTTP/1.1 500 Error moving ' . $errors . ' file(s)');
@@ -908,7 +902,7 @@ class File {
 
 	public function get_public($hash, $key) {
 		$key = ($key != "") ? hash('sha256', $key . $this->config['salt']) : "";
-		$share = $this->db->share_get($hash);
+		$share = $this->db->share_get_by_hash($hash);
 
 		// File not shared at all
 		if (!$share) {
@@ -944,7 +938,7 @@ class File {
 	}
 
 	/**
-	 * Returns file to client (in 200kB chunks)
+	 * Returns file to client (in 200kB chunks, so images can build up progressively)
 	 * @param array $source file to return
 	 * @param array $width screen width for shrinking to save bandwidth
 	 * @param string $height screen heightfor shrinking to save bandwidth

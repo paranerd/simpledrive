@@ -18,7 +18,7 @@ class User {
 	}
 
 	public function get($username) {
-		$user = $this->db->user_get_by_id($this->uid, true);
+		$user = $this->db->user_get_by_id($this->uid);
 
 		if ($user) {
 			if ($username != $this->username && !$user['admin']) {
@@ -41,14 +41,14 @@ class User {
 		return $this->db->user_get_all();
 	}
 
-	public function create($user, $pass, $admin, $mail) {
+	public function create($username, $pass, $admin, $mail) {
 		if (!$this->uid || !$this->user['admin']) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
 
 		// Check if username contains certain special characters
-		if (preg_match('/(\/|\.|\<|\>|%)/', $user) || strlen($user) > 32) {
+		if (preg_match('/(\/|\.|\<|\>|%)/', $username) || strlen($username) > 32) {
 			header('HTTP/1.1 400 Username not allowed');
 			return "Username not allowed";
 		}
@@ -225,9 +225,9 @@ class User {
 	}
 
 	public function change_password($currpass, $newpass) {
-		$user = $this->db->user_get_by_name($this->username);
+		$user = $this->db->user_get_by_name($this->username, true);
 
-		if (!$user || ($user['username'] != $this->username && !$user['admin'])) {
+		if (!$user || ($user['id'] != $this->uid && !$user['admin'])) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -236,8 +236,10 @@ class User {
 			$salt = uniqid(mt_rand(), true);
 			$crypt_pass = hash('sha256', $newpass . $salt);
 
-			if ($this->db->user_change_password($user['username'], $salt, $crypt_pass)) {
-				return $this->c->generate_token($user['username']);
+			if ($this->db->user_change_password($this->uid, $salt, $crypt_pass)) {
+				$token = $this->c->generate_token($this->uid);
+				$this->db->session_invalidate($this->uid, $token);
+				return $token;
 			}
 			else {
 				header('HTTP/1.1 500 Error updating password');
@@ -274,6 +276,14 @@ class User {
 	public function load_view() {
 		$user = $this->db->user_get_by_name($this->username);
 		return array('color' => $user['color'], 'fileview' => $user['fileview']);
+	}
+
+	public function active_token() {
+		return $this->db->session_active_token($this->uid);
+	}
+
+	public function invalidate_token() {
+		$this->db->session_invalidate($this->uid, $this->token);
 	}
 
 	public function is_admin() {

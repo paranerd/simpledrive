@@ -1,5 +1,9 @@
+var username,
+	token,
+	code;
+
 $(window).resize(function() {
-	$("#content").width(window.innerWidth - $("#sidebar").width());
+	$("#content").width(window.innerWidth - $("#sidebar").outerWidth());
 	$("#sidebar, #content").height(window.innerHeight - $("#header").height());
 
 	// Position centered divs
@@ -9,9 +13,19 @@ $(window).resize(function() {
 			left : ($(this).parent().width() - $(this).outerWidth()) / 2
 		});
 	});
+
+	$('.center-hor').each(function(i, obj) {
+		$(this).css({
+			left : ($(this).parent().width() - $(this).outerWidth()) / 2
+		});
+	});
 });
 
 $(document).ready(function() {
+	username = $("#data-username").val();
+	token = $("#data-token").val();
+	code = $("#data-code").val();
+
 	if (code.length > 0) {
 		Backup.setToken(code);
 		return;
@@ -23,6 +37,7 @@ $(document).ready(function() {
 	Util.getVersion();
 	General.load();
 	General.getQuota();
+	General.activeToken();
 	Backup.getStatus();
 });
 
@@ -35,7 +50,7 @@ $("#shield").click(function(e) {
 });
 
 $(".checkbox-box").on('click', function(e) {
-	$(this).toggleClass("checkbox-checked");
+	$(this).toggleClass("checkbox-checked icon-check");
 });
 
 $("#fileview").on('change', function(e) {
@@ -49,6 +64,52 @@ $("#color").on('change', function(e) {
 $("#autoscan.checkbox-box").on('click', function(e) {
 	var enable = $("#autoscan").hasClass("checkbox-checked") ? 1 : 0;
 	General.setAutoscan(enable);
+});
+
+$("#sidebar-general").on('click', function(e) {
+	General.load();
+});
+
+$("#invalidate-token").on('click', function(e) {
+	General.invalidateToken();
+});
+
+$("#bBackup").on('click', function(e) {
+	Backup.toggleStart('');
+});
+
+$("#bEnabled").on('click', function(e) {
+	Backup.toggleEnable();
+});
+
+$("#bChangePassword").on('click', function(e) {
+	General.showChangePassword();
+});
+
+$("#bClearTemp").on('click', function(e) {
+	General.clearTemp();
+});
+
+$("#changepass .close").on('click', function(e) {
+	Util.closePopup();
+});
+
+$("#changepass").on('submit', function(e) {
+	e.preventDefault();
+	General.changePassword();
+});
+
+$("#notification .close").on('click', function(e) {
+	Util.hideNotification();
+});
+
+$("#menu-item-info").on('click', function(e) {
+	$("#info, #shield").removeClass("hidden");
+});
+
+$("#setupBackup").on('submit', function(e) {
+	e.preventDefault();
+	Backup.enable();
 });
 
 $(document).on('mousedown', '#content', function(e) {
@@ -89,7 +150,7 @@ var Backup = {
 	},
 
 	setToken: function(code) {
-		Util.notify("Info", "Setting auth token", true, true);
+		Util.notify("Setting auth token", true, true);
 
 		$.ajax({
 			url: 'api/backup/token',
@@ -99,7 +160,7 @@ var Backup = {
 		}).done(function(data, statusText, xhr) {
 			window.location = 'user';
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -114,7 +175,7 @@ var Backup = {
 		var enc = ($("#setupbackup-encrypt").hasClass("checkbox-checked")) ? 1 : 0;
 
 		if (enc && (pass == "" || (pass != passConfirm))) {
-			Util.notify("Error", "Passwords don't match", true, true);
+			Util.notify("Passwords don't match", true, true);
 		}
 		else {
 			$("#setupbackup, #shield").addClass("hidden");
@@ -127,7 +188,7 @@ var Backup = {
 			}).done(function(data, statusText, xhr) {
 				window.location = data.msg;
 			}).fail(function(xhr, statusText, error) {
-				Util.notify("Error", Util.getError(xhr), true, true);
+				Util.notify(Util.getError(xhr), true, true);
 			});
 		}
 	},
@@ -143,7 +204,7 @@ var Backup = {
 		}).done(function(data, statusText, xhr) {
 			$("#bBackup").text("Start").removeClass("button-disabled");
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 
 		setTimeout(function() { Backup.getStatus(); }, 3000);
@@ -159,7 +220,7 @@ var Backup = {
 			Backup.running = false;
 			$("#bBackup").text("Start");
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -172,7 +233,7 @@ var Backup = {
 		}).done(function(data, statusText, xhr) {
 			location.reload(true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -196,12 +257,39 @@ var Backup = {
 				$("#bEnabled").text("Enable");
 			}
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 }
 
 var General = {
+	invalidateToken: function() {
+		$.ajax({
+			url: 'api/users/invalidatetoken',
+			type: 'post',
+			data: {token: token},
+			dataType: 'json'
+		}).done(function(data, statusText, xhr) {
+			Util.notify("Tokens invalidated", true, false);
+			General.activeToken();
+		}).fail(function(xhr, statusText, error) {
+			Util.notify(Util.getError(xhr), true, true);
+		});
+	},
+
+	activeToken: function() {
+		$.ajax({
+			url: 'api/users/activetoken',
+			type: 'post',
+			data: {token: token},
+			dataType: 'json'
+		}).done(function(data, statusText, xhr) {
+			$("#active-token").text(data.msg);
+		}).fail(function(xhr, statusText, error) {
+			Util.notify(Util.getError(xhr), true, true);
+		});
+	},
+
 	load: function() {
 		$("#list").empty();
 		$(".path-element").text("General");
@@ -214,12 +302,11 @@ var General = {
 			data: {token: token, user: username},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			console.log(data.msg);
 			$("#fileview").val(data.msg.fileview);
 			$("#color").val(data.msg.color);
 			if (data.msg.autoscan) { $("#autoscan").addClass("checkbox-checked"); }
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -230,9 +317,9 @@ var General = {
 			data: {token: token, view: view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Saved changes", true);
+			Util.notify("Saved changes", true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -243,9 +330,9 @@ var General = {
 			data: {token: token, color: color},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Saved changes", true);
+			Util.notify("Saved changes", true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -256,9 +343,9 @@ var General = {
 			data: {token: token, enable: enable},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Saved changes", true);
+			Util.notify("Saved changes", true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -273,7 +360,7 @@ var General = {
 			$("#mem-used").text(Util.byteToString(data.msg.used) + " (" + percent + "%)");
 			$("#mem-total").text(Util.byteToString(data.msg.max));
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", getError(xhr), true, true);
+			Util.notify(getError(xhr), true, true);
 		});
 	},
 
@@ -284,9 +371,9 @@ var General = {
 			data: {token: token},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Cache cleared", true);
+			Util.notify("Cache cleared", true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -296,12 +383,12 @@ var General = {
 		var newpass2 = $("#changepass-pass2").val();
 
 		if (currpass.length == 0 || newpass1.length == 0 || newpass2.length == 0) {
-			Util.notify("Error", "Fields cannot be empty", true, true);
+			Util.notify("Fields cannot be empty", true, true);
 			return;
 		}
 
 		if (newpass1 != newpass2) {
-			Util.notify("Error", "New passwords don't match", true, true);
+			Util.notify("New passwords don't match", true, true);
 			return;
 		}
 
@@ -312,11 +399,11 @@ var General = {
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			token = data.msg;
-			Util.notify("Info", "Password changed", true);
+			Util.notify("Password changed", true);
 			$("#changepass-pass0, #changepass-pass1, #changepass-pass2").val('');
 			$("#changepass, #shield").addClass("hidden");
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 

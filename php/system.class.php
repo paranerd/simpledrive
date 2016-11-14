@@ -11,6 +11,7 @@ class System {
 		$this->config	= json_decode(file_get_contents(dirname(__DIR__) . '/config/config.json'), true);
 		$this->db		= Database::getInstance();
 		$this->token	= $token;
+		$this->admin	= $this->db->user_is_admin($this->token);
 	}
 
 	/**
@@ -18,7 +19,7 @@ class System {
 	 */
 
 	public function status() {
-		if (!$this->db->user_is_admin($this->token)) {
+		if (!$this->admin) {
 			header('HTTP/1.1 400 Permission denied');
 			return "Permission denied";
 		}
@@ -56,12 +57,12 @@ class System {
 	}
 
 	public function set_upload_limit($limit) {
-		if (!$this->db->user_is_admin($this->token)) {
+		if (!$this->admin) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
 
-		if (!ctype_digit($limit) || (ctype_digit($limit) && $limit < 512)) {
+		if (!ctype_digit($limit) || (ctype_digit($limit) && $limit < 1024)) {
 			header('HTTP/1.1 500 Illegal value for upload size');
 			return 'Illegal value for upload size';
 		}
@@ -77,7 +78,7 @@ class System {
 				$write .= 'php_value post_max_size ' . $limit . PHP_EOL;
 			}
 			else {
-				$write .= str_replace(array("\r\n", "\r", "\n"), '', $line) . PHP_EOL;
+				$write .= str_replace(array("\r", "\n"), '', $line) . PHP_EOL;
 			}
 		}
 
@@ -90,7 +91,7 @@ class System {
 	}
 
 	public function set_domain($domain) {
-		if (!$this->db->user_is_admin($this->token)) {
+		if (!$this->admin) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -108,7 +109,7 @@ class System {
 
 	public function use_ssl($ssl) {
 		$ssl = ($ssl == "1") ? 1 : 0;
-		if (!$this->db->user_is_admin($this->token)) {
+		if (!$this->admin) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -161,7 +162,7 @@ class System {
 	 */
 
 	public function get_log($page) {
-		if (!$this->db->user_is_admin($this->token)) {
+		if (!$this->admin) {
 			header('HTTP/1.1 403 Permission denied');
 			return 'Permission denied';
 		}
@@ -174,7 +175,7 @@ class System {
 	 */
 
 	public function clear_log() {
-		if (!$this->db->user_is_admin($this->token)) {
+		if (!$this->admin) {
 			header('HTTP/1.1 403 Permission denied');
 			return 'Permission denied';
 		}
@@ -187,14 +188,14 @@ class System {
 	 */
 
 	public function get_plugin($name) {
-		if (!$this->db->user_is_admin($this->token)) {
+		if (!$this->admin) {
 			header('HTTP/1.1 403 Permission denied');
 			return 'Permission denied';
 		}
 
 		// MD5-Hashes for integrity-check
 		$plugins = array(
-			'webodf'	=> '4badffe56e14d6649bad81df801f6b49',
+			'webodf'	=> 'b1763b275ace38d8993cf3aeeff36f10',
 			'sabredav'	=> '0fc7e4a845e4a1b0902db293216364e9',
 			'phpmailer'	=> 'd78dab2aba41a7cb508c9b513f403374x'
 		);
@@ -267,7 +268,7 @@ class System {
 	 */
 
 	public function remove_plugin($name) {
-		if (!$this->db->user_is_admin($this->token)) {
+		if (!$this->admin) {
 			header('HTTP/1.1 403 Permission denied');
 			return 'Permission denied';
 		}

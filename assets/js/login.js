@@ -1,4 +1,12 @@
 $(window).resize(function() {
+	// Position centered divs
+	$('.center').each(function(i, obj) {
+		$(this).css({
+			top : ($(this).parent().height() - $(this).outerHeight()) / 2,
+			left : ($(this).parent().width() - $(this).outerWidth()) / 2
+		});
+	});
+
 	$('.center-hor').each(function(i, obj) {
 		$(this).css({
 			left : ($(this).parent().width() - $(this).outerWidth()) / 2
@@ -8,9 +16,13 @@ $(window).resize(function() {
 
 $(document).ready(function() {
 	$(window).resize();
-	if (demo) {
+	if ($("#data-demo").val()) {
 		demoLogin();
 	}
+});
+
+$("#login").on('submit', function() {
+	login();
 });
 
 function demoLogin() {
@@ -36,25 +48,28 @@ function demoLogin() {
 }
 
 function login() {
-	$("#login-error").addClass("hidden");
+	$("#login-error").addClass("hidden").text("");
 
 	if ($("#user").val() == "" || $("#pass").val() == "") {
 		$("#login-error").removeClass("hidden").text("No blank fields!");
 	}
 	else {
 		$("#login").find('input[type=submit]').prop('disabled', true);
+		$("#submit").addClass("button-disabled");
 		$.ajax({
 			url: 'api/core/login',
 			type: 'post',
 			data: {user: $("#user").val(), pass: $("#pass").val()},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			//console.log("login successful");
+			console.log(data.msg);
+			$("#submit").removeClass("button-disabled");
 			window.location.href = "files";
 		}).fail(function(xhr, statusText, error) {
 			$("#login-error").removeClass("hidden").text(error);
 			$("#pass").val("");
 			$("#login").find('input[type=submit]').prop('disabled', false);
+			$("#submit").removeClass("button-disabled");
 		});
 	}
 }

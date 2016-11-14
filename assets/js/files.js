@@ -4,10 +4,16 @@
  * See the COPYING-README file.
  */
 
+/* TO-DO
+ * Only load displayed thumbnails
+ */
+
 var startDrag = false,
 	dragging = false,
 	mouseStart = {x: 0, y: 0},
-	seekPos = null;
+	seekPos = null,
+	username,
+	token;
 
 $(window).resize(function() {
 	var contentWidth = ($("#fileinfo").hasClass("hidden")) ? window.innerWidth - $("#sidebar").outerWidth() : window.innerWidth - $("#sidebar").outerWidth() - $("#fileinfo").outerWidth();
@@ -41,9 +47,11 @@ $(window).resize(function() {
 });
 
 $(document).ready(function() {
+	username = $("#data-username").val();
+	token = $("#data-token").val();
 	simpleScroll.init("files");
 	ImageManager.init();
-	FileManager.init();
+	FileManager.init($("#data-view").val(), $("#data-id").val(), $("#data-publichash").val());
 
 	if (username) {
 		Util.getVersion();
@@ -156,6 +164,142 @@ $(document).on('keyup', function(e) {
 	}
 });
 
+$("#sidebar-files").on('click', function(e) {
+	FileManager.closeTrash();
+});
+
+$("#sidebar-shareout").on('click', function(e) {
+	FileManager.listShares('shareout');
+});
+
+$("#sidebar-sharein").on('click', function(e) {
+	FileManager.listShares('sharein');
+});
+
+$("#sidebar-trash").on('click', function(e) {
+	FileManager.openTrash();
+});
+
+$("#upload-cancel").on('click', function(e) {
+	FileManager.finishUpload(true);
+});
+
+$("#clipboard .close").on('click', function(e) {
+	FileManager.emptyClipboard();
+});
+
+$("#scan").on('click', function(e) {
+	FileManager.scan();
+});
+
+$("#files-filter .close").on('click', function(e) {
+	FileManager.closeFilter();
+});
+
+$("#list-header .col1").on('click', function(e) {
+	FileManager.sortByName();
+});
+
+$("#list-header .col3").on('click', function(e) {
+	FileManager.sortByType();
+});
+
+$("#list-header .col4").on('click', function(e) {
+	FileManager.sortBySize();
+});
+
+$("#list-header .col5").on('click', function(e) {
+	FileManager.sortByEdit();
+});
+
+$("#create-file").on('click', function(e) {
+	FileManager.showCreate('file');
+});
+
+$("#create-folder").on('click', function(e) {
+	FileManager.showCreate('folder');
+});
+
+$("#create .close, #share .close").on('click', function(e) {
+	Util.closePopup();
+});
+
+$("#create").on('submit', function(e) {
+	e.preventDefault();
+	FileManager.create();
+});
+
+$("#share").on('submit', function(e) {
+	e.preventDefault();
+	FileManager.share();
+});
+
+$("#menu-item-info").on('click', function(e) {
+	$("#info, #shield").removeClass("hidden");
+});
+
+$("#notification .close, #notification2 .close").on('click', function(e) {
+	Util.hideNotification();
+});
+
+$("#fileinfo .close").on('click', function(e) {
+	$("#fileinfo").addClass("hidden");
+	$(window).resize();
+});
+
+$("#share-public").on('click', function(e) {
+	FileManager.toggleShareLink();
+});
+
+$("#context-gallery").on('click', function(e) {
+	ImageManager.openGallery();
+});
+
+$("#context-restore").on('click', function(e) {
+	FileManager.restore();
+});
+
+$("#context-copy").on('click', function(e) {
+	FileManager.copy();
+});
+
+$("#context-cut").on('click', function(e) {
+	FileManager.cut();
+});
+
+$("#context-paste").on('click', function(e) {
+	FileManager.paste();
+});
+
+$("#context-share").on('click', function(e) {
+	FileManager.showShare();
+});
+
+$("#context-rename").on('click', function(e) {
+	FileManager.showRename();
+});
+
+$("#context-unshare").on('click', function(e) {
+	FileManager.unshare();
+});
+
+$("#context-zip").on('click', function(e) {
+	FileManager.zip();
+});
+
+$("#context-download").on('click', function(e) {
+	FileManager.download();
+});
+
+$("#context-delete").on('click', function(e) {
+	FileManager.remove();
+});
+
+$("#load-public").on('submit', function(e) {
+	e.preventDefault();
+	FileManager.loadPublic();
+});
+
 $("#bFile").on('click', function(e) {
 	$("#upload-file").trigger("click");
 });
@@ -164,10 +308,17 @@ if (Util.isDirectorySupported()) {
 	$("#bFolder").on('click', function(e) {
 		$("#upload-folder").trigger("click");
 	});
+	$("#upload-folder").on('change', function(e) {
+		FileManager.addUpload(this);
+	});
 }
 else {
 	$("#bFolder").addClass("hidden");
 }
+
+$("#upload-file").on('change', function(e) {
+	FileManager.addUpload(this);
+});
 
 $("#username").on('click', function(e) {
 	$("#menu").toggleClass("hidden");
@@ -184,10 +335,12 @@ $("#contextmenu").on('click', function(e) {
 
 $("#sidebar-create").on('click', function() {
 	$("#create-menu").removeClass("hidden");
+	$("#upload-menu").addClass("hidden");
 });
 
 $("#sidebar-upload").on('click', function() {
 	$("#upload-menu").removeClass("hidden");
+	$("#create-menu").addClass("hidden");
 });
 
 $(".checkbox-box").on('click', function(e) {
@@ -553,19 +706,21 @@ var FileManager = {
 	},
 
 	create: function() {
-		Util.updateWorker(1);
+		Util.busy(true);
+
 		$.ajax({
 			url: 'api/files/create',
 			type: 'post',
 			data: {token: token, target: FileManager.id, type: $("#create-type").val(), filename: $("#create-input").val()},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.updateWorker(-1);
+			Util.busy(false);
 			FileManager.fetch();
 			Util.closePopup();
 		}).fail(function(xhr, statusText, error) {
-			Util.updateWorker(-1);
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.busy(false);
+			$("#create-error").removeClass("hidden").text(Util.getError(xhr));
+			//Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -691,17 +846,17 @@ var FileManager = {
 		}
 
 		if (FileManager.getSelectedCount() > 1 || folderSel) {
-			Util.notify("Info", "Zipping files", true);
+			Util.notify("Started zipping files...", true, false);
 		}
 
 		if (FileManager.getSelectedCount() == 0) {
 			return;
 		}
 
-		$('<form class="hidden-form" action="api/files/get" method="post" style="display: none;"><input name="token"></input><input name="target"></input></form>').appendTo('body');
+		$('<form id="download-form" class="hidden" action="api/files/get" method="post"><input name="token"></input><input name="target"></input></form>').appendTo('body');
 		$('[name="token"]').val(token);
 		$('[name="target"]').val(JSON.stringify(FileManager.getAllSelectedIDs()));
-		$('.hidden-form').submit();
+		$('#download-form').submit();
 		FileManager.unselectAll();
 	},
 
@@ -722,7 +877,7 @@ var FileManager = {
 		FileManager.updateSidebar();
 		FileManager.currentSelected = -1;
 		$("#contextmenu").addClass("hidden");
-		Util.updateWorker(1);
+		Util.busy(true);
 
 		$.ajax({
 			url: 'api/files/children',
@@ -731,7 +886,7 @@ var FileManager = {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			FileManager.closeFilter();
-			Util.updateWorker(-1);
+			Util.busy(false);
 			FileManager.allElem = data.msg.files;
 			FileManager.filteredElem = FileManager.allElem;
 			FileManager.hierarchy = data.msg.hierarchy;
@@ -741,8 +896,8 @@ var FileManager = {
 				window.history.pushState(null, '', '?v=' + FileManager.view + '&id=' + FileManager.id);
 			}
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
-			Util.updateWorker(-1);
+			Util.notify(Util.getError(xhr), true, true);
+			Util.busy(false);
 		});
 	},
 
@@ -765,7 +920,7 @@ var FileManager = {
 
 	finishUpload: function(abort) {
 		if (FileManager.abort) {
-			Util.notify("Info", "Upload aborted", true, false);
+			Util.notify("Upload aborted", true, false);
 		}
 		FileManager.uploadRunning = false;
 		FileManager.uploadQueue = [];
@@ -776,7 +931,11 @@ var FileManager = {
 		FileManager.fetch();
 
 		window.onbeforeunload = null;
-		setTimeout('$("#upload").addClass("hidden");', 5000);
+		setTimeout(function() { FileManager.hideUpload(); }, 5000);
+	},
+
+	hideUpload: function() {
+		$("#upload").addClass("hidden");
 	},
 
 	getAllElements: function() {
@@ -797,18 +956,18 @@ var FileManager = {
 	},
 
 	getLink: function(elem) {
-		Util.updateWorker(1);
+		Util.busy(true);
 		$.ajax({
 			url: 'api/files/getlink',
 			type: 'post',
 			data: {token: token, target: elem.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.updateWorker(-1);
-			Util.notify("Link", "<input style='width: 90%;' value='" + data.msg + "'></input>", false, false);
+			Util.busy(false);
+			Util.notify("Share link: " + data.msg, false, false);
 		}).fail(function(xhr, statusText, error) {
-			Util.updateWorker(-1);
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.busy(false);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -820,7 +979,11 @@ var FileManager = {
 		return Object.keys(FileManager.selected).length;
 	},
 
-	init: function() {
+	init: function(view, id, publicHash) {
+		FileManager.view = (view) ? view : "files";
+		FileManager.id = id;
+		FileManager.publicHash = publicHash;
+
 		if (FileManager.publicHash) {
 			FileManager.loadPublic();
 		}
@@ -862,11 +1025,13 @@ var FileManager = {
 			}
 			else {
 				$("#pubfile").removeClass("hidden");
-				$("#pub-header, #pub-key, #pub-error").addClass("hidden");
+				$("#pub-key, #pub-error").addClass("hidden");
 				FileManager.filteredElem = [data.msg.share];
-				$("#unlock").val("Download " + data.msg.share.filename);
+				$("#pub-filename").text(data.msg.share.filename);
+				$("#unlock").val("Download");
 				FileManager.downloadPub = true;
 			}
+			$(window).resize();
 		}).fail(function(xhr, statusText, error) {
 			var parsedError = Util.getError(xhr);
 			if (xhr.status == "403") {
@@ -882,23 +1047,24 @@ var FileManager = {
 				$("#pubfile, #pub-error").removeClass("hidden");
 				$("#pub-error").text(parsedError);
 			}
+			$(window).resize();
 		});
 	},
 
 	move: function(target) {
-		Util.updateWorker(1);
+		Util.busy(true);
 		$.ajax({
 			url: 'api/files/move',
 			type: 'post',
 			data: {token: token, source: JSON.stringify(FileManager.getAllSelectedIDs()), target: target, trash: 'false'},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.updateWorker(-1);
-			Util.notify("Move", data.msg, true);
+			Util.busy(false);
+			Util.notify(data.msg, true);
 			FileManager.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
-			Util.updateWorker(-1);
+			Util.notify(Util.getError(xhr), true, true);
+			Util.busy(false);
 			FileManager.fetch();
 		});
 	},
@@ -933,7 +1099,7 @@ var FileManager = {
 				FileManager.openFolder(file);
 				break;
 			default:
-				Util.notify("Cannot open file", "Unknown format", true, true);
+				Util.notify("Unknown format", true, true);
 				break;
 		}
 
@@ -946,10 +1112,10 @@ var FileManager = {
 	},
 
 	openODT: function(elem) {
-		$('<form class="hidden-form" action="odfeditor" target="blank" method="post" style="display: none;"><input name="token"/><input name="elem"/></form>').appendTo('body');
+		$('<form id="odt-form" class="hidden" action="odfeditor" target="blank" method="post"><input name="token"/><input name="elem"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
 		$('[name="elem"]').val(elem.id);
-		$('.hidden-form').submit();
+		$('#odt-form').submit();
 	},
 
 	openPDF: function(elem) {
@@ -957,10 +1123,10 @@ var FileManager = {
 	},
 
 	openText: function(elem) {
-		$('<form class="hidden-form" action="texteditor" method="post" style="display: none;"><input name="token"/><input name="file"/></form>').appendTo('body');
+		$('<form id="text-form" class="hidden" action="texteditor" method="post"><input name="token"/><input name="file"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
 		$('[name="file"]').val(elem.id);
-		$('.hidden-form').submit();
+		$('#text-form').submit();
 	},
 
 	openTrash: function() {
@@ -971,7 +1137,7 @@ var FileManager = {
 
 	paste: function() {
 		var action = (FileManager.deleteAfterCopy) ? 'move' : 'copy';
-		Util.updateWorker(1);
+		Util.busy(true);
 
 		$.ajax({
 			url: 'api/files/' + action,
@@ -979,19 +1145,19 @@ var FileManager = {
 			data: {token: token, source: JSON.stringify(FileManager.clipboard), target: FileManager.id, trash: 'false'},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.updateWorker(-1);
+			Util.busy(false);
 			FileManager.emptyClipboard();
 			FileManager.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.updateWorker(-1);
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.busy(false);
+			Util.notify(Util.getError(xhr), true, true);
 			FileManager.emptyClipboard();
 			FileManager.fetch();
 		});
 	},
 
 	rename: function() {
-		Util.updateWorker(1);
+		Util.busy(true);
 		newFilename = $("#renameinput").val();
 		var oldFilename = FileManager.getFirstSelected().item.filename;
 
@@ -1002,20 +1168,20 @@ var FileManager = {
 				data: {token: token, newFilename: newFilename, target: FileManager.getFirstSelected().item.id},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
-				Util.updateWorker(-1);
+				Util.busy(false);
 				FileManager.closeRename();
 				FileManager.fetch();
 			}).fail(function(xhr, statusText, error) {
-				Util.updateWorker(-1);
-				Util.notify("Error", Util.getError(xhr), true);
+				Util.busy(false);
+				Util.notify(Util.getError(xhr), true, true);
 			});
 		}
 		$("#renameinput").val("");
 	},
 
 	scan: function() {
-		Util.updateWorker(1);
-		Util.notify("File scan started", "", true);
+		Util.busy(true);
+		Util.notify("File scan started", true, false);
 
 		$.ajax({
 			url: 'api/files/scan',
@@ -1023,12 +1189,12 @@ var FileManager = {
 			data: {token: token, target: FileManager.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.updateWorker(-1);
+			Util.busy(false);
 			FileManager.closeRename();
 			FileManager.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.updateWorker(-1);
-			Util.notify("Error", Util.getError(xhr), true);
+			Util.busy(false);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -1042,24 +1208,24 @@ var FileManager = {
 	},
 
 	remove: function() {
-		Util.updateWorker(1);
+		Util.busy(true);
 		$.ajax({
 			url: 'api/files/delete',
 			type: 'post',
 			data: {token: token, target: JSON.stringify(FileManager.getAllSelectedIDs())},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.updateWorker(-1);
+			Util.busy(false);
 			FileManager.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.updateWorker(-1);
+			Util.busy(false);
 			FileManager.fetch();
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
 	restore: function() {
-		Util.updateWorker(1);
+		Util.busy(true);
 
 		$.ajax({
 			url: 'api/files/restore',
@@ -1067,12 +1233,12 @@ var FileManager = {
 			data: {token: token, target: JSON.stringify(FileManager.getAllSelectedIDs())},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.updateWorker(-1);
-			Util.notify("Info", data.msg, true);
+			Util.busy(false);
+			Util.notify(data.msg, true);
 			FileManager.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.updateWorker(-1);
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.busy(false);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -1138,7 +1304,7 @@ var FileManager = {
 	},
 
 	share: function() {
-		Util.updateWorker(1);
+		Util.busy(true);
 		var mail = $("#share-mail").val();
 		var key = $("#share-key").val();
 		var user = $("#share-user").val();
@@ -1147,7 +1313,7 @@ var FileManager = {
 		var target = FileManager.getFirstSelected().item;
 
 		if (!user && !$("#share-public").hasClass("checkbox-checked")) {
-			Util.notify("Error", "No username provided", true, true);
+			$("#share-error").removeClass("hidden").text("No username provided");
 		}
 		else {
 			$.ajax({
@@ -1156,19 +1322,19 @@ var FileManager = {
 				data: {token: token, target: target.id, mail: mail, key: key, userto: user, pubAcc: pubAcc, write: write},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
-				Util.updateWorker(-1);
+				Util.busy(false);
 				Util.closePopup();
 
 				if (pubAcc) {
-					Util.notify("File shared", "<input style='width: 90%;' value='" + data.msg + "'></input>", false);
+					Util.notify("Share link: " + data.msg, false);
 				}
 				else {
-					Util.notify("File shared", target.filename + " shared with " + user, true);
+					Util.notify(target.filename + " shared with " + user, true);
 				}
 				FileManager.fetch();
 			}).fail(function(xhr, statusText, error) {
-				Util.updateWorker(-1);
-				Util.notify("Error", Util.getError(xhr), true, true);
+				Util.busy(false);
+				$("#share-error").removeClass("hidden").text(Util.getError(xhr));
 			});
 		}
 	},
@@ -1177,18 +1343,11 @@ var FileManager = {
 	 * Displays the create-file/folder popup
 	 */
 	showCreate: function(type) {
-		$("#create-title").text("New " + type);
+		$("#create-error").text("").addClass("hidden");
 		$("#create-menu").addClass("hidden");
 		$("#create, #shield").removeClass("hidden");
 		$("#create-input").val("").focus();
 		$("#create-type").val(type);
-	},
-
-	/**
-	 * Displays version info
-	 */
-	showInfo: function() {
-		$("#info, #shield").removeClass("hidden");
 	},
 
 	/**
@@ -1202,7 +1361,6 @@ var FileManager = {
 		var form = document.createElement('form');
 		form.id = "renameform";
 		form.className = "col1";
-		form.action = 'javascript:FileManager.rename()';
 		$("#item" + elem.id).append(form);
 
 		var input = document.createElement('input');
@@ -1211,12 +1369,17 @@ var FileManager = {
 		form.appendChild(input);
 
 		$("#renameinput").val(newfilename).focus().select();
+		$("#renameform").on('submit', function(e) {
+			e.preventDefault();
+			FileManager.rename();
+		});
 	},
 
 	/**
 	 * Displays the share popup
 	 */
 	showShare: function() {
+		$("#share-error").text("").addClass("hidden");
 		$("#share .toggle-hidden").addClass("hidden").val("");
 		$("#share-public, #share-write").removeClass("checkbox-checked");
 		$("#share-user, #share-key, #share-mail").val('');
@@ -1285,7 +1448,7 @@ var FileManager = {
 	 * Shows/hides the fileinfo-panel
 	 */
 	toggleFileInfo: function(elem) {
-		$("#fileinfo-link").unbind('click');
+		$("#fileinfo-link").addClass("hidden").unbind('click');
 
 		if (elem) {
 			$("#fileinfo-icon").removeClass().addClass('menu-thumb icon-' + elem.type);
@@ -1305,7 +1468,7 @@ var FileManager = {
 			$("#fileinfo").removeClass("hidden");
 		}
 		else {
-			$("#fileinfo-link, #fileinfo").addClass("hidden");
+			$("#fileinfo").addClass("hidden");
 		}
 		$(window).resize();
 	},
@@ -1320,18 +1483,18 @@ var FileManager = {
 	},
 
 	unshare: function() {
-		Util.updateWorker(1);
+		Util.busy(true);
 		$.ajax({
 			url: 'api/files/unshare',
 			type: 'post',
 			data: {token: token, target: FileManager.getFirstSelected().item.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.updateWorker(-1);
+			Util.busy(false);
 			FileManager.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.updateWorker(-1);
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.busy(false);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -1469,7 +1632,7 @@ var FileManager = {
 
 		xhr.onreadystatechange = function() {
 			if ((xhr.status == 403 || xhr.status == 500) && xhr.readyState == 4) {
-				Util.notify("Error", Util.getError(xhr), true, true);
+				Util.notify(Util.getError(xhr), true, true);
 			}
 		}
 
@@ -1520,18 +1683,18 @@ var FileManager = {
 	},
 
 	zip: function() {
-		Util.updateWorker(1);
+		Util.busy(true);
 		$.ajax({
 			url: 'api/files/zip',
 			type: 'post',
 			data: {token: token, target: FileManager.id, source: JSON.stringify(FileManager.getAllSelectedIDs())},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.updateWorker(-1);
+			Util.busy(false);
 			FileManager.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.updateWorker(-1);
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.busy(false);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	}
 }

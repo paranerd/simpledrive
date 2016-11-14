@@ -4,6 +4,10 @@
  * See the COPYING-README file.
  */
 
+var username,
+	token,
+	file;
+
 $(window).resize(function() {
 	$("#texteditor").css({
 		height : window.innerHeight - $("#header").outerHeight() - 20
@@ -16,9 +20,19 @@ $(window).resize(function() {
 			left : ($(this).parent().width() - $(this).outerWidth()) / 2
 		});
 	});
+
+	$('.center-hor').each(function(i, obj) {
+		$(this).css({
+			left : ($(this).parent().width() - $(this).outerWidth()) / 2
+		});
+	});
 });
 
 $(document).ready(function() {
+	username = $("#data-username").val();
+	token = $("#data-token").val();
+	file = $("#data-file").val();
+
 	$("#username").html(Util.escape(username) + " &#x25BE");
 
 	$("#doc-name").mouseenter(function(e) {
@@ -83,6 +97,23 @@ $(document).on('keydown', function(e) {
 	}
 });
 
+$("#path").on('click', function() {
+	Editor.showRename();
+});
+
+$("#rename .close").on('click', function() {
+	closePopup();
+});
+
+$("#rename").on('submit', function(e) {
+	e.preventDefault();
+	Editor.rename();
+});
+
+$("#notificatino .close").on('click', function() {
+	Util.hideNotification();
+});
+
 var Editor = {
 	saveLoop: null,
 	changed: false,
@@ -108,7 +139,7 @@ var Editor = {
 			}).done(function(data, statusText, xhr) {
 				$("#doc-savestatus").text("");
 			}).fail(function(xhr, statusText, error) {
-				Util.notify("Error", Util.getError(xhr), true, true);
+				Util.notify(Util.getError(xhr), true, true);
 			});
 		}
 	},
@@ -126,7 +157,7 @@ var Editor = {
 			Editor.autosave();
 			window.onbeforeunload = Util.unsavedWarning();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -145,7 +176,7 @@ var Editor = {
 				Util.closePopup();
 				Editor.load();
 			}).fail(function(xhr, statusText, error) {
-				Util.notify("Error", Util.getError(xhr), true, true);
+				Util.notify(Util.getError(xhr), true, true);
 			});
 		}
 		else {

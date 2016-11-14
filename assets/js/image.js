@@ -14,7 +14,7 @@ var ImageManager = {
 
 	abort: function() {
 		ImageManager.loading = false;
-		Util.updateWorker(-1);
+		Util.busy(false);
 		window.stop();
 	},
 
@@ -95,6 +95,27 @@ var ImageManager = {
 		ImageManager.active = null;
 		simpleScroll.init("gallery");
 		$("#gallery").addClass("hidden");
+
+		$("#img-close").on('click', function(e) {
+			ImageManager.close();
+		});
+
+		$("#img-delete").on('click', function(e) {
+			ImageManager.remove();
+		});
+
+		$("#img-slideshow").on('click', function(e) {
+			ImageManager.slideshow(false);
+		});
+
+		$("#img-prev").on('click', function(e) {
+			ImageManager.prev();
+		});
+
+		$("#img-next").on('click', function(e) {
+			ImageManager.next();
+		});
+
 	},
 
 	isGalleryLoaded: function() {
@@ -120,7 +141,7 @@ var ImageManager = {
 
 		if (!ImageManager.loading) {
 			ImageManager.loading = true;
-			Util.updateWorker(1);
+			Util.busy(true);
 		}
 		else {
 			ImageManager.abort();
@@ -141,9 +162,9 @@ var ImageManager = {
 		var interval = setInterval(function() {
 			if (date.getTime() - start > 5000) {
 				clearTimeout(interval);
-				Util.notify("Error", "Error displaying image", true, true);
+				Util.notify("Error displaying image", true, true);
 				ImageManager.loading = false;
-				Util.updateWorker(-1);
+				Util.busy(false);
 			}
 			if (ImageManager.image.naturalHeight || ImageManager.image.height) {
 				clearTimeout(interval);
@@ -168,13 +189,13 @@ var ImageManager = {
 
 		ImageManager.image.onload = function() {
 			loading = false;
-			Util.updateWorker(-1);
+			Util.busy(false);
 		}
 
 		ImageManager.image.onerror = function() {
-			Util.notify("Error", "Error displaying image", true, true);
+			Util.notify("Error displaying image", true, true);
 			ImageManager.loading = false;
-			Util.updateWorker(-1);
+			Util.busy(false);
 		}
 	},
 

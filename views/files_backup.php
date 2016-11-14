@@ -22,7 +22,7 @@
 <body class="<?php echo $user['color']; ?>">
 	<!-- Header -->
 	<div id="header">
-		<div id="logo"><div class="menu-thumb icon-cloud"><a href="files"></div>Files</a></div>
+		<div id="logo"><div class="menu-thumb icon-cloud"><a href="files"></div>simpleDrive</a></div>
 		<div id="path"></div>
 		<div id="username"></div>
 	</div>
@@ -39,6 +39,7 @@
 		<div id="sidebar-shareout" class="menu-item" title="Show your shares"><div class="menu-thumb icon-users"></div><div class="menu-text"><?php echo $lang['yourshares']; ?></div></div>
 		<div id="sidebar-sharein" class="menu-item" title="Show files shared with you"><div class="menu-thumb icon-share"></div><div class="menu-text"><?php echo $lang['sharedwithyou']; ?></div></div>
 		<div id="sidebar-trash" class="menu-item" title="Show trash"><div class="menu-thumb icon-trash"></div><div class="menu-text"><?php echo $lang['trash']; ?></div></div>
+		<div class="divider"></div>
 
 		<!-- Upload -->
 		<div id="upload" class="sidebar-widget hidden">
@@ -169,13 +170,11 @@
 	<form id="create" class="popup input-popup center hidden" action="#">
 		<span class="close"> &times;</span>
 		<div class="popup-title"><?php echo $lang['create']; ?></div>
-
 		<div class="input-header"><?php echo $lang['filename']; ?></div>
-		<input id="create-input" type="text" class="input-wide" placeholder="<?php echo $lang['filename']; ?>" />
-
-		<div id="create-error" class="error hidden"></div>
 		<input id="create-type" type="hidden" name="type" />
-		<button type="submit" class="button">OK</button>
+		<input id="create-input" type="text" class="input-wide" placeholder="<?php echo $lang['filename']; ?>" />
+		<div id="create-error" class="error hidden"></div>
+		<input type="submit" class="button" value="OK" />
 	</form>
 
 	<!-- Share popup -->
@@ -202,7 +201,7 @@
 		</div>
 
 		<div id="share-error" class="error hidden"></div>
-		<button type="submit" class="button">OK</button>
+		<input type="submit" class="button" value="OK"/>
 	</form>
 
 	<!-- Image Viewer -->

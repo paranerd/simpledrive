@@ -19,9 +19,7 @@
 }
 
 .list-header .checkbox-box {
-	top: 15px;
-	width: 10px;
-	height: 10px;
+	top: 12px;
 }
 
 .list, .grid {
@@ -40,24 +38,24 @@
 	float: left;
 	cursor: pointer;
 	left: 0;
-	height: 40px;
+	height: 50px;
 	width: 100%;
 	border-radius: 0px;
-	line-height: 40px;
+	line-height: 50px;
 	overflow: hidden;
 }
 
 .list .item:hover .thumbnail {
-	border-radius: 20px;
+	border-radius: 30px;
 }
 
 .item-elem {
 	position: relative;
-	height: 100%;
-	font-size: 0.8rem;
+	height: 50px;
+	font-size: 0.9rem;
 	font-family: robotoregular, sans-serif;
 	text-align: left;
-	line-height: 40px;
+	line-height: 50px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -66,7 +64,7 @@
 
 .list .thumbnail {
 	position: relative;
-	top: 3px;
+	top: 8px;
 	left: 15px;
 	height: 30px;
 	width: 30px;
@@ -93,8 +91,8 @@
 
 .list #renameinput {
 	position: absolute;
-	top: 3px;
-	width: 100%;
+	top: 8px;
+	width: 95%;
 	height: 30px;
 	font-size: 0.8rem;
 }

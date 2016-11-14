@@ -6,9 +6,6 @@
  */
 
 class Core {
-	/**
-	 * Constructor
-	 */
 
 	public function __construct() {
 		$this->db			= Database::getInstance();
@@ -29,8 +26,8 @@ class Core {
 	 * @return string authorization token
 	 */
 
-	public function setup($user, $pass, $mail, $mail_pass, $db_server, $db_name, $db_user, $db_pass, $datadir) {
-		$user		= strtolower(str_replace(' ', '', $user));
+	public function setup($username, $pass, $mail, $mail_pass, $db_server, $db_name, $db_user, $db_pass, $datadir) {
+		$username	= strtolower(str_replace(' ', '', $username));
 		$datadir	= ($datadir != "") ? $datadir : dirname(__DIR__) . "/docs/";
 		$db_server	= (strlen($db_server) > 0) ? $db_server : 'localhost';
 		$db_name	= (strlen($db_name) > 0) ? $db_name : 'simpledrive';
@@ -42,7 +39,7 @@ class Core {
 		}
 
 		// Check if username contains certain special characters
-		if (preg_match('/(\/|\.|\<|\>|%)/', $user)) {
+		if (preg_match('/(\/|\.|\<|\>|%)/', $username)) {
 			header('HTTP/1.1 400 Username not allowed');
 			return "Username not allowed";
 		}
@@ -54,7 +51,7 @@ class Core {
 		}
 
 		// Setup database
-		$db_setup = Database::setup($user, $pass, $db_server, $db_name, $db_user, $db_pass);
+		$db_setup = Database::setup($username, $pass, $db_server, $db_name, $db_user, $db_pass);
 		if (array_key_exists('error', $db_setup)) {
 			header('HTTP/1.1 500 ' . $db_setup['error']);
 			return $db_setup['error'];
@@ -69,7 +66,7 @@ class Core {
 			return "Could not write documents folder";
 		}
 
-		if (!file_exists($datadir . $user) && !mkdir($datadir . $user, 0755)) {
+		if (!file_exists($datadir . $username) && !mkdir($datadir . $username, 0755)) {
 			header('HTTP/1.1 500 Could not create user directory');
 			return "Could not create user directory";
 		}
@@ -92,13 +89,13 @@ class Core {
 		$salt = uniqid(mt_rand(), true);
 		$crypt_pass = hash('sha256', $pass . $salt);
 
-		if (!$this->db->user_create($user, $crypt_pass, $salt, 1, $mail)) {
+		if (!$this->db->user_create($username, $crypt_pass, $salt, 1, $mail)) {
 			unlink($this->config_path);
 			header('HTTP/1.1 500 Could not create user');
 			return "Could not create user";
 		}
 
-		return $this->generate_token($user);
+		return $this->generate_token($username);
 	}
 
 	/**
@@ -146,7 +143,7 @@ class Core {
 				$write .= 'php_value error_log ' . $_SERVER['DOCUMENT_ROOT'] . dirname(dirname($_SERVER['SCRIPT_NAME'])) . "/logs/error.log" . PHP_EOL;
 			}
 			else {
-				$write .= str_replace(array("\r\n", "\r", "\n"), '', $line) . PHP_EOL;
+				$write .= str_replace(array("\r", "\n"), '', $line) . PHP_EOL;
 			}
 		}
 
@@ -176,14 +173,14 @@ class Core {
 	 * @return string authorization token
 	 */
 
-	public function generate_token($user, $hash = null) {
+	public function generate_token($uid, $hash = null) {
 		$token = md5(openssl_random_pseudo_bytes(32));
 		$name = ($hash) ? 'public_token' : 'token';
 		$expires = ($hash) ? time() + 60 * 60 : time() + 60 * 60 * 24 * 7; // 1h for public, otherwise 1 week
 
 		if ($token &&
 			setcookie($name, $token, $expires, "/") &&
-			$this->db->session_start($token, $user, $hash, $expires))
+			$this->db->session_start($token, $uid, $hash, $expires))
 		{
 			return $token;
 		}
@@ -201,14 +198,14 @@ class Core {
 
 	public function login($username, $pass) {
 		$username = strtolower($username);
-		$user = $this->db->user_get_by_name($username);
+		$user = $this->db->user_get_by_name($username, true);
 		$res = "Wrong username/password";
 
 		// User unknown
 		if (!$user) {
 			$this->db->log_write(null, 1, "Login", "Unknown login attempt: " . $username);
 		}
-		// User in on lockdown
+		// User is on lockdown
 		else if ((time() - ($user['login_attempts'] - 2) * 30) - $user['last_login_attempt'] < 0) {
 			$lockdown_time = (time() - ($user['login_attempts'] + 1 - 2) * 30) - $user['last_login_attempt'];
 			$res = 'Locked for ' . abs($lockdown_time) . 's';

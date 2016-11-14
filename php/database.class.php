@@ -104,7 +104,7 @@ class Database {
 		$link->query('CREATE TABLE IF NOT EXISTS sd_log (
 			id int(11) AUTO_INCREMENT,
 			PRIMARY KEY (id),
-			user varchar(32),
+			user int(11),
 			type int(11),
 			source varchar(30),
 			msg varchar(500),
@@ -113,7 +113,7 @@ class Database {
 		$link->query('CREATE TABLE IF NOT EXISTS sd_shares (
 			id varchar(32),
 			PRIMARY KEY (id),
-			userto varchar(100),
+			userto int(11),
 			pass varchar(100),
 			public tinyint(1),
 			access int(11),
@@ -126,7 +126,7 @@ class Database {
 			parent varchar(32),
 			type varchar(10),
 			size int(11),
-			owner varchar(32),
+			owner int(11),
 			edit int(11),
 			md5 varchar(32),
 			lastscan int(11))');
@@ -147,7 +147,7 @@ class Database {
 			id int(11) AUTO_INCREMENT,
 			PRIMARY KEY (id),
 			token varchar(32),
-			user varchar(32),
+			user int(11),
 			hash varchar(64),
 			fingerprint varchar(64),
 			expires int(11))');
@@ -183,22 +183,22 @@ class Database {
 		return null;
 	}
 
-	public function user_get_by_name($username, $discrete = false) {
-		return $this->user_get("user", $username, $discrete);
+	public function user_get_by_name($username, $full = false) {
+		return $this->user_get("user", $username, $full);
 	}
 
-	public function user_get_by_id($uid, $discrete = false) {
-		return $this->user_get("id", $uid, $discrete);
+	public function user_get_by_id($uid, $full = false) {
+		return $this->user_get("id", $uid, $full);
 	}
 
-	public function user_get_by_token($token, $discrete = false) {
+	public function user_get_by_token($token, $full = false) {
 		if ($uid = $this->user_get_id_by_token($token)) {
-			return $this->user_get("id", $uid, $discrete);
+			return $this->user_get("id", $uid, $full);
 		}
 		return null;
 	}
 
-	private function user_get($column, $value, $discrete = false) {
+	private function user_get($column, $value, $full = false) {
 		$stmt = $this->link->prepare('SELECT id, user, pass, salt, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan FROM sd_users WHERE ' . $column . ' = ?');
 		if (ctype_digit($value)) {
 			$stmt->bind_param('i', $value);
@@ -212,19 +212,7 @@ class Database {
 		$stmt->bind_result($id, $username, $pass, $salt, $admin, $max_storage, $color, $fileview, $login_attempts, $last_login_attempt, $last_login, $autoscan);
 
 		if ($stmt->fetch()) {
-			if ($discrete) {
-				// Filter user data
-				return array(
-					'id'			=> $id,
-					'username'		=> strtolower($username),
-					'color'			=> $color,
-					'fileview'		=> $fileview,
-					'admin'			=> $admin,
-					'last_login'	=> $last_login,
-					'autoscan'		=> $autoscan
-				);
-			}
-			else {
+			if ($full) {
 				return array(
 					'id'					=> $id,
 					'username'				=> strtolower($username),
@@ -238,6 +226,19 @@ class Database {
 					'last_login_attempt'	=> $last_login_attempt,
 					'last_login'			=> $last_login,
 					'autoscan'				=> $autoscan
+				);
+			}
+			else {
+				// Filter user data
+				return array(
+					'id'			=> $id,
+					'username'		=> strtolower($username),
+					'admin'			=> $admin,
+					'max_storage'	=> $max_storage,
+					'color'			=> $color,
+					'fileview'		=> $fileview,
+					'last_login'	=> $last_login,
+					'autoscan'		=> $autoscan
 				);
 			}
 		}
@@ -388,7 +389,7 @@ class Database {
 
 	public function user_set_autoscan($uid, $enable) {
 		// Check if real changes (update-error when trying to update exact same values)
-		if ($this->user_autoscan) {
+		if ($this->user_autoscan()) {
 			return true;
 		}
 
@@ -441,9 +442,9 @@ class Database {
 	 * @return boolean true if successful
 	 */
 
-	public function user_change_password($username, $salt, $pass) {
-		$stmt = $this->link->prepare('UPDATE sd_users SET pass = ?, salt = ? WHERE user = ?');
-		$stmt->bind_param('sss', $pass, $salt, $username);
+	public function user_change_password($uid, $salt, $pass) {
+		$stmt = $this->link->prepare('UPDATE sd_users SET pass = ?, salt = ? WHERE id = ?');
+		$stmt->bind_param('sss', $pass, $salt, $uid);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();
@@ -488,6 +489,31 @@ class Database {
 	public function session_start($token, $uid, $hash = '', $expires) {
 		$stmt = $this->link->prepare('INSERT INTO sd_session (token, user, hash, expires, fingerprint) VALUES (?, ?, ?, ?, ?)');
 		$stmt->bind_param('sisis', $token, $uid, $hash, $expires, $this->fingerprint);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->fetch();
+
+		return ($stmt->affected_rows != 0);
+	}
+
+	public function session_active_token($uid) {
+		$stmt = $this->link->prepare('SELECT COUNT(id) FROM sd_session WHERE user = ?');
+		$stmt->bind_param('i', $uid);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($count);
+		$stmt->fetch();
+
+		return $count;
+	}
+
+	/**
+	 * Ends all sessions for a user but the current active
+	 */
+
+	public function session_invalidate($uid, $token) {
+		$stmt = $this->link->prepare('DELETE FROM sd_session WHERE user = ? AND token != ?');
+		$stmt->bind_param('is', $uid, $token);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();
@@ -608,7 +634,7 @@ class Database {
 	public function share($id, $userto, $pass, $public, $access) {
 		$hash = $this->share_get_unique_hash();
 		$stmt = $this->link->prepare('INSERT INTO sd_shares (id, hash, userto, pass, public, access) VALUES (?, ?, ?, ?, ?, ?)');
-		$stmt->bind_param('sssssi', $id, $hash, $userto, $pass, $public, $access);
+		$stmt->bind_param('ssisii', $id, $hash, $userto, $pass, $public, $access);
 		$stmt->execute();
 
 		if ($stmt->affected_rows == 1) {
@@ -618,14 +644,30 @@ class Database {
 		return null;
 	}
 
-	public function share_get_hash($id) {
-		$stmt = $this->link->prepare('SELECT hash FROM sd_shares WHERE id = ?');
+	/**
+	 * Get share info
+	 * @param id
+	 * @return array share info
+	 */
+
+	public function share_get_by_id($id) {
+		$stmt = $this->link->prepare('SELECT id, userto, pass, public, access, hash FROM sd_shares WHERE id = ?');
 		$stmt->bind_param('s', $id);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($hash);
+		$stmt->bind_result($id, $userto, $pass, $public, $access, $hash);
 
-		return ($stmt->fetch()) ? $hash : null;
+		if ($stmt->fetch()) {
+			return array(
+				'id'		=> $id,
+				'userto'	=> $userto,
+				'pass'		=> $pass,
+				'public'	=> $public,
+				'access'	=> $access,
+				'hash'		=> $hash
+			);
+		}
+		return null;
 	}
 
 	/**
@@ -634,12 +676,12 @@ class Database {
 	 * @return array share info
 	 */
 
-	public function share_get($hash) {
-		$stmt = $this->link->prepare('SELECT id, userto, pass, public, access FROM sd_shares WHERE hash = ?');
+	public function share_get_by_hash($hash) {
+		$stmt = $this->link->prepare('SELECT id, userto, pass, public, access, hash FROM sd_shares WHERE hash = ?');
 		$stmt->bind_param('s', $hash);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $userto, $pass, $public, $access);
+		$stmt->bind_result($id, $userto, $pass, $public, $access, $hash);
 
 		if ($stmt->fetch()) {
 			return array(
@@ -647,7 +689,8 @@ class Database {
 				'userto'	=> $userto,
 				'pass'		=> $pass,
 				'public'	=> $public,
-				'access'	=> $access
+				'access'	=> $access,
+				'hash'		=> $hash
 			);
 		}
 		return null;
@@ -951,6 +994,7 @@ class Database {
 
 		if ($stmt->fetch()) {
 			return array(
+				'id'			=> $id,
 				'filename'		=> $filename,
 				'parent'		=> $parent,
 				'type'			=> $type,
@@ -960,7 +1004,6 @@ class Database {
 				'edit'			=> $edit,
 				'md5'			=> $md5,
 				'trash'			=> $trash,
-				'id'			=> $id,
 				'path'			=> $this->cache_relative_path($id),
 				'shared'		=> ($share_base != "0"),
 				'selfshared'	=> ($share_base == $id)
@@ -1205,6 +1248,8 @@ class Database {
 
 	public function cache_clean_trash($uid, $existing) {
 		$escaped_existing = $this->escape_array($existing);
+		file_put_contents(LOG, "uid: " . $uid . "\n", FILE_APPEND);
+		file_put_contents(LOG, "escaped: " . implode($escaped_existing, '", "') . "\n", FILE_APPEND);
 		$stmt = $this->link->prepare('DELETE t FROM sd_trash t LEFT JOIN sd_cache f ON t.id = f.id WHERE f.owner = ? AND t.hash NOT IN ("' . implode($escaped_existing, '","') . '")');
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
@@ -1253,18 +1298,6 @@ class Database {
 		}
 
 		return $thumb_paths;
-	}
-
-	// Returns last action and timestamp of that action
-	public function history_last($owner, $path) {
-		$stmt = $this->link->prepare('SELECT deleted, timestamp FROM sd_history WHERE owner = ? AND path = ?');
-		$stmt->bind_param('s', $owner, $path);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($delete, $timestamp);
-		$stmt->fetch();
-
-		return ($stmt->affected_rows == 1) ? array('delete' =>  $id, 'timestamp' => $timestamp) : null;
 	}
 
 	public function history_for_user($owner, $timestamp, $only_deleted = false) {

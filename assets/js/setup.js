@@ -1,4 +1,14 @@
+var strengths = ["Very weak", "Weak", "Ok", "Better", "Strong", "Very strong"];
+
 $(window).resize(function() {
+	// Position centered divs
+	$('.center').each(function(i, obj) {
+		$(this).css({
+			top : ($(this).parent().height() - $(this).outerHeight()) / 2,
+			left : ($(this).parent().width() - $(this).outerWidth()) / 2
+		});
+	});
+
 	$('.center-hor').each(function(i, obj) {
 		$(this).css({
 			left : (window.innerWidth - $(this).outerWidth()) / 2
@@ -7,6 +17,25 @@ $(window).resize(function() {
 });
 
 $(window).resize();
+
+$("#advanced").on('click', function() {
+	toggleAdvanced();
+});
+
+$("#setup").on('submit', function() {
+	setup();
+});
+
+$("#pass").on('keyup', function() {
+	var strength = Util.checkPasswordStrength($(this).val());
+	if (strength > 1) {
+		$("#strength").removeClass().addClass("password-ok");
+	}
+	else {
+		$("#strength").removeClass().addClass("password-bad");
+	}
+	$("#strength").text(strengths[strength]);
+});
 
 function setup() {
 	var user = $("#user").val();

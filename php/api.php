@@ -321,7 +321,7 @@ else if ($endpoint == 'users') {
 			$result = $u->set_autoscan($_REQUEST['enable']);
 			break;
 
-		case 'gettheme':
+		case 'theme':
 			$result = $u->load_view();
 			break;
 
@@ -333,6 +333,14 @@ else if ($endpoint == 'users') {
 		case 'setcolor':
 			check_required(array('color'));
 			$result = $u->set_color($_REQUEST['color']);
+			break;
+
+		case 'activetoken':
+			$result = $u->active_token();
+			break;
+
+		case 'invalidatetoken':
+			$result = $u->invalidate_token();
 			break;
 
 		default:

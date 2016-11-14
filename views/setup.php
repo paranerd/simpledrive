@@ -1,7 +1,7 @@
 <?php
 	if(file_exists('config/config.json')) {
-		header('Location: login');
-		exit();
+		//header('Location: login');
+		//exit();
 	}
 
 	$enabled = isset($_SERVER['HTACCESS']);
@@ -19,33 +19,35 @@
 	</head>
 <body>
 	<div class="major-wrapper">
-		<div class="major-title">simpleDrive</div>
-		<div class="major-subtitle">Private. Secure. Simple.</div>
+		<div class="major-logo menu-item" title="Create new element"><div class="menu-thumb icon-cloud"></div><div class="menu-text">simpleDrive</div></div>
 
-		<form class="popup input-popup major-popup center-hor" action="javascript:setup()">
-			<div class="popup-title">Setup</div>
-			<div class="input-header">Create admin</div>
-			<input id="user" class="input-wide" autofocus autocomplete="off" placeholder="Username" />
-			<input id="pass" class="input-wide" type="password" placeholder="Password" required />
+		<form id="setup" class="center" action="#">
+			<div class="major-title">Setup</div>
+			<div class="major-subtitle">Admin</div>
+			<input id="user" class="major-input major-input-small" type="text" placeholder="Username" value="" required autocomplete="off" autofocus>
+			<input id="pass" class="major-input major-input-small" type="password" placeholder="Password" value="" required><span id="strength" class="hidden"></span>
 
-			<div class="input-header">MySQL credentials</div>
-			<input id="dbuser" type="text" class="input-wide" placeholder="Database user" />
-			<input id="dbpass" type="password" class="input-wide" placeholder="Database password" />
+			<div class="major-subtitle">Database</div>
+			<input id="dbuser" class="major-input major-input-small" type="text" placeholder="Database Username" value="" required>
+			<input id="dbpass" class="major-input major-input-small" type="password" placeholder="Database Password" value="" required>
 
-			<div id="advanced" class="input-header" onclick="toggleAdvanced();">Advanced &#x25BE;</div>
+			<div id="advanced" class="major-subtitle">Advanced &#x25BE;</div>
 
-			<input id="mail" type="text" class="input-wide hidden toggle-hidden" autocomplete="off" placeholder="Mail (optional)" />
-			<input id="mailpass" type="text" class="input-wide hidden toggle-hidden" autocomplete="off" placeholder="Mail password (optional)" />
-			<input id="datadir" type="text" class="input-wide hidden toggle-hidden" autocomplete="off" placeholder="Data directory" />
-			<input id="dbserver" type="text" class="input-wide hidden toggle-hidden" autocomplete="off" placeholder="Database server" />
-			<input id="dbname" type="text" class="input-wide hidden toggle-hidden" autocomplete="off" placeholder="Database name" />
+			<input id="mail" class="major-input major-input-small hidden toggle-hidden" type="text" placeholder="Mail Address" value="">
+			<input id="mailpass" class="major-input major-input-small hidden toggle-hidden" type="password" placeholder="Mail password" value="">
+			<input id="datadir" class="major-input major-input-small hidden toggle-hidden" type="text" placeholder="Data Directory" value="">
+			<input id="dbserver" class="major-input major-input-small hidden toggle-hidden" type="text" placeholder="Database Server" value="">
+			<input id="dbname" class="major-input major-input-small hidden toggle-hidden" type="text" placeholder="Database Name" value="">
 
-			<input id="submit" class="button" type="submit" value="Setup" />
-			<div id="error" class="error <?php echo (!$enabled) ? '' : 'hidden'; ?>">Please enable .htaccess</div>
+			<div id="setup-error" class="major-error hidden"></div>
+			<button class="major-submit">Setup</button>
 		</form>
+
+		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>
 	</div>
 
 	<script type="text/javascript" src="lib/jquery/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript" src="assets/js/util.js"></script>
 	<script type="text/javascript" src="assets/js/setup.js"></script>
 </body>
 </html>

@@ -8,6 +8,7 @@
 
 date_default_timezone_set('Europe/Berlin');
 header('Content-Type: text/html; charset=UTF-8');
+
 define('LOG', (__DIR__) . '/logs/status.log');
 
 require_once 'php/database.class.php';
@@ -34,7 +35,7 @@ else if (!file_exists('config/config.json')) {
 else if (!preg_match('/(\.|\.\.\/)/', $view) && file_exists('views/' . $view . '.php')) {
 	$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
 	$db			= Database::getInstance();
-	$user		= $db->user_get_by_token($token, true);
+	$user		= $db->user_get_by_token($token);
 	require_once 'views/' . $view . '.php';
 }
 else {

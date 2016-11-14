@@ -7,6 +7,15 @@
 
 /* General */
 
+input {
+	outline: 0px solid transparent;
+	border: 1px solid grey;
+}
+
+button {
+	outline: 0px solid transparent;
+}
+
 select {
 	color: #555;
 	border: 1px solid #2e8b5e;
@@ -14,15 +23,43 @@ select {
 
 .major-wrapper {
 	background-color: #2e8b5e;
-	background: radial-gradient(#2e8b5e 25%, #157346 60%);
 }
 
-.major-title, .major-subtitle, .footer {
+.major-title, .major-subtitle, .major-logo {
 	color: white;
 }
 
-#logo, #username {
+.major-input {
+	background-color: rgba(0,0,0,0);
 	color: white;
+	border: none;
+	border-bottom: 1px dotted white;
+}
+
+.major-error {
+	color: red;
+}
+
+.major-submit {
+	background-color: rgba(255,255,255,0);
+	color: white;
+	border: 1px solid rgba(255,255,255,0.5);
+}
+
+.major-submit:hover {
+	background-color: #47a276;
+}
+
+.footer {
+	color: #555;
+}
+
+.password-ok {
+	color: white;
+}
+
+.password-bad {
+	color: red;
 }
 
 .item:hover {
@@ -46,7 +83,11 @@ select {
 	border: 2px solid white;
 }
 
-.menu-item:hover {
+.popup .menu-item {
+	border-left: 4px solid transparent;
+}
+
+.popup .menu-item:hover {
 	border-left: 4px solid #2e8b5e;
 }
 
@@ -54,11 +95,19 @@ select {
 	color: #2e8b5e;
 }
 
-#note-icon {
+.notification-info {
 	color: #2e8b5e;
+	background-color: #E0EEE0;
+	border: 1px solid #2e8b5e;
 }
 
-#info-title {
+.notification-warning {
+	color: #8B4500;
+	background-color: #F4A460;
+	border: 1px solid #8B4500;
+}
+
+#info-title, #info a {
 	color: #2e8b5e;
 }
 
@@ -95,6 +144,10 @@ select {
 	background-color: white;
 }
 
+.list-filter-input {
+	background-color: rgba(0,0,0,0);
+}
+
 .checkbox-box {
 	border: 1px solid #8c8c8c;
 }
@@ -105,8 +158,31 @@ select {
 	background-color: #2e8b5e;
 }
 
+.button:hover a {
+	color: #2e8b5e;
+}
+
+.button:hover {
+	background-color: white;
+	color: #2e8b5e;
+	border: 1px solid #2e8b5e;
+}
+
+#error-not-found, #error-not-found a {
+	color: white;
+}
+
 #seekbar-progress {
 	background-color: #2e8b5e;
+}
+
+#img-viewer {
+	background-color: black;
+}
+
+#img-title, .img-title {
+	color: white;
+	background-color: rgba(0,0,0,0.3);
 }
 
 .img-control {
@@ -117,6 +193,15 @@ select {
 .img-control:hover {
 	border: 1px solid grey;
 	background-color: rgba(255,255,255,0.1);
+}
+
+.gallery-container {
+	color: white;
+	background-color: rgba(255,255,255,0.1);
+}
+
+#videoplayer {
+	background-color: black;
 }
 
 .active {
@@ -130,8 +215,37 @@ select {
 	background-color: white;
 }
 
+.major-popup {
+	box-shadow: 0px 0px 30px 3px rgba(0,0,0,0.45) !important;
+/*
+	background-color: rgba(0,0,0,0.15) !important;
+*/
+/*
+	border: 1px solid #ddd;
+*/
+	background-color: rgba(0,0,0,0.15) !important;
+}
+
+.major-popup .popup-title, .major-popup .input-header {
+	color: #eee;
+}
+
+.major-popup .button {
+	border: 1px solid rgba(255,255,255,0.25);
+}
+
+.major-popup .button:hover {
+	color: white;
+	background-color: #3da070;
+}
+
 .popup-title {
 	color: #2e8b5e;
+}
+
+.input-popup .error {
+	color: white;
+	background-color: red;
 }
 
 .loadIndicator {
@@ -139,8 +253,9 @@ select {
 }
 
 .checkbox-checked {
-	border: 1px solid white;
+	border: 1px solid #2e8b5e;
 	background-color: #2e8b5e !important;
+	color: white;
 }
 
 .widget-title {
@@ -148,11 +263,18 @@ select {
 }
 
 .input-wide {
+	color: grey;
 	background-color: white;
 }
 
-#fileinfo-link:hover {
-	font-family: robotoregular, sans-serif;
+.highlight {
+	background-color: #FF7722;
+}
+
+.button.button-disabled, .button.button-disabled:hover {
+	color: white;
+	background-color: grey !important;
+	border: 1px solid grey;
 }
 
 #dropzone {
@@ -161,28 +283,85 @@ select {
 	border: 1px solid #2e8b5e;
 }
 
-#info a {
+#busy {
+	border: 2px solid #2e8b5e;
+	color: #2e8b5e;
+}
+
+.scrollbar {
+	background-color: rgba(170,170,170,0.4);
+}
+
+.scrollbar:hover {
+	background-color: rgba(170,170,170,1);
+}
+
+#texteditor {
+	color: black;
+	background-color: white;
+}
+
+.settings-title {
 	color: #2e8b5e;
 }
 
 /* Light */
 
+.light .popup input {
+	color: #555 !important;
+	border: none !important;
+	border-bottom: 1px dotted #2e8b5e !important;
+}
+
+.light #log-footer {
+	background-color: #e3e3e3;
+	border-top: 1px solid lightgrey;
+	border-left: 1px solid lightgrey;
+}
+
+#log-pages {
+	border: 1px solid #2e8b5e;
+}
+
+.light #log-pages-label {
+	color: #555;
+}
+
+.light #logo {
+	border-right: 1px solid #ccc;
+}
+
+.light #logo, .light #logo a {
+	color: white;
+}
+
+.light #username {
+	color: white;
+}
+
+.light #shield {
+	background-color: rgba(242,242,242,0.7);
+}
+
 .light #header {
 	background-color: #2e8b5e;
+/*
+	background-color: rgba(46, 139, 94, 0.5);
+*/
+/*
 	background: linear-gradient(45deg, #157346, #2e8b5e);
+*/
 }
 
 .light #sidebar {
 	color: #575757;
-	background-color: #e3e3e3;
+	background-color: white;
+	border-right: 1px solid #ccc;
 }
 
 .light .focus {
 	color: #2e8b5e !important;
 	background-color: #eee;
-	border-left: 4px solid #2e8b5e;
-	border-top: 1px solid lightgrey;
-	border-bottom: 1px solid lightgrey;
 }
 
 .light .path-element, .light .path-seperator {
@@ -213,7 +392,6 @@ select {
 .light #fileinfo {
 	color: #555;
 	border-left: 1px solid lightgrey;
-	background-color: #e3e3e3;
 }
 
 .light .item {
@@ -253,7 +431,7 @@ select {
 	border-top: 1px solid lightgrey;
 }
 
-.dark #scan {
+.light #scan {
 	color: black;
 }
 
@@ -265,6 +443,7 @@ select {
 	background-color: white;
 	color: #555;
 	border: 1px solid #ccc;
+	box-shadow: 0px 0px 15px 3px rgba(0,0,0,0.2) !important;
 }
 
 .light #seekbar-buffer {
@@ -288,7 +467,9 @@ select {
 }
 
 .light .menu-item:hover {
+/*
 	border-left: 4px solid #2e8b5e;
+*/
 	background-color: #eee;
 }
 
@@ -301,7 +482,7 @@ select {
 	background-color: rgba(255,0,0,0.5);
 }
 
-.light #progressShield {
+.light .progress-shield {
 	background-color: rgba(255,255,255,0.4);
 }
 
@@ -311,7 +492,11 @@ select {
 }
 
 .light .close {
-	color: black;
+	color: grey !important;
+}
+
+.light .close:hover {
+	color: #555 !important;
 }
 
 .light .divider, .light .clearer {
@@ -330,15 +515,36 @@ select {
 	color: #555;
 }
 
+.light #busy {
+	background-color: rgba(255,255,255,0.2);
+}
+
+.light input.table-cell {
+	background-color: rgba(0,0,0,0);
+	color: #555;
+	border: 1px solid #b3b3b3;
+}
+
 /* Dark */
+
+.dark #logo {
+	border-right: 1px solid #555;
+}
+
+.dark #logo, .dark #logo a {
+	color: #2e8b5e;
+}
+
+.dark #username {
+	color: #b3b3b3;
+}
 
 .dark #shield {
 	background-color: rgba(0,0,0,0.4);
 }
 
 .dark #header {
-	background-color: #101010;
-	background: linear-gradient(45deg, #202020, #303030);
+	background-color: #303030;
 }
 
 .dark .thumbnail {
@@ -347,7 +553,8 @@ select {
 }
 
 .dark #sidebar {
-	background-color: #272727;
+	background-color: #303030;
+	border-right: 1px solid #555;
 }
 
 .dark .trashact {
@@ -358,7 +565,7 @@ select {
 	background-color: rgba(255,0,0,0.5);
 }
 
-.dark .list-header, .dark .list-filter{
+.dark .list-header, .dark .list-filter {
 	color: #aaa;
 	border-bottom: 1px solid #444;
 }
@@ -369,19 +576,20 @@ select {
 }
 
 .dark .focus {
-	color: #eee !important;
-	background-color: #444;
-	border-left: 4px solid #2e8b5e;
-	border-top: 1px solid #555;
-	border-bottom: 1px solid #555;
+	color: #2e8b5e !important;
+	background-color: #404040;
 }
 
 .dark .path-element, .dark .path-seperator {
-	color: #8c8c8c;
+	color: #555;
+}
+
+.dark .path-element:hover {
+	color: #b3b3b3;
 }
 
 .dark .path-current {
-	color: #eee;
+	color: #b3b3b3;
 }
 
 .dark #content, .dark #gallery {
@@ -414,8 +622,11 @@ select {
 	background-color: #444;
 }
 
-.dark #note-title, .dark #note-msg {
-	color: #eee;
+.dark .popup input {
+	color: #b3b3b3 !important;
+	border: none !important;
+	border-bottom: 1px dotted #2e8b5e !important;
+	background-color: rgba(0,0,0,0);
 }
 
 .dark .input-header {
@@ -427,7 +638,7 @@ select {
 }
 
 .dark .menu-item, .dark .menu-item a {
-	color: #eee;
+	color: #b3b3b3;
 }
 
 .dark .menu-item:hover, .dark .menu-item a:hover {
@@ -460,7 +671,7 @@ select {
 	color: white;
 }
 
-.dark #progressShield {
+.dark .progress-shield {
 	background-color: rgba(0,0,0,0.4);
 }
 
@@ -500,4 +711,18 @@ select {
 
 .dark #status, .dark #plugins {
 	color: #eee;
+}
+
+.dark #busy {
+	background-color: rgba(0,0,0,0.2);
+}
+
+.dark .settings-info {
+	color: #b3b3b3;
+}
+
+.dark input.table-cell {
+	background-color: rgba(0,0,0,0);
+	color: #b3b3b3;
+	border: 1px solid #555;
 }

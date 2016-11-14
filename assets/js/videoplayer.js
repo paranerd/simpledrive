@@ -33,7 +33,7 @@ var VideoManager = {
 		});
 
 		VideoManager.video.addEventListener('error', function(e) {
-			Util.notify("Error", "Error playing video", true, true);
+			Util.notify("Error playing video", true, true);
 		});
 	},
 

@@ -41,6 +41,8 @@ In case you run on an nginx-server, please add the following to your nginx.conf 
 			add_header X-Frame-Options "SAMEORIGIN";
 			add_header X-XSS-Protection "1; mode=block";
 			add_header X-Robots-Tag none;
+			add_header X-Content-Security-Policy "default-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'; font-src 'self';"
+			add_header Content-Security-Policy "default-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'; font-src 'self';"
 		}
 
 		location / {

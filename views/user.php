@@ -23,51 +23,77 @@
 <body class="<?php echo $user['color']; ?>">
 	<!-- Header -->
 	<div id="header">
-		<div id="logo" title="Return to files"><div class="menu-thumb icon-cloud"><a href="files"></div>simpleDrive</a></div>
+		<div id="logo"><div class="menu-thumb icon-cloud"><a href="user"></div>Settings</a></div>
 		<div id="path"><div class="path-element path-current">User Settings</div></div>
 		<div id="username"></div>
 	</div>
 
 	<!-- Sidebar -->
 	<div id="sidebar">
-		<div id="sidebar-general" class="menu-item focus" title="Status info" onclick="General.load();"><div class="menu-thumb icon-info"></div><div class="sidebar-text">General</div></div>
+		<div id="sidebar-general" class="menu-item focus" title="Status info"><div class="menu-thumb icon-info"></div><div class="menu-text">General</div></div>
 	</div>
 
 	<!-- Content -->
 	<div id="content">
 		<div id="status" class="hidden">
-			<div class="table-cell">Quota total</div>
+			<div class="table-cell">
+				<div class="settings-title">Quota total</div>
+			</div>
 			<div class="table-cell" id="mem-total">loading...</div>
 
-			<div class="table-cell">Quota used</div>
+			<div class="table-cell">
+				<div class="settings-title">Quota used</div>
+			</div>
 			<div class="table-cell" id="mem-used">loading...</div>
 
 			<div class="divider"></div>
 
-			<div class="table-cell">Cloud Backup</div>
 			<div class="table-cell">
-				<button id="bBackup" class="button button-disabled" onclick="Backup.toggleStart('');">Start</button>
-				<button id="bEnabled" class="button" onclick="Backup.toggleEnable();">loading...</button>
+				<div class="settings-title">Active token (<span id="active-token">1</span>)</div>
 			</div>
-
-			<div class="table-cell">Password</div>
 			<div class="table-cell">
-				<button class="button" onclick="General.showChangePassword();">Change</button>
-			</div>
-
-			<div class="table-cell">Temp Folder</div>
-			<div class="table-cell">
-				<button class="button" onclick="General.clearTemp();">Clear</button>
+				<button id="invalidate-token" class="button">Invalidate</button>
 			</div>
 
 			<div class="divider"></div>
 
-			<div class="table-cell">Scan directories to cache before listing<div>(can disable if you only insert data through simpleDrive-Interface)</div></div>
-			<div class="table-cell"><div class="checkbox"><div id="autoscan" class="checkbox-box"></div></div></div>
+			<div class="table-cell">
+				<div class="settings-title">Cloud Backup</div>
+			</div>
+			<div class="table-cell">
+				<button id="bBackup" class="button button-disabled">Start</button>
+				<button id="bEnabled" class="button">loading...</button>
+			</div>
+
+			<div class="table-cell">
+				<div class="settings-title">Password</div>
+			</div>
+			<div class="table-cell">
+				<button id="bChangePassword" class="button">Change</button>
+			</div>
+
+			<div class="table-cell">
+				<div class="settings-title">Temp Folder</div>
+			</div>
+			<div class="table-cell">
+				<button id="bClearTemp" class="button">Clear</button>
+			</div>
 
 			<div class="divider"></div>
 
-			<div class="table-cell">Color theme</div>
+			<div class="table-cell">
+				<div class="settings-title">Auto-Scan</div>
+				<div class="settings-info">Scan directories to cache before listing. Disable if you only insert data through simpleDrive-Interface.</div>
+			</div>
+			<div class="table-cell">
+				<div class="checkbox"><div id="autoscan" class="checkbox-box icon-check"></div></div>
+			</div>
+
+			<div class="divider"></div>
+
+			<div class="table-cell">
+				<div class="settings-title">Color theme</div>
+			</div>
 			<div class="table-cell">
 				<select id="color">
 					<option value="light">Light</option>
@@ -75,7 +101,9 @@
 				</select>
 			</div>
 
-			<div class="table-cell">Fileview</div>
+			<div class="table-cell">
+				<div class="settings-title">Fileview</div>
+			</div>
 			<div class="table-cell">
 				<select id="fileview">
 					<option value="list">List</option>
@@ -89,6 +117,7 @@
 	<div id="menu" class="popup hidden">
 		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
 		<?php if($user['admin']) { echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-users"></div>System</a></div>'; } ?>
+		<div id="menu-item-info" class="menu-item"><a href="#"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></a></div>
 		<div class="menu-item"><a href="logout?t=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div>Logout</a></div>
 	</div>
 
@@ -96,10 +125,10 @@
 	<div id="shield" class="overlay hidden"></div>
 
 	<!-- Backup password popup -->
-	<form id="setupbackup" class="popup hidden center input-popup" action="javascript:Backup.enable();">
+	<form id="setupbackup" class="popup hidden center input-popup" action="#">
 		<div class="popup-title">Enable cloud backup</div>
 
-		<input id="setupbackup-pass1" class="input-wide" style="margin-top: 10px;" type="password" placeholder="Password" required></input>
+		<input id="setupbackup-pass1" class="input-wide" type="password" placeholder="Password" required></input>
 		<input id="setupbackup-pass2" class="input-wide" type="password" placeholder="Password (repeat)" required></input>
 
 		<div class="checkbox">
@@ -110,8 +139,8 @@
 	</form>
 
 	<!-- User password popup -->
-	<form id="changepass" class="popup input-popup center hidden" action="javascript:General.changePassword();">
-		<span class="close" onclick="Util.closePopup();"> &times;</span>
+	<form id="changepass" class="popup input-popup center hidden" action="#">
+		<span class="close"> &times;</span>
 		<div class="popup-title">Change password</div>
 		<input id="changepass-pass0" type="password" class="input-wide" placeholder="Current password"></input>
 		<input id="changepass-pass1" type="password" class="input-wide" placeholder="New password"></input>
@@ -120,26 +149,23 @@
 	</form>
 
 	<!-- Notification -->
-	<div id="notification" class="popup hidden">
-		<div id="note-icon" class="note-info"></div>
-		<div id="note-title"></div>
+	<div id="notification" class="center-hor notification-info light hidden">
+		<div id="note-icon" class="icon-info"></div>
 		<div id="note-msg"></div>
-		<div class="close" onclick="Util.hideNotification();"> &times;</div>
+		<span class="light close"> &times;</span>
 	</div>
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<div id="version">simpleDrive </div>
-		<div style="font-size: 24px;">Private. Secure. Simple.</div>
+		<div id="info-title">simpleDrive</div>
+		<div id="info-subtitle">Private. Secure. Simple.</div>
 		<div class="clearer"></div>
-		<div style="font-size: 14px; margin-top: 10px;">paranerd 2013-2016 | <a style="color: #2E8B57; font-size: 14px;" href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		<div id="info-footer">paranerd 2013-2016 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 	</div>
 
-	<script>
-		var username	= "<?php echo $user['username']; ?>";
-		var code		= '<?php echo $code; ?>';
-		var token		= "<?php echo $token;?>";
-	</script>
+	<input id="data-username" type="hidden" value="<?php echo $user['username']; ?>"/>
+	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
+	<input id="data-code" type="hidden" value="<?php echo $code; ?>"/>
 
 	<script type="text/javascript" src="lib/jquery/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="assets/js/util.js"></script>

@@ -1,9 +1,14 @@
+var username,
+	token,
+	view,
+	strengths = ["Very weak", "Weak", "Ok", "Better", "Strong", "Very strong"];
+
 $(window).resize(function() {
 	var contentHeight = ($("#log-footer").hasClass("hidden")) ? window.innerHeight - $("#header").height() : window.innerHeight - $("#header").height() - $("#log-footer").height();
 	contentHeight = ($(".list-filter").hasClass("hidden")) ? contentHeight : contentHeight - $(".list-filter").height();
 
 	$("#content").height(contentHeight);
-	$("#content, #log-footer").width(window.innerWidth - $("#sidebar").width());
+	$("#content, #log-footer").width(window.innerWidth - $("#sidebar").outerWidth());
 	$("#users, #log").height($("#content").height() - $(".list-header").height());
 	$("#sidebar").height(window.innerHeight - $("#header").height());
 
@@ -15,18 +20,27 @@ $(window).resize(function() {
 		});
 	});
 
+	$('.center-hor').each(function(i, obj) {
+		$(this).css({
+			left : ($(this).parent().width() - $(this).outerWidth()) / 2
+		});
+	});
+
 	setTimeout(function() {
 		simpleScroll.update();
 	}, 200);
 });
 
 $(document).ready(function() {
+	username = $("#data-username").val();
+	token = $("#data-token").val();
+	view = $("#data-view").val();
+
 	$("#username").html(Util.escape(username) + " &#x25BE");
 
 	simpleScroll.init("users");
 	simpleScroll.init("log");
 
-	Util.getVersion();
 	$(window).resize();
 
 	if (view == "users") {
@@ -47,7 +61,6 @@ $("#username").click(function(e) {
 	$("#menu").toggleClass("hidden");
 });
 
-
 $('#upload-max').on('change', function(e){
 	Status.setUploadLimit($("#upload-max").val());
 });
@@ -63,6 +76,74 @@ $("#force-ssl.checkbox-box").on('click', function(e) {
 
 $("#shield").click(function(e) {
 	Util.closePopup();
+});
+
+$("#sidebar-status").on('click', function() {
+	Status.fetch(true);
+});
+
+$("#sidebar-users").on('click', function() {
+	Users.fetch(true);
+});
+
+$("#sidebar-plugins").on('click', function() {
+	Plugins.fetch(true);
+});
+
+$("#sidebar-log").on('click', function() {
+	Log.fetch(true, 0);
+});
+
+$("#users-filter .close").on('click', function() {
+	Users.closeFilter();
+});
+
+$(".plugin-install").on('click', function(e) {
+	Plugins.install($(this).val());
+});
+
+$(".plugin-remove").on('click', function(e) {
+	Plugins.remove($(this).val());
+});
+
+$("#log-filter .close").on('click', function(e) {
+	Log.closeFilter();
+});
+
+$("#context-create").on('click', function(e) {
+	Users.showCreateUser();
+});
+
+$("#context-delete").on('click', function(e) {
+	Users.remove();
+});
+
+$("#context-clearlog").on('click', function(e) {
+	Log.clear();
+});
+
+$("#createuser .close").on('click', function(e) {
+	Util.closePopup();
+});
+
+$("#create").on('submit', function(e) {
+	e.preventDefault();
+	Users.create();
+});
+
+$("#createuser-pass1").on('keyup', function() {
+	var strength = Util.checkPasswordStrength($(this).val());
+	if (strength > 1) {
+		$("#strength").removeClass().addClass("password-ok");
+	}
+	else {
+		$("#strength").removeClass().addClass("password-bad");
+	}
+	$("#strength").text(strengths[strength]);
+});
+
+$("#notification .close").on('click', function(e) {
+	Util.hideNotification();
 });
 
 $(document).on('contextmenu', '#content', function(e) {
@@ -210,7 +291,7 @@ var Status = {
 			$("#status-version").text(data.msg.version);
 			if (data.msg.ssl) { $("#force-ssl").addClass("checkbox-checked"); }
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -218,11 +299,11 @@ var Status = {
 		var size = Util.stringToByte($("#upload-max").val());
 
 		if (!size) {
-			Util.notify("Error", "Invalid input", true, true);
+			Util.notify("Invalid input", true, true);
 			return false;
 		}
 		if (size < 1024) {
-			Util.notify("Error", "Upload size too small", true, true);
+			Util.notify("Upload size too small", true, true);
 			return false;
 		}
 
@@ -232,10 +313,10 @@ var Status = {
 			data: {token: token, size: size, ssl: $("#force-ssl").hasClass("checkbox-checked"), domain: $("#domain").val()},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Saved changes", true);
+			Util.notify("Saved changes", true);
 			Status.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -243,11 +324,11 @@ var Status = {
 		var size = Util.stringToByte(sizeRaw);
 
 		if (!size) {
-			Util.notify("Error", "Invalid input", true, true);
+			Util.notify("Invalid input", true, true);
 			return false;
 		}
 		if (size < 1024) {
-			Util.notify("Error", "Upload size too small", true, true);
+			Util.notify("Upload size too small", true, true);
 			return false;
 		}
 
@@ -257,10 +338,10 @@ var Status = {
 			data: {token: token, value: size},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Saved changes", true);
+			Util.notify("Saved changes", true);
 			Status.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -271,10 +352,10 @@ var Status = {
 			data: {token: token, domain: domain},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Saved changes", true);
+			Util.notify("Saved changes", true);
 			Status.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -285,10 +366,10 @@ var Status = {
 			data: {token: token, enable: enable},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Saved changes", true);
+			Util.notify("Saved changes", true);
 			Status.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	}
 }
@@ -318,7 +399,7 @@ var Log = {
 			Log.pageTotal = data.msg.total;
 			Log.display();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -428,7 +509,7 @@ var Log = {
 			}).done(function(data, statusText, xhr) {
 				fetch(false, 0);
 			}).fail(function(xhr, statusText, error) {
-				Util.notify("Error", Util.getError(xhr), true, true);
+				Util.notify(Util.getError(xhr), true, true);
 			});
 		}
 	}
@@ -450,7 +531,7 @@ var Plugins = {
 		}).done(function(data, statusText, xhr) {
 			Plugins.display(data.msg.plugins);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -482,7 +563,7 @@ var Plugins = {
 	},
 
 	install: function(name) {
-		Util.notify("Info", "Installing " + name, true);
+		Util.notify("Installing " + name + "...", true);
 		$("#get-" + name).addClass("button-disabled").text("loading...");
 
 		$.ajax({
@@ -491,10 +572,10 @@ var Plugins = {
 			data: {token: token, name: name},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Installation complete", true);
+			Util.notify("Installation complete", true);
 			Plugins.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -505,10 +586,10 @@ var Plugins = {
 			data: {token: token, name: name},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Plugin " + name + " removed", true);
+			Util.notify("Plugin " + name + " removed", true);
 			Plugins.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	}
 }
@@ -633,7 +714,7 @@ var Users = {
 			Users.filtered = data.msg;
 			Users.display();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -661,7 +742,7 @@ var Users = {
 			$("#user-quota-total" + id).text(Util.byteToString(data.msg.max));
 			Users.all[id]['usedspace'] = data.msg.used;
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -671,7 +752,7 @@ var Users = {
 
 	remove: function() {
 		if (Users.all[Users.selected]['own']) {
-			Util.notify("Error", "Cannot erase active user!", true, true);
+			Util.notify("Cannot erase active user!", true, true);
 			return;
 		}
 
@@ -685,7 +766,7 @@ var Users = {
 			}).done(function(data, statusText, xhr) {
 				Users.fetch();
 			}).fail(function(xhr, statusText, error) {
-				Util.notify("Error", Util.getError(xhr), true, true);
+				Util.notify(Util.getError(xhr), true, true);
 			});
 		}
 	},
@@ -704,10 +785,10 @@ var Users = {
 			data: {token: token, user: Users.all[Users.selected]['user'], enable: admin},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Saved changes", true, true);
+			Util.notify("Saved changes", true, true);
 			Users.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 			Users.fetch();
 		});
 	},
@@ -717,7 +798,7 @@ var Users = {
 		$("#user-quota-total-change").remove();
 
 		if (size != 0 && size != "Unlimited" && !Util.stringToByte(size)) {
-			Util.notify("Error", "Invalid quota value", true, true);
+			Util.notify("Invalid quota value", true, true);
 			return;
 		}
 
@@ -731,10 +812,10 @@ var Users = {
 			data: {token: token, user: Users.all[Users.selected]['user'], value: size},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Info", "Saved changes", true, true);
+			Util.notify("Saved changes", true, true);
 			Users.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify("Error", Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 			Users.fetch();
 		});
 	},
@@ -760,7 +841,7 @@ var Users = {
 				Util.closePopup();
 				Users.fetch();
 			}).fail(function(xhr, statusText, error) {
-				Util.notify("Error", Util.getError(xhr), true, true);
+				Util.notify(Util.getError(xhr), true, true);
 				$("#createuser-pass1, #createuser-pass2").val("");
 			});
 		}
