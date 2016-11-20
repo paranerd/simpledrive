@@ -48,28 +48,25 @@ function demoLogin() {
 }
 
 function login() {
-	$("#login-error").addClass("hidden").text("");
+	$("#error").addClass("hidden").text("");
 
 	if ($("#user").val() == "" || $("#pass").val() == "") {
-		$("#login-error").removeClass("hidden").text("No blank fields!");
+		$("#error").removeClass("hidden").text("No blank fields!");
 	}
 	else {
-		$("#login").find('input[type=submit]').prop('disabled', true);
-		$("#submit").addClass("button-disabled");
+		$("#submit").prop('disabled', true).addClass("button-disabled");
 		$.ajax({
 			url: 'api/core/login',
 			type: 'post',
 			data: {user: $("#user").val(), pass: $("#pass").val()},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			console.log(data.msg);
 			$("#submit").removeClass("button-disabled");
 			window.location.href = "files";
 		}).fail(function(xhr, statusText, error) {
-			$("#login-error").removeClass("hidden").text(error);
+			$("#error").removeClass("hidden").text(error);
 			$("#pass").val("");
-			$("#login").find('input[type=submit]').prop('disabled', false);
-			$("#submit").removeClass("button-disabled");
+			$("#submit").removeClass("button-disabled").prop('disabled', false);
 		});
 	}
 }

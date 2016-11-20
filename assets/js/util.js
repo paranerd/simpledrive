@@ -151,6 +151,11 @@ var Util = {
 		}
 	},
 
+	confirm: function(title) {
+		$("#confirm-title").text(title);
+		$("#confirm").removeClass("hidden");
+	},
+
 	stringToByte: function(size) {
 		if (!isNaN(parseInt(size))) {
 			var dim = "" + size.substr(-2).toLowerCase();

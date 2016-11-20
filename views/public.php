@@ -84,7 +84,7 @@
 				<input id="files-filter-input" class="list-filter-input" placeholder="Filter..."/>
 				<span class="close"> &times;</span>
 			</div>
-			<div id="list-header" class="list-header <?php if ($user['fileview'] == 'grid') echo 'hidden'; ?>">
+			<div id="list-header" class="list-header">
 				<span class="col0 checkbox"><span id="fSelect" class="checkbox-box"></span></span>
 				<span class="col1"><span><?php echo $lang['name']; ?> </span><span id="fName-ord"></span></span>
 				<span class="col2"><span><?php echo $lang['owner']; ?></span><span id="fOwner-ord"></span></span>
@@ -93,7 +93,7 @@
 				<span class="col5"><span id="fEdit-ord"></span><span><?php echo $lang['edit']; ?> </span></span>
 			</div>
 
-			<div id="files" class="<?php echo $user['fileview']; ?>"></div>
+			<div id="files" class="list"></div>
 		</div>
 
 		<!-- Upload menu -->
@@ -224,7 +224,7 @@
 
 		<form id="load-public" class="center">
 			<div class="major-title">Public share</div>
-			<div id="pub-filename" class="major-subtitle"></div>
+			<div id="pub-filename" class="major-subtitle hidden"></div>
 			<input id="pub-key" class="major-input hidden" placeholder="Password" autocomplete="off" autofocus />
 			<div id="pub-error" class="major-error hidden"></div>
 			<input id="unlock" class="major-submit" type="submit" value="Unlock" />
@@ -234,7 +234,7 @@
 	</div>
 
 	<!-- Progress circle -->
-	<div id="busy" class="busy-animation">busy</div>
+	<div id="busy" class="busy-animation hidden">busy</div>
 
 	<input id="data-username" type="hidden" value=""/>
 	<input id="data-token" type="hidden" value="<?php echo $token;?>"/>

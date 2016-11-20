@@ -1,7 +1,7 @@
 <?php
 	if(file_exists('config/config.json')) {
-		header('Location: login');
-		exit();
+		//header('Location: login');
+		//exit();
 	}
 
 	$enabled = isset($_SERVER['HTACCESS']);
@@ -19,7 +19,7 @@
 	</head>
 <body>
 	<div class="major-wrapper">
-		<div class="major-logo menu-item" title="Create new element"><div class="menu-thumb icon-cloud"></div><div class="menu-text">simpleDrive</div></div>
+		<div class="major-logo" title="Logo"><div>simpleDrive</div></div>
 
 		<form id="setup" class="center" action="#">
 			<div class="major-title">Setup</div>
@@ -39,8 +39,8 @@
 			<input id="dbserver" class="major-input major-input-small hidden toggle-hidden" type="text" placeholder="Database Server" value="">
 			<input id="dbname" class="major-input major-input-small hidden toggle-hidden" type="text" placeholder="Database Name" value="">
 
-			<div id="setup-error" class="major-error hidden"></div>
-			<button class="major-submit">Setup</button>
+			<div id="error" class="major-error hidden"></div>
+			<button id="submit" class="major-submit">Setup</button>
 		</form>
 
 		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>

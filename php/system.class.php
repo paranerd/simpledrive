@@ -179,7 +179,7 @@ class System {
 			header('HTTP/1.1 403 Permission denied');
 			return 'Permission denied';
 		}
-		return $this->db->clear_log();
+		return $this->db->log_clear();
 	}
 
 	/**

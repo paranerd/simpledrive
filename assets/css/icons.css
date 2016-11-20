@@ -1,6 +1,6 @@
 @font-face {
 	font-family: 'icomoon';
-	src: url('../font/icomoon.woff?h92l32') format('woff');
+	src: url('../font/icomoon.woff?v4bf3h') format('woff');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -195,4 +195,8 @@
 
 .icon-check:before {
 	content: "\e936";
+}
+
+.icon-arrow-left:before {
+  content: "\e937";
 }

@@ -52,17 +52,18 @@ function setup() {
 		$("#error").removeClass("hidden").text("Username / password not set!");
 	}
 	else {
-		$("#submit").prop('disabled', true);
+		$("#submit").prop('disabled', true).addClass("button-disabled");
 		$.ajax({
 			url: 'api/core/setup',
 			type: 'post',
 			data: {user: user, pass: pass, mail: mail, mailpass: mailpass, dbserver: dbserver, dbname: dbname, dbuser: dbuser, dbpass: dbpass, datadir: datadir},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
+			$("#submit").removeClass("button-disabled").prop('disabled', false);
 			window.location.replace("files");
 		}).fail(function(xhr, statusText, error) {
 			$("#error").removeClass("hidden").text(getError(xhr));
-			$("#submit").prop('disabled', false);
+			$("#submit").removeClass("button-disabled").prop('disabled', false);
 		});
 	}
 }

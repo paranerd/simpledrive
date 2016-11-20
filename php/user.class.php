@@ -18,18 +18,13 @@ class User {
 	}
 
 	public function get($username) {
-		$user = $this->db->user_get_by_id($this->uid);
-
-		if ($user) {
-			if ($username != $this->username && !$user['admin']) {
-				header('HTTP/1.1 403 Permission denied');
-				return "Permission denied";
-			}
-
-			return $user;
+		if ($this->user) {
+			return $this->user;
 		}
-
-		return null;
+		else {
+			header('HTTP/1.1 403 Permission denied');
+			return "Permission denied";
+		}
 	}
 
 	public function get_all() {
@@ -117,7 +112,7 @@ class User {
 
 	public function set_quota_max($username, $max) {
 		$user = $this->db->user_get_by_name($username);
-		if (!$user || !$user['admin']) {
+		if (!$user || !$this->user['admin']) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -146,7 +141,7 @@ class User {
 	public function set_admin($username, $admin) {
 		$be_admin = ($admin == "1") ? 1 : 0;
 		$user = $this->db->user_get_by_name($username);
-		if (!$user || !$user['admin']) {
+		if (!$user || !$this->user['admin']) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -180,8 +175,8 @@ class User {
 	}
 
 	public function delete($username) {
-		$user = $db->user_get_by_name($username);
-		if (!$user['admin']) {
+		$user = $this->db->user_get_by_name($username);
+		if (!$this->user['admin']) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}
@@ -212,9 +207,9 @@ class User {
 	public function get_quota($username) {
 		$user = $this->db->user_get_by_name($username);
 
-		if (!$user || ($username != $this->username && !$user['admin'])) {
+		if (!$user || ($username != $this->username && !$this->user['admin'])) {
 			header('HTTP/1.1 403 Permission denied');
-			return ($internal) ? null : "Permission denied";
+			return "Permission denied";
 		}
 
 		$max = ($user['max_storage'] == '0') ? (disk_total_space(dirname(__FILE__)) != "") ? disk_total_space(dirname(__FILE__)) : disk_total_space('/') : $user['max_storage'];
@@ -227,7 +222,7 @@ class User {
 	public function change_password($currpass, $newpass) {
 		$user = $this->db->user_get_by_name($this->username, true);
 
-		if (!$user || ($user['id'] != $this->uid && !$user['admin'])) {
+		if (!$user || ($user['id'] != $this->uid && !$this->user['admin'])) {
 			header('HTTP/1.1 403 Permission denied');
 			return "Permission denied";
 		}

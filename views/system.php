@@ -21,7 +21,13 @@
 <body class="<?php echo $user['color']; ?>">
 	<!-- Header -->
 	<div id="header">
-		<div id="logo" title="Return to files"><div class="menu-thumb icon-cloud"><a href="system"></div>System</a></div>
+		<!-- Title -->
+		<div id="logo" class="menu-item" title="Return to files">
+			<a href="files" class="back">
+				<div class="menu-thumb back-icon icon-arrow-left"></div>
+				<span class="logo-text">System</span>
+			</a>
+		</div>
 		<div id="path"><div class="path-element path-current">Status</div></div>
 		<div id="username"></div>
 	</div>
@@ -185,6 +191,13 @@
 	<div id="notification" class="center-hor notification-info light hidden">
 		<div id="note-icon" class="icon-info"></div>
 		<div id="note-msg"></div>
+		<span class="light close"> &times;</span>
+	</div>
+
+	<div id="confirm" class="popup input-popup center hidden">
+		<div id="confirm-title" class="popup-title">Confirm</div>
+		<button id="confirm-yes" class="button">OK</button>
+		<button id="confirm-no" class="button inverted">Cancel</button>
 		<span class="light close"> &times;</span>
 	</div>
 

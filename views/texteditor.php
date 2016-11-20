@@ -9,11 +9,16 @@
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 
-<body class="light">
+<body class="<?php echo $user['color']; ?>">
 	<!-- Header -->
 	<div id="header">
-		<!-- Filename -->
-		<div id="logo" title="Return to files"><div class="menu-thumb icon-cloud"><a href="files"></div>simpleDrive</a></div>
+		<!-- Title -->
+		<div id="logo" class="menu-item" title="Return to files">
+			<a href="files" class="back">
+				<div class="menu-thumb back-icon icon-arrow-left"></div>
+				<span class="logo-text">Editor</span>
+			</a>
+		</div>
 		<div id="path" title="Click to rename">
 			<div id="doc-name" class="path-element path-current"></div>
 			<span id="doc-savestatus" class="path-element"></span>

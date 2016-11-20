@@ -325,7 +325,7 @@ class Database {
 		$stmt->store_result();
 		$stmt->fetch();
 
-		return ($stmt->affected_rows != 0);
+		return ($stmt->affected_rows != 0) ? $stmt->insert_id : null;
 	}
 
 	/**
@@ -487,6 +487,7 @@ class Database {
 	 */
 
 	public function session_start($token, $uid, $hash = '', $expires) {
+		$this->session_invalidate_user_on_client($uid);
 		$stmt = $this->link->prepare('INSERT INTO sd_session (token, user, hash, expires, fingerprint) VALUES (?, ?, ?, ?, ?)');
 		$stmt->bind_param('sisis', $token, $uid, $hash, $expires, $this->fingerprint);
 		$stmt->execute();
@@ -514,6 +515,20 @@ class Database {
 	public function session_invalidate($uid, $token) {
 		$stmt = $this->link->prepare('DELETE FROM sd_session WHERE user = ? AND token != ?');
 		$stmt->bind_param('is', $uid, $token);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->fetch();
+
+		return ($stmt->affected_rows != 0);
+	}
+
+	/**
+	 * Ends all sessions for a user on the current client but the current active
+	 */
+
+	public function session_invalidate_user_on_client($uid) {
+		$stmt = $this->link->prepare('DELETE FROM sd_session WHERE user = ? AND fingerprint = ?');
+		$stmt->bind_param('is', $uid, $this->fingerprint);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();

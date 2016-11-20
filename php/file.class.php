@@ -373,7 +373,8 @@ class File {
 	 */
 
 	public function create($target, $type, $orig_filename = "") {
-		if (preg_match('/[\'\/~`\!@#\$%\^&\*=\{\}\[\];:"\<\>,\?\\\]/', $orig_filename)) {
+		if (preg_match('/[\/\\\\]/', $orig_filename)) {
+		//if (preg_match('/[\'\/~`\!@#\$%\^&\*=\{\}\[\];:"\<\>,\?\\\\]/', $orig_filename)) {
 			header('HTTP/1.1 400 Filename not allowed');
 			return "Filename not allowed";
 		}
@@ -386,7 +387,6 @@ class File {
 		}
 
 		$path = $this->config['datadir'] . $file['owner'] . $file['path'];
-
 		$filename = ($orig_filename != "") ? $orig_filename : "Unknown " . $type;
 
 		if ($orig_filename == "" && file_exists($path . "/" . $filename)) {
@@ -423,7 +423,8 @@ class File {
 	 */
 
 	public function rename($id, $newname) {
-		if (preg_match('/[\'\/~`\!@#\$%\^&\*=\{\}\[\];:"\<\>,\?\\\]/', $newname) || strlen($newname) == 0) {
+		if (preg_match('/[\/\\\\]/', $orig_filename)) {
+		//if (preg_match('/[\'\/~`\!@#\$%\^&\*=\{\}\[\];:"\<\>,\?\\\\]/', $orig_filename)) {
 			header('HTTP/1.1 400 Filename not allowed');
 			return "Filename not allowed";
 		}
@@ -555,6 +556,7 @@ class File {
 		if ($hash = $this->db->share($target, $userto_uid, $crypt_pass, $public, $access)) {
 			if ($public == 1) {
 				$link = $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "public?r=" . $hash;
+				// Regex for verifying email: '/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/'
 				/*if (isset($_POST['mail']) && $_POST['mail'] != "" && $this->config['mailuser'] != '' && $this->config['mailpass'] != '') {
 					$subject = $this->username . " wants to share a file";
 					$msg = $link . "\n Password: " + $key;
@@ -840,7 +842,7 @@ class File {
 			$max_upload = Util::convert_size(ini_get('upload_max_filesize'));
 			$file = $this->get_cached($target, self::$PERMISSION_WRITE);
 
-			if (!$file) {
+			if (!$file || preg_match('/[\/\\\\]/', $_FILES[0]['name'])) {
 				header('HTTP/1.1 403 Access denied');
 				return "Access denied";
 			}

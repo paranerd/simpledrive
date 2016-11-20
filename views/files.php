@@ -19,10 +19,16 @@
 	<link rel="stylesheet" href="assets/css/fileviews.css" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
+
 <body class="<?php echo $user['color']; ?>">
 	<!-- Header -->
 	<div id="header">
-		<div id="logo"><div class="menu-thumb icon-cloud"><a href="files"></div>Files</a></div>
+		<div id="logo">
+			<a href="files">
+				<div class="menu-thumb icon-cloud"></div>
+				<span class="menu-text">Files</span>
+			</a>
+		</div>
 		<div id="path"></div>
 		<div id="username"></div>
 	</div>

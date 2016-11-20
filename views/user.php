@@ -23,7 +23,13 @@
 <body class="<?php echo $user['color']; ?>">
 	<!-- Header -->
 	<div id="header">
-		<div id="logo"><div class="menu-thumb icon-cloud"><a href="user"></div>Settings</a></div>
+		<!-- Title -->
+		<div id="logo" class="menu-item" title="Return to files">
+			<a href="files" class="back">
+				<div class="menu-thumb back-icon icon-arrow-left"></div>
+				<span class="logo-text">Settings</span>
+			</a>
+		</div>
 		<div id="path"><div class="path-element path-current">User Settings</div></div>
 		<div id="username"></div>
 	</div>
@@ -135,17 +141,25 @@
 			<div id="setupbackup-encrypt" class="checkbox-box"></div>
 			<div class="checkbox-label">Encrypt filenames</div>
 		</div>
-		<input type="submit" class="button" value="OK" />
+		<button class="button">OK</button>
 	</form>
 
 	<!-- User password popup -->
 	<form id="changepass" class="popup input-popup center hidden" action="#">
 		<span class="close"> &times;</span>
 		<div class="popup-title">Change password</div>
+
+		<div class="input-header">Current password</div>
 		<input id="changepass-pass0" type="password" class="input-wide" placeholder="Current password"></input>
+
+		<div class="input-header">New password</div>
 		<input id="changepass-pass1" type="password" class="input-wide" placeholder="New password"></input>
+
+		<div class="input-header">New password (repeat)</div>
 		<input id="changepass-pass2" type="password" class="input-wide" placeholder="New password (repeat)"></input>
-		<input type="submit" class="button" value="OK" />
+
+		<div id="changepass-error" class="error hidden"></div>
+		<button class="button">OK</button>
 	</form>
 
 	<!-- Notification -->

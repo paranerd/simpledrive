@@ -113,10 +113,18 @@ select {
 	display: none;
 }
 
+.back-icon {
+	display: block !important;
+}
+
 #logo a {
 	margin-left: 20px;
 	font-family: robotolight, sans-serif;
 	font-size: 1.7rem;
+}
+
+.back {
+	margin-left: 0 !important;
 }
 
 #username {
@@ -514,28 +522,16 @@ select {
 		margin-top: 30px;
 	}
 
-	#logo {
-		width: 54px;
-	}
-
-	#logo a {
-		display: none;
-	}
-
 	#logo .menu-thumb {
 		display: block;
 	}
 
-	#sidebar {
+	#logo, #sidebar, #sidebar .menu-item {
 		width: 54px;
 	}
 
-	#sidebar .menu-text {
+	#sidebar .menu-text, #logo .menu-text {
 		display: none;
-	}
-
-	#sidebar .menu-item {
-		width: 54px;
 	}
 
 	#path {
@@ -595,15 +591,6 @@ select {
 		border-radius: 27px !important;
 		border: 2px solid #2e8b5e !important;
 	}
-}
-
-#change-fileview {
-	right: 20px;
-}
-
-#change-theme {
-	right: 70px;
-	float: left;
 }
 
 .empty {
@@ -694,7 +681,7 @@ select {
 #gallery {
 	position: absolute;
 	overflow: hidden;
-	top: 50px;
+	top: 80px;
 	height: 85%;
 	width: 100%;
 }
@@ -1289,4 +1276,22 @@ select {
 	margin: 0px;
 	padding: 0px;
 	z-index: 0;
+}
+
+.confirm-button {
+	height: 50px;
+	width: 100px;
+	line-height: 50px;
+	text-align: center;
+	font-family: robotoregular, sans-serif;
+	font-size: 1rem;
+	border-radius: 3px;
+	font-weight: normal;
+	cursor: pointer;
+	background-color: #2e8b5e;
+	color: white;
+}
+
+#confirm .button {
+	left: 28px;
 }

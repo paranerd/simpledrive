@@ -383,12 +383,12 @@ var General = {
 		var newpass2 = $("#changepass-pass2").val();
 
 		if (currpass.length == 0 || newpass1.length == 0 || newpass2.length == 0) {
-			Util.notify("Fields cannot be empty", true, true);
+			$("#changepass-error").removeClass("hidden").text("Fields cannot be empty", true, true);
 			return;
 		}
 
 		if (newpass1 != newpass2) {
-			Util.notify("New passwords don't match", true, true);
+			$("#changepass-error").removeClass("hidden").text("New passwords don't match", true, true);
 			return;
 		}
 
@@ -403,11 +403,12 @@ var General = {
 			$("#changepass-pass0, #changepass-pass1, #changepass-pass2").val('');
 			$("#changepass, #shield").addClass("hidden");
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			$("#changepass-error").removeClass("hidden").text(Util.getError(xhr));
 		});
 	},
 
 	showChangePassword: function() {
+		$("#changepass-error").text("").addClass("hidden");
 		$("#changepass, #shield").removeClass("hidden")
 		$("#changepass-pass0").val('').focus();
 	}

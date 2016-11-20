@@ -98,6 +98,10 @@ $("#users-filter .close").on('click', function() {
 	Users.closeFilter();
 });
 
+$("#confirm .close").on('click', function() {
+	Util.closePopup();
+});
+
 $(".plugin-install").on('click', function(e) {
 	Plugins.install($(this).val());
 });
@@ -126,20 +130,25 @@ $("#createuser .close").on('click', function(e) {
 	Util.closePopup();
 });
 
-$("#create").on('submit', function(e) {
+$("#createuser").on('submit', function(e) {
 	e.preventDefault();
 	Users.create();
 });
 
 $("#createuser-pass1").on('keyup', function() {
-	var strength = Util.checkPasswordStrength($(this).val());
-	if (strength > 1) {
-		$("#strength").removeClass().addClass("password-ok");
+	if ($(this).val()) {
+		var strength = Util.checkPasswordStrength($(this).val());
+		if (strength > 1) {
+			$("#strength").removeClass().addClass("password-ok");
+		}
+		else {
+			$("#strength").removeClass().addClass("password-bad");
+		}
+		$("#strength").text(strengths[strength]);
 	}
 	else {
-		$("#strength").removeClass().addClass("password-bad");
+		$("#strength").text("");
 	}
-	$("#strength").text(strengths[strength]);
 });
 
 $("#notification .close").on('click', function(e) {
@@ -500,18 +509,25 @@ var Log = {
 	},
 
 	clear: function() {
-		if (confirm("Clear log?")) {
+		$("#confirm-title").text("Clear log?");
+		$("#shield, #confirm").removeClass("hidden");
+
+		$("#confirm-yes").unbind('click').on('click', function() {
 			$.ajax({
 				url: 'api/system/clearlog',
 				type: 'post',
 				data: {token: token},
 				dataType: 'json'
 			}).done(function(data, statusText, xhr) {
-				fetch(false, 0);
+				Log.fetch(false, 0);
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 			});
-		}
+			Util.closePopup();
+		});
+		$("#confirm-no").unbind('click').on('click', function() {
+			Util.closePopup();
+		});
 	}
 }
 
@@ -750,25 +766,26 @@ var Users = {
 		return (id >= 0 && id < Users.filtered.length) ? Users.filtered[id] : null;
 	},
 
-	remove: function() {
-		if (Users.all[Users.selected]['own']) {
-			Util.notify("Cannot erase active user!", true, true);
-			return;
-		}
+remove: function() {
+		$("#confirm-title").text("Delete user?");
+		$("#shield, #confirm").removeClass("hidden");
 
-		var doDelete = confirm("Delete user?");
-		if (doDelete) {
+		$("#confirm-yes").unbind('click').on('click', function() {
 			$.ajax({
 				url: 'api/users/delete',
 				type: 'post',
-				data: {token: token, user: Users.all[Users.selected]['user']},
+				data: {token: token, user: Users.all[Users.selected]['username']},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				Users.fetch();
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 			});
-		}
+			Util.closePopup();
+		});
+		$("#confirm-no").unbind('click').on('click', function() {
+			Util.closePopup();
+		});
 	},
 
 	select: function(id) {
@@ -782,7 +799,7 @@ var Users = {
 		$.ajax({
 			url: 'api/users/setadmin',
 			type: 'post',
-			data: {token: token, user: Users.all[Users.selected]['user'], enable: admin},
+			data: {token: token, user: Users.all[Users.selected]['username'], enable: admin},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true, true);
@@ -809,7 +826,7 @@ var Users = {
 		$.ajax({
 			url: 'api/users/setquota',
 			type: 'post',
-			data: {token: token, user: Users.all[Users.selected]['user'], value: size},
+			data: {token: token, user: Users.all[Users.selected]['username'], value: size},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true, true);

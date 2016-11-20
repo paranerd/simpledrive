@@ -17,11 +17,16 @@ require_once 'php/database.class.php';
 $lang_code = (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && in_array($_SERVER['HTTP_ACCEPT_LANGUAGE'], array('de', 'en'))) ? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en';
 $lang = json_decode(file_get_contents('lang/lang_' . $lang_code . '.json'), true);
 
+// Determine base
+$base = rtrim(dirname($_SERVER['PHP_SELF']), "/") . "/";
+
 // Extract endpoint and action
-$request = $_REQUEST['request'];
+$request = (isset($_REQUEST['request'])) ? $_REQUEST['request'] : null;
+if (!$request) {
+	header('Location: ' . $base . 'files');
+}
 $args = explode('/', rtrim($request, '/'));
 $view = array_shift($args);
-$base = rtrim(dirname($_SERVER['PHP_SELF']), "/") . "/";
 
 if (!$view) {
 	header('Location: ' . $base . 'files');

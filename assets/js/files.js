@@ -366,12 +366,20 @@ $("#files").on('mousedown', function(e) {
 	}
 });
 
+// $(document).on('contextmenu', '#gallery', function(e) {
+// 	console.log("worx");
+// 	var target = (typeof e.target.value != "undefined") ? FileManager.getElementAt(e.target.value) : ((typeof e.target.parentNode.value != "undefined") ? FileManager.getElementAt(e.target.parentNode.value) : null);
+// 	console.log(target);
+// });
+
 /**
  * Prepares and shows the custom context menu depending on the element(s) selected
  */
-$(document).on('contextmenu', '#content', function(e) {
+$(document).on('contextmenu', '#content, #gallery', function(e) {
 	e.preventDefault();
-	var target = (typeof e.target.parentNode.value === "undefined") ? null : FileManager.getElementAt(e.target.parentNode.value);
+	//var target = (typeof e.target.parentNode.value === "undefined") ? null : FileManager.getElementAt(e.target.parentNode.value);
+	var target = (typeof e.target.value != "undefined") ? FileManager.getElementAt(e.target.value) : ((typeof e.target.parentNode.value != "undefined") ? FileManager.getElementAt(e.target.parentNode.value) : null);
+	console.log(target);
 
 	$('[id^="context-"]').addClass("hidden");
 	$("#contextmenu .divider").addClass("hidden");
@@ -396,6 +404,10 @@ $(document).on('contextmenu', '#content', function(e) {
 				folderSel = true;
 				continue;
 			}
+		}
+		// Is there something in the clipboard?
+		if (FileManager.isClipboardFilled()) {
+			$("#context-paste").removeClass("hidden");
 		}
 		// Is an image selected?
 		if (target.type == "image" && !multi) {
@@ -449,7 +461,7 @@ $(document).on('mousedown', '#content', function(e) {
 	Util.closePopup();
 });
 
-$(document).on('mousedown', '.item', function(e) {
+$(document).on('mousedown', '.item, .gallery-container', function(e) {
 	if ($(e.target).is(".thumbnail, .shared, input")) {
 		return;
 	}
@@ -720,7 +732,6 @@ var FileManager = {
 		}).fail(function(xhr, statusText, error) {
 			Util.busy(false);
 			$("#create-error").removeClass("hidden").text(Util.getError(xhr));
-			//Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -878,6 +889,7 @@ var FileManager = {
 		FileManager.currentSelected = -1;
 		$("#contextmenu").addClass("hidden");
 		Util.busy(true);
+		console.log("busy");
 
 		$.ajax({
 			url: 'api/files/children',
@@ -964,7 +976,7 @@ var FileManager = {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.busy(false);
-			Util.notify("Share link: " + data.msg, false, false);
+			Util.notify(data.msg, false, false);
 		}).fail(function(xhr, statusText, error) {
 			Util.busy(false);
 			Util.notify(Util.getError(xhr), true, true);
@@ -1027,7 +1039,7 @@ var FileManager = {
 				$("#pubfile").removeClass("hidden");
 				$("#pub-key, #pub-error").addClass("hidden");
 				FileManager.filteredElem = [data.msg.share];
-				$("#pub-filename").text(data.msg.share.filename);
+				$("#pub-filename").removeClass("hidden").text(data.msg.share.filename);
 				$("#unlock").val("Download");
 				FileManager.downloadPub = true;
 			}
@@ -1112,7 +1124,7 @@ var FileManager = {
 	},
 
 	openODT: function(elem) {
-		$('<form id="odt-form" class="hidden" action="odfeditor" target="blank" method="post"><input name="token"/><input name="elem"/></form>').appendTo('body');
+		$('<form id="odt-form" class="hidden" action="odfeditor" target="_blank" method="post"><input name="token"/><input name="elem"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
 		$('[name="elem"]').val(elem.id);
 		$('#odt-form').submit();
@@ -1123,7 +1135,7 @@ var FileManager = {
 	},
 
 	openText: function(elem) {
-		$('<form id="text-form" class="hidden" action="texteditor" method="post"><input name="token"/><input name="file"/></form>').appendTo('body');
+		$('<form id="text-form" class="hidden" action="texteditor" target="_blank" method="post"><input name="token"/><input name="file"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
 		$('[name="file"]').val(elem.id);
 		$('#text-form').submit();
@@ -1326,7 +1338,7 @@ var FileManager = {
 				Util.closePopup();
 
 				if (pubAcc) {
-					Util.notify("Share link: " + data.msg, false);
+					Util.notify(data.msg, false);
 				}
 				else {
 					Util.notify(target.filename + " shared with " + user, true);

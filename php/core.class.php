@@ -89,13 +89,13 @@ class Core {
 		$salt = uniqid(mt_rand(), true);
 		$crypt_pass = hash('sha256', $pass . $salt);
 
-		if (!$this->db->user_create($username, $crypt_pass, $salt, 1, $mail)) {
-			unlink($this->config_path);
-			header('HTTP/1.1 500 Could not create user');
-			return "Could not create user";
+		if ($id = $this->db->user_create($username, $crypt_pass, $salt, 1, $mail)) {
+			return $this->generate_token($id);
 		}
 
-		return $this->generate_token($username);
+		unlink($this->config_path);
+		header('HTTP/1.1 500 Could not create user');
+		return "Could not create user";
 	}
 
 	/**

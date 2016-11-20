@@ -16,24 +16,27 @@ button {
 	outline: 0px solid transparent;
 }
 
-select {
-	color: #555;
-	border: 1px solid #2e8b5e;
-}
-
 .major-wrapper {
-	background-color: #2e8b5e;
+	background-color: #303030;
 }
 
 .major-title, .major-subtitle, .major-logo {
 	color: white;
 }
 
+.major-title {
+	color: #2e8b5e;
+}
+
+.major-logo {
+	font-family: robotolight, sans-serif;
+}
+
 .major-input {
 	background-color: rgba(0,0,0,0);
-	color: white;
+	color: #b3b3b3;
 	border: none;
-	border-bottom: 1px dotted white;
+	border-bottom: 1px dotted #b3b3b3;
 }
 
 .major-error {
@@ -41,13 +44,18 @@ select {
 }
 
 .major-submit {
-	background-color: rgba(255,255,255,0);
 	color: white;
-	border: 1px solid rgba(255,255,255,0.5);
+	border-radius: 3px;
+	/*border: 1px solid #b3b3b3;
+	background-color: transparent;*/
+
+	background-color: #2e8b5e;
+	border: 1px solid #2e8b5e;
 }
 
 .major-submit:hover {
 	background-color: #47a276;
+	/*background-color: rgba(255,255,255,0.1);*/
 }
 
 .footer {
@@ -165,6 +173,18 @@ select {
 .button:hover {
 	background-color: white;
 	color: #2e8b5e;
+	border: 1px solid #2e8b5e;
+}
+
+.button.inverted {
+	background-color: white;
+	color: #2e8b5e;
+	border: 1px solid #2e8b5e;
+}
+
+.button.inverted:hover {
+	background-color: #2e8b5e;
+	color: white;
 	border: 1px solid #2e8b5e;
 }
 
@@ -306,6 +326,11 @@ select {
 }
 
 /* Light */
+
+.light select {
+	color: #555;
+	border: 1px solid #2e8b5e;
+}
 
 .light .popup input {
 	color: #555 !important;
@@ -471,10 +496,12 @@ select {
 	border-left: 4px solid #2e8b5e;
 */
 	background-color: #eee;
+	color: #555 !important;
 }
 
 .light .menu-item a:hover {
 	background-color: #eee;
+	color: #555 !important;
 }
 
 .light .menu-item.trashact:hover {
@@ -527,6 +554,12 @@ select {
 
 /* Dark */
 
+.dark select {
+	color: #eee;
+	border: 1px solid #555;
+	background-color: #303030;
+}
+
 .dark #logo {
 	border-right: 1px solid #555;
 }
@@ -549,7 +582,7 @@ select {
 
 .dark .thumbnail {
 	color: #bcbcbc;
-	border: 2px solid #303030;
+	border: 2px solid transparent;
 }
 
 .dark #sidebar {
@@ -682,8 +715,8 @@ select {
 
 .dark #fileinfo {
 	color: #eee;
-	border-left: 1px solid #333;
-	background-color: #272727;
+	border-left: 1px solid #555;
+	background-color: #303030;
 }
 
 .dark .sidebar-widget {
@@ -723,6 +756,28 @@ select {
 
 .dark input.table-cell {
 	background-color: rgba(0,0,0,0);
-	color: #b3b3b3;
+	color: #eee;
 	border: 1px solid #555;
 }
+
+/*.dark #content {
+	background-color: white !important;
+}
+
+.dark .item {
+	color: #555 !important;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.dark .thumbnail {
+	color: #555 !important;
+}
+
+.dark #list-header {
+	color: #555;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.dark #logo {
+	border-right: 1px solid transparent;
+}*/
