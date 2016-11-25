@@ -4,7 +4,11 @@
 		exit();
 	}
 
-	$view = (isset($_GET['v'])) ? $_GET['v'] : 'status';
+	$view = (sizeof($args) > 0) ? array_shift($args) : "status";
+	$username 	= ($user) ? $user['username'] : '';
+	$admin 		= ($user) ? $user['admin'] : false;
+	$color 		= ($user) ? $user['color'] : 'light';
+	$fileview 	= ($user) ? $user['fileview'] : 'list';
 ?>
 
 <!doctype html>
@@ -12,13 +16,16 @@
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<title>System | simpleDrive</title>
+
+	<base href="<?php echo $html_base; ?>">
+
 	<link rel="stylesheet" href="assets/css/icons.css" />
 	<link rel="stylesheet" href="assets/css/layout.css" />
 	<link rel="stylesheet" href="assets/css/colors.css" />
 	<link rel="stylesheet" href="assets/css/fileviews.css" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
-<body class="<?php echo $user['color']; ?>">
+<body class="<?php echo $color; ?>">
 	<!-- Header -->
 	<div id="header">
 		<!-- Title -->
@@ -43,54 +50,59 @@
 	<!-- Menu -->
 	<div id="menu" class="popup hidden">
 		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
-		<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div>Settings</a></div>
-		<div class="menu-item"><a href="logout?t=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div>Logout</a></div>
+		<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div><?php echo $lang['settings']; ?></a></div>
+		<?php if ($admin) echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>'; ?>
+		<div id="menu-item-info" class="menu-item"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></div>
+		<div class="menu-item"><a href="logout?t=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
 	</div>
 
 	<!-- Content -->
 	<div id="content">
 		<!-- Status -->
 		<div id="status" class="hidden">
-			<div class="table-cell">
-				<div class="settings-title">Users</div>
+			<div class="settings-title">General</div>
+			<div class="row">
+				<div class="cell settings-label">Users</div>
+				<div class="cell" id="users-count">Loading...</div>
 			</div>
-			<div class="table-cell" id="users-count">Loading...</div>
-
-			<div class="table-cell">
-				<div class="settings-title">Upload max</div>
+			<div class="row">
+				<div class="cell settings-label">Upload max</div>
+				<div class="cell"><input id="upload-max" value="Loading..."></div>
 			</div>
-			<input class="table-cell" id="upload-max" value="Loading...">
 
 			<div class="divider"></div>
 
-			<div class="table-cell">
-				<div class="settings-title">Total Storage</div>
+			<div class="settings-title">Storage</div>
+			<div class="row">
+				<div class="cell settings-label">Total</div>
+				<div class="cell" id="storage-total">Loading...</div>
 			</div>
-			<div class="table-cell" id="storage-total">Loading...</div>
-
-			<div class="table-cell">
-				<div class="settings-title">Used Storage</div>
+			<div class="row">
+				<div class="cell settings-label">Used</div>
+				<div class="cell" id="storage-used">Loading...</div>
 			</div>
-			<div class="table-cell" id="storage-used">Loading...</div>
 
 			<div class="divider"></div>
 
-			<div class="table-cell">
-				<div class="settings-title">Public domain</div>
+			<div class="settings-title">Connection</div>
+			<div class="row">
+				<div class="cell settings-label">Public domain</div>
+				<div class="cell"><input id="domain" value="Loading..."></div>
 			</div>
-			<input class="table-cell" id="domain" value="Loading...">
-
-			<div class="table-cell">
-				<div class="settings-title">Force SSL</div>
+			<div class="row">
+				<div class="cell settings-label">Use SSL</div>
+				<div class="cell"><div class="checkbox"><div id="force-ssl2" class="checkbox-box"></div></div></div>
 			</div>
-			<div class="table-cell"><div class="checkbox"><div id="force-ssl" class="checkbox-box"></div></div></div>
 
 			<div class="divider"></div>
 
-			<div class="table-cell">
-				<div class="settings-title">Version</div>
+			<div class="settings-title">Info</div>
+			<div class="row">
+				<div class="cell settings-label">Version</div>
+				<div class="cell" id="status-version">Loading...</div>
 			</div>
-			<div class="table-cell" id="status-version">Loading...</div>
+
+			<div class="divider"></div>
 		</div>
 
 		<!-- Users -->
@@ -100,7 +112,7 @@
 		</div>
 		<div id="users-header" class="list-header">
 			<span class="col0">&nbsp;</span>
-			<span class="col1">User</span>
+			<span class="col1">Username</span>
 			<span class="col2">Admin</span>
 			<span class="col3">Quota total</span>
 			<span class="col4">Quota used</span>
@@ -110,32 +122,38 @@
 
 		<!-- Plugins -->
 		<div id="plugins" class="hidden">
-			<div class="table-cell">
+			<div class="row">
 				<div class="settings-title">WebODF</div>
-				<div class="settings-info">WebODF is a JavaScript library that makes it easy to add Open Document Format (ODF) support to your website and to your mobile or desktop application. It uses HTML and CSS to display ODF documents.</div>
-			</div>
-			<div class="table-cell">
-				<button id="get-webodf" class="button plugin-install hidden" value="webodf">Download</button>
-				<button id="remove-webodf" class="button plugin-remove hidden" value="webodf">Remove</button>
+				<div class="cell settings-label multi-line">WebODF is a JavaScript library that makes it easy to add Open Document Format (ODF) support to your website and to your mobile or desktop application. It uses HTML and CSS to display ODF documents.</div>
+				<div class="cell">
+					<button id="get-webodf" class="button plugin-install hidden" value="webodf">Download</button>
+					<button id="remove-webodf" class="button plugin-remove hidden" value="webodf">Remove</button>
+				</div>
 			</div>
 
-			<div class="table-cell">
+			<div class="divider"></div>
+
+			<div class="row columns2">
 				<div class="settings-title">SabreDAV</div>
-				<div class="settings-info">sabre/dav is an open source WebDAV server, developed by fruux and built in PHP. It is an implementation of the WebDAV protocol (with extensions for CalDAV[1] and CardDAV), providing a native PHP server implementation which operates on Apache 2 and Nginx web servers.</div>
-			</div>
-			<div class="table-cell">
-				<button id="get-sabredav" class="button plugin-install hidden" value="sabredav">Download</button>
-				<button id="remove-sabredav" class="button plugin-remove hidden" value="sabredav">Remove</button>
+				<div class="cell settings-label multi-line">sabre/dav is an open source WebDAV server, developed by fruux and built in PHP. It is an implementation of the WebDAV protocol (with extensions for CalDAV[1] and CardDAV), providing a native PHP server implementation which operates on Apache 2 and Nginx web servers.</div>
+				<div class="cell">
+					<button id="get-sabredav" class="button plugin-install hidden" value="sabredav">Download</button>
+					<button id="remove-sabredav" class="button plugin-remove hidden" value="sabredav">Remove</button>
+				</div>
 			</div>
 
-			<div class="table-cell">
+			<div class="divider"></div>
+
+			<div class="row">
 				<div class="settings-title">PHPMailer</div>
-				<div class="settings-info">A full-featured email creation and transfer class for PHP</div>
+				<div class="cell settings-label multi-line">A full-featured email creation and transfer class for PHP</div>
+				<div class="cell">
+					<button id="get-phpmailer" class="button plugin-install hidden" value="phpmailer">Download</button>
+					<button id="remove-phpmailer" class="button plugin-remove hidden" value="phpmailer">Remove</button>
+				</div>
 			</div>
-			<div class="table-cell">
-				<button id="get-phpmailer" class="button plugin-install hidden" value="phpmailer">Download</button>
-				<button id="remove-phpmailer" class="button plugin-remove hidden" value="phpmailer">Remove</button>
-			</div>
+
+			<div class="divider"></div>
 		</div>
 
 		<!-- Log -->
@@ -201,7 +219,7 @@
 		<span class="light close"> &times;</span>
 	</div>
 
-	<input id="data-username" type="hidden" value="<?php echo $user['username']; ?>"/>
+	<input id="data-username" type="hidden" value="<?php echo $username; ?>"/>
 	<input id="data-token" type="hidden" value="<?php echo $token;?>"/>
 	<input id="data-view" type="hidden" value="<?php echo $view;?>"/>
 

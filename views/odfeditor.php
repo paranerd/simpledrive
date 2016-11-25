@@ -1,11 +1,23 @@
+<?php
+	$id = (sizeof($args) > 0) ? array_shift($args) : null;
+
+	if (!$user || !$id) {
+		header('Location: ' . $base . 'logout');
+		exit();
+	}
+?>
+
 <!DOCTYPE HTML>
 <html xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>ODF-Editor | simpleDrive</title>
+	
+    <base href="<?php echo $html_base; ?>">
+
     <link rel="stylesheet" href="assets/css/layout.css" />
     <link rel="stylesheet" href="assets/css/colors.css" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <title>Local Editor</title>
   </head>
 
   <body class="light">
@@ -19,8 +31,8 @@
 	</div>
 
    	<input id="data-username" type="hidden" value="<?php echo $user['username']; ?>"/>
-	<input id="data-token" type="hidden" value="<?php echo $token;?>"/>
-	<input id="data-file" type="hidden" value="<?php echo $_POST['elem'];?>"/>
+	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
+	<input id="data-file" type="hidden" value="<?php echo $id; ?>"/>
 
 	<script type="text/javascript" src="lib/jquery/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="assets/js/util.js"></script>

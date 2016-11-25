@@ -1,8 +1,8 @@
 .list-header {
 	position: relative;
-	height: 40px;
+	height: 50px;
 	width: 100%;
-	line-height: 40px;
+	line-height: 50px;
 	font-size: 0.9rem;
 	font-family: robotoregular, sans-serif;
 	overflow: hidden;
@@ -19,7 +19,7 @@
 }
 
 .list-header .checkbox-box {
-	top: 12px;
+	top: 17px;
 }
 
 .list, .grid {

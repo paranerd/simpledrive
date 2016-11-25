@@ -321,11 +321,11 @@ button {
 	background-color: white;
 }
 
-.settings-title {
-	color: #2e8b5e;
-}
-
 /* Light */
+
+.light .settings-label {
+	color: #555;
+}
 
 .light select {
 	color: #555;
@@ -370,12 +370,6 @@ button {
 
 .light #header {
 	background-color: #2e8b5e;
-/*
-	background-color: rgba(46, 139, 94, 0.5);
-*/
-/*
-	background: linear-gradient(45deg, #157346, #2e8b5e);
-*/
 }
 
 .light #sidebar {
@@ -384,7 +378,7 @@ button {
 	border-right: 1px solid #ccc;
 }
 
-.light .focus {
+.light .focus, .light .focus a {
 	color: #2e8b5e !important;
 	background-color: #eee;
 }
@@ -407,7 +401,7 @@ button {
 }
 
 .light .list-header {
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #bbb;
 }
 
 .light #content, .light #gallery {
@@ -554,6 +548,10 @@ button {
 
 /* Dark */
 
+.dark .settings-label {
+	color: white;
+}
+
 .dark select {
 	color: #eee;
 	border: 1px solid #555;
@@ -600,7 +598,7 @@ button {
 
 .dark .list-header, .dark .list-filter {
 	color: #aaa;
-	border-bottom: 1px solid #444;
+	border-bottom: 1px solid #555;
 }
 
 .dark .item {
@@ -608,7 +606,7 @@ button {
 	border-bottom: 1px solid #444;
 }
 
-.dark .focus {
+.dark .focus, .dark .focus a {
 	color: #2e8b5e !important;
 	background-color: #404040;
 }
@@ -630,9 +628,9 @@ button {
 }
 
 .dark #log-footer {
-	background-color: #272727;
-	border-top: 1px solid #303030;
-	border-left: 1px solid #303030;
+	background-color: #303030;
+	border-top: 1px solid #555;
+	border-left: 1px solid #555;
 }
 
 .dark #log-pages-label {
@@ -754,7 +752,7 @@ button {
 	color: #b3b3b3;
 }
 
-.dark input.table-cell {
+.dark .cell input {
 	background-color: rgba(0,0,0,0);
 	color: #eee;
 	border: 1px solid #555;

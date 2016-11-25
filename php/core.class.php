@@ -173,8 +173,8 @@ class Core {
 	 * @return string authorization token
 	 */
 
-	public function generate_token($uid, $hash = null) {
-		$token = md5(openssl_random_pseudo_bytes(32));
+	public function generate_token($uid, $hash = "") {
+		$token = $this->db->session_get_unique_token();
 		$name = ($hash) ? 'public_token' : 'token';
 		$expires = ($hash) ? time() + 60 * 60 : time() + 60 * 60 * 24 * 7; // 1h for public, otherwise 1 week
 

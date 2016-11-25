@@ -1,11 +1,19 @@
 <?php
-	if (!$user) {
-		header('Location: logout');
+	$view 	= (sizeof($args) > 0) ? array_shift($args) : "files";
+	$id 	= (sizeof($args) > 0) ? array_shift($args) : "0";
+
+	if ($view == 'public') {
+		$token	= (isset($_COOKIE['public_token'])) ? $_COOKIE['public_token'] : null;
+	}
+	else if (!$user) {
+		header('Location: ' . $base . 'logout');
 		exit();
 	}
 
-	$view = (isset($_GET['v'])) ? $_GET['v'] : 'files';
-	$id = (isset($_GET['id'])) ? $_GET['id'] : '0';
+	$username 	= ($user) ? $user['username'] : '';
+	$admin 		= ($user) ? $user['admin'] : false;
+	$color 		= ($user) ? $user['color'] : 'light';
+	$fileview 	= ($user) ? $user['fileview'] : 'list';
 ?>
 
 <!doctype html>
@@ -13,6 +21,9 @@
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<title>Files | simpleDrive</title>
+
+	<base href="<?php echo $html_base; ?>">
+
 	<link rel="stylesheet" href="assets/css/icons.css" />
 	<link rel="stylesheet" href="assets/css/layout.css" />
 	<link rel="stylesheet" href="assets/css/colors.css" />
@@ -20,7 +31,7 @@
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 
-<body class="<?php echo $user['color']; ?>">
+<body class="<?php echo $color; ?>">
 	<!-- Header -->
 	<div id="header">
 		<div id="logo">
@@ -30,7 +41,10 @@
 			</a>
 		</div>
 		<div id="path"></div>
+
+		<?php if ($view != 'public') : ?>
 		<div id="username"></div>
+		<?php endif; ?>
 	</div>
 
 	<!-- Sidebar -->
@@ -40,11 +54,13 @@
 
 		<div id="sidebar-create" class="menu-item" title="Create new element"><div class="menu-thumb icon-add"></div><div class="menu-text"><?php echo $lang['new']; ?></div></div>
 		<div id="sidebar-upload" class="menu-item" title="Upload file(s)"><div class="menu-thumb icon-upload"></div><div class="menu-text">Upload</div></div>
+		<?php if ($view != 'public') : ?>
 		<div class="divider"></div>
 		<div id="sidebar-files" class="menu-item focus" title="Show all files"><div class="menu-thumb icon-files"></div><div class="menu-text"><?php echo $lang['myfiles']; ?></div></div>
 		<div id="sidebar-shareout" class="menu-item" title="Show your shares"><div class="menu-thumb icon-users"></div><div class="menu-text"><?php echo $lang['yourshares']; ?></div></div>
 		<div id="sidebar-sharein" class="menu-item" title="Show files shared with you"><div class="menu-thumb icon-share"></div><div class="menu-text"><?php echo $lang['sharedwithyou']; ?></div></div>
 		<div id="sidebar-trash" class="menu-item" title="Show trash"><div class="menu-thumb icon-trash"></div><div class="menu-text"><?php echo $lang['trash']; ?></div></div>
+	<?php endif; ?>
 
 		<!-- Upload -->
 		<div id="upload" class="sidebar-widget hidden">
@@ -98,7 +114,7 @@
 			<input id="files-filter-input" class="list-filter-input" placeholder="Filter..."/>
 			<span class="close"> &times;</span>
 		</div>
-		<div id="list-header" class="list-header <?php if ($user['fileview'] == 'grid') echo 'hidden'; ?>">
+		<div id="list-header" class="list-header <?php if ($fileview == 'grid') echo 'hidden'; ?>">
 			<span class="col0 checkbox"><span id="fSelect" class="checkbox-box"></span></span>
 			<span class="col1"><span><?php echo $lang['name']; ?> </span><span id="fName-ord"></span></span>
 			<span class="col2"><span><?php echo $lang['owner']; ?></span><span id="fOwner-ord"></span></span>
@@ -107,7 +123,7 @@
 			<span class="col5"><span id="fEdit-ord"></span><span><?php echo $lang['edit']; ?> </span></span>
 		</div>
 
-		<div id="files" class="<?php echo $user['fileview']; ?>"></div>
+		<div id="files" class="<?php echo $fileview; ?>"></div>
 	</div>
 
 	<!-- Upload menu -->
@@ -125,16 +141,13 @@
 	<!-- File Info Panel -->
 	<div id="fileinfo" class="hidden">
 		<span class="close"> &times;</span>
+		<div id="fileinfo-icon" class="menu-thumb icon-files"></div><div id="fileinfo-name" class="menu-text"></div>
 
-		<div id="fileinfo-title">
-			<span id="fileinfo-icon" class="menu-thumb"></span>
-			<span id="fileinfo-name"></span>
-		</div>
+		<div class="menu-item"><div id="fileinfo-header" class="menu-text">Details:</div></div>
 
-		<span class="table-cell"><?php echo $lang['size']; ?>:</span><span id="fileinfo-size" class="table-cell"></span>
-		<span class="table-cell"><?php echo $lang['type']; ?>:</span><span id="fileinfo-type" class="table-cell"></span>
-		<span class="table-cell"><?php echo $lang['edit']; ?>:</span><span id="fileinfo-edit" class="table-cell"></span>
-		<span id="fileinfo-link" class="table-cell hidden"><?php echo $lang['showsharelink']; ?></span>
+		<div class="menu-item"><div class="menu-thumb icon-files"></div><div class="menu-text">2.48MB</div></div>
+		<div class="menu-item"><div class="menu-thumb icon-info"></div><div class="menu-text">image</div></div>
+		<div class="menu-item"><div class="menu-thumb icon-rename"></div><div class="menu-text">20.11.2016</div></div>
 	</div>
 
 	<!-- Gallery -->
@@ -159,9 +172,10 @@
 
 	<!-- Menu -->
 	<div id="menu" class="popup hidden">
+		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
 		<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div><?php echo $lang['settings']; ?></a></div>
-		<?php if ($user['admin']) echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>'; ?>
-		<div id="menu-item-info" class="menu-item"><a href="#"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></a></div>
+		<?php if ($admin) echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>'; ?>
+		<div id="menu-item-info" class="menu-item"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></div>
 		<div class="menu-item"><a href="logout?t=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
 	</div>
 
@@ -247,10 +261,24 @@
 	<!-- Progress circle -->
 	<div id="busy" class="busy-animation hidden">busy</div>
 
-	<input id="data-username" type="hidden" value="<?php echo $user['username']; ?>"/>
-	<input id="data-token" type="hidden" value="<?php echo $token;?>"/>
-	<input id="data-view" type="hidden" value="<?php echo $view;?>"/>
-	<input id="data-id" type="hidden" value="<?php echo $id;?>"/>
+	<div id="pubfile" class="major-wrapper hidden">
+		<div class="major-logo menu-item" title="Create new element"><div class="menu-thumb icon-cloud"></div><div class="menu-text">simpleDrive</div></div>
+
+		<form id="load-public" class="center">
+			<div class="major-title">Public share</div>
+			<div id="pub-filename" class="major-subtitle hidden"></div>
+			<input id="pub-key" class="major-input hidden" placeholder="Password" autocomplete="off" autofocus />
+			<div id="pub-error" class="major-error hidden"></div>
+			<input id="unlock" class="major-submit" type="submit" value="Unlock" />
+		</form>
+
+		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>
+	</div>
+
+	<input id="data-username" type="hidden" value="<?php echo $username; ?>"/>
+	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
+	<input id="data-view" type="hidden" value="<?php echo $view; ?>"/>
+	<input id="data-id" type="hidden" value="<?php echo $id; ?>"/>
 
 	<script src="lib/jquery/jquery-1.11.3.min.js"></script>
 	<script src="lib/jquery/simplescroll.js"></script>

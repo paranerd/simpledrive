@@ -489,7 +489,6 @@ class File {
 			// Fully delete
 			if ($file['trash']) {
 				$trash_path = $trashdir . $file['filename'] . $file['trash'];
-				file_put_contents(LOG, "trash path: " . $trash_path . "\n", FILE_APPEND);
 
 				if (is_dir($trash_path) && $this->recursive_remove($file['ownerid'], $source, $trash_path) ||
 					(file_exists($trash_path) && unlink($trash_path) && $this->db->cache_remove($source)))
@@ -555,7 +554,7 @@ class File {
 
 		if ($hash = $this->db->share($target, $userto_uid, $crypt_pass, $public, $access)) {
 			if ($public == 1) {
-				$link = $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "public?r=" . $hash;
+				$link = $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/public/" . $hash;
 				// Regex for verifying email: '/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/'
 				/*if (isset($_POST['mail']) && $_POST['mail'] != "" && $this->config['mailuser'] != '' && $this->config['mailpass'] != '') {
 					$subject = $this->username . " wants to share a file";
@@ -608,7 +607,9 @@ class File {
 
 		if ($share = $this->db->share_get_by_id($id)) {
 			if ($share['public']) {
-				return $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "public?r=" . $share['hash'];
+				return $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/public/" . $share['hash'];
+				//return $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/public/" . $share['hash'] . "?r=1";
+				//return $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "public?r=" . $share['hash'];
 			}
 		}
 
@@ -912,7 +913,7 @@ class File {
 			return "File not found";
 		}
 
-		$file = $this->get_cached($share['id'], self::$PERMISSION_READ);
+		$file = $this->get_cached($share['id'], self::$PERMISSION_READ, $hash);
 
 		// File not shared with accessing user
 		if (!$file) {
@@ -927,11 +928,11 @@ class File {
 			return "Wrong password";
 		}
 		else {
-			$this->db->session_end_all_public();
-			$token = $this->core->generate_token(null, $hash);
+			$token = $this->core->generate_token(0, $hash);
 
 			if ($token) {
-				return array('share' => array('id' => $file['id'], 'filename' => $file['filename'], 'type' => $file['type']), 'token' => $token);
+				$return = array('share' => array('id' => $file['id'], 'filename' => $file['filename'], 'type' => $file['type']), 'token' => $token);
+				return $return;
 			}
 		}
 
@@ -1065,7 +1066,7 @@ class File {
 		return "Error saving file";
 	}
 
-	public function get_cached($id, $access) {
+	public function get_cached($id, $access, $hash = "") {
 		if (!$access) {
 			return;
 		}
@@ -1074,7 +1075,11 @@ class File {
 			return array('ownerid' => $this->uid, 'owner' => $this->username, 'path' => "", 'type' => 'folder');
 		}
 
-		return $this->db->cache_get($id, $this->uid, $access);
+		if (!$this->uid && $hash == "") {
+			$hash = $this->db->get_hash_from_token($this->token);
+		}
+
+		return $this->db->cache_get($id, $this->uid, $access, $hash);
 	}
 
 	public function scan($id, $update = false, $include_childs = false) {

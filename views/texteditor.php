@@ -1,8 +1,20 @@
+<?php
+	$id = (sizeof($args) > 0) ? array_shift($args) : null;
+
+	if (!$user || !$id) {
+		header('Location: ' . $base . 'logout');
+		exit();
+	}
+?>
+
 <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<title>Editor | simpleDrive</title>
+
+	<base href="<?php echo $html_base; ?>">
+
 	<link rel="stylesheet" href="assets/css/icons.css" />
 	<link rel="stylesheet" href="assets/css/layout.css" />
 	<link rel="stylesheet" href="assets/css/colors.css" />
@@ -62,7 +74,7 @@
 
 	<input id="data-username" type="hidden" value="<?php echo $user['username']; ?>"/>
 	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
-	<input id="data-file" type="hidden" value="<?php echo $_POST['file']; ?>"/>
+	<input id="data-file" type="hidden" value="<?php echo $id; ?>"/>
 
 	<script type="text/javascript" src="lib/jquery/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="assets/js/util.js"></script>

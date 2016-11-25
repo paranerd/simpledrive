@@ -171,7 +171,7 @@ select {
 	font-size: 1.1rem;
 }
 
-.focus {
+.focus, .focus a {
 	font-family: robotoregular, sans-serif !important;
 }
 
@@ -245,9 +245,9 @@ select {
 
 .list-filter {
 	position: relative;
-	height: 40px;
+	height: 50px;
 	width: 100%;
-	line-height: 40px;
+	line-height: 50px;
 	font-size: 1rem;
 	font-family: robotoregular, sans-serif;
 }
@@ -316,29 +316,29 @@ select {
 	position: absolute;
 	top: 80px;
 	right: 0;
-	padding-left: 20px;
 	width: 200px;
 	height: 100%;
 	font-family: robotolight, sans-serif;
 }
 
-#fileinfo .table-cell {
-	margin-bottom: 0;
+#fileinfo-header {
+	margin-left: 20px;
+	font-family: robotoregular, sans-serif;
 }
 
 #fileinfo-icon {
 	position: relative;
-	height: 60px;
-	width: 10%;
-	line-height: 60px;
+	height: 50px;
+	width: 50px;
+	line-height: 50px;
 	font-size: 1rem;
-	text-align: left;
+	text-align: middle;
 }
 
 #fileinfo-name {
-	height: 60px;
-	width: 90%;
-	line-height: 60px;
+	height: 50px;
+	width: 150px;
+	line-height: 50px;
 	font-family: robotolight, sans-serif;
 	font-size: 1.5rem;
 	overflow: hidden;
@@ -513,84 +513,6 @@ select {
 
 #audio-next {
 	right: 40px;
-}
-
-/* Responsive */
-
-@media screen and (max-width: 1000px) {
-	#major-title {
-		margin-top: 30px;
-	}
-
-	#logo .menu-thumb {
-		display: block;
-	}
-
-	#logo, #sidebar, #sidebar .menu-item {
-		width: 54px;
-	}
-
-	#sidebar .menu-text, #logo .menu-text {
-		display: none;
-	}
-
-	#path {
-		left: 74px;
-	}
-
-	#log-footer {
-		left: 54px;
-	}
-
-	#logPages {
-		left: 54px;
-	}
-
-	#audioplayer {
-		height: 54px;
-		width: 54px;
-	}
-
-	#clipboard {
-		height: 54px;
-	}
-
-	#clipboard-count {
-		display: block;
-	}
-
-	#audioplayer .close, #seekbar-bg, #seekbar-buffer, #audio-title, #audio-playpos, #audio-duration, #audio-prev, #audio-next, #clipboard .close, #clipboard-title, #clipboard-content {
-		display: none;
-	}
-
-	#audio-play {
-		bottom: 0px;
-		left: 0px;
-		width: 48px;
-		height: 48px;
-		line-height: 48px;
-	}
-
-	#upload-title, #upload-filename, #border, #upload-cancel, #upload-progress, #upload .divider, #clipboard .divider {
-		display: none;
-	}
-
-	#upload-percent {
-		display: block;
-	}
-
-	#foldersize {
-		display: none;
-	}
-
-	.sidebar-widget {
-		left: 1px !important;
-		width: 48px !important;
-		height: 48px !important;
-		line-height: 48px !important;
-		border-radius: 27px !important;
-		border: 2px solid #2e8b5e !important;
-	}
 }
 
 .empty {
@@ -867,10 +789,31 @@ select {
 }
 
 .divider {
+	position: relative;
+/*
+	margin-top: 20px;
+	margin-bottom: 20px;
+*/
 	height: 1px;
 	width: 100%;
 	float: left;
 	clear: both;
+}
+
+#status .divider, #plugins .divider {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+.settings-title {
+	height: 40px;
+	width: 100%;
+	float: left;
+	clear: both;
+	font-family: robotoregular, sans-serif;
+	font-size: 1.5rem;
+	line-height: 40px;
+	color: #2e8b5e;
 }
 
 .transition {
@@ -1151,32 +1094,21 @@ select {
 #status, #plugins {
 	position: relative;
 	margin-top: 20px;
-	margin-left: 1%;
+	margin-left: 20px;
 	height: 100%;
 	width: 98%;
 	font-size: 1.2rem;
 	font-family: robotolight, sans-serif;
+	overflow: hidden;
 }
 
-.settings-title {
-	font-family: robotoregular, sans-serif;
-}
-
-.table-cell {
-	position: relative;
-	margin-bottom: 20px;
-	height: 40px;
-	width: 50%;
-	float: left;
+.settings-label {
+	font-family: robotolight, sans-serif
 }
 
 #upload-max, #domain {
 	width: 200px;
 	padding-left: 10px;
-}
-
-#plugins .table-cell {
-	height: 100px;
 }
 
 .settings-info {
@@ -1294,4 +1226,108 @@ select {
 
 #confirm .button {
 	left: 28px;
+}
+
+.row {
+	position: relative;
+	margin-bottom: 20px;
+	width: 100%;
+	clear: both;
+}
+
+.row .cell {
+	position: relative;
+	padding-left: 1%;
+	margin-top: 20px;
+	width: 48%;
+	height: 40px;
+	line-height: 40px;
+	float: left;
+}
+
+.cell.multi-line {
+	height: 100%;
+	line-height: 40px;
+}
+
+.cell input {
+	height: 100%;
+}
+
+/* Responsive */
+
+@media screen and (max-width: 1000px) {
+	#major-title {
+		margin-top: 30px;
+	}
+
+	#logo .menu-thumb {
+		display: block;
+	}
+
+	#logo, #sidebar, #sidebar .menu-item {
+		width: 54px;
+	}
+
+	#sidebar .menu-text, #logo .menu-text {
+		display: none;
+	}
+
+	#path {
+		left: 74px;
+	}
+
+	#log-footer {
+		left: 54px;
+	}
+
+	#logPages {
+		left: 54px;
+	}
+
+	#audioplayer {
+		height: 54px;
+		width: 54px;
+	}
+
+	#clipboard {
+		height: 54px;
+	}
+
+	#clipboard-count {
+		display: block;
+	}
+
+	#audioplayer .close, #seekbar-bg, #seekbar-buffer, #audio-title, #audio-playpos, #audio-duration, #audio-prev, #audio-next, #clipboard .close, #clipboard-title, #clipboard-content {
+		display: none;
+	}
+
+	#audio-play {
+		bottom: 0px;
+		left: 0px;
+		width: 48px;
+		height: 48px;
+		line-height: 48px;
+	}
+
+	#upload-title, #upload-filename, #border, #upload-cancel, #upload-progress, #upload .divider, #clipboard .divider {
+		display: none;
+	}
+
+	#upload-percent {
+		display: block;
+	}
+
+	#foldersize {
+		display: none;
+	}
+
+	.sidebar-widget {
+		left: 1px !important;
+		width: 48px !important;
+		height: 48px !important;
+		line-height: 48px !important;
+		border-radius: 27px !important;
+		border: 2px solid #2e8b5e !important;
+	}
 }

@@ -26,22 +26,23 @@ if (!$request) {
 	header('Location: ' . $base . 'files');
 }
 $args = explode('/', rtrim($request, '/'));
-$view = array_shift($args);
+$controller = array_shift($args);
 
-if (!$view) {
+if (!$controller) {
 	header('Location: ' . $base . 'files');
 }
 else if (!file_exists('config/config.json')) {
-	if ($view !== 'setup') {
+	if ($controller !== 'setup') {
 		header('Location: ' . $base . 'setup');
 	}
 	require_once 'views/setup.php';
 }
-else if (!preg_match('/(\.|\.\.\/)/', $view) && file_exists('views/' . $view . '.php')) {
+else if (!preg_match('/(\.|\.\.\/)/', $controller) && file_exists('views/' . $controller . '.php')) {
+	$html_base	= $base;
 	$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
 	$db			= Database::getInstance();
 	$user		= $db->user_get_by_token($token);
-	require_once 'views/' . $view . '.php';
+	require_once 'views/' . $controller . '.php';
 }
 else {
 	header('Location: ' . $base . '404');

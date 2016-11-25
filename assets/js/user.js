@@ -1,6 +1,7 @@
 var username,
 	token,
-	code;
+	code,
+	base;
 
 $(window).resize(function() {
 	$("#content").width(window.innerWidth - $("#sidebar").outerWidth());
@@ -19,12 +20,21 @@ $(window).resize(function() {
 			left : ($(this).parent().width() - $(this).outerWidth()) / 2
 		});
 	});
+
+	setTimeout(function() {
+		simpleScroll.update();
+	}, 200);
 });
 
 $(document).ready(function() {
 	username = $("#data-username").val();
 	token = $("#data-token").val();
 	code = $("#data-code").val();
+	base = $("#data-base").val();
+
+	simpleScroll.init("status");
+
+	Binder.init();
 
 	if (code.length > 0) {
 		Backup.setToken(code);
@@ -41,98 +51,101 @@ $(document).ready(function() {
 	Backup.getStatus();
 });
 
-$("#username").click(function(e) {
-	$("#menu").toggleClass("hidden");
-});
+var Binder = {
+	init: function() {
+		$("#username").click(function(e) {
+			$("#menu").toggleClass("hidden");
+		});
 
-$("#shield").click(function(e) {
-	Util.closePopup();
-});
-
-$(".checkbox-box").on('click', function(e) {
-	$(this).toggleClass("checkbox-checked icon-check");
-});
-
-$("#fileview").on('change', function(e) {
-	General.setFileview($(this).val());
-});
-
-$("#color").on('change', function(e) {
-	General.setColor($(this).val());
-});
-
-$("#autoscan.checkbox-box").on('click', function(e) {
-	var enable = $("#autoscan").hasClass("checkbox-checked") ? 1 : 0;
-	General.setAutoscan(enable);
-});
-
-$("#sidebar-general").on('click', function(e) {
-	General.load();
-});
-
-$("#invalidate-token").on('click', function(e) {
-	General.invalidateToken();
-});
-
-$("#bBackup").on('click', function(e) {
-	Backup.toggleStart('');
-});
-
-$("#bEnabled").on('click', function(e) {
-	Backup.toggleEnable();
-});
-
-$("#bChangePassword").on('click', function(e) {
-	General.showChangePassword();
-});
-
-$("#bClearTemp").on('click', function(e) {
-	General.clearTemp();
-});
-
-$("#changepass .close").on('click', function(e) {
-	Util.closePopup();
-});
-
-$("#changepass").on('submit', function(e) {
-	e.preventDefault();
-	General.changePassword();
-});
-
-$("#notification .close").on('click', function(e) {
-	Util.hideNotification();
-});
-
-$("#menu-item-info").on('click', function(e) {
-	$("#info, #shield").removeClass("hidden");
-});
-
-$("#setupBackup").on('submit', function(e) {
-	e.preventDefault();
-	Backup.enable();
-});
-
-$(document).on('mousedown', '#content', function(e) {
-	Util.closePopup();
-});
-
-$(document).on('keyup', function(e) {
-	switch(e.keyCode) {
-		case 27: // Esc
+		$("#shield").click(function(e) {
 			Util.closePopup();
-			break;
+		});
+
+		$(".checkbox-box").on('click', function(e) {
+			$(this).toggleClass("checkbox-checked icon-check");
+		});
+
+		$("#fileview").on('change', function(e) {
+			General.setFileview($(this).val());
+		});
+
+		$("#color").on('change', function(e) {
+			General.setColor($(this).val());
+		});
+
+		$("#autoscan.checkbox-box").on('click', function(e) {
+			var enable = $("#autoscan").hasClass("checkbox-checked") ? 1 : 0;
+			General.setAutoscan(enable);
+		});
+
+		$("#sidebar-general").on('click', function(e) {
+			General.load();
+		});
+
+		$("#invalidate-token").on('click', function(e) {
+			General.invalidateToken();
+		});
+
+		$("#bBackup").on('click', function(e) {
+			if (!$(this).hasClass("hidden")) {
+				Backup.toggleStart('');
+			}
+		});
+
+		$("#bEnabled").on('click', function(e) {
+			Backup.toggleEnable();
+		});
+
+		$("#bChangePassword").on('click', function(e) {
+			General.showChangePassword();
+		});
+
+		$("#bClearTemp").on('click', function(e) {
+			General.clearTemp();
+		});
+
+		$("#changepass .close").on('click', function(e) {
+			Util.closePopup();
+		});
+
+		$("#changepass").on('submit', function(e) {
+			e.preventDefault();
+			General.changePassword();
+		});
+
+		$("#notification .close").on('click', function(e) {
+			Util.hideNotification();
+		});
+
+		$("#menu-item-info").on('click', function(e) {
+			$("#info, #shield").removeClass("hidden");
+		});
+
+		$("#setupBackup").on('submit', function(e) {
+			e.preventDefault();
+			Backup.enable();
+		});
+
+		$(document).on('mousedown', '#content', function(e) {
+			Util.closePopup();
+		});
+
+		$(document).on('keyup', function(e) {
+			switch(e.keyCode) {
+				case 27: // Esc
+					Util.closePopup();
+					break;
+			}
+		});
 	}
-});
+}
 
 var Backup = {
 	running: false,
 	enabled: false,
 
 	toggleStart: function(code) {
-		if ($("#bBackup").hasClass("button-disabled")) {
-			return;
-		}
-		else if (Backup.running) {
+		if (Backup.running) {
 			Backup.cancel();
 		}
 		else if (Backup.enabled) {
@@ -250,10 +263,10 @@ var Backup = {
 			if (data.msg.enabled) {
 				$("#bEnabled").text("Disable");
 				var text = (data.msg.running) ? "Cancel" : "Start";
-				$("#bBackup").text(text).removeClass('button-disabled');
+				$("#bBackup").text(text).removeClass('hidden');
 			}
 			else {
-				$("#bBackup").text("Start").addClass("button-disabled");
+				$("#bBackup").text("Start").addClass("hidden");
 				$("#bEnabled").text("Enable");
 			}
 		}).fail(function(xhr, statusText, error) {

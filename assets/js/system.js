@@ -4,13 +4,17 @@ var username,
 	strengths = ["Very weak", "Weak", "Ok", "Better", "Strong", "Very strong"];
 
 $(window).resize(function() {
-	var contentHeight = ($("#log-footer").hasClass("hidden")) ? window.innerHeight - $("#header").height() : window.innerHeight - $("#header").height() - $("#log-footer").height();
-	contentHeight = ($(".list-filter").hasClass("hidden")) ? contentHeight : contentHeight - $(".list-filter").height();
+	var contentWidth = window.innerWidth - $("#sidebar").outerWidth();
+	$("#content").width(contentWidth);
+	$("#status, #plugins").width(contentWidth - 20);
+
+	var contentHeight = ($("#log-footer").hasClass("hidden")) ? window.innerHeight - $("#header").outerHeight() : window.innerHeight - $("#header").outerHeight() - $("#log-footer").outerHeight();
+	contentHeight = ($(".list-filter").hasClass("hidden")) ? contentHeight : contentHeight - $(".list-filter").outerHeight();
 
 	$("#content").height(contentHeight);
 	$("#content, #log-footer").width(window.innerWidth - $("#sidebar").outerWidth());
-	$("#users, #log").height($("#content").height() - $(".list-header").height());
-	$("#sidebar").height(window.innerHeight - $("#header").height());
+	$("#users, #log").height($("#content").outerHeight() - $(".list-header").outerHeight());
+	$("#sidebar").height(window.innerHeight - $("#header").outerHeight());
 
 	// Position centered divs
 	$('.center').each(function(i, obj) {
@@ -38,8 +42,12 @@ $(document).ready(function() {
 
 	$("#username").html(Util.escape(username) + " &#x25BE");
 
+	simpleScroll.init("status");
 	simpleScroll.init("users");
 	simpleScroll.init("log");
+	simpleScroll.init("plugins");
+
+	Binder.init();
 
 	$(window).resize();
 
@@ -49,235 +57,239 @@ $(document).ready(function() {
 	else if (view == "log") {
 		Log.fetch(true, 0);
 	}
-	else if (view == "status") {
-		Status.fetch(true);
-	}
-	else {
+	else if (view == "plugins") {
 		Plugins.fetch(true);
 	}
-});
-
-$("#username").click(function(e) {
-	$("#menu").toggleClass("hidden");
-});
-
-$('#upload-max').on('change', function(e){
-	Status.setUploadLimit($("#upload-max").val());
-});
-
-$('#domain').on('change', function(e){
-	Status.setDomain($("#domain").val());
-});
-
-$("#force-ssl.checkbox-box").on('click', function(e) {
-	var enable = $("#force-ssl").hasClass("checkbox-checked") ? 1 : 0;
-	Status.useSSL(enable);
-});
-
-$("#shield").click(function(e) {
-	Util.closePopup();
-});
-
-$("#sidebar-status").on('click', function() {
-	Status.fetch(true);
-});
-
-$("#sidebar-users").on('click', function() {
-	Users.fetch(true);
-});
-
-$("#sidebar-plugins").on('click', function() {
-	Plugins.fetch(true);
-});
-
-$("#sidebar-log").on('click', function() {
-	Log.fetch(true, 0);
-});
-
-$("#users-filter .close").on('click', function() {
-	Users.closeFilter();
-});
-
-$("#confirm .close").on('click', function() {
-	Util.closePopup();
-});
-
-$(".plugin-install").on('click', function(e) {
-	Plugins.install($(this).val());
-});
-
-$(".plugin-remove").on('click', function(e) {
-	Plugins.remove($(this).val());
-});
-
-$("#log-filter .close").on('click', function(e) {
-	Log.closeFilter();
-});
-
-$("#context-create").on('click', function(e) {
-	Users.showCreateUser();
-});
-
-$("#context-delete").on('click', function(e) {
-	Users.remove();
-});
-
-$("#context-clearlog").on('click', function(e) {
-	Log.clear();
-});
-
-$("#createuser .close").on('click', function(e) {
-	Util.closePopup();
-});
-
-$("#createuser").on('submit', function(e) {
-	e.preventDefault();
-	Users.create();
-});
-
-$("#createuser-pass1").on('keyup', function() {
-	if ($(this).val()) {
-		var strength = Util.checkPasswordStrength($(this).val());
-		if (strength > 1) {
-			$("#strength").removeClass().addClass("password-ok");
-		}
-		else {
-			$("#strength").removeClass().addClass("password-bad");
-		}
-		$("#strength").text(strengths[strength]);
-	}
 	else {
-		$("#strength").text("");
+		Status.fetch(true);
 	}
 });
 
-$("#notification .close").on('click', function(e) {
-	Util.hideNotification();
-});
+var Binder = {
+	init: function() {
+		$("#username").click(function(e) {
+			$("#menu").toggleClass("hidden");
+		});
 
-$(document).on('contextmenu', '#content', function(e) {
-	e.preventDefault();
-	$('[id^="context-"]').addClass("hidden");
+		$('#upload-max').on('change', function(e){
+			Status.setUploadLimit($("#upload-max").val());
+		});
 
-	if (!$("#sidebar-log").hasClass("focus") && !$("#sidebar-users").hasClass("focus")) {
-		return false;
-	}
+		$('#domain').on('change', function(e){
+			Status.setDomain($("#domain").val());
+		});
 
-	if ($("#sidebar-log").hasClass("focus")) {
-		$("#context-clearlog").removeClass("hidden");
-	}
-	else {
-		var target = (typeof e.target.parentNode.value === "undefined") ? null : Users.getUserAt(e.target.parentNode.value);
+		$("#force-ssl.checkbox-box").on('click', function(e) {
+			var enable = $("#force-ssl").hasClass("checkbox-checked") ? 1 : 0;
+			Status.useSSL(enable);
+		});
 
-		if (target !== null) {
-			$("#context-delete").removeClass("hidden");
-		}
-		else {
-			$("#context-create").removeClass("hidden");
-		}
-	}
+		$("#shield").click(function(e) {
+			Util.closePopup();
+		});
 
-	var top = (e.clientY + $("#contextmenu").height() < window.innerHeight) ? e.clientY : e.clientY - $("#contextmenu").height();
-	$("#contextmenu").css({
-		left : e.clientX,
-		top : top
-	}).removeClass("hidden");
+		$("#sidebar-status").on('click', function() {
+			Status.fetch(true);
+		});
 
-	return false;
-});
+		$("#sidebar-users").on('click', function() {
+			Users.fetch(true);
+		});
 
-$(document).on('mousedown', '#users .item', function(e) {
-	Users.select(this.value);
-});
+		$("#sidebar-plugins").on('click', function() {
+			Plugins.fetch(true);
+		});
 
-$('[id^="sidebar-"]').mousedown(function() {
-	Util.closePopup();
-});
+		$("#sidebar-log").on('click', function() {
+			Log.fetch(true, 0);
+		});
 
-$("#content").on('mouseup', function(e) {
-	if (e.which != 3) {
-		$("#contextmenu").addClass("hidden");
-	}
-});
-
-$("#contextmenu").on('click', function(e) {
-	$("#contextmenu").addClass("hidden");
-});
-
-$("#log-pages").on('change', function() {
-	Log.fetch(false, $(this).val());
-});
-
-$("#log-filter-input").on('input', function(e) {
-	Log.filter($(this).val());
-});
-
-$("#users-filter-input").on('input', function(e) {
-	Users.filter($(this).val());
-});
-
-$(document).on('keyup', function(e) {
-	// Filter
-	if ((view == "log" || view == "users") && !e.shiftKey && !$(e.target).is('input') && !e.ctrlKey &&
-		((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 96 && e.keyCode <= 105)))
-	{
-		if (!$("#log").hasClass('hidden') && $("#log-filter").hasClass('hidden')) {
-			$("#log-filter").removeClass('hidden');
-			$(window).resize();
-			$("#log-filter-input").focus();
-
-			setTimeout(function() {
-				// Place cursor behind text
-				$("#log-filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
-			}, 1);
-			Log.filter(String.fromCharCode(e.keyCode).toLowerCase());
-		}
-		else if (!$("#users").hasClass('hidden') && $("#users-filter").hasClass('hidden')) {
-			$("#users-filter").removeClass('hidden');
-			$(window).resize();
-			$("#users-filter-input").focus();
-
-			setTimeout(function() {
-				// Place cursor behind text
-				$("#users-filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
-			}, 1);
-			Users.filter(String.fromCharCode(e.keyCode).toLowerCase());
-		}
-	}
-
-	switch(e.keyCode) {
-		case 27: // Esc
-			$(".popup, #shield").addClass("hidden");
-			$("#user-quota-total-change").remove();
-			Users.editUser = null;
-			Log.closeFilter();
+		$("#users-filter .close").on('click', function() {
 			Users.closeFilter();
-			break;
+		});
+
+		$("#confirm .close").on('click', function() {
+			Util.closePopup();
+		});
+
+		$(".plugin-install").on('click', function(e) {
+			Plugins.install($(this).val());
+		});
+
+		$(".plugin-remove").on('click', function(e) {
+			Plugins.remove($(this).val());
+		});
+
+		$("#log-filter .close").on('click', function(e) {
+			Log.closeFilter();
+		});
+
+		$("#context-create").on('click', function(e) {
+			Users.showCreateUser();
+		});
+
+		$("#context-delete").on('click', function(e) {
+			Users.remove();
+		});
+
+		$("#context-clearlog").on('click', function(e) {
+			Log.clear();
+		});
+
+		$("#createuser .close").on('click', function(e) {
+			Util.closePopup();
+		});
+
+		$("#createuser").on('submit', function(e) {
+			e.preventDefault();
+			Users.create();
+		});
+
+		$("#createuser-pass1").on('keyup', function() {
+			if ($(this).val()) {
+				var strength = Util.checkPasswordStrength($(this).val());
+				if (strength > 1) {
+					$("#strength").removeClass().addClass("password-ok");
+				}
+				else {
+					$("#strength").removeClass().addClass("password-bad");
+				}
+				$("#strength").text(strengths[strength]);
+			}
+			else {
+				$("#strength").text("");
+			}
+		});
+
+		$("#notification .close").on('click', function(e) {
+			Util.hideNotification();
+		});
+
+		$(document).on('contextmenu', '#content', function(e) {
+			e.preventDefault();
+			$('[id^="context-"]').addClass("hidden");
+
+			if (!$("#sidebar-log").hasClass("focus") && !$("#sidebar-users").hasClass("focus")) {
+				return false;
+			}
+
+			if ($("#sidebar-log").hasClass("focus")) {
+				$("#context-clearlog").removeClass("hidden");
+			}
+			else {
+				var target = (typeof e.target.parentNode.value === "undefined") ? null : Users.getUserAt(e.target.parentNode.value);
+
+				if (target !== null) {
+					$("#context-delete").removeClass("hidden");
+				}
+				else {
+					$("#context-create").removeClass("hidden");
+				}
+			}
+
+			var top = (e.clientY + $("#contextmenu").height() < window.innerHeight) ? e.clientY : e.clientY - $("#contextmenu").height();
+			$("#contextmenu").css({
+				left : e.clientX,
+				top : top
+			}).removeClass("hidden");
+
+			return false;
+		});
+
+		$(document).on('mousedown', '#users .item', function(e) {
+			Users.select(this.value);
+		});
+
+		$('[id^="sidebar-"]').mousedown(function() {
+			Util.closePopup();
+		});
+
+		$("#content").on('mouseup', function(e) {
+			if (e.which != 3) {
+				$("#contextmenu").addClass("hidden");
+			}
+		});
+
+		$("#contextmenu").on('click', function(e) {
+			$("#contextmenu").addClass("hidden");
+		});
+
+		$("#log-pages").on('change', function() {
+			Log.fetch(false, $(this).val());
+		});
+
+		$("#log-filter-input").on('input', function(e) {
+			Log.filter($(this).val());
+		});
+
+		$("#users-filter-input").on('input', function(e) {
+			Users.filter($(this).val());
+		});
+
+		$(document).on('keyup', function(e) {
+			// Filter
+			if ((view == "log" || view == "users") && !e.shiftKey && !$(e.target).is('input') && !e.ctrlKey &&
+				((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 96 && e.keyCode <= 105)))
+			{
+				if (!$("#log").hasClass('hidden') && $("#log-filter").hasClass('hidden')) {
+					$("#log-filter").removeClass('hidden');
+					$(window).resize();
+					$("#log-filter-input").focus();
+
+					setTimeout(function() {
+						// Place cursor behind text
+						$("#log-filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
+					}, 1);
+					Log.filter(String.fromCharCode(e.keyCode).toLowerCase());
+				}
+				else if (!$("#users").hasClass('hidden') && $("#users-filter").hasClass('hidden')) {
+					$("#users-filter").removeClass('hidden');
+					$(window).resize();
+					$("#users-filter-input").focus();
+
+					setTimeout(function() {
+						// Place cursor behind text
+						$("#users-filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
+					}, 1);
+					Users.filter(String.fromCharCode(e.keyCode).toLowerCase());
+				}
+			}
+
+			switch(e.keyCode) {
+				case 27: // Esc
+					$(".popup, #shield").addClass("hidden");
+					$("#user-quota-total-change").remove();
+					Users.editUser = null;
+					Log.closeFilter();
+					Users.closeFilter();
+					break;
+			}
+
+			$(".item").removeClass("selected");
+		});
+
+		$(document).on('mousedown', '#content', function(e) {
+			Util.closePopup();
+		});
+
+		$(document).on('mouseup', '.checkbox-box', function(e) {
+			$(this).toggleClass("checkbox-checked");
+		});
+
+		$(document).on('mouseup', '#users', function(e) {
+			if (Users.editUser != null && !$(e.target).hasClass('checkbox-box')) {
+				Users.setQuotaMax();
+			}
+		});
 	}
-
-	$(".item").removeClass("selected");
-});
-
-$(document).on('mousedown', '#content', function(e) {
-	Util.closePopup();
-});
-
-$(document).on('mouseup', '.checkbox-box', function(e) {
-	$(this).toggleClass("checkbox-checked");
-});
-
-$(document).on('mouseup', '#users', function(e) {
-	if (Users.editUser != null && !$(e.target).hasClass('checkbox-box')) {
-		Users.setQuotaMax();
-	}
-});
+}
 
 var Status = {
 	fetch: function(pushState) {
 		view = "status";
 
 		if (pushState) {
-			window.history.pushState(null, '', '?v=status');
+			window.history.pushState(null, '', 'system/status');
 		}
 
 		// Set right view
@@ -285,6 +297,9 @@ var Status = {
 		$(".focus").removeClass("focus");
 		$("#sidebar-status").addClass("focus");
 		$("#status").removeClass("hidden");
+		$("#users, #users-filter, #users-header, #log, #log-filter, #log-header").addClass("hidden");
+		simpleScroll.empty("users");
+		simpleScroll.empty("log");
 
 		$.ajax({
 			url: 'api/system/status',
@@ -393,7 +408,7 @@ var Log = {
 		view = "log";
 
 		if (pushState) {
-			window.history.pushState(null, '', '?v=log');
+			window.history.pushState(null, '', 'system/log');
 		}
 
 		$.ajax({
@@ -536,7 +551,7 @@ var Plugins = {
 		view = "plugins";
 
 		if (pushState) {
-			window.history.pushState(null, '', '?v=plugins');
+			window.history.pushState(null, '', 'system/plugins');
 		}
 
 		$.ajax({
@@ -717,7 +732,7 @@ var Users = {
 		view = "users";
 
 		if (pushState) {
-			window.history.pushState(null, '', '?v=users');
+			window.history.pushState(null, '', 'system/users');
 		}
 
 		$.ajax({

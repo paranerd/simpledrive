@@ -212,35 +212,28 @@ class Database {
 		$stmt->bind_result($id, $username, $pass, $salt, $admin, $max_storage, $color, $fileview, $login_attempts, $last_login_attempt, $last_login, $autoscan);
 
 		if ($stmt->fetch()) {
+			// Filter user data
+			$user = array(
+				'id'			=> $id,
+				'username'		=> strtolower($username),
+				'admin'			=> $admin,
+				'max_storage'	=> $max_storage,
+				'color'			=> $color,
+				'fileview'		=> $fileview,
+				'last_login'	=> $last_login,
+				'autoscan'		=> $autoscan
+			);
+
 			if ($full) {
-				return array(
-					'id'					=> $id,
-					'username'				=> strtolower($username),
+				$user = array_merge($user, array(
 					'pass'					=> $pass,
 					'salt'					=> $salt,
 					'admin'					=> $admin,
-					'max_storage'			=> $max_storage,
-					'color'					=> $color,
-					'fileview'				=> $fileview,
 					'login_attempts'		=> $login_attempts,
-					'last_login_attempt'	=> $last_login_attempt,
-					'last_login'			=> $last_login,
-					'autoscan'				=> $autoscan
-				);
+					'last_login_attempt'	=> $last_login_attempt
+				));
 			}
-			else {
-				// Filter user data
-				return array(
-					'id'			=> $id,
-					'username'		=> strtolower($username),
-					'admin'			=> $admin,
-					'max_storage'	=> $max_storage,
-					'color'			=> $color,
-					'fileview'		=> $fileview,
-					'last_login'	=> $last_login,
-					'autoscan'		=> $autoscan
-				);
-			}
+			return $user;
 		}
 
 		return null;
@@ -487,14 +480,28 @@ class Database {
 	 */
 
 	public function session_start($token, $uid, $hash = '', $expires) {
-		$this->session_invalidate_user_on_client($uid);
 		$stmt = $this->link->prepare('INSERT INTO sd_session (token, user, hash, expires, fingerprint) VALUES (?, ?, ?, ?, ?)');
 		$stmt->bind_param('sisis', $token, $uid, $hash, $expires, $this->fingerprint);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();
 
+		$this->session_invalidate_client($uid, $token);
+
 		return ($stmt->affected_rows != 0);
+	}
+
+	public function session_get_unique_token() {
+		$token;
+
+		do {
+			$token = md5(openssl_random_pseudo_bytes(32));
+			$stmt = $this->link->prepare('SELECT token FROM sd_session WHERE token = ?');
+			$stmt->bind_param('s', $token);
+			$stmt->execute();
+		} while ($stmt->num_rows > 0);
+
+		return $token;
 	}
 
 	public function session_active_token($uid) {
@@ -522,13 +529,9 @@ class Database {
 		return ($stmt->affected_rows != 0);
 	}
 
-	/**
-	 * Ends all sessions for a user on the current client but the current active
-	 */
-
-	public function session_invalidate_user_on_client($uid) {
-		$stmt = $this->link->prepare('DELETE FROM sd_session WHERE user = ? AND fingerprint = ?');
-		$stmt->bind_param('is', $uid, $this->fingerprint);
+	public function session_invalidate_client($uid, $token) {
+		$stmt = $this->link->prepare('DELETE FROM sd_session WHERE user = ? AND token != ? AND fingerprint = ?');
+		$stmt->bind_param('iss', $uid, $token, $this->fingerprint);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();
@@ -550,17 +553,6 @@ class Database {
 	}
 
 	/**
-	 * Removes all open public sessions
-	 */
-
-	public function session_end_all_public() {
-		$stmt = $this->link->prepare('DELETE FROM sd_session WHERE fingerprint = ? AND user = ""');
-		$stmt->bind_param('s', $this->fingerprint);
-
-		return ($stmt->execute());
-	}
-
-	/**
 	 * Get share-owner from authorization token
 	 * @param token
 	 * @return string owner
@@ -576,6 +568,24 @@ class Database {
 		$stmt->fetch();
 
 		return ($stmt->affected_rows != 0) ? $owner : null;
+	}
+
+	/**
+	 * Get share-hash from authorization token
+	 * @param token
+	 * @return string owner
+	 */
+
+	public function get_hash_from_token($token) {
+		$time = time();
+		$stmt = $this->link->prepare('SELECT hash FROM sd_session WHERE token = ? AND fingerprint = ? AND expires > ?');
+		$stmt->bind_param('sss', $token, $this->fingerprint, $time);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($hash);
+		$stmt->fetch();
+
+		return ($stmt->affected_rows != 0) ? $hash : null;
 	}
 
 	/**
@@ -625,7 +635,7 @@ class Database {
 		$hash;
 
 		do {
-			$hash = md5(microtime(true));
+			$hash = substr(md5(microtime(true)), 0, 8);
 			$stmt = $this->link->prepare('SELECT hash FROM sd_shares WHERE hash = ?');
 			$stmt->bind_param('s', $hash);
 			$stmt->execute();
@@ -794,17 +804,17 @@ class Database {
 		return ($stmt->execute());
 	}
 
-	public function share_get_base($id) {
+	public function share_get_base($id, $uid) {
 		$share_base = "0";
 
 		do {
-			$stmt = $this->link->prepare('SELECT sd_cache.id, sd_cache.parent, sd_shares.access from sd_cache LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id WHERE sd_cache.id = ?');
+			$stmt = $this->link->prepare('SELECT sd_cache.id, sd_cache.parent, sd_shares.access, sd_shares.userto, sd_shares.public from sd_cache LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id WHERE sd_cache.id = ?');
 			$stmt->bind_param('s', $id);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($id, $parent, $access);
+			$stmt->bind_result($id, $parent, $access, $userto, $public);
 			$stmt->fetch();
-			if ($access) {
+			if ($access && ($userto == $uid || $public)) {
 				$share_base = $id;
 				break;
 			}
@@ -998,14 +1008,30 @@ class Database {
 		return $files;
 	}
 
-	public function cache_get($id, $uid, $access_request) {
-		$share_base = $this->share_get_base($id);
+	public function cache_get($id, $uid, $access_request, $hash) {
+		$share_base = $this->share_get_base($id, $uid);
 
-		$stmt = $this->link->prepare('SELECT filename, parent, type, size, sd_cache.owner, sd_users.user, edit, md5, sd_trash.hash, sd_cache.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.id = ? AND (owner = ? OR ((userto = ? OR public = 1) AND (access >= ?)) OR (SELECT access FROM sd_shares WHERE id = ?) >= ?)');
-		$stmt->bind_param('siiisi', $id, $uid, $uid, $access_request, $share_base, $access_request);
+		//$stmt = $this->link->prepare('SELECT filename, parent, type, size, sd_cache.owner, sd_users.user, edit, md5, sd_trash.hash, sd_cache.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.id = ? AND (owner = ? OR ((userto = ? OR public = 1) AND (access >= ?)) OR (SELECT access FROM sd_shares WHERE id = ?) >= ?)');
+
+		//$stmt = $this->link->prepare('SELECT filename, parent, type, size, sd_cache.owner, sd_users.user, edit, md5, sd_trash.hash, sd_cache.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.id = ? AND (owner = ? OR ((userto = ? OR public = 1) AND access >= ? AND sd_shares.hash = ?) OR ((SELECT access FROM sd_shares WHERE id = ?) >= ? AND (SELECT hash FROM sd_shares WHERE id = ?) = ?))');
+		//$stmt->bind_param('siiississ', $id, $uid, $uid, $access_request, $hash, $share_base, $access_request, $share_base, $hash);
+
+		//$stmt = $this->link->prepare('SELECT filename, parent, type, size, sd_cache.owner, sd_users.user, edit, md5, sd_trash.hash, sd_cache.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.id = ? AND (owner = ? OR ((userto = ? OR public = 1) AND (access >= ?)) OR (SELECT access FROM sd_shares WHERE id = ?) >= ?)');
+		//$stmt->bind_param('siiisi', $id, $uid, $uid, $access_request, $share_base, $access_request);
+
+		$stmt = $this->link->prepare('
+			SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.hash
+			FROM sd_users
+			RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner
+			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id
+			LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
+			WHERE sd_cache.id = ?
+			AND (sd_cache.owner = ? OR ((SELECT access FROM sd_shares WHERE id = ?) >= ? AND (SELECT hash FROM sd_shares WHERE id = ?) = ?))
+		');
+		$stmt->bind_param('sisiss', $id, $uid, $share_base, $access_request, $share_base, $hash);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($filename, $parent, $type, $size, $ownerid, $owner, $edit, $md5, $trash, $id);
+		$stmt->bind_result($id, $filename, $parent, $type, $size, $edit, $md5, $ownerid, $owner, $trash);
 
 		if ($stmt->fetch()) {
 			return array(
@@ -1108,7 +1134,7 @@ class Database {
 	}
 
 	public function cache_children($id, $uid, $access_request) {
-		$share_base = $this->share_get_base($id);
+		$share_base = $this->share_get_base($id, $uid);
 
 		if ($this->cache_trashed($id)) {
 			return array();
@@ -1158,7 +1184,7 @@ class Database {
 	}
 
 	public function cache_parents($id, $uid) {
-		$share_base = $this->share_get_base($id);
+		$share_base = $this->share_get_base($id, $uid);
 		$parents = array();
 
 		do {

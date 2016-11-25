@@ -51,7 +51,8 @@ $(document).ready(function() {
 	token = $("#data-token").val();
 	simpleScroll.init("files");
 	ImageManager.init();
-	FileManager.init($("#data-view").val(), $("#data-id").val(), $("#data-publichash").val());
+	Binder.init();
+	FileManager.init($("#data-view").val(), $("#data-id").val(), $("#data-ishash").val());
 
 	if (username) {
 		Util.getVersion();
@@ -61,541 +62,538 @@ $(document).ready(function() {
 	$(window).resize();
 });
 
-$(document).on('keydown', function(e) {
-	if ((e.keyCode == 8 || (e.keyCode == 65 && e.ctrlKey)) && !$(e.target).is('input')) {
-		e.preventDefault();
-	}
-});
+var Binder = {
+	init: function() {
+		$(document).on('keydown', function(e) {
+			if ((e.keyCode == 8 || (e.keyCode == 65 && e.ctrlKey)) && !$(e.target).is('input')) {
+				e.preventDefault();
+			}
+		});
 
-$("#files-filter-input").on('input', function(e) {
-	FileManager.filter($(this).val());
-});
+		$("#files-filter-input").on('input', function(e) {
+			FileManager.filter($(this).val());
+		});
 
-$(document).on('keydown', function(e) {
-	// Filter
-	if (!e.shiftKey && !$(e.target).is('input') && !e.ctrlKey &&
-		$("#files-filter").hasClass('hidden') &&
-		((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 96 && e.keyCode <= 105)))
-	{
-		$("#files-filter").removeClass('hidden');
-		$(window).resize();
-		$("#files-filter-input").focus();
+		$(document).on('keydown', function(e) {
+			// Filter
+			if (!e.shiftKey && !$(e.target).is('input') && !e.ctrlKey &&
+				$("#files-filter").hasClass('hidden') &&
+				((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 96 && e.keyCode <= 105)))
+			{
+				$("#files-filter").removeClass('hidden');
+				$(window).resize();
+				$("#files-filter-input").focus();
 
-		setTimeout(function() {
-			// Place cursor behind text
-			$("#files-filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
-		}, 10);
-		FileManager.filter(String.fromCharCode(e.keyCode).toLowerCase());
-	}
+				setTimeout(function() {
+					// Place cursor behind text
+					$("#files-filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
+				}, 10);
+				FileManager.filter(String.fromCharCode(e.keyCode).toLowerCase());
+			}
 
-	switch(e.keyCode) {
-		case 13: // Return
-			if (FileManager.getSelectedCount() == 1 && (!$(e.target).is('input') || e.target.id == 'files-filter-input')) {
+			switch(e.keyCode) {
+				case 13: // Return
+					if (FileManager.getSelectedCount() == 1 && (!$(e.target).is('input') || e.target.id == 'files-filter-input')) {
+						FileManager.open();
+					}
+					break;
+
+				case 38: // Up
+					if (!e.shiftKey) {
+						FileManager.selectPrev();
+					}
+					break;
+
+				case 40: // Down
+					if (!e.shiftKey) {
+						FileManager.selectNext();
+					}
+					break;
+			}
+		});
+
+		$(document).on('keyup', function(e) {
+			switch(e.keyCode) {
+				case 37: // Left
+					if (!$("#img-viewer").hasClass("hidden")) {
+						ImageManager.prev();
+					}
+					break;
+
+				case 39: // Right
+					if (!$("#img-viewer").hasClass("hidden")) {
+						ImageManager.next();
+					}
+					break;
+
+				case 46: // Del
+					if (!$(e.target).is('input')) {
+						FileManager.remove();
+					}
+					break;
+
+				case 8: // Backspace
+					if (!$(e.target).is('input') && !ImageManager.isGalleryLoaded()) {
+						FileManager.dirUp();
+					}
+					break;
+
+				case 65: // A
+					if (e.ctrlKey && !$(e.target).is('input')) {
+						FileManager.selectAll();
+					}
+					break;
+
+				case 32: // Space
+					if (!$(e.target).is('input')) {
+						AudioManager.togglePlay();
+					}
+					break;
+
+				case 27: // Esc
+					ImageManager.closeGallery();
+					ImageManager.close();
+					ImageManager.slideshow(true);
+
+					FileManager.unselectAll();
+					VideoManager.stopVideo();
+					AudioManager.stopAudio();
+
+					Util.closePopup();
+					FileManager.closeFilter();
+					FileManager.closeRename();
+					$(window).resize();
+					break;
+			}
+		});
+
+		$("#sidebar-files").on('click', function(e) {
+			FileManager.closeTrash();
+		});
+
+		$("#sidebar-shareout").on('click', function(e) {
+			FileManager.listShares('shareout');
+		});
+
+		$("#sidebar-sharein").on('click', function(e) {
+			FileManager.listShares('sharein');
+		});
+
+		$("#sidebar-trash").on('click', function(e) {
+			FileManager.openTrash();
+		});
+
+		$("#upload-cancel").on('click', function(e) {
+			FileManager.finishUpload(true);
+		});
+
+		$("#clipboard .close").on('click', function(e) {
+			FileManager.emptyClipboard();
+		});
+
+		$("#scan").on('click', function(e) {
+			FileManager.scan();
+		});
+
+		$("#files-filter .close").on('click', function(e) {
+			FileManager.closeFilter();
+		});
+
+		$("#list-header .col1").on('click', function(e) {
+			FileManager.sortByName();
+		});
+
+		$("#list-header .col3").on('click', function(e) {
+			FileManager.sortByType();
+		});
+
+		$("#list-header .col4").on('click', function(e) {
+			FileManager.sortBySize();
+		});
+
+		$("#list-header .col5").on('click', function(e) {
+			FileManager.sortByEdit();
+		});
+
+		$("#create-file").on('click', function(e) {
+			FileManager.showCreate('file');
+		});
+
+		$("#create-folder").on('click', function(e) {
+			FileManager.showCreate('folder');
+		});
+
+		$("#create .close, #share .close").on('click', function(e) {
+			Util.closePopup();
+		});
+
+		$("#create").on('submit', function(e) {
+			e.preventDefault();
+			FileManager.create();
+		});
+
+		$("#share").on('submit', function(e) {
+			e.preventDefault();
+			FileManager.share();
+		});
+
+		$("#menu-item-info").on('click', function(e) {
+			$("#info, #shield").removeClass("hidden");
+		});
+
+		$("#notification .close, #notification2 .close").on('click', function(e) {
+			Util.hideNotification();
+		});
+
+		$("#fileinfo .close").on('click', function(e) {
+			$("#fileinfo").addClass("hidden");
+			$(window).resize();
+		});
+
+		$("#share-public").on('click', function(e) {
+			FileManager.toggleShareLink();
+		});
+
+		$("#context-gallery").on('click', function(e) {
+			ImageManager.openGallery();
+		});
+
+		$("#context-restore").on('click', function(e) {
+			FileManager.restore();
+		});
+
+		$("#context-copy").on('click', function(e) {
+			FileManager.copy();
+		});
+
+		$("#context-cut").on('click', function(e) {
+			FileManager.cut();
+		});
+
+		$("#context-paste").on('click', function(e) {
+			FileManager.paste();
+		});
+
+		$("#context-share").on('click', function(e) {
+			FileManager.showShare();
+		});
+
+		$("#context-rename").on('click', function(e) {
+			FileManager.showRename();
+		});
+
+		$("#context-unshare").on('click', function(e) {
+			FileManager.unshare();
+		});
+
+		$("#context-zip").on('click', function(e) {
+			FileManager.zip();
+		});
+
+		$("#context-download").on('click', function(e) {
+			FileManager.download();
+		});
+
+		$("#context-delete").on('click', function(e) {
+			FileManager.remove();
+		});
+
+		$("#load-public").on('submit', function(e) {
+			e.preventDefault();
+			FileManager.loadPublic();
+		});
+
+		$("#bFile").on('click', function(e) {
+			$("#upload-file").trigger("click");
+		});
+
+		if (Util.isDirectorySupported()) {
+			$("#bFolder").on('click', function(e) {
+				$("#upload-folder").trigger("click");
+			});
+			$("#upload-folder").on('change', function(e) {
+				FileManager.addUpload(this);
+			});
+		}
+		else {
+			$("#bFolder").addClass("hidden");
+		}
+
+		$("#upload-file").on('change', function(e) {
+			FileManager.addUpload(this);
+		});
+
+		$("#username").on('click', function(e) {
+			$("#menu").toggleClass("hidden");
+		});
+
+		$("#shield").on('click', function(e) {
+			Util.closePopup();
+			FileManager.closeRename();
+		});
+
+		$("#contextmenu").on('click', function(e) {
+			$("#contextmenu").addClass("hidden");
+		});
+
+		$("#sidebar-create").on('click', function() {
+			$("#create-menu").removeClass("hidden");
+			$("#upload-menu").addClass("hidden");
+		});
+
+		$("#sidebar-upload").on('click', function() {
+			$("#upload-menu").removeClass("hidden");
+			$("#create-menu").addClass("hidden");
+		});
+
+		$(".checkbox-box").on('click', function(e) {
+			$(this).toggleClass('checkbox-checked');
+		});
+
+		$("#fSelect").on('click', function(e) {
+			FileManager.toggleSelection();
+		});
+
+		$("#seekbar-bg").on('mousedown', function(e) {
+			seekPos = (e.pageX - $(this).offset().left) / $(this).width();
+		});
+
+		$("#sidebar-trash").on('mouseup', function(e) {
+			if (dragging) { FileManager.remove(); }
+		});
+
+		$("#files").on('mousedown', function(e) {
+			if (typeof e.target.parentNode.value === "undefined" && typeof e.target.value === "undefined" && !$(e.target).is('input')) {
+				$("#contextmenu").addClass("hidden");
+				FileManager.unselectAll();
+			}
+		});
+
+		/**
+		 * Prepares and shows the custom context menu depending on the element(s) selected
+		 */
+		$(document).on('contextmenu', '#content, #gallery', function(e) {
+			e.preventDefault();
+			//var target = (typeof e.target.parentNode.value === "undefined") ? null : FileManager.getElementAt(e.target.parentNode.value);
+			var target = (typeof e.target.value != "undefined") ? FileManager.getElementAt(e.target.value) : ((typeof e.target.parentNode.value != "undefined") ? FileManager.getElementAt(e.target.parentNode.value) : null);
+
+			$('[id^="context-"]').addClass("hidden");
+			$("#contextmenu .divider").addClass("hidden");
+
+			var multi = (FileManager.getSelectedCount() > 1);
+
+			// Restore
+			if (FileManager.view == "trash") {
+				$("#context-restore").removeClass("hidden");
+			}
+			else if (target == null && FileManager.isClipboardFilled()) {
+				// Paste
+				$("#context-paste").removeClass("hidden");
+			}
+			else if (target) {
+				$(".divider").removeClass("hidden");
+				// Is a folder selected?
+				var folderSel = false;
+				var allSel = FileManager.getAllSelected();
+				for (var elem in allSel) {
+					if (allSel[elem].type == "folder") {
+						folderSel = true;
+						continue;
+					}
+				}
+				// Is there something in the clipboard?
+				if (FileManager.isClipboardFilled()) {
+					$("#context-paste").removeClass("hidden");
+				}
+				// Is an image selected?
+				if (target.type == "image" && !multi) {
+					$("#context-gallery").removeClass("hidden");
+				}
+				// Copy
+				if (true) {
+					$("#context-copy").removeClass("hidden");
+				}
+				// Cut
+				if (true) {
+					$("#context-cut").removeClass("hidden");
+				}
+				// Share
+				if ((!target.selfshared) && target.owner == username && !multi) {
+					$("#context-share").removeClass("hidden");
+				}
+				// Unshare
+				else if (target.selfshared && !multi) {
+					$("#context-unshare").removeClass("hidden");
+				}
+				// Rename
+				if (!multi) {
+					$("#context-rename").removeClass("hidden");
+				}
+
+				// Zip
+				$("#context-zip").removeClass("hidden");
+
+				// Download
+				$("#context-download").removeClass("hidden");
+			}
+			else {
+				return;
+			}
+
+			if (target) {
+				// Delete
+				$("#context-delete").removeClass("hidden");
+			}
+
+			// Position context menu at mouse
+			var top = (e.clientY + $("#contextmenu").height() < window.innerHeight) ? e.clientY : e.clientY - $("#contextmenu").height();
+			$("#contextmenu").css({
+				'left' : (e.clientX + 5),
+				'top' : (top + 5)
+			}).removeClass("hidden");
+		});
+
+		$(document).on('mousedown', '#content', function(e) {
+			Util.closePopup();
+		});
+
+		$(document).on('mousedown', '.item, .gallery-container', function(e) {
+			if ($(e.target).is(".thumbnail, .shared, input")) {
+				return;
+			}
+
+			mouseStart = {x: e.clientX, y: e.clientY};
+
+			if (!$("#item" + e.target.parentNode.value).hasClass("selected")) {
+				FileManager.unselectAll();
+				FileManager.closeRename();
+			}
+
+			FileManager.select(this.value);
+			startDrag = true;
+
+			FileManager.updateSelStatus();
+		});
+
+		$(document).on('mouseup', '.item', function(e) {
+			// When click on thumbnail or shared-icon, only select!
+			if ($(e.target).is(".thumbnail, .shared, input")) {
+				return;
+			}
+
+			var id = this.value;
+			if (dragging && FileManager.getElementAt(id).type == "folder" && FileManager.view != "trash" && typeof FileManager.getSelectedAt(id) === 'undefined') {
+				FileManager.move(FileManager.getElementAt(id).id);
+			}
+			else if (e.which == 1 && !dragging) {
+				FileManager.select(this.value);
 				FileManager.open();
 			}
-			break;
+		});
 
-		case 38: // Up
-			if (!e.shiftKey) {
-				FileManager.selectPrev();
+		$(document).on('mouseenter', '.item', function(e) {
+			if (FileManager.getElementAt(this.value).type == 'folder' && dragging) {
+				$(this).addClass("highlight-folder");
 			}
-			break;
+		});
 
-		case 40: // Down
-			if (!e.shiftKey) {
-				FileManager.selectNext();
+		$(document).on('mouseleave', '.item', function(e) {
+			$(this).removeClass("highlight-folder");
+		});
+
+		$(document).on('mouseup', '.thumbnail', function(e) {
+			// Un-select
+			if (typeof FileManager.getSelectedAt(this.value) !== "undefined") {
+				FileManager.unselect(this.value);
+				FileManager.toggleFileInfo(null);
 			}
-			break;
+			// Select
+			else {
+				FileManager.select(this.value);
+				FileManager.toggleFileInfo(FileManager.getElementAt(this.value));
+			}
+		});
+
+		$(document).on('mouseenter', '.item .col1', function(e) {
+			if (this.offsetWidth + 4 < this.scrollWidth && this.offsetHeight <= this.scrollHeight) {
+				$("#dragstatus").css({
+					'top' : e.pageY + 10,
+					'left' : e.pageX + 10
+				}).removeClass("hidden").text(this.innerHTML);
+			}
+		});
+
+		$(document).on('mouseleave', '.item .col1', function(e) {
+			if (!dragging) {
+				$("#dragstatus").addClass("hidden");
+			}
+		});
+
+		$(document).on('mousemove', function(e) {
+			if (seekPos != null && e.pageX > $("#seekbar-bg").offset().left && e.pageX < $("#seekbar-bg").offset().left + $("#seekbar-bg").width()) {
+				seekPos = (e.pageX - $("#seekbar-bg").offset().left) / $("#seekbar-bg").width();
+				$("#seekbar-progress").width($("#seekbar-bg").width() * seekPos);
+			}
+			else if (startDrag) {
+				var distMoved = Math.round(Math.sqrt(Math.pow(mouseStart.y - e.clientY, 2) + Math.pow(mouseStart.x - e.clientX, 2)));
+				if (distMoved > 10) {
+					$("#sidebar-trash").addClass("trashact");
+					dragging = true;
+					$("#dragstatus").css({
+						'top' : e.pageY + 10,
+						'left' : e.pageX + 10
+					}).removeClass("hidden").text(FileManager.getSelectedCount());
+				}
+			}
+		});
+
+		$(document).on('mouseup', function(e) {
+			if (seekPos != null) {
+				AudioManager.seekTo(seekPos);
+				seekPos = null;
+			}
+
+			$("#dragstatus").addClass("hidden");
+			startDrag = false;
+			dragging = false;
+
+			$("#sidebar-trash").removeClass("trashact");
+
+			if (e.target.id != "renameinput") {
+				FileManager.closeRename();
+			}
+
+			if (e.which != 3) {
+				$("#contextmenu").addClass("hidden");
+			}
+		});
+
+		document.addEventListener('dragover', function(e) {
+			$("#dropzone").removeClass("hidden");
+			e.stopPropagation();
+			e.preventDefault();
+			e.dataTransfer.dropEffect = 'copy';
+		});
+
+		document.addEventListener('dragleave', function(e) {
+			$("#dropzone").addClass("hidden");
+		});
+
+		// Get file data on drop
+		document.addEventListener('drop', function(e) {
+			$("#dropzone").addClass("hidden");
+			e.stopPropagation();
+			e.preventDefault();
+			FileManager.addUpload(e.dataTransfer);
+		});
+
+		window.onpopstate = function(e) {
+			var id = Util.getUrlParameter('id');
+			FileManager.id = (!id || id == 'null') ? '0' : id;
+			FileManager.fetch(true);
+		};
 	}
-});
-
-$(document).on('keyup', function(e) {
-	switch(e.keyCode) {
-		case 37: // Left
-			if (!$("#img-viewer").hasClass("hidden")) {
-				ImageManager.prev();
-			}
-			break;
-
-		case 39: // Right
-			if (!$("#img-viewer").hasClass("hidden")) {
-				ImageManager.next();
-			}
-			break;
-
-		case 46: // Del
-			if (!$(e.target).is('input')) {
-				FileManager.remove();
-			}
-			break;
-
-		case 8: // Backspace
-			if (!$(e.target).is('input') && !ImageManager.isGalleryLoaded()) {
-				FileManager.dirUp();
-			}
-			break;
-
-		case 65: // A
-			if (e.ctrlKey && !$(e.target).is('input')) {
-				FileManager.selectAll();
-			}
-			break;
-
-		case 32: // Space
-			if (!$(e.target).is('input')) {
-				AudioManager.togglePlay();
-			}
-			break;
-
-		case 27: // Esc
-			ImageManager.closeGallery();
-			ImageManager.close();
-			ImageManager.slideshow(true);
-
-			FileManager.unselectAll();
-			VideoManager.stopVideo();
-			AudioManager.stopAudio();
-
-			Util.closePopup();
-			FileManager.closeFilter();
-			FileManager.closeRename();
-			$(window).resize();
-			break;
-	}
-});
-
-$("#sidebar-files").on('click', function(e) {
-	FileManager.closeTrash();
-});
-
-$("#sidebar-shareout").on('click', function(e) {
-	FileManager.listShares('shareout');
-});
-
-$("#sidebar-sharein").on('click', function(e) {
-	FileManager.listShares('sharein');
-});
-
-$("#sidebar-trash").on('click', function(e) {
-	FileManager.openTrash();
-});
-
-$("#upload-cancel").on('click', function(e) {
-	FileManager.finishUpload(true);
-});
-
-$("#clipboard .close").on('click', function(e) {
-	FileManager.emptyClipboard();
-});
-
-$("#scan").on('click', function(e) {
-	FileManager.scan();
-});
-
-$("#files-filter .close").on('click', function(e) {
-	FileManager.closeFilter();
-});
-
-$("#list-header .col1").on('click', function(e) {
-	FileManager.sortByName();
-});
-
-$("#list-header .col3").on('click', function(e) {
-	FileManager.sortByType();
-});
-
-$("#list-header .col4").on('click', function(e) {
-	FileManager.sortBySize();
-});
-
-$("#list-header .col5").on('click', function(e) {
-	FileManager.sortByEdit();
-});
-
-$("#create-file").on('click', function(e) {
-	FileManager.showCreate('file');
-});
-
-$("#create-folder").on('click', function(e) {
-	FileManager.showCreate('folder');
-});
-
-$("#create .close, #share .close").on('click', function(e) {
-	Util.closePopup();
-});
-
-$("#create").on('submit', function(e) {
-	e.preventDefault();
-	FileManager.create();
-});
-
-$("#share").on('submit', function(e) {
-	e.preventDefault();
-	FileManager.share();
-});
-
-$("#menu-item-info").on('click', function(e) {
-	$("#info, #shield").removeClass("hidden");
-});
-
-$("#notification .close, #notification2 .close").on('click', function(e) {
-	Util.hideNotification();
-});
-
-$("#fileinfo .close").on('click', function(e) {
-	$("#fileinfo").addClass("hidden");
-	$(window).resize();
-});
-
-$("#share-public").on('click', function(e) {
-	FileManager.toggleShareLink();
-});
-
-$("#context-gallery").on('click', function(e) {
-	ImageManager.openGallery();
-});
-
-$("#context-restore").on('click', function(e) {
-	FileManager.restore();
-});
-
-$("#context-copy").on('click', function(e) {
-	FileManager.copy();
-});
-
-$("#context-cut").on('click', function(e) {
-	FileManager.cut();
-});
-
-$("#context-paste").on('click', function(e) {
-	FileManager.paste();
-});
-
-$("#context-share").on('click', function(e) {
-	FileManager.showShare();
-});
-
-$("#context-rename").on('click', function(e) {
-	FileManager.showRename();
-});
-
-$("#context-unshare").on('click', function(e) {
-	FileManager.unshare();
-});
-
-$("#context-zip").on('click', function(e) {
-	FileManager.zip();
-});
-
-$("#context-download").on('click', function(e) {
-	FileManager.download();
-});
-
-$("#context-delete").on('click', function(e) {
-	FileManager.remove();
-});
-
-$("#load-public").on('submit', function(e) {
-	e.preventDefault();
-	FileManager.loadPublic();
-});
-
-$("#bFile").on('click', function(e) {
-	$("#upload-file").trigger("click");
-});
-
-if (Util.isDirectorySupported()) {
-	$("#bFolder").on('click', function(e) {
-		$("#upload-folder").trigger("click");
-	});
-	$("#upload-folder").on('change', function(e) {
-		FileManager.addUpload(this);
-	});
 }
-else {
-	$("#bFolder").addClass("hidden");
-}
-
-$("#upload-file").on('change', function(e) {
-	FileManager.addUpload(this);
-});
-
-$("#username").on('click', function(e) {
-	$("#menu").toggleClass("hidden");
-});
-
-$("#shield").on('click', function(e) {
-	Util.closePopup();
-	FileManager.closeRename();
-});
-
-$("#contextmenu").on('click', function(e) {
-	$("#contextmenu").addClass("hidden");
-});
-
-$("#sidebar-create").on('click', function() {
-	$("#create-menu").removeClass("hidden");
-	$("#upload-menu").addClass("hidden");
-});
-
-$("#sidebar-upload").on('click', function() {
-	$("#upload-menu").removeClass("hidden");
-	$("#create-menu").addClass("hidden");
-});
-
-$(".checkbox-box").on('click', function(e) {
-	$(this).toggleClass('checkbox-checked');
-});
-
-$("#fSelect").on('click', function(e) {
-	FileManager.toggleSelection();
-});
-
-$("#seekbar-bg").on('mousedown', function(e) {
-	seekPos = (e.pageX - $(this).offset().left) / $(this).width();
-});
-
-$("#sidebar-trash").on('mouseup', function(e) {
-	if (dragging) { FileManager.remove(); }
-});
-
-$("#files").on('mousedown', function(e) {
-	if (typeof e.target.parentNode.value === "undefined" && typeof e.target.value === "undefined" && !$(e.target).is('input')) {
-		$("#contextmenu").addClass("hidden");
-		FileManager.unselectAll();
-	}
-});
-
-// $(document).on('contextmenu', '#gallery', function(e) {
-// 	console.log("worx");
-// 	var target = (typeof e.target.value != "undefined") ? FileManager.getElementAt(e.target.value) : ((typeof e.target.parentNode.value != "undefined") ? FileManager.getElementAt(e.target.parentNode.value) : null);
-// 	console.log(target);
-// });
-
-/**
- * Prepares and shows the custom context menu depending on the element(s) selected
- */
-$(document).on('contextmenu', '#content, #gallery', function(e) {
-	e.preventDefault();
-	//var target = (typeof e.target.parentNode.value === "undefined") ? null : FileManager.getElementAt(e.target.parentNode.value);
-	var target = (typeof e.target.value != "undefined") ? FileManager.getElementAt(e.target.value) : ((typeof e.target.parentNode.value != "undefined") ? FileManager.getElementAt(e.target.parentNode.value) : null);
-	console.log(target);
-
-	$('[id^="context-"]').addClass("hidden");
-	$("#contextmenu .divider").addClass("hidden");
-
-	var multi = (FileManager.getSelectedCount() > 1);
-
-	// Restore
-	if (FileManager.view == "trash") {
-		$("#context-restore").removeClass("hidden");
-	}
-	else if (target == null && FileManager.isClipboardFilled()) {
-		// Paste
-		$("#context-paste").removeClass("hidden");
-	}
-	else if (target) {
-		$(".divider").removeClass("hidden");
-		// Is a folder selected?
-		var folderSel = false;
-		var allSel = FileManager.getAllSelected();
-		for (var elem in allSel) {
-			if (allSel[elem].type == "folder") {
-				folderSel = true;
-				continue;
-			}
-		}
-		// Is there something in the clipboard?
-		if (FileManager.isClipboardFilled()) {
-			$("#context-paste").removeClass("hidden");
-		}
-		// Is an image selected?
-		if (target.type == "image" && !multi) {
-			$("#context-gallery").removeClass("hidden");
-		}
-		// Copy
-		if (true) {
-			$("#context-copy").removeClass("hidden");
-		}
-		// Cut
-		if (true) {
-			$("#context-cut").removeClass("hidden");
-		}
-		// Share
-		if ((!target.selfshared) && target.owner == username && !multi) {
-			$("#context-share").removeClass("hidden");
-		}
-		// Unshare
-		else if (target.selfshared && !multi) {
-			$("#context-unshare").removeClass("hidden");
-		}
-		// Rename
-		if (!multi) {
-			$("#context-rename").removeClass("hidden");
-		}
-
-		// Zip
-		$("#context-zip").removeClass("hidden");
-
-		// Download
-		$("#context-download").removeClass("hidden");
-	}
-	else {
-		return;
-	}
-
-	if (target) {
-		// Delete
-		$("#context-delete").removeClass("hidden");
-	}
-
-	// Position context menu at mouse
-	var top = (e.clientY + $("#contextmenu").height() < window.innerHeight) ? e.clientY : e.clientY - $("#contextmenu").height();
-	$("#contextmenu").css({
-		'left' : (e.clientX + 5),
-		'top' : (top + 5)
-	}).removeClass("hidden");
-});
-
-$(document).on('mousedown', '#content', function(e) {
-	Util.closePopup();
-});
-
-$(document).on('mousedown', '.item, .gallery-container', function(e) {
-	if ($(e.target).is(".thumbnail, .shared, input")) {
-		return;
-	}
-
-	mouseStart = {x: e.clientX, y: e.clientY};
-
-	if (!$("#item" + e.target.parentNode.value).hasClass("selected")) {
-		FileManager.unselectAll();
-		FileManager.closeRename();
-	}
-
-	FileManager.select(this.value);
-	startDrag = true;
-
-	FileManager.updateSelStatus();
-});
-
-$(document).on('mouseup', '.item', function(e) {
-	// When click on thumbnail or shared-icon, only select!
-	if ($(e.target).is(".thumbnail, .shared, input")) {
-		return;
-	}
-
-	var id = this.value;
-	if (dragging && FileManager.getElementAt(id).type == "folder" && FileManager.view != "trash" && typeof FileManager.getSelectedAt(id) === 'undefined') {
-		FileManager.move(FileManager.getElementAt(id).id);
-	}
-	else if (e.which == 1 && !dragging) {
-		FileManager.select(this.value);
-		FileManager.open();
-	}
-});
-
-$(document).on('mouseenter', '.item', function(e) {
-	if (FileManager.getElementAt(this.value).type == 'folder' && dragging) {
-		$(this).addClass("highlight-folder");
-	}
-});
-
-$(document).on('mouseleave', '.item', function(e) {
-	$(this).removeClass("highlight-folder");
-});
-
-$(document).on('mouseup', '.thumbnail', function(e) {
-	// Un-select
-	if (typeof FileManager.getSelectedAt(this.value) !== "undefined") {
-		FileManager.unselect(this.value);
-		FileManager.toggleFileInfo(null);
-	}
-	// Select
-	else {
-		FileManager.select(this.value);
-		FileManager.toggleFileInfo(FileManager.getElementAt(this.value));
-	}
-});
-
-$(document).on('mouseenter', '.item .col1', function(e) {
-	if (this.offsetWidth + 4 < this.scrollWidth && this.offsetHeight <= this.scrollHeight) {
-		$("#dragstatus").css({
-			'top' : e.pageY + 10,
-			'left' : e.pageX + 10
-		}).removeClass("hidden").text(this.innerHTML);
-	}
-});
-
-$(document).on('mouseleave', '.item .col1', function(e) {
-	if (!dragging) {
-		$("#dragstatus").addClass("hidden");
-	}
-});
-
-$(document).on('mousemove', function(e) {
-	if (seekPos != null && e.pageX > $("#seekbar-bg").offset().left && e.pageX < $("#seekbar-bg").offset().left + $("#seekbar-bg").width()) {
-		seekPos = (e.pageX - $("#seekbar-bg").offset().left) / $("#seekbar-bg").width();
-		$("#seekbar-progress").width($("#seekbar-bg").width() * seekPos);
-	}
-	else if (startDrag) {
-		var distMoved = Math.round(Math.sqrt(Math.pow(mouseStart.y - e.clientY, 2) + Math.pow(mouseStart.x - e.clientX, 2)));
-		if (distMoved > 10) {
-			$("#sidebar-trash").addClass("trashact");
-			dragging = true;
-			$("#dragstatus").css({
-				'top' : e.pageY + 10,
-				'left' : e.pageX + 10
-			}).removeClass("hidden").text(FileManager.getSelectedCount());
-		}
-	}
-});
-
-$(document).on('mouseup', function(e) {
-	if (seekPos != null) {
-		AudioManager.seekTo(seekPos);
-		seekPos = null;
-	}
-
-	$("#dragstatus").addClass("hidden");
-	startDrag = false;
-	dragging = false;
-
-	$("#sidebar-trash").removeClass("trashact");
-
-	if (e.target.id != "renameinput") {
-		FileManager.closeRename();
-	}
-
-	if (e.which != 3) {
-		$("#contextmenu").addClass("hidden");
-	}
-});
-
-document.addEventListener('dragover', function(e) {
-	$("#dropzone").removeClass("hidden");
-	e.stopPropagation();
-	e.preventDefault();
-	e.dataTransfer.dropEffect = 'copy';
-});
-
-document.addEventListener('dragleave', function(e) {
-	$("#dropzone").addClass("hidden");
-});
-
-// Get file data on drop
-document.addEventListener('drop', function(e) {
-	$("#dropzone").addClass("hidden");
-	e.stopPropagation();
-	e.preventDefault();
-	FileManager.addUpload(e.dataTransfer);
-});
-
-window.onpopstate = function(e) {
-	var id = Util.getUrlParameter('id');
-	FileManager.id = (!id || id == 'null') ? '0' : id;
-	FileManager.fetch(true);
-};
 
 /**
  * FileManager
@@ -615,7 +613,6 @@ var FileManager = {
 	hierarchy: [],
 	sortOrder: 1, // 1: asc, -1: desc
 	downloadPub: false,
-	publicHash: null,
 	publicLoginAttempt: 0,
 	deleteAfterCopy: false,
 
@@ -889,7 +886,6 @@ var FileManager = {
 		FileManager.currentSelected = -1;
 		$("#contextmenu").addClass("hidden");
 		Util.busy(true);
-		console.log("busy");
 
 		$.ajax({
 			url: 'api/files/children',
@@ -905,7 +901,12 @@ var FileManager = {
 			FileManager.sortByName(1);
 
 			if (!back) {
-				window.history.pushState(null, '', '?v=' + FileManager.view + '&id=' + FileManager.id);
+				if (FileManager.id.length > 1) {
+					window.history.pushState(null, '', 'files/' + FileManager.view + '/' + FileManager.id);
+				}
+				else {
+					window.history.pushState(null, '', 'files/' + FileManager.view);
+				}
 			}
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
@@ -991,12 +992,12 @@ var FileManager = {
 		return Object.keys(FileManager.selected).length;
 	},
 
-	init: function(view, id, publicHash) {
+	init: function(view, id) {
 		FileManager.view = (view) ? view : "files";
 		FileManager.id = id;
-		FileManager.publicHash = publicHash;
+		var isHash = (FileManager.id.length == 8);
 
-		if (FileManager.publicHash) {
+		if (FileManager.view == 'public' && (isHash)) {
 			FileManager.loadPublic();
 		}
 		else {
@@ -1024,7 +1025,7 @@ var FileManager = {
 		$.ajax({
 			url: 'api/files/public',
 			type: 'post',
-			data: {token: token, hash: FileManager.publicHash, key: key},
+			data: {token: token, hash: FileManager.id, key: key},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			FileManager.hierarchy = [];
@@ -1124,9 +1125,8 @@ var FileManager = {
 	},
 
 	openODT: function(elem) {
-		$('<form id="odt-form" class="hidden" action="odfeditor" target="_blank" method="post"><input name="token"/><input name="elem"/></form>').appendTo('body');
+		$('<form id="odt-form" class="hidden" action="odfeditor/' + elem.id + '" target="_blank" method="post"><input name="token"/><input name="elem"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
-		$('[name="elem"]').val(elem.id);
 		$('#odt-form').submit();
 	},
 
@@ -1135,9 +1135,8 @@ var FileManager = {
 	},
 
 	openText: function(elem) {
-		$('<form id="text-form" class="hidden" action="texteditor" target="_blank" method="post"><input name="token"/><input name="file"/></form>').appendTo('body');
+		$('<form id="text-form" class="hidden" action="texteditor/' + elem.id + '" target="_blank" method="post"><input name="token"/><input name="file"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
-		$('[name="file"]').val(elem.id);
 		$('#text-form').submit();
 	},
 
