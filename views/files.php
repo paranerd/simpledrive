@@ -145,9 +145,9 @@
 
 		<div class="menu-item"><div id="fileinfo-header" class="menu-text">Details:</div></div>
 
-		<div class="menu-item"><div class="menu-thumb icon-files"></div><div class="menu-text">2.48MB</div></div>
-		<div class="menu-item"><div class="menu-thumb icon-info"></div><div class="menu-text">image</div></div>
-		<div class="menu-item"><div class="menu-thumb icon-rename"></div><div class="menu-text">20.11.2016</div></div>
+		<div class="menu-item"><div class="menu-thumb icon-files"></div><div id="fileinfo-size" class="menu-text"></div></div>
+		<div class="menu-item"><div class="menu-thumb icon-info"></div><div id="fileinfo-type" class="menu-text"></div></div>
+		<div class="menu-item"><div class="menu-thumb icon-rename"></div><div id="fileinfo-edit" class="menu-text"></div></div>
 	</div>
 
 	<!-- Gallery -->

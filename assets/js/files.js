@@ -1462,9 +1462,10 @@ var FileManager = {
 		$("#fileinfo-link").addClass("hidden").unbind('click');
 
 		if (elem) {
+			var size = (elem.type == "folder") ? ((elem.size == 1) ? elem.size + " file" : elem.size + " files") : Util.byteToString(elem.size);
 			$("#fileinfo-icon").removeClass().addClass('menu-thumb icon-' + elem.type);
 			$("#fileinfo-name").text(elem.filename);
-			$("#fileinfo-size").text(Util.byteToString(elem.size));
+			$("#fileinfo-size").text(size);
 			$("#fileinfo-type").text(elem.type);
 			$("#fileinfo-edit").text(Util.timestampToDate(elem.edit));
 

@@ -1,8 +1,10 @@
 <?php
+
 /**
- * Copyright (c) 2016, Kevin Schulz <paranerd.development@gmail.com>
- * This file is licensed under the Affero General Public License version 3 or later.
- * See the COPYING-README file.
+ * @author		Kevin Schulz <paranerd.development@gmail.com>
+ * @copyright	(c) 2016, Kevin Schulz. All Rights Reserved
+ * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
+ * @link		http://simpledrive.org
  */
 
 class Database {
