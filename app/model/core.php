@@ -84,7 +84,7 @@ class Core_Model {
 		$crypt_pass = hash('sha256', $pass . $salt);
 
 		if ($id = $this->db->user_create($username, $crypt_pass, $salt, 1, $mail)) {
-			return $this->generate_token($id);
+			return Util::generate_token($id);
 		}
 
 		unlink($this->config_path);
@@ -168,7 +168,7 @@ class Core_Model {
 
 	public function generate_token($uid, $hash = "") {
 		$db			= Database::getInstance();
-		$token		= $db->session_get_unique_token();
+		//$token		= $db->session_get_unique_token();
 		$name		= ($hash) ? 'public_token' : 'token';
 		$expires	= ($hash) ? time() + 60 * 60 : time() + 60 * 60 * 24 * 7; // 1h for public, otherwise 1 week
 
@@ -211,7 +211,7 @@ class Core_Model {
 			// Protect user directories
 			$this->create_user_htaccess();
 
-			return $this->generate_token($user['id']);
+			return Util::generate_token($user['id']);
 		}
 		// Wrong password
 		else {

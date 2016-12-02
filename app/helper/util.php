@@ -7,10 +7,8 @@
  * @link		http://simpledrive.org
  */
 
-require_once 'app/helper/ogg.class.php';
-
 class Util {
-	static $encryption_method	= 'aes-256-cbc';
+	static $encryption_method = 'aes-256-cbc';
 
 	/**
 	 * Encrypt string or file
@@ -254,5 +252,40 @@ class Util {
 				return $key;
 			}
 		}
+	}
+
+	/**
+	 * Generate authorization token, add session to db and set cookie
+	 * @param user
+	 * @param hash public share hash (optional)
+	 * @return string authorization token
+	 */
+
+	public function generate_token($uid, $hash = "") {
+		$config		= json_decode(file_get_contents('config/config.json'), true);
+		$db			= Database::getInstance();
+		//$token		= $db->session_get_unique_token();
+		$name		= ($hash) ? 'public_token' : 'token';
+		$expires	= ($hash) ? time() + 60 * 60 : time() + 60 * 60 * 24 * 7; // 1h for public, otherwise 1 week
+
+		/*if ($token &&
+			setcookie($name, $token, $expires, "/") &&
+			$db->session_start($token, $uid, $hash, $expires))
+		{
+			return $token;
+		}*/
+
+		if ($token = $db->session_start($uid, $hash, $expires)) {
+			file_put_contents(LOG, "generated token: " . $token . "\n", FILE_APPEND);
+			setcookie($name, $token, $expires, "/");
+			return $token;
+		}
+
+		return null;
+	}
+
+	public function validate_token($token) {
+		$db = Database::getInstance();
+		return ($db->session_validate_token($token)) ? $token : "";
 	}
 }

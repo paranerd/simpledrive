@@ -12,6 +12,7 @@
 		exit();
 	}
 
+	$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
 	$code		= (isset($_GET['code'])) ? $_GET['code'] : "";
 	$username 	= ($user) ? $user['username'] : '';
 	$admin 		= ($user) ? $user['admin'] : false;

@@ -7,8 +7,6 @@
  * @link		http://simpledrive.org
  */
 
-require_once 'app/model/core.php';
-
 class User_Model {
 
 	public function __construct($token) {
@@ -18,7 +16,6 @@ class User_Model {
 		$this->user		= $this->db->user_get_by_token($token);
 		$this->uid		= ($this->user) ? $this->user['id'] : null;
 		$this->username	= ($this->user) ? $this->user['username'] : "";
-		$this->c		= new Core_Model();
 	}
 
 	public function get($username) {
@@ -213,7 +210,7 @@ class User_Model {
 			$crypt_pass = hash('sha256', $newpass . $salt);
 
 			if ($this->db->user_change_password($this->uid, $salt, $crypt_pass)) {
-				$token = $this->c->generate_token($this->uid);
+				$token = Util::generate_token($this->uid);
 				$this->db->session_invalidate($this->uid, $token);
 				return $token;
 			}

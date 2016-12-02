@@ -53,10 +53,10 @@ $(document).ready(function() {
 	simpleScroll.init("files");
 	ImageManager.init();
 	Binder.init();
-	FileManager.init($("#data-view").val(), $("#data-id").val(), $("#data-ishash").val());
+	FileManager.init($("#data-view").val(), $("#data-id").val(), $("#data-public").val());
 
 	if (username) {
-		Util.getVersion();
+		//Util.getVersion();
 		$("#username").html(Util.escape(username) + " &#x25BE");
 	}
 
@@ -605,6 +605,7 @@ var FileManager = {
 	requestID: 0,
 	view: 'files',
 	id: '0',
+	public: false,
 
 	selected: {},
 	currentSelected: -1,
@@ -1005,9 +1006,10 @@ var FileManager = {
 		return Object.keys(FileManager.selected).length;
 	},
 
-	init: function(view, id) {
+	init: function(view, id, public) {
 		FileManager.view = (view) ? view : "files";
 		FileManager.id = id;
+		FileManager.public = public;
 		var isHash = (FileManager.id.length == 8);
 
 		if (FileManager.view == 'pub' && (isHash)) {
@@ -1138,7 +1140,7 @@ var FileManager = {
 	},
 
 	openODT: function(elem) {
-		$('<form id="odt-form" class="hidden" action="files/odfeditor/' + elem.id + '" target="_blank" method="post"><input name="token"/><input name="elem"/></form>').appendTo('body');
+		$('<form id="odt-form" class="hidden" action="files/odfeditor/' + elem.id + '" target="_blank" method="post"><input name="token"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
 		$('#odt-form').submit();
 	},
@@ -1148,8 +1150,9 @@ var FileManager = {
 	},
 
 	openText: function(elem) {
-		$('<form id="text-form" class="hidden" action="files/texteditor/' + elem.id + '" target="_blank" method="post"><input name="token"/><input name="file"/></form>').appendTo('body');
+		$('<form id="text-form" class="hidden" action="files/texteditor/' + elem.id + '" target="_blank" method="post"><input name="token"/><input name="public"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
+		$('[name="public"]').val(FileManager.public);
 		$('#text-form').submit();
 	},
 

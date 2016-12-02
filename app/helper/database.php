@@ -481,7 +481,9 @@ class Database {
 	 * @return boolean true if successful
 	 */
 
-	public function session_start($token, $uid, $hash = '', $expires) {
+	public function session_start($uid, $hash = '', $expires) {
+		$token = $this->session_get_unique_token();
+
 		$stmt = $this->link->prepare('INSERT INTO sd_session (token, user, hash, expires, fingerprint) VALUES (?, ?, ?, ?, ?)');
 		$stmt->bind_param('sisis', $token, $uid, $hash, $expires, $this->fingerprint);
 		$stmt->execute();
@@ -490,20 +492,34 @@ class Database {
 
 		$this->session_invalidate_client($uid, $token);
 
-		return ($stmt->affected_rows != 0);
+		return ($stmt->affected_rows != 0) ? $token : null;
 	}
 
 	public function session_get_unique_token() {
 		$token;
 
 		do {
-			$token = md5(openssl_random_pseudo_bytes(32));
+			$token = bin2hex(openssl_random_pseudo_bytes(32));
 			$stmt = $this->link->prepare('SELECT token FROM sd_session WHERE token = ?');
 			$stmt->bind_param('s', $token);
 			$stmt->execute();
 		} while ($stmt->num_rows > 0);
 
 		return $token;
+	}
+
+	/**
+	 * Returns true if the token exists and is connected to the current client
+	 */
+
+	public function session_validate_token($token) {
+		$stmt = $this->link->prepare('SELECT id FROM sd_session WHERE token = ? AND fingerprint = ?');
+		$stmt->bind_param('ss', $token, $this->fingerprint);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->fetch();
+
+		return ($stmt->num_rows == 1);
 	}
 
 	public function session_active_token($uid) {

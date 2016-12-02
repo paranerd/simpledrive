@@ -12,6 +12,7 @@
 		exit();
 	}
 
+	$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
 	$username 	= ($user) ? $user['username'] : '';
 	$admin 		= ($user) ? $user['admin'] : false;
 	$color 		= ($user) ? $user['color'] : 'light';

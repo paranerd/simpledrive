@@ -10,6 +10,7 @@ var VideoManager = {
 	used: false,
 
 	init: function() {
+		console.log("init video");
 		$("#video-close").on('click', function(e) {
 			$("#videoplayer").addClass("hidden");
 			VideoManager.stopVideo();
@@ -40,6 +41,7 @@ var VideoManager = {
 	},
 
 	play: function(elem, id) {
+		console.log("play video");
 		if (!VideoManager.used) {
 			VideoManager.init();
 		}
@@ -59,6 +61,7 @@ var VideoManager = {
 	},
 
 	stopVideo: function() {
+		console.log("stop video");
 		VideoManager.video.pause();
 	}
 }

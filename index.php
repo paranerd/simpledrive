@@ -26,7 +26,7 @@ $action			= (sizeof($args) > 0) ? array_shift($args) : '';
 $name			= ucfirst($controller) . "_Controller";
 // Extract token
 $token_source	= ($render) ? $_COOKIE : $_REQUEST;
-$token			= (isset($token_source['token'])) ? $token_source['token'] : null;
+$token	= (isset($token_source['token'])) ? Util::validate_token($token_source['token']) : '';
 
 // Not installed - enter setup
 if (!file_exists('config/config.json') && ($controller != 'core' || $action != 'setup')) {

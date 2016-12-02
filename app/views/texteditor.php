@@ -7,9 +7,21 @@
  * @link		http://simpledrive.org
  */
 
-	$id = (sizeof($args) > 0) ? array_shift($args) : null;
+	$id			= (sizeof($args) > 0) ? array_shift($args) : null;
+	$public		= isset($_REQUEST['public']);
+	$username 	= ($user) ? $user['username'] : '';
+	$admin 		= ($user) ? $user['admin'] : false;
+	$color 		= ($user) ? $user['color'] : 'light';
+	$fileview 	= ($user) ? $user['fileview'] : 'list';
 
-	if (!$user || !$id) {
+	if ($public) {
+		$token = (isset($_COOKIE['public_token'])) ? $_COOKIE['public_token'] : null;
+	}
+	else {
+		$token = (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
+	}
+
+	if ((!$public && !$user) || !$id) {
 		header('Location: ' . $base . 'core/logout');
 		exit();
 	}
@@ -29,7 +41,7 @@
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 
-<body class="<?php echo $user['color']; ?>">
+<body class="<?php echo $color; ?>">
 	<!-- Header -->
 	<div id="header">
 		<!-- Title -->
@@ -80,7 +92,7 @@
 		<span class="light close"> &times;</span>
 	</div>
 
-	<input id="data-username" type="hidden" value="<?php echo $user['username']; ?>"/>
+	<input id="data-username" type="hidden" value="<?php echo $username; ?>"/>
 	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
 	<input id="data-file" type="hidden" value="<?php echo $id; ?>"/>
 

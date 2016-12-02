@@ -9,7 +9,6 @@
 
 require_once 'app/helper/ogg.class.php';
 require_once 'app/helper/sync.php';
-require_once 'app/model/core.php';
 require_once 'app/model/user.php';
 
 class File_Model {
@@ -31,7 +30,6 @@ class File_Model {
 		$this->user			= ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid			= ($this->user) ? $this->user['id'] : null;
 		$this->username		= ($this->user) ? $this->user['username'] : "";
-		$this->core			= new Core_Model();
 	}
 
 	/**
@@ -366,7 +364,7 @@ class File_Model {
 		$file = $this->get_cached($target, self::$PERMISSION_WRITE);
 
 		if (!$file) {
-			throw new Exception('Error accessing file', '403');
+			throw new Exception('Permission denied', '403');
 		}
 
 		$path = $this->config['datadir'] . $file['owner'] . $file['path'];
@@ -868,13 +866,12 @@ class File_Model {
 			throw new Exception('File not found', '500');
 		}
 
-
 		// Incorrect password
 		else if ($share['pass'] != $key && !$this->db->share_is_unlocked($hash, $this->token)) {
 			throw new Exception('Wrong password', '403');
 		}
 		else {
-			$token = $this->core->generate_token(0, $hash);
+			$token = Util::generate_token(0, $hash);
 
 			if ($token) {
 				$return = array('share' => array('id' => $file['id'], 'filename' => $file['filename'], 'type' => $file['type']), 'token' => $token);
@@ -894,7 +891,6 @@ class File_Model {
 	 */
 
 	public function get($targets, $width = null, $height = null) {
-		//throw new Exception('Error downloading', '500');
 		$path = null;
 		$delete_flag = false;
 

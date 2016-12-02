@@ -7,20 +7,24 @@
  * @link		http://simpledrive.org
  */
 
-	$id = (sizeof($args) > 0) ? array_shift($args) : "0";
-
-	if ($section == 'pub') {
-		$token = (isset($_COOKIE['public_token'])) ? $_COOKIE['public_token'] : null;
-	}
-	else if (!$user) {
-		header('Location: ' . $base . 'core/login');
-		exit();
-	}
-
+	$id			= (sizeof($args) > 0) ? array_shift($args) : "0";
+	$public		= ($section == 'pub');
 	$username 	= ($user) ? $user['username'] : '';
 	$admin 		= ($user) ? $user['admin'] : false;
 	$color 		= ($user) ? $user['color'] : 'light';
 	$fileview 	= ($user) ? $user['fileview'] : 'list';
+
+	if ($public) {
+		$token = (isset($_COOKIE['public_token'])) ? $_COOKIE['public_token'] : null;
+	}
+	else {
+		$token = (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
+	}
+
+	if (!$public && !$user) {
+		header('Location: ' . $base . 'core/login');
+		exit();
+	}
 ?>
 
 <!DOCTYPE html>
@@ -290,6 +294,7 @@
 	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
 	<input id="data-view" type="hidden" value="<?php echo $section; ?>"/>
 	<input id="data-id" type="hidden" value="<?php echo $id; ?>"/>
+	<input id="data-public" type="hidden" value="<?php echo $public; ?>"/>
 
 	<script src="public/js/jquery-1.11.3.min.js"></script>
 	<script src="public/js/simplescroll.js"></script>
