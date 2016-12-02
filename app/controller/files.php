@@ -11,9 +11,9 @@ require_once 'app/model/file.php';
 
 class Files_Controller {
 	protected $model;
-	protected $default_section = "files";
-	protected $default_view = "files";
-	protected $valid_sections = array('files', 'sharein', 'shareout', 'trash', 'pub', 'webdav', 'texteditor', 'odfeditor');
+	protected $default_section	= "files";
+	protected $default_view		= "files";
+	protected $valid_sections	= array('files', 'sharein', 'shareout', 'trash', 'pub', 'webdav', 'texteditor', 'odfeditor');
 
 	public $required = array(
 		'children'	=> array('target', 'mode'),
@@ -39,20 +39,18 @@ class Files_Controller {
 	);
 
 	public function __construct($token) {
-		$this->model = new File_Model($token);
+		$this->token	= $token;
+		$this->model	= new File_Model($token);
 	}
 
-	public function render($base, $token, $lang, $section, $args) {
-		$section	= ($section) ? $section : $this->default_section;
+	public function render($section, $args) {
+		$section = ($section) ? $section : $this->default_section;
 		if (in_array($section, $this->valid_sections)) {
-			$db			= Database::getInstance();
-			$user		= ($db) ? $db->user_get_by_token($token) : null;
-			$filename	= ($section == "files" || $section == "sharein" || $section == "shareout" || $section == "trash" || $section == "pub") ? $this->default_view : $section;
-			require_once 'app/views/' . $filename . '.php';
+			$view = ($section == "files" || $section == "sharein" || $section == "shareout" || $section == "trash" || $section == "pub") ? $this->default_view : $section;
+			return Response::success($view, true, $this->token, $section, $args);
 		}
 		else {
-			Response::error('404', 'The requested site could not be found...', true);
-			//require_once 'app/views/404.php';
+			return Response::error('404', 'The requested site could not be found...', true);
 		}
 	}
 

@@ -71,7 +71,7 @@
 			<div class="settings-title">Security</div>
 			<div class="row">
 				<div class="cell settings-label">Password</div>
-				<div class="cell"><button id="bChangePassword" class="button">Change</button></div>
+				<div class="cell"><button id="change-password-button" class="button">Change</button></div>
 			</div>
 			<div class="row">
 				<div class="cell settings-label">Active token (<span id="active-token">0</span>)</div>
@@ -84,8 +84,8 @@
 			<div class="row">
 				<div class="cell settings-label">Cloud Backup</div>
 				<div class="cell">
-					<button id="bBackup" class="button hidden">Start</button>
-					<button id="bEnabled" class="button">loading...</button>
+					<button id="backup-toggle-button" class="button hidden">Start</button>
+					<button id="backup-enable-button" class="button">loading...</button>
 				</div>
 			</div>
 
@@ -120,7 +120,7 @@
 			</div>
 			<div class="row">
 				<div class="cell settings-label">Temp Folder</div>
-				<div class="cell"><button id="bClearTemp" class="button">Clear</button></div>
+				<div class="cell"><button id="clear-temp-button" class="button">Clear</button></div>
 			</div>
 
 			<div class="divider"></div>
@@ -131,7 +131,9 @@
 	<div id="menu" class="popup hidden">
 		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
 		<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div><?php echo $lang['settings']; ?></a></div>
-		<?php if ($admin) echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>'; ?>
+		<?php if ($admin) : ?>
+		<div class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>
+		<?php endif; ?>
 		<div id="menu-item-info" class="menu-item"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></div>
 		<div class="menu-item"><a href="core/logout?token=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
 	</div>
@@ -154,20 +156,20 @@
 	</form>
 
 	<!-- User password popup -->
-	<form id="changepass" class="popup input-popup center hidden" action="#">
+	<form id="change-password" class="popup input-popup center hidden" action="#">
 		<span class="close"> &times;</span>
 		<div class="popup-title">Change password</div>
 
 		<div class="input-header">Current password</div>
-		<input id="changepass-pass0" type="password" class="input-wide" placeholder="Current password"></input>
+		<input id="change-password-pass0" type="password" class="input-wide" placeholder="Current password"></input>
 
 		<div class="input-header">New password</div>
-		<input id="changepass-pass1" type="password" class="input-wide" placeholder="New password"></input>
+		<input id="change-password-pass1" type="password" class="input-wide" placeholder="New password"></input>
 
 		<div class="input-header">New password (repeat)</div>
-		<input id="changepass-pass2" type="password" class="input-wide" placeholder="New password (repeat)"></input>
+		<input id="change-password-pass2" type="password" class="input-wide" placeholder="New password (repeat)"></input>
 
-		<div id="changepass-error" class="error hidden"></div>
+		<div id="change-password-error" class="error hidden"></div>
 		<button class="button">OK</button>
 	</form>
 

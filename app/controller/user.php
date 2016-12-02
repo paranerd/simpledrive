@@ -8,13 +8,12 @@
  */
 
 require_once 'app/model/user.php';
-require_once 'app/model/core.php';
 
 class User_Controller {
 	protected $model;
-	protected $default_section = 'status';
-	protected $default_view = 'user';
-	protected $valid_sections = array('status');
+	protected $default_section	= 'status';
+	protected $default_view		= 'user';
+	protected $valid_sections	= array('status');
 
 	public $required = array(
 		'get'			=> array('user'),
@@ -30,18 +29,17 @@ class User_Controller {
 	);
 
 	public function __construct($token) {
+		$this->token	= $token;
 		$this->model	= new User_Model($token);
 	}
 
-	public function render($base, $token, $lang, $section, $args) {
-		$section	= ($section) ? $section : $this->default_section;
+	public function render($section, $args) {
+		$section = ($section) ? $section : $this->default_section;
 		if (in_array($section, $this->valid_sections)) {
-			$db		= Database::getInstance();
-			$user	= ($db) ? $db->user_get_by_token($token) : null;
-			require_once 'app/views/' . $this->default_view . '.php';
+			return Response::success($this->default_view, true, $this->token, $section, $args);
 		}
 		else {
-			require_once 'app/views/404.php';
+			return Response::error('404', 'The requested site could not be found...', true);
 		}
 	}
 

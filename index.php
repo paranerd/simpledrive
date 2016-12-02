@@ -12,20 +12,15 @@ header('Content-Type: text/html; charset=UTF-8');
 
 define('LOG', (__DIR__) . '/logs/status.log');
 
-require_once 'app/helper/database.class.php';
-require_once 'app/helper/util.class.php';
+require_once 'app/helper/database.php';
+require_once 'app/helper/util.php';
 require_once 'app/helper/response.php';
 
 // To differentiate between api- and render-calls
-$render			= isset($_GET['render']);
-// Set interface language
-$lang_code		= (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && in_array($_SERVER['HTTP_ACCEPT_LANGUAGE'], array('de', 'en'))) ? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en';
-$lang			= json_decode(file_get_contents('lang/' . $lang_code . '.json'), true);
-// Determine base (for js, css, redirects, etc.)
-$base			= rtrim(dirname($_SERVER['PHP_SELF']), '/') . '/';
+$render			= (!isset($_REQUEST['api']) && !(isset($_REQUEST['request']) && $_REQUEST['request'] == 'api'));
 // Extract controller and action
-$request		= $_REQUEST['request'];
-$args			= explode('/', rtrim($request, '/'));
+$request		= (isset($_REQUEST['request'])) ? $_REQUEST['request'] : null;
+$args			= ($request) ? explode('/', rtrim($request, '/')) : array();
 $controller		= (sizeof($args) > 0) ? array_shift($args) : 'files';
 $action			= (sizeof($args) > 0) ? array_shift($args) : '';
 $name			= ucfirst($controller) . "_Controller";
@@ -35,9 +30,12 @@ $token			= (isset($token_source['token'])) ? $token_source['token'] : null;
 
 // Not installed - enter setup
 if (!file_exists('config/config.json') && ($controller != 'core' || $action != 'setup')) {
-	header('Location: ' . $base . 'core/setup');
+	exit (Response::redirect('core/setup'));
 }
-else if (!preg_match('/(\.|\.\.\/)/', $controller) && file_exists('app/controller/' . $controller . '.php')) {
+else if (!$request && $render) {
+	exit (Response::redirect('files'));
+}
+else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/' . $controller . '.php')) {
 	try {
 		require_once 'app/controller/' . $controller . '.php';
 
@@ -56,7 +54,7 @@ else if (!preg_match('/(\.|\.\.\/)/', $controller) && file_exists('app/controlle
 		}
 		// Call to render
 		else if ($render && method_exists($name, 'render')) {
-			exit ($c->render($base, $token, $lang, $action, $args));
+			exit ($c->render($action, $args));
 		}
 	} catch (Exception $e) {
 		exit (Response::error($e->getCode(), $e->getMessage(), $render));

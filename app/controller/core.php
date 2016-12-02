@@ -22,17 +22,17 @@ class Core_Controller {
 	);
 
 	public function __construct($token) {
-		$this->model = new Core_Model();
+		$this->token	= $token;
+		$this->model	= new Core_Model();
 	}
 
-	public function render($base, $token, $lang, $section, $args) {
+	public function render($section, $args) {
 		$section = ($section) ? $section : $this->default_section;
 		if (in_array($section, $this->valid_sections)) {
-			$filename	= $section;
-			require_once 'app/views/' . $filename . '.php';
+			return Response::success($section, true, $this->token, $section, $args, false);
 		}
 		else {
-			require_once 'app/views/404.php';
+			return Response::error('404', 'The requested site could not be found...', true);
 		}
 	}
 

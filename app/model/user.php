@@ -7,6 +7,8 @@
  * @link		http://simpledrive.org
  */
 
+require_once 'app/model/core.php';
+
 class User_Model {
 
 	public function __construct($token) {

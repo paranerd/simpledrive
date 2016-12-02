@@ -56,8 +56,8 @@
 
 	<!-- Sidebar -->
 	<div id="sidebar">
-		<input id="upload-file" class="hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="">
-		<input id="upload-folder" class="hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="" directory="" webkitdirectory="" mozdirectory="">
+		<input id="upload-file-input" class="hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="">
+		<input id="upload-folder-input" class="hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="" directory="" webkitdirectory="" mozdirectory="">
 
 		<div id="sidebar-create" class="menu-item" title="Create new element"><div class="menu-thumb icon-add"></div><div class="menu-text"><?php echo $lang['new']; ?></div></div>
 		<div id="sidebar-upload" class="menu-item" title="Upload file(s)"><div class="menu-thumb icon-upload"></div><div class="menu-text">Upload</div></div>
@@ -123,11 +123,11 @@
 		</div>
 		<div id="list-header" class="list-header <?php if ($fileview == 'grid') echo 'hidden'; ?>">
 			<span class="col0 checkbox"><span id="fSelect" class="checkbox-box"></span></span>
-			<span class="col1"><span><?php echo $lang['name']; ?> </span><span id="fName-ord"></span></span>
-			<span class="col2"><span><?php echo $lang['owner']; ?></span><span id="fOwner-ord"></span></span>
-			<span class="col3"><span><?php echo $lang['type']; ?> </span><span id="fType-ord"></span></span>
-			<span class="col4"><span><?php echo $lang['size']; ?> </span><span id="fSize-ord"></span></span>
-			<span class="col5"><span id="fEdit-ord"></span><span><?php echo $lang['edit']; ?> </span></span>
+			<span class="col1"><span><?php echo $lang['name']; ?> </span><span id="file-name-ord"></span></span>
+			<span class="col2"><span><?php echo $lang['owner']; ?></span><span id="file-owner-ord"></span></span>
+			<span class="col3"><span><?php echo $lang['type']; ?> </span><span id="file-type-ord"></span></span>
+			<span class="col4"><span><?php echo $lang['size']; ?> </span><span id="file-size-ord"></span></span>
+			<span class="col5"><span id="file-edit-ord"></span><span><?php echo $lang['edit']; ?> </span></span>
 		</div>
 
 		<div id="files" class="<?php echo $fileview; ?>"></div>
@@ -135,8 +135,8 @@
 
 	<!-- Upload menu -->
 	<div id="upload-menu" class="popup hidden">
-		<div id="bFile" class="menu-item"><div class="menu-thumb icon-unknown"></div><?php echo "Upload " . $lang['file']; ?></div>
-		<div id="bFolder" class="menu-item"><div class="menu-thumb icon-folder"></div><?php echo "Upload " . $lang['folder']; ?></div>
+		<div id="upload-file" class="menu-item"><div class="menu-thumb icon-unknown"></div><?php echo "Upload " . $lang['file']; ?></div>
+		<div id="upload-folder" class="menu-item"><div class="menu-thumb icon-folder"></div><?php echo "Upload " . $lang['folder']; ?></div>
 	</div>
 
 	<!-- Create menu -->
@@ -182,7 +182,9 @@
 	<div id="menu" class="popup hidden">
 		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
 		<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div><?php echo $lang['settings']; ?></a></div>
-		<?php if ($admin) echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>'; ?>
+		<?php if ($admin) : ?>
+		<div class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>
+		<?php endif; ?>
 		<div id="menu-item-info" class="menu-item"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></div>
 		<div class="menu-item"><a href="core/logout?token=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
 	</div>

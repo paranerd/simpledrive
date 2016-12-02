@@ -11,9 +11,9 @@ require_once 'app/model/system.php';
 
 class System_Controller {
 	protected $model;
-	protected $default_section = "status";
-	protected $default_view = "system";
-	protected $valid_sections = array('status', 'users', 'plugins', 'log');
+	protected $default_section	= "status";
+	protected $default_view		= "system";
+	protected $valid_sections	= array('status', 'users', 'plugins', 'log');
 
 	public $required = array(
 		'getplugin'		=> array('name'),
@@ -25,18 +25,17 @@ class System_Controller {
 	);
 
 	public function __construct($token) {
-		$this->model = new System_Model($token);
+		$this->token	= $token;
+		$this->model	= new System_Model($token);
 	}
 
-	public function render($base, $token, $lang, $section, $args) {
+	public function render($section, $args) {
 		$section = ($section) ? $section : $this->default_section;
 		if (in_array($section, $this->valid_sections)) {
-			$db		= Database::getInstance();
-			$user	= ($db) ? $db->user_get_by_token($token) : null;
-			require_once 'app/views/' . $this->default_view . '.php';
+			return Response::success($this->default_view, true, $this->token, $section, $args);
 		}
 		else {
-			require_once 'app/views/404.php';
+			return Response::error('404', 'The requested site could not be found...', true);
 		}
 	}
 

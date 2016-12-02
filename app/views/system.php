@@ -58,7 +58,9 @@
 	<div id="menu" class="popup hidden">
 		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
 		<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div><?php echo $lang['settings']; ?></a></div>
-		<?php if ($admin) echo '<div id="bAdmin" class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>'; ?>
+		<?php if ($admin) : ?>
+		<div class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>
+		<?php endif; ?>
 		<div id="menu-item-info" class="menu-item"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></div>
 		<div class="menu-item"><a href="core/logout?token=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
 	</div>

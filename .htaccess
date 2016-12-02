@@ -4,14 +4,14 @@ SetEnv HTACCESS on
 php_value upload_max_filesize 10485760
 php_value post_max_size 10485760
 php_flag log_errors on
-php_value error_log /var/www/html/simpledrive-mvc/logs/error.log
+php_value error_log /var/www/html/simpledrive/logs/error.log
 </IfModule>
 
 <IfModule mod_php7.c>
 php_value upload_max_filesize 10485760
 php_value post_max_size 10485760
 php_flag log_errors on
-php_value error_log /var/www/html/simpledrive-mvc/logs/error.log
+php_value error_log /var/www/html/simpledrive/logs/error.log
 </IfModule>
 
 <IfModule mod_header.c>
@@ -34,9 +34,9 @@ RewriteEngine on
 
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^api/(.*)$ index.php?request=$1 [QSA,NC,L]
+RewriteRule ^api/(.*)$ index.php?request=$1&api=1 [QSA,NC,L]
 
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ index.php?render=1&request=$1 [QSA,NC,L]
+RewriteRule ^(.*)$ index.php?request=$1&render=1 [QSA,NC,L]
 </IfModule>

@@ -304,25 +304,25 @@ var Binder = {
 			FileManager.loadPublic();
 		});
 
-		$("#bFile").on('click', function(e) {
-			$("#upload-file").trigger("click");
+		$("#upload-file").on('click', function(e) {
+			$("#upload-file-input").trigger("click");
+		});
+
+		$("#upload-file-input").on('change', function(e) {
+			FileManager.addUpload(this);
 		});
 
 		if (Util.isDirectorySupported()) {
-			$("#bFolder").on('click', function(e) {
-				$("#upload-folder").trigger("click");
+			$("#upload-folder").on('click', function(e) {
+				$("#upload-folder-input").trigger("click");
 			});
-			$("#upload-folder").on('change', function(e) {
+			$("#upload-folder-input").on('change', function(e) {
 				FileManager.addUpload(this);
 			});
 		}
 		else {
-			$("#bFolder").addClass("hidden");
+			$("#upload-folder").addClass("hidden");
 		}
-
-		$("#upload-file").on('change', function(e) {
-			FileManager.addUpload(this);
-		});
 
 		$("#username").on('click', function(e) {
 			$("#menu").toggleClass("hidden");
@@ -633,11 +633,11 @@ var FileManager = {
 			FileManager.uploadTotal++;
 		}
 
-		$("#upload-file, #upload-folder").val('');
+		$("#upload-file-input, #upload-folder-input").val('');
 		$("#upload-menu").addClass("hidden");
 
 		if (!FileManager.uploadRunning) {
-			$("#upload-percent, #upload-filename, #upload-title, #upload-folder, #upload-file").text('');
+			$("#upload-percent, #upload-filename, #upload-title, #upload-folder-input, #upload-file-input").text('');
 			$("#upload").removeClass("hidden");
 			FileManager.uploadRunning = true;
 			window.onbeforeunload = Util.refreshWarning();
@@ -1429,9 +1429,9 @@ var FileManager = {
 		FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareName);
 
 		var text = (FileManager.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
-		$("#fName-ord").html(text);
+		$("#file-name-ord").html(text);
 
-		$("#fType-ord, #fSize-ord, #fEdit-ord").text('');
+		$("#file-type-ord, #file-size-ord, #file-edit-ord").text('');
 		FileManager.display();
 	},
 
@@ -1440,9 +1440,9 @@ var FileManager = {
 		FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareEdit);
 
 		var text = (FileManager.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
-		$("#fEdit-ord").html(text);
+		$("#file-edit-ord").html(text);
 
-		$("#fName-ord, #fType-ord, #fSize-ord").text('');
+		$("#file-name-ord, #file-type-ord, #file-size-ord").text('');
 		FileManager.display();
 	},
 
@@ -1451,9 +1451,9 @@ var FileManager = {
 		FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareType);
 
 		var text = (FileManager.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
-		$("#fType-ord").html(text);
+		$("#file-type-ord").html(text);
 
-		$("#fName-ord, #fSize-ord, #fEdit-ord").text('');
+		$("#file-name-ord, #file-size-ord, #file-edit-ord").text('');
 		FileManager.display();
 	},
 
@@ -1462,9 +1462,9 @@ var FileManager = {
 		FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareSize);
 
 		var text = (FileManager.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
-		$("#fSize-ord").html(text);
+		$("#file-size-ord").html(text);
 
-		$("#fName-ord, #fType-ord, #fEdit-ord").text('');
+		$("#file-name-ord, #file-type-ord, #file-edit-ord").text('');
 		FileManager.display();
 	},
 

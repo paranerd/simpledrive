@@ -91,29 +91,29 @@ var Binder = {
 			General.invalidateToken();
 		});
 
-		$("#bBackup").on('click', function(e) {
+		$("#backup-toggle-button").on('click', function(e) {
 			if (!$(this).hasClass("hidden")) {
 				Backup.toggleStart('');
 			}
 		});
 
-		$("#bEnabled").on('click', function(e) {
+		$("#backup-enable-button").on('click', function(e) {
 			Backup.toggleEnable();
 		});
 
-		$("#bChangePassword").on('click', function(e) {
+		$("#change-password-button").on('click', function(e) {
 			General.showChangePassword();
 		});
 
-		$("#bClearTemp").on('click', function(e) {
+		$("#clear-temp-button").on('click', function(e) {
 			General.clearTemp();
 		});
 
-		$("#changepass .close").on('click', function(e) {
+		$("#change-password .close").on('click', function(e) {
 			Util.closePopup();
 		});
 
-		$("#changepass").on('submit', function(e) {
+		$("#change-password").on('submit', function(e) {
 			e.preventDefault();
 			General.changePassword();
 		});
@@ -212,7 +212,7 @@ var Backup = {
 	},
 
 	start: function() {
-		$("#bBackup").text("starting...").addClass("button-disabled");
+		$("#backup-toggle-button").text("starting...").addClass("button-disabled");
 
 		$.ajax({
 			url: 'api/backup/start',
@@ -220,7 +220,7 @@ var Backup = {
 			data: {token: token},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			$("#bBackup").text("Start").removeClass("button-disabled");
+			$("#backup-toggle-button").text("Start").removeClass("button-disabled");
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -236,7 +236,7 @@ var Backup = {
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Backup.running = false;
-			$("#bBackup").text("Start");
+			$("#backup-toggle-button").text("Start");
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -266,13 +266,13 @@ var Backup = {
 			Backup.running = data.msg.running;
 
 			if (data.msg.enabled) {
-				$("#bEnabled").text("Disable");
+				$("#backup-enable-button").text("Disable");
 				var text = (data.msg.running) ? "Cancel" : "Start";
-				$("#bBackup").text(text).removeClass('hidden');
+				$("#backup-toggle-button").text(text).removeClass('hidden');
 			}
 			else {
-				$("#bBackup").text("Start").addClass("hidden");
-				$("#bEnabled").text("Enable");
+				$("#backup-toggle-button").text("Start").addClass("hidden");
+				$("#backup-enable-button").text("Enable");
 			}
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
@@ -291,7 +291,7 @@ var General = {
 			Util.notify("Tokens invalidated", true, false);
 			General.activeToken();
 		}).fail(function(xhr, statusText, error) {
-			//Util.notify(Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -396,17 +396,17 @@ var General = {
 	},
 
 	changePassword: function() {
-		var currpass = $("#changepass-pass0").val();
-		var newpass1 = $("#changepass-pass1").val();
-		var newpass2 = $("#changepass-pass2").val();
+		var currpass = $("#change-password-pass0").val();
+		var newpass1 = $("#change-password-pass1").val();
+		var newpass2 = $("#change-password-pass2").val();
 
 		if (currpass.length == 0 || newpass1.length == 0 || newpass2.length == 0) {
-			$("#changepass-error").removeClass("hidden").text("Fields cannot be empty", true, true);
+			$("#change-password-error").removeClass("hidden").text("Fields cannot be empty", true, true);
 			return;
 		}
 
 		if (newpass1 != newpass2) {
-			$("#changepass-error").removeClass("hidden").text("New passwords don't match", true, true);
+			$("#change-password-error").removeClass("hidden").text("New passwords don't match", true, true);
 			return;
 		}
 
@@ -418,16 +418,16 @@ var General = {
 		}).done(function(data, statusText, xhr) {
 			token = data.msg;
 			Util.notify("Password changed", true);
-			$("#changepass-pass0, #changepass-pass1, #changepass-pass2").val('');
-			$("#changepass, #shield").addClass("hidden");
+			$("#change-password-pass0, #change-password-pass1, #change-password-pass2").val('');
+			$("#change-password, #shield").addClass("hidden");
 		}).fail(function(xhr, statusText, error) {
-			$("#changepass-error").removeClass("hidden").text(Util.getError(xhr));
+			$("#change-password-error").removeClass("hidden").text(Util.getError(xhr));
 		});
 	},
 
 	showChangePassword: function() {
-		$("#changepass-error").text("").addClass("hidden");
-		$("#changepass, #shield").removeClass("hidden")
-		$("#changepass-pass0").val('').focus();
+		$("#change-password-error").text("").addClass("hidden");
+		$("#change-password, #shield").removeClass("hidden")
+		$("#change-password-pass0").val('').focus();
 	}
 }

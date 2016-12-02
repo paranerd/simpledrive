@@ -8,7 +8,7 @@
  */
 
 require_once 'app/helper/ogg.class.php';
-require_once 'app/helper/sync.class.php';
+require_once 'app/helper/sync.php';
 require_once 'app/model/core.php';
 require_once 'app/model/user.php';
 

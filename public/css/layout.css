@@ -222,9 +222,6 @@ select {
 }
 
 #upload-progress {
-/*
-	position: absolute;
-*/
 	margin-top: 1px;
 	bottom: 0;
 	height: 5px;
