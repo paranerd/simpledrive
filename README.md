@@ -51,9 +51,8 @@ In case you run on an nginx-server, please add the following to your nginx.conf 
 		}
 
 		location @w {
-			rewrite ^/api/(.*)$ /php/api.php?request=$1 last;
-			rewrite ^/webdav(.*)$ /php/webdav.php last;
-			rewrite ^/(.*)$ /index.php?request=$1 last;
+			rewrite ^/api/(.*)$ /index.php?request=$1&api=1 last;
+			rewrite ^/(.*)$ /index.php?request=$1&render=1 last;
 		}
 
 		location ~ \.php$ {
