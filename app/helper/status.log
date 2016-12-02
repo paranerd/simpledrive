@@ -1,0 +1,36 @@
+index.php | before token
+index.php | token: 
+generated token: 85fa0d8f08201d90a56d6567dc45f93687ce9ed0205bcd686510b4e97e888d6f
+index.php | before token
+validate 85fa0d8f08201d90a56d6567dc45f93687ce9ed0205bcd686510b4e97e888d6f ok
+index.php | token: 
+files.php token: 85fa0d8f08201d90a56d6567dc45f93687ce9ed0205bcd686510b4e97e888d6f
+not public and no user, so redirect to login
+index.php | before token
+validate 85fa0d8f08201d90a56d6567dc45f93687ce9ed0205bcd686510b4e97e888d6f ok
+index.php | token: 
+index.php | before token
+index.php | token: 
+generated token: 1cca4f46a174fe0061ae315f524b7ff859bee93e9f0ffd22a114859fff2d3b78
+index.php | before token
+validate 1cca4f46a174fe0061ae315f524b7ff859bee93e9f0ffd22a114859fff2d3b78 failed
+index.php | token: 
+files.php token: 1cca4f46a174fe0061ae315f524b7ff859bee93e9f0ffd22a114859fff2d3b78
+not public and no user, so redirect to login
+index.php | before token
+validate 1cca4f46a174fe0061ae315f524b7ff859bee93e9f0ffd22a114859fff2d3b78 failed
+index.php | token: 
+index.php | before token
+index.php | token: 
+get instance ok
+generated token: a90217e9cd1912e5ec20025ca841b73272131dc9df67c38a6d417551a8773b5a
+index.php | before token
+get instance ok
+validate a90217e9cd1912e5ec20025ca841b73272131dc9df67c38a6d417551a8773b5a failed
+index.php | token: 
+files.php token: a90217e9cd1912e5ec20025ca841b73272131dc9df67c38a6d417551a8773b5a
+not public and no user, so redirect to login
+index.php | before token
+get instance ok
+validate a90217e9cd1912e5ec20025ca841b73272131dc9df67c38a6d417551a8773b5a failed
+index.php | token: 

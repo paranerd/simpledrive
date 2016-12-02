@@ -22,6 +22,7 @@
 	}
 
 	if (!$public && !$user) {
+		file_put_contents(LOG, "not public and no user, so redirect to login\n", FILE_APPEND);
 		header('Location: ' . $base . 'core/login');
 		exit();
 	}

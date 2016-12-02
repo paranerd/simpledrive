@@ -499,7 +499,7 @@ class Database {
 		$token;
 
 		do {
-			$token = bin2hex(openssl_random_pseudo_bytes(32));
+			$token = bin2hex(openssl_random_pseudo_bytes(16));
 			$stmt = $this->link->prepare('SELECT token FROM sd_session WHERE token = ?');
 			$stmt->bind_param('s', $token);
 			$stmt->execute();

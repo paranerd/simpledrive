@@ -264,19 +264,10 @@ class Util {
 	public function generate_token($uid, $hash = "") {
 		$config		= json_decode(file_get_contents('config/config.json'), true);
 		$db			= Database::getInstance();
-		//$token		= $db->session_get_unique_token();
 		$name		= ($hash) ? 'public_token' : 'token';
 		$expires	= ($hash) ? time() + 60 * 60 : time() + 60 * 60 * 24 * 7; // 1h for public, otherwise 1 week
 
-		/*if ($token &&
-			setcookie($name, $token, $expires, "/") &&
-			$db->session_start($token, $uid, $hash, $expires))
-		{
-			return $token;
-		}*/
-
 		if ($token = $db->session_start($uid, $hash, $expires)) {
-			file_put_contents(LOG, "generated token: " . $token . "\n", FILE_APPEND);
 			setcookie($name, $token, $expires, "/");
 			return $token;
 		}

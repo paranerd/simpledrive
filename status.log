@@ -1,0 +1,87 @@
+index.php | before token
+index.php | token: 
+get instance ok
+generated token: 4d24792b0f9e4882d9acba32402cdb2acbfeb39145da78f532ee2b2f9ac45fef
+index.php | before token
+get instance ok
+validate 4d24792b0f9e4882d9acba32402cdb2acbfeb39145da78f532ee2b2f9ac45fef failed
+index.php | token: 
+files.php token: 4d24792b0f9e4882d9acba32402cdb2acbfeb39145da78f532ee2b2f9ac45fef
+not public and no user, so redirect to login
+index.php | before token
+get instance ok
+validate 4d24792b0f9e4882d9acba32402cdb2acbfeb39145da78f532ee2b2f9ac45fef failed
+index.php | token: 
+index.php | before token
+index.php | token: 4d24792b0f9e4882d9acba32402cdb2acbfeb39145da78f532ee2b2f9ac45fef
+index.php | before token
+index.php | token: 
+get instance ok
+generated token: 013b3a0c1d71c683619fc1233c17c3463b7a601e4b10c12cb271da3d07a3e139
+index.php | before token
+index.php | token: 013b3a0c1d71c683619fc1233c17c3463b7a601e4b10c12cb271da3d07a3e139
+get instance ok
+files.php token: 013b3a0c1d71c683619fc1233c17c3463b7a601e4b10c12cb271da3d07a3e139
+not public and no user, so redirect to login
+index.php | before token
+index.php | token: 013b3a0c1d71c683619fc1233c17c3463b7a601e4b10c12cb271da3d07a3e139
+index.php | before token
+index.php | token: 
+get instance ok
+generated token: 3f220ae097bdb36f8ff66ab7d8a5c5e32a2659de25dfdbd7277f42c0ad78e0ed
+index.php | before token
+index.php | token: 3f220ae097bdb36f8ff66ab7d8a5c5e32a2659de25dfdbd7277f42c0ad78e0ed
+get instance ok
+files.php token: 3f220ae097bdb36f8ff66ab7d8a5c5e32a2659de25dfdbd7277f42c0ad78e0ed
+not public and no user, so redirect to login
+index.php | before token
+index.php | token: 3f220ae097bdb36f8ff66ab7d8a5c5e32a2659de25dfdbd7277f42c0ad78e0ed
+index.php | before token
+index.php | token: 3f220ae097bdb36f8ff66ab7d8a5c5e32a2659de25dfdbd7277f42c0ad78e0ed
+index.php | before token
+index.php | token: 
+get instance ok
+generated token: 05c614cb39eca2c99c24365ebe7f4fdb465cd4e38865aa9e0cb321952fd3b3f8
+index.php | before token
+index.php | token: 05c614cb39eca2c99c24365ebe7f4fdb465cd4e38865aa9e0cb321952fd3b3f8
+get instance ok
+files.php token: 05c614cb39eca2c99c24365ebe7f4fdb465cd4e38865aa9e0cb321952fd3b3f8
+not public and no user, so redirect to login
+index.php | before token
+index.php | token: 05c614cb39eca2c99c24365ebe7f4fdb465cd4e38865aa9e0cb321952fd3b3f8
+index.php | token_source: Array
+(
+    [token] => 05c614cb39eca2c99c24365ebe7f4fdb465cd4e38865aa9e0cb321952fd3b3f8
+)
+
+index.php | before token
+index.php | token: 05c614cb39eca2c99c24365ebe7f4fdb465cd4e38865aa9e0cb321952fd3b3f8
+index.php | token_source: Array
+(
+    [request] => core/login
+    [api] => 1
+    [user] => demo
+    [pass] => demo
+)
+
+index.php | before token
+index.php | token: 
+get instance ok
+generated token: b6144a424ca1ff8cfba342e3b7974a32134f5a5e56412ccafd7051f729752dae
+index.php | token_source: Array
+(
+    [token] => b6144a424ca1ff8cfba342e3b7974a32134f5a5e56412ccafd7051f729752dae
+)
+
+index.php | before token
+index.php | token: b6144a424ca1ff8cfba342e3b7974a32134f5a5e56412ccafd7051f729752dae
+get instance ok
+files.php token: b6144a424ca1ff8cfba342e3b7974a32134f5a5e56412ccafd7051f729752dae
+not public and no user, so redirect to login
+index.php | token_source: Array
+(
+    [token] => b6144a424ca1ff8cfba342e3b7974a32134f5a5e56412ccafd7051f729752dae
+)
+
+index.php | before token
+index.php | token: b6144a424ca1ff8cfba342e3b7974a32134f5a5e56412ccafd7051f729752dae

@@ -1142,6 +1142,7 @@ var FileManager = {
 	openODT: function(elem) {
 		$('<form id="odt-form" class="hidden" action="files/odfeditor/' + elem.id + '" target="_blank" method="post"><input name="token"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
+		$('[name="public"]').val(FileManager.public);
 		$('#odt-form').submit();
 	},
 
