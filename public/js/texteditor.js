@@ -34,6 +34,8 @@ $(document).ready(function() {
 	token = $("#data-token").val();
 	file = $("#data-file").val();
 
+	console.log(token);
+
 	$("#username").html(Util.escape(username) + " &#x25BE");
 
 	$("#doc-name").mouseenter(function(e) {

@@ -56,7 +56,7 @@ $(document).ready(function() {
 	FileManager.init($("#data-view").val(), $("#data-id").val(), $("#data-public").val());
 
 	if (username) {
-		//Util.getVersion();
+		Util.getVersion();
 		$("#username").html(Util.escape(username) + " &#x25BE");
 	}
 

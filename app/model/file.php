@@ -969,6 +969,8 @@ class File_Model {
 	}
 
 	public function load_text($target) {
+		file_put_contents(LOG, "load text target: " . print_r($target, true) . "\n", FILE_APPEND);
+		file_put_contents(LOG, "token: " . $this->token . " | uid: " . $this->uid . "\n", FILE_APPEND);
 		$file = $this->get_cached($target, self::$PERMISSION_READ);
 
 		if (!$file) {

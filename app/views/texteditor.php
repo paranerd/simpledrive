@@ -8,7 +8,7 @@
  */
 
 	$id			= (sizeof($args) > 0) ? array_shift($args) : null;
-	$public		= isset($_REQUEST['public']);
+	$public		= isset($_REQUEST['public']) && $_REQUEST['public'];
 	$username 	= ($user) ? $user['username'] : '';
 	$admin 		= ($user) ? $user['admin'] : false;
 	$color 		= ($user) ? $user['color'] : 'light';
@@ -16,9 +16,11 @@
 
 	if ($public) {
 		$token = (isset($_COOKIE['public_token'])) ? $_COOKIE['public_token'] : null;
+		file_put_contents(LOG, "texteditor.php | public token: " . $token . "\n", FILE_APPEND);
 	}
 	else {
 		$token = (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
+		file_put_contents(LOG, "texteditor.php | token: " . $token . "\n", FILE_APPEND);
 	}
 
 	if ((!$public && !$user) || !$id) {

@@ -1028,6 +1028,16 @@ class Database {
 
 	public function cache_get($id, $uid, $access_request, $hash) {
 		$share_base = $this->share_get_base($id, $uid);
+		file_put_contents(LOG, "getting file from cache\n", FILE_APPEND);
+		file_put_contents(LOG, '
+			SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.hash
+			FROM sd_users
+			RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner
+			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id
+			LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
+			WHERE sd_cache.id = ' . $id . '
+			AND (sd_cache.owner = ' . $uid . ' OR ((SELECT access FROM sd_shares WHERE id = ' . $share_base . ') >= ' . $access_request . ' AND (SELECT hash FROM sd_shares WHERE id = ' . $share_base . ') = ' . $hash . '))
+		\n', FILE_APPEND);
 
 		//$stmt = $this->link->prepare('SELECT filename, parent, type, size, sd_cache.owner, sd_users.user, edit, md5, sd_trash.hash, sd_cache.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.id = ? AND (owner = ? OR ((userto = ? OR public = 1) AND (access >= ?)) OR (SELECT access FROM sd_shares WHERE id = ?) >= ?)');
 
