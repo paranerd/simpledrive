@@ -5,6 +5,8 @@
  * @link		http://simpledrive.org
  */
 
+var base;
+
 $(window).resize(function() {
 	// Position centered divs
 	$('.center').each(function(i, obj) {
@@ -22,6 +24,8 @@ $(window).resize(function() {
 });
 
 $(document).ready(function() {
+	base = $("#data-base").val();
+
 	$(window).resize();
 	if ($("#data-demo").val()) {
 		demoLogin();
@@ -71,7 +75,7 @@ function login() {
 		}).done(function(data, statusText, xhr) {
 			$("#submit").removeClass("button-disabled");
 			$("#submit").removeClass("button-disabled").prop('disabled', false);
-			window.location.href = "files";
+			window.location.href = base + "files";
 		}).fail(function(xhr, statusText, error) {
 			$("#error").removeClass("hidden").text(error);
 			$("#pass").val("");

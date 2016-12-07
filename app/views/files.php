@@ -7,25 +7,25 @@
  * @link		http://simpledrive.org
  */
 
-	$id			= (sizeof($args) > 0) ? array_shift($args) : "0";
-	$public		= ($section == 'pub');
-	$username 	= ($user) ? $user['username'] : '';
-	$admin 		= ($user) ? $user['admin'] : false;
-	$color 		= ($user) ? $user['color'] : 'light';
-	$fileview 	= ($user) ? $user['fileview'] : 'list';
+$id			= (sizeof($args) > 0) ? array_shift($args) : "0";
+$public		= ($section == 'pub');
+$username 	= ($user) ? $user['username'] : '';
+$admin 		= ($user) ? $user['admin'] : false;
+$color 		= ($user) ? $user['color'] : 'light';
+$fileview 	= ($user) ? $user['fileview'] : 'list';
 
-	if ($public) {
-		$token = (isset($_COOKIE['public_token'])) ? $_COOKIE['public_token'] : null;
-	}
-	else {
-		$token = (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-	}
+if ($public) {
+	$token = (isset($_COOKIE['public_token'])) ? $_COOKIE['public_token'] : null;
+}
+else {
+	$token = (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
+}
 
-	if (!$public && !$user) {
-		file_put_contents(LOG, "not public and no user, so redirect to login\n", FILE_APPEND);
-		header('Location: ' . $base . 'core/login');
-		exit();
-	}
+if (!$public && !$user) {
+	file_put_contents(LOG, "not public and no user, so redirect to login\n", FILE_APPEND);
+	header('Location: ' . $base . 'core/login');
+	exit();
+}
 ?>
 
 <!DOCTYPE html>

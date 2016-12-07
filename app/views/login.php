@@ -7,7 +7,7 @@
  * @link		http://simpledrive.org
  */
 
-	$demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'] == "simpledrive.org/demo");
+$demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'] == "simpledrive.org/demo");
 ?>
 
 <!DOCTYPE html>
@@ -41,6 +41,8 @@
 
 		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>
 	</div>
+
+	<input id="data-base" type="hidden" value="<?php echo $base; ?>"/>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/login.js"></script>

@@ -5,7 +5,8 @@
  * @link		http://simpledrive.org
  */
 
-var token;
+var token,
+	base;
 
 $(window).resize(function() {
 	// Position centered divs
@@ -25,6 +26,7 @@ $(window).resize(function() {
 
 $(document).ready(function() {
 	token = $("#data-token").val();
+	base = $("#data-base").val();
 	$(window).resize();
 	logout();
 });
@@ -63,8 +65,8 @@ function logout() {
 		data: {token: token},
 		dataType: "json"
 	}).done(function(data, statusText, xhr) {
-		window.location.href = "core/login";
+		window.location.href = base + "core/login";
 	}).fail(function(xhr, statusText, error) {
-		window.location.href = "core/login";
+		window.location.href = base + "core/login";
 	});
 }
