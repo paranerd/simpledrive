@@ -39,7 +39,7 @@ class Response {
 	}
 
 	// Determine base (for js, css, redirects, etc.)
-	static public function base() {
+	static private function base() {
 		return rtrim(dirname($_SERVER['PHP_SELF']), '/') . '/';
 	}
 

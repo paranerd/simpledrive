@@ -49,10 +49,7 @@ class User_Model {
 		$username = preg_replace("/[^a-zA-Z0-9_\-]+/", "", $username);
 
 		if (!$this->db->user_get_by_name($username)) {
-			$salt = uniqid(mt_rand(), true);
-			$crypt_pass = hash('sha256', $pass . $salt);
-
-			if (!$this->db->user_create($username, $crypt_pass, $salt, $admin, $mail)) {
+			if (!$this->db->user_create($username, Crypto::generate_password($pass), $admin, $mail)) {
 				throw new Exception('Error creating user', '500');
 			}
 
@@ -205,12 +202,9 @@ class User_Model {
 			throw new Exception('Permission denied', '403');
 		}
 
-		if ($user['pass'] == hash('sha256', $currpass . $user['salt'])) {
-			$salt = uniqid(mt_rand(), true);
-			$crypt_pass = hash('sha256', $newpass . $salt);
-
-			if ($this->db->user_change_password($this->uid, $salt, $crypt_pass)) {
-				$token = Util::generate_token($this->uid);
+		if (Crypto::verify_password($currpass, $user['pass'])) {
+			if ($this->db->user_change_password($this->uid, Crypto::generate_password($newpass))) {
+				$token = Crypto::generate_token($this->uid);
 				$this->db->session_invalidate($this->uid, $token);
 				return $token;
 			}

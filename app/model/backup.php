@@ -165,7 +165,7 @@ class Backup_Model {
 			}
 
 			if (is_readable($path . $file) && substr($file, 0, 1) !== '.') {
-				$online_filename = ($this->enc_filename) ? hash('sha256', $file) . Util::encrypt($file, $this->key) : $file;
+				$online_filename = ($this->enc_filename) ? hash('sha256', $file) . Crypto::encrypt($file, $this->key) : $file;
 
 				if (!$online_filename) {
 					continue;
@@ -184,7 +184,7 @@ class Backup_Model {
 					}
 				}
 				else {
-					$enc_path = Util::encrypt($path . $file, $this->key, true, $this->temp, true);
+					$enc_path = Crypto::encrypt($path . $file, $this->key, true, $this->temp, true);
 
 					// Upload if file is not online or different from online version
 					if ($enc_path && (!$existing_file || ($existing_file && $existing_file['description'] != hash_file('sha256', $path . $file)))) {

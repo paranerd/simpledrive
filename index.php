@@ -14,6 +14,7 @@ define('LOG', (__DIR__) . '/logs/status.log');
 
 require_once 'app/helper/database.php';
 require_once 'app/helper/util.php';
+require_once 'app/helper/crypto.php';
 require_once 'app/helper/response.php';
 
 // To differentiate between api- and render-calls
@@ -24,9 +25,6 @@ $args			= ($request) ? explode('/', rtrim($request, '/')) : array();
 $controller		= (sizeof($args) > 0) ? array_shift($args) : 'files';
 $action			= (sizeof($args) > 0) ? array_shift($args) : '';
 $name			= ucfirst($controller) . "_Controller";
-// Extract token
-$token_source	= ($render) ? $_COOKIE : $_REQUEST;
-$token			= (isset($token_source['token'])) ? Util::validate_token($token_source['token']) : '';
 
 // Not installed - enter setup
 if (!file_exists('config/config.json') && ($controller != 'core' || $action != 'setup')) {
@@ -39,7 +37,11 @@ else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/'
 	try {
 		require_once 'app/controller/' . $controller . '.php';
 
-		$c = new $name($token);
+		// Extract token
+		$token_source	= ($render) ? $_COOKIE : $_REQUEST;
+		$token			= (isset($token_source['token'])) ? Crypto::validate_token($token_source['token']) : '';
+
+		$c				= new $name($token);
 
 		// Call to API
 		if (!$render && method_exists($name, $action)) {

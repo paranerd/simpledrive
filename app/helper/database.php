@@ -92,7 +92,6 @@ class Database {
 			PRIMARY KEY (id),
 			user varchar(32),
 			pass varchar(64),
-			salt varchar (64),
 			admin tinyint(1),
 			max_storage varchar(30) default "0",
 			mail varchar(30),
@@ -201,7 +200,7 @@ class Database {
 	}
 
 	private function user_get($column, $value, $full = false) {
-		$stmt = $this->link->prepare('SELECT id, user, pass, salt, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan FROM sd_users WHERE ' . $column . ' = ?');
+		$stmt = $this->link->prepare('SELECT id, user, pass, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan FROM sd_users WHERE ' . $column . ' = ?');
 		if (ctype_digit($value)) {
 			$stmt->bind_param('i', $value);
 		}
@@ -211,7 +210,7 @@ class Database {
 		$stmt->store_result();
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $username, $pass, $salt, $admin, $max_storage, $color, $fileview, $login_attempts, $last_login_attempt, $last_login, $autoscan);
+		$stmt->bind_result($id, $username, $pass, $admin, $max_storage, $color, $fileview, $login_attempts, $last_login_attempt, $last_login, $autoscan);
 
 		if ($stmt->fetch()) {
 			// Filter user data
@@ -229,7 +228,6 @@ class Database {
 			if ($full) {
 				$user = array_merge($user, array(
 					'pass'					=> $pass,
-					'salt'					=> $salt,
 					'admin'					=> $admin,
 					'login_attempts'		=> $login_attempts,
 					'last_login_attempt'	=> $last_login_attempt
@@ -307,15 +305,14 @@ class Database {
 	 * Create new user
 	 * @param user
 	 * @param pass
-	 * @param salt
 	 * @param admin
 	 * @param mail
 	 * @return boolean true if successful
 	 */
 
-	public function user_create($username, $pass, $salt, $admin, $mail) {
-		$stmt = $this->link->prepare('INSERT INTO sd_users (user, pass, salt, admin, mail) VALUES (?, ?, ?, ?, ?)');
-		$stmt->bind_param('sssis', $username, $pass, $salt, $admin, $mail);
+	public function user_create($username, $pass, $admin, $mail) {
+		$stmt = $this->link->prepare('INSERT INTO sd_users (user, pass, admin, mail) VALUES (?, ?, ?, ?)');
+		$stmt->bind_param('ssis', $username, $pass, $admin, $mail);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();
@@ -432,12 +429,11 @@ class Database {
 	/**
 	 * Change user password
 	 * @param user
-	 * @param salt
 	 * @param pass
 	 * @return boolean true if successful
 	 */
 
-	public function user_change_password($uid, $salt, $pass) {
+	public function user_change_password($uid, $pass) {
 		$stmt = $this->link->prepare('UPDATE sd_users SET pass = ?, salt = ? WHERE id = ?');
 		$stmt->bind_param('sss', $pass, $salt, $uid);
 		$stmt->execute();
@@ -499,7 +495,7 @@ class Database {
 		$token;
 
 		do {
-			$token = bin2hex(openssl_random_pseudo_bytes(16));
+			$token = Crypto::random(32);
 			$stmt = $this->link->prepare('SELECT token FROM sd_session WHERE token = ?');
 			$stmt->bind_param('s', $token);
 			$stmt->execute();
@@ -653,7 +649,7 @@ class Database {
 		$hash;
 
 		do {
-			$hash = substr(md5(microtime(true)), 0, 8);
+			$hash = Crypto::random(8);
 			$stmt = $this->link->prepare('SELECT hash FROM sd_shares WHERE hash = ?');
 			$stmt->bind_param('s', $hash);
 			$stmt->execute();
@@ -931,7 +927,7 @@ class Database {
 		$id;
 
 		do {
-			$id = md5(microtime(true));
+			$id = Crypto::random(32);
 			$stmt = $this->link->prepare('SELECT id FROM sd_cache WHERE id = ?');
 			$stmt->bind_param('s', $id);
 			$stmt->execute();
@@ -944,7 +940,7 @@ class Database {
 		$hash;
 
 		do {
-			$hash = md5(microtime(true));
+			$hash = Crypto::random(32);
 			$stmt = $this->link->prepare('SELECT hash FROM sd_trash WHERE hash = ?');
 			$stmt->bind_param('s', $hash);
 			$stmt->execute();
@@ -1028,25 +1024,6 @@ class Database {
 
 	public function cache_get($id, $uid, $access_request, $hash) {
 		$share_base = $this->share_get_base($id, $uid);
-		file_put_contents(LOG, "getting file from cache\n", FILE_APPEND);
-		file_put_contents(LOG, '
-			SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.hash
-			FROM sd_users
-			RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner
-			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id
-			LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
-			WHERE sd_cache.id = ' . $id . '
-			AND (sd_cache.owner = ' . $uid . ' OR ((SELECT access FROM sd_shares WHERE id = ' . $share_base . ') >= ' . $access_request . ' AND (SELECT hash FROM sd_shares WHERE id = ' . $share_base . ') = ' . $hash . '))
-		\n', FILE_APPEND);
-
-		//$stmt = $this->link->prepare('SELECT filename, parent, type, size, sd_cache.owner, sd_users.user, edit, md5, sd_trash.hash, sd_cache.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.id = ? AND (owner = ? OR ((userto = ? OR public = 1) AND (access >= ?)) OR (SELECT access FROM sd_shares WHERE id = ?) >= ?)');
-
-		//$stmt = $this->link->prepare('SELECT filename, parent, type, size, sd_cache.owner, sd_users.user, edit, md5, sd_trash.hash, sd_cache.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.id = ? AND (owner = ? OR ((userto = ? OR public = 1) AND access >= ? AND sd_shares.hash = ?) OR ((SELECT access FROM sd_shares WHERE id = ?) >= ? AND (SELECT hash FROM sd_shares WHERE id = ?) = ?))');
-		//$stmt->bind_param('siiississ', $id, $uid, $uid, $access_request, $hash, $share_base, $access_request, $share_base, $hash);
-
-		//$stmt = $this->link->prepare('SELECT filename, parent, type, size, sd_cache.owner, sd_users.user, edit, md5, sd_trash.hash, sd_cache.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.id = ? AND (owner = ? OR ((userto = ? OR public = 1) AND (access >= ?)) OR (SELECT access FROM sd_shares WHERE id = ?) >= ?)');
-		//$stmt->bind_param('siiisi', $id, $uid, $uid, $access_request, $share_base, $access_request);
-
 		$stmt = $this->link->prepare('
 			SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.hash
 			FROM sd_users

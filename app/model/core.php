@@ -80,11 +80,8 @@ class Core_Model {
 			throw new Exception($e->getMessage(), '500');
 		}
 
-		$salt = uniqid(mt_rand(), true);
-		$crypt_pass = hash('sha256', $pass . $salt);
-
-		if ($id = $this->db->user_create($username, $crypt_pass, $salt, 1, $mail)) {
-			return Util::generate_token($id);
+		if ($id = $this->db->user_create($username, Crypto::generate_password($pass), 1, $mail)) {
+			return Crypto::generate_token($id);
 		}
 
 		unlink($this->config_path);
@@ -105,7 +102,7 @@ class Core_Model {
 
 	private function create_config($datadir, $db_server, $db_name, $db_user, $db_pass, $mail, $mail_pass) {
 		$config = array(
-			'salt'			=> hash('sha256', uniqid(mt_rand(), true)),
+			'salt'			=> Crypto::random(64),
 			'installdir'	=> dirname($_SERVER['PHP_SELF']) . "/",
 			'datadir'		=> $datadir,
 			'dbserver'		=> $db_server,
@@ -205,13 +202,13 @@ class Core_Model {
 			throw new Exception('Locked for ' . abs($lockdown_time) . 's', '500');
 		}
 		// Correct
-		else if ($user['pass'] == hash('sha256', $pass . $user['salt'])) {
+		else if (Crypto::verify_password($pass, $user['pass'])) {
 			$this->db->user_set_login($user['id'], time());
 
 			// Protect user directories
 			$this->create_user_htaccess();
 
-			return Util::generate_token($user['id']);
+			return Crypto::generate_token($user['id']);
 		}
 		// Wrong password
 		else {

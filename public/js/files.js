@@ -65,17 +65,15 @@ $(document).ready(function() {
 
 var Binder = {
 	init: function() {
-		$(document).on('keydown', function(e) {
-			if ((e.keyCode == 8 || (e.keyCode == 65 && e.ctrlKey)) && !$(e.target).is('input')) {
-				e.preventDefault();
-			}
-		});
-
 		$("#files-filter-input").on('input', function(e) {
 			FileManager.filter($(this).val());
 		});
 
 		$(document).on('keydown', function(e) {
+			if ((e.keyCode == 8 || (e.keyCode == 65 && e.ctrlKey)) && !$(e.target).is('input')) {
+				e.preventDefault();
+			}
+
 			// Filter
 			if (!e.shiftKey && !$(e.target).is('input') && !e.ctrlKey &&
 				$("#files-filter").hasClass('hidden') &&
@@ -217,11 +215,13 @@ var Binder = {
 		});
 
 		$("#create-file").on('click', function(e) {
-			FileManager.showCreate('file');
+			$("#create-type").val('file');
+			Util.showPopup('create');
 		});
 
 		$("#create-folder").on('click', function(e) {
-			FileManager.showCreate('folder');
+			$("#create-type").val('folder');
+			Util.showPopup('create');
 		});
 
 		$("#create .close, #share .close").on('click', function(e) {
@@ -239,7 +239,7 @@ var Binder = {
 		});
 
 		$("#menu-item-info").on('click', function(e) {
-			$("#info, #shield").removeClass("hidden");
+			Util.showPopup('info');
 		});
 
 		$("#notification .close, #notification2 .close").on('click', function(e) {
@@ -276,7 +276,7 @@ var Binder = {
 		});
 
 		$("#context-share").on('click', function(e) {
-			FileManager.showShare();
+			Util.showPopup('share');
 		});
 
 		$("#context-rename").on('click', function(e) {
@@ -330,7 +330,6 @@ var Binder = {
 
 		$("#shield").on('click', function(e) {
 			Util.closePopup();
-			FileManager.closeRename();
 		});
 
 		$("#contextmenu").on('click', function(e) {
@@ -1368,17 +1367,6 @@ var FileManager = {
 	},
 
 	/**
-	 * Displays the create-file/folder popup
-	 */
-	showCreate: function(type) {
-		$("#create-error").text("").addClass("hidden");
-		$("#create-menu").addClass("hidden");
-		$("#create, #shield").removeClass("hidden");
-		$("#create-input").val("").focus();
-		$("#create-type").val(type);
-	},
-
-	/**
 	 * Displays the rename input field
 	 */
 	showRename: function(e) {
@@ -1401,18 +1389,6 @@ var FileManager = {
 			e.preventDefault();
 			FileManager.rename();
 		});
-	},
-
-	/**
-	 * Displays the share popup
-	 */
-	showShare: function() {
-		$("#share-error").text("").addClass("hidden");
-		$("#share .toggle-hidden").addClass("hidden").val("");
-		$("#share-public, #share-write").removeClass("checkbox-checked");
-		$("#share-user, #share-key, #share-mail").val('');
-		$("#shield, #share").removeClass("hidden");
-		$("#share-user").val("").focus();
 	},
 
 	/**

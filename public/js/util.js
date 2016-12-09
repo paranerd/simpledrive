@@ -67,6 +67,10 @@ var Util = {
 		return (password.length <= 6) ? Math.min(score, 1) : score;
 	},
 
+	showPopup: function(id) {
+		$("#" + id + ", #shield").removeClass("hidden");
+	},
+
 	closePopup: function() {
 		$(".popup, .overlay, .toggle-hidden").addClass("hidden");
 		$(".popup input[type=text]").val("");
@@ -184,8 +188,8 @@ var Util = {
 
 	timestampToDate: function(timestamp) {
 		var date = new Date(timestamp * 1000);
-		var day = (date.getDate() < 9) ? "0" + date.getDate() : date.getDate();
-		var month = (date.getMonth() < 9) ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+		var day = (date.getDate() < 10) ? "0" + date.getDate() : date.getDate();
+		var month = (date.getMonth() < 10) ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
 		var year = date.getFullYear();
 		return day + "." + month + "." + year;
 	},
@@ -196,5 +200,11 @@ var Util = {
 		var minutes = parseInt(duration / 60) % 60;
 		var seconds = duration % 60;
 		return (hours > 0 ?(hours < 10 ? "0" + hours + ":" : hours + ":") : "") + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
+	},
+
+	dateToTimestamp: function(date) {
+		date = date.split(".");
+		var newDate = date[1] + "," + date[0] + "," + date[2];
+		return (new Date(newDate).getTime()) / 1000;
 	}
 }

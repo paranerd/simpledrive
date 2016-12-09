@@ -138,6 +138,8 @@ class File_Model {
 
 	private function get_temp_dir($file) {
 		$temp = $this->config['datadir'] . $file['owner'] . self::$TEMP;
+		file_put_contents(LOG, "file: " . print_r($file, true) . "\n", FILE_APPEND);
+		file_put_contents(LOG, "creating temp folder: " . $temp . "\n", FILE_APPEND);
 
 		if ($file['owner'] != "" && !file_exists($temp)) {
 			mkdir($temp);
@@ -632,7 +634,8 @@ class File_Model {
 	 */
 
 	public function zip($target, $sources, $for_download = false) {
-		$targetfile = ($for_download) ? null : $this->get_cached($target, self::$PERMISSION_READ);
+		$target = (!$target && $for_download) ? '0' : $target;
+		$targetfile = $this->get_cached($target, self::$PERMISSION_READ);
 
 		// Download-only doesn't need permissions, because zip will be created in temp
 		if (!$for_download && !$targetfile) {
@@ -650,12 +653,12 @@ class File_Model {
 			throw new Exception('Could not create temp-folder', '500');
 		}
 
-		$destination;
+		$destination = "";
 		$destination_parent = ($for_download) ? $temp : $this->config['datadir'] . $targetfile['owner'] . $targetfile['path'] . "/";
 		$datestamp = date("o-m-d-His") . '.' . explode('.', microtime(true))[1];
 
 		if (count($sources) > 1) {
-			$destination_parent . $datestamp . ".zip";
+			$destination = $destination_parent . $datestamp . ".zip";
 		}
 		else {
 			$firstfile = $this->get_cached(reset($sources), self::$PERMISSION_READ);
@@ -690,6 +693,7 @@ class File_Model {
 
 		$zip->close();
 
+		file_put_contents(LOG, "destination: " . $destination . "\n", FILE_APPEND);
 		if (file_exists($destination)) {
 			return $destination;
 		}
@@ -871,7 +875,7 @@ class File_Model {
 			throw new Exception('Wrong password', '403');
 		}
 		else {
-			$token = Util::generate_token(0, $hash);
+			$token = Crypto::generate_token(0, $hash);
 
 			if ($token) {
 				$return = array('share' => array('id' => $file['id'], 'filename' => $file['filename'], 'type' => $file['type']), 'token' => $token);
