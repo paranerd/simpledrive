@@ -22,7 +22,6 @@ else {
 }
 
 if (!$public && !$user) {
-	file_put_contents(LOG, "not public and no user, so redirect to login\n", FILE_APPEND);
 	header('Location: ' . $base . 'core/login');
 	exit();
 }
@@ -76,41 +75,47 @@ if (!$public && !$user) {
 
 		<!-- Upload -->
 		<div id="upload" class="sidebar-widget hidden">
-			<div id="upload-title" class="widget-title"></div>
+			<div id="upload-title" class="sidebar-widget-row widget-text widget-title"></div>
 			<div class="divider"></div>
-			<div id="upload-filename"></div>
+			<div id="upload-filename" class="sidebar-widget-row widget-text">Filename</div>
 			<div class="divider"></div>
-			<div id="upload-progress"></div>
-			<div id="upload-percent"></div>
+			<div class="progressbar"><div id="upload-progress" class="progressbar-progress"></div></div>
+			<div id="upload-percent">33%</div>
 			<span id="upload-cancel" class="close"> &times; </span>
 		</div>
 
 		<!-- Audio Player -->
 		<div id="audioplayer" class="sidebar-widget hidden">
-			<div id="audio-title"></div>
+			<div id="audio-title" class="sidebar-widget-row widget-text widget-title"></div>
 
-			<div id="seekbar-bg">
-				<div id="seekbar-buffer"></div>
-				<div id="seekbar-progress"></div>
+			<div class="divider"></div>
+			<div id="audio-seekbar" class="progressbar">
+				<div id="audio-seekbar-buffer" class="progressbar-buffer"></div>
+				<div id="audio-seekbar-progress" class="progressbar-progress"></div>
+			</div>
+			<div class="divider"></div>
+
+			<div id="audio-time" class="sidebar-widget-row">
+				<div id="audio-playpos">00:00</div>
+				<div id="audio-duration">00:00</div>
 			</div>
 
-			<div id="audio-playpos">00:00</div>
-			<div id="audio-duration">00:00</div>
+			<div class="divider"></div>
 
-
-			<div id="audio-prev" class="audio-controls icon-prev"></div>
-			<div id="audio-play" class="audio-controls icon-play"></div>
-			<div id="audio-next" class="audio-controls icon-next"></div>
-
+			<div class="sidebar-widget-row sidebar-widget-icons">
+				<div id="audio-prev" class="sidebar-widget-icon icon-prev"></div>
+				<div id="audio-play" class="sidebar-widget-icon icon-play"></div>
+				<div id="audio-next" class="sidebar-widget-icon icon-next"></div>
+			</div>
 			<span class="close"> &times; </span>
 		</div>
 
 		<div id="clipboard" class="sidebar-widget hidden">
-			<span class="close"> &times; </span>
-			<div id="clipboard-title" class="widget-title">Clipboard</div>
+			<div class="sidebar-widget-row widget-text widget-title">Clipboard</div>
 			<div class="divider"></div>
-			<div id="clipboard-content" class="clipboard-content">1</div>
-			<div id="clipboard-count" class="clipboard-content hidden">2</div>
+			<div id="clipboard-content" class="sidebar-widget-row widget-text">1</div>
+			<div id="clipboard-count" class="hidden">2</div>
+			<span class="close"> &times; </span>
 		</div>
 
 		<!-- Folder size -->
@@ -123,7 +128,7 @@ if (!$public && !$user) {
 	<!-- Files -->
 	<div id="content">
 		<div id="files-filter" class="list-filter hidden">
-			<input id="files-filter-input" class="list-filter-input" placeholder="Filter..."/>
+			<input class="list-filter-input" placeholder="Filter..."/>
 			<span class="close"> &times;</span>
 		</div>
 		<div id="list-header" class="list-header <?php if ($fileview == 'grid') echo 'hidden'; ?>">
@@ -205,8 +210,8 @@ if (!$public && !$user) {
 		<span class="close"> &times;</span>
 		<div class="popup-title"><?php echo $lang['create']; ?></div>
 
-		<div class="input-header"><?php echo $lang['filename']; ?></div>
-		<input id="create-input" type="text" class="input-wide" placeholder="<?php echo $lang['filename']; ?>" />
+		<label for="create-input"><?php echo $lang['filename']; ?></label>
+		<input id="create-input" type="text" placeholder="<?php echo $lang['filename']; ?>" />
 
 		<div id="create-error" class="error hidden"></div>
 		<input id="create-type" type="hidden" name="type" />
@@ -218,14 +223,14 @@ if (!$public && !$user) {
 		<span class="close"> &times;</span>
 		<div class="popup-title"><?php echo $lang['share']; ?></div>
 
-		<div class="input-header"><?php echo $lang['username']; ?></div>
-		<input id="share-user" type="text" class="input-wide" placeholder="<?php echo $lang['username']; ?>">
+		<label><?php echo $lang['username']; ?></label>
+		<input id="share-user" type="text" placeholder="<?php echo $lang['username']; ?>">
 
-		<div class="input-header hidden toggle-hidden"><?php echo $lang['password']; ?></div>
-		<input id="share-key" type="text" class="input-wide hidden toggle-hidden" placeholder="<?php echo $lang['password']; ?> (optional)" autocomplete="off">
+		<label for="share-key" class="hidden toggle-hidden"><?php echo $lang['password']; ?></label>
+		<input id="share-key" type="text" class="hidden toggle-hidden" placeholder="<?php echo $lang['password']; ?> (optional)" autocomplete="off">
 
-		<div class="input-header hidden toggle-hidden">Mail</div>
-		<input id="share-mail" type="text" class="input-wide hidden toggle-hidden" placeholder="Mail (optional)">
+		<label for="share-mail" class="hidden toggle-hidden">Mail</label>
+		<input id="share-mail" type="text" class="hidden toggle-hidden" placeholder="Mail (optional)">
 
 		<div class="checkbox">
 			<div id="share-write" class="checkbox-box"></div>
@@ -242,7 +247,7 @@ if (!$public && !$user) {
 
 	<!-- Image Viewer -->
 	<div id="img-viewer" class="overlay hidden">
-		<button id="img-close" class="img-control icon-cross"></button>
+		<button id="img-close" class="img-control overlay-close icon-cross"></button>
 		<button id="img-delete" class="img-control icon-trash"></button>
 		<button id="img-slideshow" class="img-control icon-play"></button>
 		<button id="img-prev" class="img-control icon-prev"></button>
@@ -251,7 +256,7 @@ if (!$public && !$user) {
 	</div>
 
 	<!-- Notification -->
-	<div id="notification" class="center-hor notification-info light hidden">
+	<div id="notification" class="popup center-hor light hidden">
 		<div id="note-icon" class="icon-info"></div>
 		<div id="note-msg"></div>
 		<span class="light close"> &times;</span>
@@ -267,7 +272,7 @@ if (!$public && !$user) {
 
 	<!-- Video player -->
 	<div id="videoplayer" class="overlay hidden">
-		<button id="video-close" class="img-control icon-cross"></button>
+		<button id="video-close" class="img-control overlay-close icon-cross"></button>
 		<video id="video" controls></video>
 	</div>
 

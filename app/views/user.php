@@ -146,8 +146,8 @@
 	<form id="setupbackup" class="popup hidden center input-popup" action="#">
 		<div class="popup-title">Enable cloud backup</div>
 
-		<input id="setupbackup-pass1" class="input-wide" type="password" placeholder="Password" required></input>
-		<input id="setupbackup-pass2" class="input-wide" type="password" placeholder="Password (repeat)" required></input>
+		<input id="setupbackup-pass1" type="password" placeholder="Password" required></input>
+		<input id="setupbackup-pass2" type="password" placeholder="Password (repeat)" required></input>
 
 		<div class="checkbox">
 			<div id="setupbackup-encrypt" class="checkbox-box"></div>
@@ -161,14 +161,14 @@
 		<span class="close"> &times;</span>
 		<div class="popup-title">Change password</div>
 
-		<div class="input-header">Current password</div>
-		<input id="change-password-pass0" type="password" class="input-wide" placeholder="Current password"></input>
+		<label for="change-password-pass0">Current password</label>
+		<input id="change-password-pass0" type="password" placeholder="Current password"></input>
 
-		<div class="input-header">New password</div>
-		<input id="change-password-pass1" type="password" class="input-wide" placeholder="New password"></input>
+		<label for="change-password-pass1">New password</label>
+		<input id="change-password-pass1" type="password" placeholder="New password"></input>
 
-		<div class="input-header">New password (repeat)</div>
-		<input id="change-password-pass2" type="password" class="input-wide" placeholder="New password (repeat)"></input>
+		<label for="change-password-pass2">New password (repeat)</label>
+		<input id="change-password-pass2" type="password" placeholder="New password (repeat)"></input>
 
 		<div id="change-password-error" class="error hidden"></div>
 		<button class="button">OK</button>

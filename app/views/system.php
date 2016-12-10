@@ -203,10 +203,14 @@
 		<span class="close"> &times;</span>
 		<div class="popup-title">New User</div>
 
-		<input id="createuser-name" type="text" name="username" class="input-wide" autofocus autocomplete="off" placeholder="Username"/>
-		<input id="createuser-pass1" type="password" class="input-wide" placeholder="Password"/><span id="strength" class="hidden"></span>
-		<input id="createuser-pass2" type="password" class="input-wide" placeholder="Repeat Password"/>
-		<input id="createuser-mail" type="text" class="input-wide" placeholder="E-Mail (optional)"/>
+		<label for="createuser-name">Username</label>
+		<input id="createuser-name" type="text" name="username" autofocus autocomplete="off" placeholder="Username"/>
+		<label for="createuser-pass1">Password</label>
+		<input id="createuser-pass1" type="password" placeholder="Password"/><span id="strength" class="hidden"></span>
+		<label for="createuser-pass2">Repeat Password</label>
+		<input id="createuser-pass2" type="password" placeholder="Repeat Password"/>
+		<label for="createuser-mail">E-Mail</label>
+		<input id="createuser-mail" type="text" placeholder="E-Mail (optional)"/>
 
 		<div class="checkbox">
 			<div id="createuser-admin" class="checkbox-box"></div>
@@ -232,8 +236,8 @@
 
 	<div id="confirm" class="popup input-popup center hidden">
 		<div id="confirm-title" class="popup-title">Confirm</div>
-		<button id="confirm-yes" class="button">OK</button>
 		<button id="confirm-no" class="button inverted">Cancel</button>
+		<button id="confirm-yes" class="button">OK</button>
 		<span class="light close"> &times;</span>
 	</div>
 

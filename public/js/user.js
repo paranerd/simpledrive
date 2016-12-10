@@ -62,6 +62,12 @@ var Binder = {
 			$("#menu").toggleClass("hidden");
 		});
 
+		$(".close").on('click', function(e) {
+			if ($(this).parents('.popup').length) {
+				Util.closePopup($(this).parent().attr('id'));
+			}
+		});
+
 		$("#shield").click(function(e) {
 			Util.closePopup();
 		});
@@ -102,24 +108,17 @@ var Binder = {
 		});
 
 		$("#change-password-button").on('click', function(e) {
-			General.showChangePassword();
+			Util.showPopup('change-password');
+			$("#change-password-pass0").focus();
 		});
 
 		$("#clear-temp-button").on('click', function(e) {
 			General.clearTemp();
 		});
 
-		$("#change-password .close").on('click', function(e) {
-			Util.closePopup();
-		});
-
 		$("#change-password").on('submit', function(e) {
 			e.preventDefault();
 			General.changePassword();
-		});
-
-		$("#notification .close").on('click', function(e) {
-			Util.hideNotification();
 		});
 
 		$("#menu-item-info").on('click', function(e) {
@@ -423,11 +422,5 @@ var General = {
 		}).fail(function(xhr, statusText, error) {
 			$("#change-password-error").removeClass("hidden").text(Util.getError(xhr));
 		});
-	},
-
-	showChangePassword: function() {
-		$("#change-password-error").text("").addClass("hidden");
-		$("#change-password, #shield").removeClass("hidden")
-		$("#change-password-pass0").val('').focus();
 	}
 }

@@ -133,7 +133,8 @@ var Binder = {
 		});
 
 		$("#context-create").on('click', function(e) {
-			Users.showCreateUser();
+			Util.showPopup('createuser');
+			$("#createuser-name").focus();
 		});
 
 		$("#context-delete").on('click', function(e) {
@@ -148,8 +149,10 @@ var Binder = {
 			$("#info, #shield").removeClass("hidden");
 		});
 
-		$("#createuser .close").on('click', function(e) {
-			Util.closePopup();
+		$(".close").on('click', function(e) {
+			if ($(this).parents('.popup').length) {
+				Util.closePopup($(this).parent().attr('id'));
+			}
 		});
 
 		$("#createuser").on('submit', function(e) {
@@ -171,10 +174,6 @@ var Binder = {
 			else {
 				$("#strength").text("");
 			}
-		});
-
-		$("#notification .close").on('click', function(e) {
-			Util.hideNotification();
 		});
 
 		$(document).on('contextmenu', '#content', function(e) {
@@ -545,7 +544,7 @@ var Log = {
 
 	clear: function() {
 		$("#confirm-title").text("Clear log?");
-		$("#shield, #confirm").removeClass("hidden");
+		Util.showPopup('confirm');
 
 		$("#confirm-yes").unbind('click').on('click', function() {
 			$.ajax({
@@ -558,10 +557,10 @@ var Log = {
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 			});
-			Util.closePopup();
+			Util.closePopup('confirm');
 		});
 		$("#confirm-no").unbind('click').on('click', function() {
-			Util.closePopup();
+			Util.closePopup('confirm');
 		});
 	},
 
@@ -813,7 +812,7 @@ var Users = {
 
 	remove: function() {
 		$("#confirm-title").text("Delete user?");
-		$("#shield, #confirm").removeClass("hidden");
+		Util.showPopup('confirm');
 
 		$("#confirm-yes").unbind('click').on('click', function() {
 			$.ajax({
@@ -826,10 +825,10 @@ var Users = {
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 			});
-			Util.closePopup();
+			Util.closePopup('confirm');
 		});
 		$("#confirm-no").unbind('click').on('click', function() {
-			Util.closePopup();
+			Util.closePopup('confirm');
 		});
 	},
 
@@ -882,11 +881,6 @@ var Users = {
 		});
 	},
 
-	showCreateUser: function() {
-		$("#createuser, #shield").removeClass("hidden");
-		$("#createuser-name").focus();
-	},
-
 	create: function() {
 		var admin = ($("#createuser-admin").hasClass("checkbox-checked")) ? 1 : 0;
 
@@ -900,7 +894,7 @@ var Users = {
 				data: {token: token, user: $("#createuser-name").val(), pass: $("#createuser-pass1").val(), admin: admin, mail: $("#createuser-mail").val()},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
-				Util.closePopup();
+				Util.closePopup('createuser');
 				Users.fetch();
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);

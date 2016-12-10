@@ -56,13 +56,13 @@ var AudioManager = {
 		});
 
 		AudioManager.sound.addEventListener('timeupdate', function() {
-			$("#seekbar-progress").width((this.currentTime / this.duration) * 100 + "%");
-			$("#seekbar-buffer").width((this.buffered.end(0) / this.duration) * 100 + "%");
+			$("#audio-seekbar-progress").width((this.currentTime / this.duration) * 100 + "%");
+			$("#audio-seekbar-buffer").width((this.buffered.end(0) / this.duration) * 100 + "%");
 			$("#audio-playpos").text(Util.timestampToString(this.currentTime));
 		});
 
 		AudioManager.sound.addEventListener('ended', function() {
-			$("#seekbar-progress").width('0%');
+			$("#audio-seekbar-progress").width('0%');
 			AudioManager.next(true);
 		});
 
@@ -94,7 +94,7 @@ var AudioManager = {
 		var wasPlaying = !AudioManager.sound.paused;
 		AudioManager.sound.pause();
 		AudioManager.sound.currentTime = parseInt(AudioManager.sound.duration) * percent;
-		$("#seekbar-progress").width($("#seekbar-bg").width() * percent);
+		$("#audio-seekbar-progress").width($("#audio-seekbar-bg").width() * percent);
 
 		if (wasPlaying) {
 			AudioManager.sound.play();

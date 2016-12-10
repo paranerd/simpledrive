@@ -7,7 +7,7 @@
  * @link		http://simpledrive.org
  */
 
-	if(file_exists('config/config.json')) {
+	if (file_exists('config/config.json')) {
 		header('Location: ' . $base . 'core/login');
 		exit();
 	}

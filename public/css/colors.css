@@ -50,16 +50,12 @@ button {
 .major-submit {
 	color: white;
 	border-radius: 3px;
-	/*border: 1px solid #b3b3b3;
-	background-color: transparent;*/
-
 	background-color: #2e8b5e;
 	border: 1px solid #2e8b5e;
 }
 
 .major-submit:hover {
 	background-color: #47a276;
-	/*background-color: rgba(255,255,255,0.1);*/
 }
 
 .footer {
@@ -108,22 +104,30 @@ button {
 }
 
 .notification-info {
-	color: #2e8b5e;
-	background-color: #E0EEE0;
-	border: 1px solid #2e8b5e;
+	color: #2e8b5e !important;
+	background-color: #E0EEE0 !important;
+	border: 1px solid #2e8b5e !important;
 }
 
 .notification-warning {
-	color: #8B4500;
-	background-color: #F4A460;
-	border: 1px solid #8B4500;
+	color: #8B4500 !important;
+	background-color: #F4A460 !important;
+	border: 1px solid #8B4500 !important;
 }
 
 #info-title, #info a {
 	color: #2e8b5e;
 }
 
-#upload-progress {
+.progressbar {
+	background-color: rgba(0,0,0,0.1);
+}
+
+.progressbar-buffer {
+	background-color: rgba(0,0,0,0.1);
+}
+
+.progressbar-progress {
 	background-color: #2e8b5e;
 }
 
@@ -196,10 +200,6 @@ button {
 	color: #b3b3b3;
 }
 
-#seekbar-progress {
-	background-color: #2e8b5e;
-}
-
 #img-viewer {
 	background-color: black;
 }
@@ -239,30 +239,6 @@ button {
 	background-color: white;
 }
 
-.major-popup {
-	box-shadow: 0px 0px 30px 3px rgba(0,0,0,0.45) !important;
-/*
-	background-color: rgba(0,0,0,0.15) !important;
-*/
-/*
-	border: 1px solid #ddd;
-*/
-	background-color: rgba(0,0,0,0.15) !important;
-}
-
-.major-popup .popup-title, .major-popup .input-header {
-	color: #eee;
-}
-
-.major-popup .button {
-	border: 1px solid rgba(255,255,255,0.25);
-}
-
-.major-popup .button:hover {
-	color: white;
-	background-color: #3da070;
-}
-
 .popup-title {
 	color: #2e8b5e;
 }
@@ -286,7 +262,7 @@ button {
 	color: #2e8b5e;
 }
 
-.input-wide {
+.popup input {
 	color: grey;
 	background-color: white;
 }
@@ -440,10 +416,6 @@ button {
 	border-bottom: 1px solid #bbb;
 }
 
-.light #upload-percent {
-	color: #555;
-}
-
 .light .trashact {
 	color: white;
 	background-color: rgba(255,0,0,0.3);
@@ -469,20 +441,8 @@ button {
 	box-shadow: 0px 0px 15px 3px rgba(0,0,0,0.2) !important;
 }
 
-.light #seekbar-buffer {
-	background-color: white;
-}
-
-.light #seekbar-bg {
-	background-color: lightgrey;
-}
-
 .light input {
 	border: 1px solid lightgrey;
-}
-
-.light .input-header {
-	color: #555;
 }
 
 .light .menu-item, .light .menu-item a {
@@ -505,10 +465,6 @@ button {
 .light .menu-item.trashact:hover {
 	color: white;
 	background-color: rgba(255,0,0,0.5);
-}
-
-.light .progress-shield {
-	background-color: rgba(255,255,255,0.4);
 }
 
 .light #loading {
@@ -654,6 +610,7 @@ button {
 }
 
 .dark .popup {
+	color: #bcbcbc;
 	background-color: #444;
 }
 
@@ -662,10 +619,6 @@ button {
 	border: none !important;
 	border-bottom: 1px dotted #2e8b5e !important;
 	background-color: rgba(0,0,0,0);
-}
-
-.dark .input-header {
-	color: #bcbcbc;
 }
 
 .dark .checkbox-label {
@@ -685,14 +638,6 @@ button {
 	color: #b3b3b3 !important;
 }
 
-.dark #seekbar-bg {
-	background-color: #292929;
-}
-
-.dark #seekbar-buffer {
-	background-color: #555;
-}
-
 .dark #sidebar-footer {
 	color: #aaa;
 	border-top: 1px solid #555;
@@ -702,16 +647,8 @@ button {
 	color: white;
 }
 
-.dark #upload-percent {
-	color: #eee;
-}
-
 .dark .fileinfo-elem {
 	color: white;
-}
-
-.dark .progress-shield {
-	background-color: rgba(0,0,0,0.4);
 }
 
 .dark #loading {
@@ -765,25 +702,3 @@ button {
 	color: #eee;
 	border: 1px solid #555;
 }
-
-/*.dark #content {
-	background-color: white !important;
-}
-
-.dark .item {
-	color: #555 !important;
-	border-bottom: 1px solid #e0e0e0;
-}
-
-.dark .thumbnail {
-	color: #555 !important;
-}
-
-.dark #list-header {
-	color: #555;
-	border-bottom: 1px solid #e0e0e0;
-}
-
-.dark #logo {
-	border-right: 1px solid transparent;
-}*/

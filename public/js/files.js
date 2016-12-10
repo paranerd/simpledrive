@@ -65,7 +65,7 @@ $(document).ready(function() {
 
 var Binder = {
 	init: function() {
-		$("#files-filter-input").on('input', function(e) {
+		$("#files-filter .list-filter-input").on('input', function(e) {
 			FileManager.filter($(this).val());
 		});
 
@@ -81,18 +81,18 @@ var Binder = {
 			{
 				$("#files-filter").removeClass('hidden');
 				$(window).resize();
-				$("#files-filter-input").focus();
+				$("#files-filter .list-filter-input").focus();
 
 				setTimeout(function() {
 					// Place cursor behind text
-					$("#files-filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
+					$("#files-filter .list-filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
 				}, 10);
 				FileManager.filter(String.fromCharCode(e.keyCode).toLowerCase());
 			}
 
 			switch(e.keyCode) {
 				case 13: // Return
-					if (FileManager.getSelectedCount() == 1 && (!$(e.target).is('input') || e.target.id == 'files-filter-input')) {
+					if (FileManager.getSelectedCount() == 1 && (!$(e.target).is('input') || e.target.className == 'list-filter-input')) {
 						FileManager.open();
 					}
 					break;
@@ -182,8 +182,12 @@ var Binder = {
 			FileManager.openTrash();
 		});
 
-		$("#upload-cancel").on('click', function(e) {
+		$("#upload .close").on('click', function(e) {
 			FileManager.finishUpload(true);
+		});
+
+		$("#audioplayer .close").on('click', function(e) {
+			AudioManager.stopAudio()
 		});
 
 		$("#clipboard .close").on('click', function(e) {
@@ -224,8 +228,13 @@ var Binder = {
 			Util.showPopup('create');
 		});
 
-		$("#create .close, #share .close").on('click', function(e) {
-			Util.closePopup();
+		$(".close").on('click', function(e) {
+			if ($(this).parents('.popup').length) {
+				Util.closePopup($(this).parent().attr('id'));
+			}
+			else if ($(this).parents('.sidebar-widget').length) {
+				Util.closeWidget($(this).parent().attr('id'));
+			}
 		});
 
 		$("#create").on('submit', function(e) {
@@ -240,10 +249,6 @@ var Binder = {
 
 		$("#menu-item-info").on('click', function(e) {
 			Util.showPopup('info');
-		});
-
-		$("#notification .close, #notification2 .close").on('click', function(e) {
-			Util.hideNotification();
 		});
 
 		$("#fileinfo .close").on('click', function(e) {
@@ -354,7 +359,7 @@ var Binder = {
 			FileManager.toggleSelection();
 		});
 
-		$("#seekbar-bg").on('mousedown', function(e) {
+		$("#audio-seekbar").on('mousedown', function(e) {
 			seekPos = (e.pageX - $(this).offset().left) / $(this).width();
 		});
 
@@ -530,9 +535,9 @@ var Binder = {
 		});
 
 		$(document).on('mousemove', function(e) {
-			if (seekPos != null && e.pageX > $("#seekbar-bg").offset().left && e.pageX < $("#seekbar-bg").offset().left + $("#seekbar-bg").width()) {
-				seekPos = (e.pageX - $("#seekbar-bg").offset().left) / $("#seekbar-bg").width();
-				$("#seekbar-progress").width($("#seekbar-bg").width() * seekPos);
+			if (seekPos != null && e.pageX > $("#audio-seekbar").offset().left && e.pageX < $("#audio-seekbar").offset().left + $("#audio-seekbar").width()) {
+				seekPos = (e.pageX - $("#audio-seekbar").offset().left) / $("#audio-seekbar").width();
+				$("#audio-seekbar-progress").width($("#audio-seekbar").width() * seekPos);
 			}
 			else if (startDrag) {
 				var distMoved = Math.round(Math.sqrt(Math.pow(mouseStart.y - e.clientY, 2) + Math.pow(mouseStart.x - e.clientX, 2)));
@@ -645,10 +650,6 @@ var FileManager = {
 		}
 	},
 
-	closeClipboard: function() {
-		$("#clipboard").addClass("hidden");
-	},
-
 	closeFilter: function() {
 		$("#files-filter").addClass("hidden");
 		FileManager.filter('');
@@ -712,7 +713,7 @@ var FileManager = {
 		}
 
 		FileManager.deleteAfterCopy = false;
-		FileManager.updateClipboard(FileManager.clipboard);
+		FileManager.updateClipboard();
 	},
 
 	create: function() {
@@ -726,7 +727,7 @@ var FileManager = {
 		}).done(function(data, statusText, xhr) {
 			Util.busy(false);
 			FileManager.fetch();
-			Util.closePopup();
+			Util.closePopup('create');
 		}).fail(function(xhr, statusText, error) {
 			Util.busy(false);
 			$("#create-error").removeClass("hidden").text(Util.getError(xhr));
@@ -745,7 +746,7 @@ var FileManager = {
 		}
 
 		FileManager.deleteAfterCopy = true;
-		FileManager.updateClipboard(FileManager.clipboard);
+		FileManager.updateClipboard();
 	},
 
 	dirUp: function() {
@@ -888,7 +889,7 @@ var FileManager = {
 
 	emptyClipboard: function() {
 		FileManager.clipboard = {};
-		FileManager.closeClipboard();
+		FileManager.updateClipboard();
 	},
 
 	fetch: function(back) {
@@ -957,11 +958,7 @@ var FileManager = {
 		FileManager.fetch();
 
 		window.onbeforeunload = null;
-		setTimeout(function() { FileManager.hideUpload(); }, 5000);
-	},
-
-	hideUpload: function() {
-		$("#upload").addClass("hidden");
+		setTimeout(function() { Util.closeWidget('upload'); }, 5000);
 	},
 
 	getAllElements: function() {
@@ -1350,7 +1347,7 @@ var FileManager = {
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				Util.busy(false);
-				Util.closePopup();
+				Util.closePopup('share');
 
 				if (pubAcc) {
 					Util.notify(data.msg, false);
@@ -1512,11 +1509,11 @@ var FileManager = {
 		FileManager.updateSelStatus();
 	},
 
-	updateClipboard: function(clipboard) {
-		var content = (Object.keys(clipboard).length == 1) ? Object.keys(clipboard).length + " file" : Object.keys(clipboard).length + " files";
+	updateClipboard: function() {
+		var content = (Object.keys(FileManager.clipboard).length == 1) ? Object.keys(FileManager.clipboard).length + " file" : Object.keys(FileManager.clipboard).length + " files";
 		$("#clipboard").removeClass("hidden");
 		$("#clipboard-content").text(content);
-		$("#clipboard-count").text(Object.keys(clipboard).length);
+		$("#clipboard-count").text(Object.keys(FileManager.clipboard).length);
 	},
 
 	/**

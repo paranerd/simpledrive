@@ -82,9 +82,10 @@
 	<form id="rename" class="popup input-popup center hidden" action="#">
 		<div class="close"> &times;</div>
 		<div class="popup-title">Rename</div>
-		<div class="input-header">New filename</div>
-		<input id="rename-filename" type="text" class="input-wide" placeholder="Filename" autofocus autocomplete="off">
-		<input type="submit" class="button" value="Rename">
+
+		<label for="rename-filename">New filename</label>
+		<input id="rename-filename" type="text" placeholder="Filename" autofocus autocomplete="off">
+		<button type="submit" class="button">Rename</button>
 	</form>
 
 	<!-- Notification -->

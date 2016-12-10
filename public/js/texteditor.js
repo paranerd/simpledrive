@@ -34,8 +34,6 @@ $(document).ready(function() {
 	token = $("#data-token").val();
 	file = $("#data-file").val();
 
-	console.log(token);
-
 	$("#username").html(Util.escape(username) + " &#x25BE");
 
 	$("#doc-name").mouseenter(function(e) {
@@ -52,6 +50,12 @@ $(document).ready(function() {
 		});
 	}).mouseout(function(e) {
 		$("#dragstatus").fadeOut(500);
+	});
+
+	$(".close").on('click', function(e) {
+		if ($(this).parents('.popup').length) {
+			Util.closePopup($(this).parent().attr('id'));
+		}
 	});
 
 	$("#shield").click(function() {
@@ -101,20 +105,13 @@ $(document).on('keydown', function(e) {
 });
 
 $("#path").on('click', function() {
-	Editor.showRename();
-});
-
-$("#rename .close").on('click', function() {
-	closePopup();
+	Util.showPopup('rename');
+	$("#rename-filename").val(file['filename']).focus().select();
 });
 
 $("#rename").on('submit', function(e) {
 	e.preventDefault();
 	Editor.rename();
-});
-
-$("#notificatino .close").on('click', function() {
-	Util.hideNotification();
 });
 
 var Editor = {
@@ -176,20 +173,14 @@ var Editor = {
 				data: {token: token, newFilename: newFilename, target: JSON.stringify(file)},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
-				Util.closePopup();
+				Util.closePopup('rename');
 				Editor.load();
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 			});
 		}
 		else {
-			Util.closePopup();
+			Util.closePopup('rename');
 		}
-	},
-
-	showRename: function() {
-		$("#renameStatus").text("");
-		$("#shield, #rename").removeClass("hidden");
-		$("#rename-filename").val(file['filename']).focus().select();
 	}
 }

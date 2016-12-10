@@ -176,6 +176,7 @@ select {
 }
 
 .sidebar-widget {
+	position: relative;
 	margin-top: 20px;
 	width: 100%;
 	font-family: robotoregular, sans-serif;
@@ -183,10 +184,20 @@ select {
 	text-align: left;
 }
 
-.widget-title {
-	margin-left: 20px;
+.sidebar-widget-row {
+	position: relative;
+	width: 100%;
 	height: 40px;
 	line-height: 40px;
+	font-size: 0.9rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.sidebar-widget-row.widget-text {
+	padding-left: 5%;
+	width: 95%;
 }
 
 #create-menu {
@@ -199,18 +210,7 @@ select {
 	left: 54px;
 }
 
-#upload {
-	position: relative;
-/*
-	top: 262px;
-*/
-	height: 87px;
-}
-
 #upload-percent {
-/*
-	position: absolute;
-*/
 	left: 1px;
 	bottom: 0;
 	height: 48px;
@@ -219,23 +219,6 @@ select {
 	font-family: robotoregular, sans-serif;
 	text-align: center;
 	display: none;
-}
-
-#upload-progress {
-	margin-top: 1px;
-	bottom: 0;
-	height: 5px;
-}
-
-#upload-filename {
-	margin-left: 20px;
-	width: 180px;
-	height: 40px;
-	line-height: 40px;
-	font-size: 0.9rem;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
 }
 
 /* Content */
@@ -263,15 +246,6 @@ select {
 	height: 100%;
 	width: 88%;
 	overflow: hidden;
-}
-
-.progress-shield {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 101;
 }
 
 /* Notification */
@@ -388,127 +362,55 @@ select {
 	clear: both;
 }
 
-/* Clipboard */
-
-#clipboard {
-	position: relative;
-/*
-	bottom: 40px;
-*/
-	height: 80px;
-}
-
-.clipboard-content {
-	position: absolute;
-	bottom: 0;
-	margin-left: 10%;
-	width: 90%;
-	height: 40px;
-	line-height: 40px;
-	font-size: 0.9rem;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	font-family: robotoregular, sans-serif;
-}
-
-#clipboard-count {
-	margin-left: 0;
-	width: 48px;
-	height: 48px;
-	line-height: 48px;
-	font-size: 1rem;
-	text-align: center;
-}
-
 /* Audio player */
-
-#audioplayer {
-	position: relative;
-	height: 110px;
-	text-align: center;
-}
-
-#audio-title {
-	position: absolute;
-	top: 10px;
-	width: 100%;
-	height: 20px;
-	font-size: 0.9rem;
-	text-align: center;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
 
 #audio-playpos {
 	position: absolute;
-	bottom: 40px;
 	left: 10px;
-	font-size: 0.8rem;
-	height: 20px;
-	line-height: 20px;
 	text-align: left;
 }
 
 #audio-duration {
 	position: absolute;
-	bottom: 40px;
 	right: 10px;
-	font-size: 0.8rem;
-	height: 20px;
-	line-height: 20px;
 	text-align: right;
 }
 
-#seekbar-bg {
-	position: absolute;
-	bottom: 65px;
-	width: 100%;
-	height: 5px;
-	cursor: pointer;
+.sidebar-widget-icons {
+	margin: 0 auto;
+	text-align: center;
 }
 
-#seekbar-buffer {
-	position: absolute;
-	width: 0%;
-	height: 100%;
-
-}
-
-#seekbar-progress {
-	position: absolute;
-	top: 0px;
-	left: 0;
-	width: 0%;
-	height: 5px;
-	border-radius: 0px;
-}
-
-.audio-controls {
-	position: absolute;
-	bottom: 5px;
+.sidebar-widget-icon {
 	height: 40px;
 	width: 40px;
 	font-family: 'icomoon';
 	font-size: 1rem;
 	line-height: 40px;
-	text-align: center;
 	border-radius: 20px;
-	background-size: 100%;
+	color: #777;
+	display: inline-block;
 	cursor: pointer;
 }
 
-#audio-prev {
-	left: 40px;
+.progressbar {
+	position: relative;
+	height: 5px;
+	cursor: pointer;
 }
 
-#audio-play {
-	left: 80px;
+.progressbar-buffer {
+	position: absolute;
+	width: 0%;
+	height: 100%;
 }
 
-#audio-next {
-	right: 40px;
+.progressbar-progress {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 0%;
+	height: 100%;
 }
 
 .empty {
@@ -535,19 +437,8 @@ select {
 /* Image viewer */
 
 #img-viewer {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
 	background-position: center;
 	background-repeat: no-repeat;
-	z-index: 100;
-}
-
-#img-close {
-	top: 20px;
-	right: 20px;
 }
 
 #img-delete {
@@ -643,24 +534,11 @@ select {
 
 /* Video */
 
-#videoplayer {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-}
-
 #video {
 	position: absolute;
 }
 
-#video-close {
-	top: 20px;
-	right: 20px;
-}
-
-/* General */
+/* Checkbox */
 
 .checkbox {
 	position: relative;
@@ -694,9 +572,11 @@ select {
 	font-size: 1rem;
 }
 
+/* Popup */
+
 .popup {
 	position: absolute;
-	width: 200px;
+	min-width: 200px;
 	border-radius: 3px;
 	font-family: robotoregular, sans-serif;
 	font-size: 1rem;
@@ -704,36 +584,9 @@ select {
 }
 
 .popup .button {
-	margin-top: 10px;
-	left: 168px;
-}
-
-.major-popup {
-	margin-top: 50px;
-}
-
-.major-popup .popup-title {
-	width: 100%;
-	text-align: center;
-}
-
-.major-popup .input-header {
-	text-align: center;
-}
-
-.major-popup .input-wide {
-	width: 100%;
-	margin: 0;
-	margin-bottom: 20px;
-	padding: 0;
-	text-align: center;
-	font-size: 1.1rem;
-}
-
-.major-popup .button {
-	left: 0;
-	width: 100%;
-	font-size: 1.1rem;
+	position: relative;
+	margin-left: 10px;
+	float: right;
 }
 
 .input-popup {
@@ -741,11 +594,11 @@ select {
 	padding: 30px;
 }
 
-.input-wide {
+.popup input {
 	height: 40px;
 	width: 258px;
 	margin: 0;
-	margin-bottom: 10px;
+	margin-bottom: 20px;
 	padding: 0;
 	padding-left: 10px;
 	text-align: left;
@@ -767,9 +620,6 @@ select {
 
 .menu-item a {
 	font-family: robotolight, sans-serif;
-/*
-	font-size: 0.9rem;
-*/
 	display: block;
 }
 
@@ -791,10 +641,6 @@ select {
 
 .divider {
 	position: relative;
-/*
-	margin-top: 20px;
-	margin-bottom: 20px;
-*/
 	height: 1px;
 	width: 100%;
 	float: left;
@@ -898,40 +744,11 @@ select {
 	font-size: 1.1rem;
 }
 
-/* Loading indicator */
-
-#loading {
-	position: absolute;
-	top: 200px;
-	height: 40px;
-	width: 40px;
-	border-radius: 0px;
-	z-index: 101;
-}
-
-.loadIndicator {
-	margin-top: 0px;
-	margin-left: 0px;
-	width: 20px;
-	height: 20px;
-	border-radius: 0px;
-	float: left;
-}
-
-#loader0 {
-	opacity: 1.0;
-}
-
-#loader1 {
-	opacity: 0.75;
-}
-
-#loader2 {
-	opacity: 0.25;
-}
-
-#loader3 {
-	opacity: 0.5;
+label {
+	position: relative;
+	margin-bottom: 10px;
+	font-family: robotolight, sans-serif;
+	font-size: 1.1rem;
 }
 
 #dragstatus {
@@ -944,15 +761,6 @@ select {
 	text-align: center;
 	font-family: robotoregular, sans-serif;
 	font-size: 14px;
-}
-
-#shield {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 1001;
 }
 
 #dropzone {
@@ -1215,24 +1023,6 @@ select {
 	z-index: 0;
 }
 
-.confirm-button {
-	height: 50px;
-	width: 100px;
-	line-height: 50px;
-	text-align: center;
-	font-family: robotoregular, sans-serif;
-	font-size: 1rem;
-	border-radius: 3px;
-	font-weight: normal;
-	cursor: pointer;
-	background-color: #2e8b5e;
-	color: white;
-}
-
-#confirm .button {
-	left: 28px;
-}
-
 .row {
 	position: relative;
 	margin-bottom: 20px;
@@ -1266,16 +1056,8 @@ select {
 		margin-top: 30px;
 	}
 
-	#logo .menu-thumb {
-		display: block;
-	}
-
 	#logo, #sidebar, #sidebar .menu-item {
 		width: 54px;
-	}
-
-	#sidebar .menu-text, #logo .menu-text {
-		display: none;
 	}
 
 	#path {
@@ -1286,45 +1068,18 @@ select {
 		left: 54px;
 	}
 
-	#logPages {
-		left: 54px;
-	}
-
-	#audioplayer {
-		height: 54px;
-		width: 54px;
-	}
-
-	#clipboard {
-		height: 54px;
-	}
-
-	#clipboard-count {
+	#logo .menu-thumb, #clipboard-count, #upload-percent {
 		display: block;
 	}
 
-	#audioplayer .close, #seekbar-bg, #seekbar-buffer, #audio-title, #audio-playpos, #audio-duration, #audio-prev, #audio-next, #clipboard .close, #clipboard-title, #clipboard-content {
+	#sidebar .menu-text, #logo .menu-text, #foldersize, #audio-time, #audio-prev, #audio-next, #clipboard-content, #upload-filename, .sidebar-widget .close,  .widget-title, .sidebar-widget .divider, .sidebar-widget .progressbar {
 		display: none;
 	}
 
 	#audio-play {
-		bottom: 0px;
-		left: 0px;
 		width: 48px;
 		height: 48px;
 		line-height: 48px;
-	}
-
-	#upload-title, #upload-filename, #border, #upload-cancel, #upload-progress, #upload .divider, #clipboard .divider {
-		display: none;
-	}
-
-	#upload-percent {
-		display: block;
-	}
-
-	#foldersize {
-		display: none;
 	}
 
 	.sidebar-widget {
@@ -1334,5 +1089,24 @@ select {
 		line-height: 48px !important;
 		border-radius: 27px !important;
 		border: 2px solid #2e8b5e !important;
+		text-align: center;
 	}
+
+	.sidebar-widget-row {
+		height: 48px;
+	}
+}
+
+.overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1001;
+}
+
+.overlay-close {
+	top: 20px;
+	right: 20px;
 }

@@ -71,10 +71,23 @@ var Util = {
 		$("#" + id + ", #shield").removeClass("hidden");
 	},
 
-	closePopup: function() {
-		$(".popup, .overlay, .toggle-hidden").addClass("hidden");
-		$(".popup input[type=text]").val("");
-		$(".popup .checkbox-box").removeClass("checkbox-checked");
+	closePopup: function(id) {
+		if (id) {
+			$("#" + id + ", .overlay, .toggle-hidden").addClass("hidden");
+			$("#" + id + " input[type=text]").val("");
+			$("#" + id + " .checkbox-box").removeClass("checkbox-checked");
+		}
+		else {
+			$(".popup, .overlay, .toggle-hidden").addClass("hidden");
+			$(".popup input[type=text]").val("");
+			$(".popup .checkbox-box").removeClass("checkbox-checked");
+		}
+	},
+
+	closeWidget: function(id) {
+		if (id) {
+			$("#" + id).addClass("hidden");
+		}
 	},
 
 	escape: function(text) {
@@ -114,10 +127,6 @@ var Util = {
 		});
 	},
 
-	hideNotification: function() {
-		$("#notification").addClass("hidden");
-	},
-
 	isDirectorySupported: function() {
 		var tmpInput = document.createElement('input');
 		return ('webkitdirectory' in tmpInput || 'mozdirectory' in tmpInput || 'odirectory' in tmpInput || 'msdirectory' in tmpInput || 'directory' in tmpInput);
@@ -130,7 +139,7 @@ var Util = {
 		$("#notification").removeClass().addClass("light center-hor notification-" + type);
 
 		if (autohide) {
-			setTimeout(function() { Util.hideNotification(); }, 3000);
+			setTimeout(function() { Util.closePopup('notification'); }, 3000);
 		}
 		$(window).resize();
 	},
