@@ -85,7 +85,7 @@ if (!$public && !$user) {
 		</div>
 
 		<!-- Audio Player -->
-		<div id="audioplayer" class="sidebar-widget">
+		<div id="audioplayer" class="sidebar-widget hidden">
 			<div id="audio-title" class="sidebar-widget-row widget-text widget-title"></div>
 
 			<div class="divider"></div>

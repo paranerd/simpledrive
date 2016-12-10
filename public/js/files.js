@@ -889,7 +889,7 @@ var FileManager = {
 
 	emptyClipboard: function() {
 		FileManager.clipboard = {};
-		FileManager.updateClipboard();
+		Util.closeWidget('clipboard');
 	},
 
 	fetch: function(back) {
