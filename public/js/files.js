@@ -16,37 +16,6 @@ var startDrag = false,
 	username,
 	token;
 
-$(window).resize(function() {
-	var contentWidth = ($("#fileinfo").hasClass("hidden")) ? window.innerWidth - $("#sidebar").outerWidth() : window.innerWidth - $("#sidebar").outerWidth() - $("#fileinfo").outerWidth();
-	$("#content").width(contentWidth);
-
-	var contentHeight = window.innerHeight - $("#header").height();
-	contentHeight = ($(".list-filter").hasClass("hidden")) ? contentHeight : contentHeight - $(".list-filter").height();
-
-	$("#content").height(contentHeight);
-	$("#files").height($("#content").height() - $(".list-header").height());
-	$("#sidebar, #fileinfo").height(window.innerHeight - $("#header").height());
-	$("#gallery").height($("#content").height());
-
-	// Position centered divs
-	$('.center').each(function(i, obj) {
-		$(this).css({
-			top : ($(this).parent().height() - $(this).outerHeight()) / 2,
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-
-	$('.center-hor').each(function(i, obj) {
-		$(this).css({
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-
-	setTimeout(function() {
-		simpleScroll.update();
-	}, 200);
-});
-
 $(document).ready(function() {
 	username = $("#data-username").val();
 	token = $("#data-token").val();
@@ -132,7 +101,7 @@ var Binder = {
 					break;
 
 				case 8: // Backspace
-					if (!$(e.target).is('input') && !ImageManager.isGalleryLoaded()) {
+					if (!$(e.target).is('input')) {
 						FileManager.dirUp();
 					}
 					break;
@@ -150,7 +119,6 @@ var Binder = {
 					break;
 
 				case 27: // Esc
-					ImageManager.closeGallery();
 					ImageManager.close();
 					ImageManager.slideshow(true);
 
@@ -166,20 +134,10 @@ var Binder = {
 			}
 		});
 
-		$("#sidebar-files").on('click', function(e) {
-			FileManager.closeTrash();
-		});
-
-		$("#sidebar-shareout").on('click', function(e) {
-			FileManager.listShares('shareout');
-		});
-
-		$("#sidebar-sharein").on('click', function(e) {
-			FileManager.listShares('sharein');
-		});
-
-		$("#sidebar-trash").on('click', function(e) {
-			FileManager.openTrash();
+		$(".sidebar-navigation").on('click', function(e) {
+			FileManager.view = $(this).find('input').val();
+			FileManager.clearHierarchy();
+			FileManager.fetch();
 		});
 
 		$("#upload .close").on('click', function(e) {
@@ -220,21 +178,10 @@ var Binder = {
 
 		$("#create-file").on('click', function(e) {
 			$("#create-type").val('file');
-			Util.showPopup('create');
 		});
 
 		$("#create-folder").on('click', function(e) {
 			$("#create-type").val('folder');
-			Util.showPopup('create');
-		});
-
-		$(".close").on('click', function(e) {
-			if ($(this).parents('.popup').length) {
-				Util.closePopup($(this).parent().attr('id'));
-			}
-			else if ($(this).parents('.sidebar-widget').length) {
-				Util.closeWidget($(this).parent().attr('id'));
-			}
 		});
 
 		$("#create").on('submit', function(e) {
@@ -247,10 +194,6 @@ var Binder = {
 			FileManager.share();
 		});
 
-		$("#menu-item-info").on('click', function(e) {
-			Util.showPopup('info');
-		});
-
 		$("#fileinfo .close").on('click', function(e) {
 			$("#fileinfo").addClass("hidden");
 			$(window).resize();
@@ -260,48 +203,61 @@ var Binder = {
 			FileManager.toggleShareLink();
 		});
 
-		$("#context-gallery").on('click', function(e) {
-			ImageManager.openGallery();
-		});
+		$("#contextmenu .menu-item").on('click', function(e) {
+			var id = $(this).attr('id')
+			var action = id.substr(id.indexOf('-') + 1);
 
-		$("#context-restore").on('click', function(e) {
-			FileManager.restore();
-		});
+			switch (action) {
+				case 'restore':
+					FileManager.restore();
+					break;
 
-		$("#context-copy").on('click', function(e) {
-			FileManager.copy();
-		});
+				case 'copy':
+					FileManager.copy();
+					break;
 
-		$("#context-cut").on('click', function(e) {
-			FileManager.cut();
-		});
+				case 'cut':
+					FileManager.cut();
+					break;
 
-		$("#context-paste").on('click', function(e) {
-			FileManager.paste();
-		});
+				case 'paste':
+					FileManager.paste();
+					break;
 
-		$("#context-share").on('click', function(e) {
-			Util.showPopup('share');
-		});
+				case 'share':
+					Util.showPopup('share');
+					break;
 
-		$("#context-rename").on('click', function(e) {
-			FileManager.showRename();
-		});
+				case 'unshare':
+					FileManager.unshare();
+					break;
 
-		$("#context-unshare").on('click', function(e) {
-			FileManager.unshare();
-		});
+				case 'rename':
+					FileManager.showRename();
+					break;
 
-		$("#context-zip").on('click', function(e) {
-			FileManager.zip();
-		});
+				case 'zip':
+					FileManager.zip();
+					break;
 
-		$("#context-download").on('click', function(e) {
-			FileManager.download();
-		});
+				case 'download':
+					FileManager.download();
+					break;
 
-		$("#context-delete").on('click', function(e) {
-			FileManager.remove();
+				case 'delete':
+					FileManager.remove();
+					break;
+
+				case 'gallery':
+					FileManager.openGallery();
+					break;
+
+				case 'closegallery':
+					FileManager.closeGallery();
+					break;
+			}
+
+			$("#contextmenu").addClass("hidden");
 		});
 
 		$("#load-public").on('submit', function(e) {
@@ -309,51 +265,21 @@ var Binder = {
 			FileManager.loadPublic();
 		});
 
-		$("#upload-file").on('click', function(e) {
-			$("#upload-file-input").trigger("click");
+		$(".upload-button").on('click', function(e) {
+			$(this).find('input').trigger('click');
 		});
 
-		$("#upload-file-input").on('change', function(e) {
+		$(".upload-input").on('change', function(e) {
 			FileManager.addUpload(this);
 		});
 
-		if (Util.isDirectorySupported()) {
-			$("#upload-folder").on('click', function(e) {
-				$("#upload-folder-input").trigger("click");
-			});
-			$("#upload-folder-input").on('change', function(e) {
-				FileManager.addUpload(this);
-			});
-		}
-		else {
+		$(".upload-input").on('click', function(e) {
+			e.stopPropagation();
+		});
+
+		if (!Util.isDirectorySupported()) {
 			$("#upload-folder").addClass("hidden");
 		}
-
-		$("#username").on('click', function(e) {
-			$("#menu").toggleClass("hidden");
-		});
-
-		$("#shield").on('click', function(e) {
-			Util.closePopup();
-		});
-
-		$("#contextmenu").on('click', function(e) {
-			$("#contextmenu").addClass("hidden");
-		});
-
-		$("#sidebar-create").on('click', function() {
-			$("#create-menu").removeClass("hidden");
-			$("#upload-menu").addClass("hidden");
-		});
-
-		$("#sidebar-upload").on('click', function() {
-			$("#upload-menu").removeClass("hidden");
-			$("#create-menu").addClass("hidden");
-		});
-
-		$(".checkbox-box").on('click', function(e) {
-			$(this).toggleClass('checkbox-checked');
-		});
 
 		$("#fSelect").on('click', function(e) {
 			FileManager.toggleSelection();
@@ -377,7 +303,7 @@ var Binder = {
 		/**
 		 * Prepares and shows the custom context menu depending on the element(s) selected
 		 */
-		$(document).on('contextmenu', '#content, #gallery', function(e) {
+		$(document).on('contextmenu', '#content', function(e) {
 			e.preventDefault();
 			//var target = (typeof e.target.parentNode.value === "undefined") ? null : FileManager.getElementAt(e.target.parentNode.value);
 			var target = (typeof e.target.value != "undefined") ? FileManager.getElementAt(e.target.value) : ((typeof e.target.parentNode.value != "undefined") ? FileManager.getElementAt(e.target.parentNode.value) : null);
@@ -410,17 +336,13 @@ var Binder = {
 				if (FileManager.isClipboardFilled()) {
 					$("#context-paste").removeClass("hidden");
 				}
-				// Is an image selected?
-				if (target.type == "image" && !multi) {
+				// Open Gallery
+				if (target.type == "image" && !multi && !FileManager.galleryMode) {
 					$("#context-gallery").removeClass("hidden");
 				}
-				// Copy
-				if (true) {
-					$("#context-copy").removeClass("hidden");
-				}
-				// Cut
-				if (true) {
-					$("#context-cut").removeClass("hidden");
+				// Close Gallery
+				if (target.type == "image" && !multi && FileManager.galleryMode) {
+					$("#context-closegallery").removeClass("hidden");
 				}
 				// Share
 				if ((!target.selfshared) && target.owner == username && !multi) {
@@ -437,6 +359,12 @@ var Binder = {
 
 				// Zip
 				$("#context-zip").removeClass("hidden");
+
+				// Copy
+				$("#context-copy").removeClass("hidden");
+
+				// Cut
+				$("#context-cut").removeClass("hidden");
 
 				// Download
 				$("#context-download").removeClass("hidden");
@@ -462,7 +390,7 @@ var Binder = {
 			Util.closePopup();
 		});
 
-		$(document).on('mousedown', '.item, .gallery-container', function(e) {
+		$(document).on('mousedown', '.item', function(e) {
 			if ($(e.target).is(".thumbnail, .shared, input")) {
 				return;
 			}
@@ -608,6 +536,8 @@ var Binder = {
 var FileManager = {
 	requestID: 0,
 	view: 'files',
+	galleryMode: false,
+	originalFileview: '',
 	id: '0',
 	public: false,
 
@@ -638,11 +568,12 @@ var FileManager = {
 			FileManager.uploadTotal++;
 		}
 
-		$("#upload-file-input, #upload-folder-input").val('');
+		$(elem).val(''); // Remove files from DOM
+
 		$("#upload-menu").addClass("hidden");
 
 		if (!FileManager.uploadRunning) {
-			$("#upload-percent, #upload-filename, #upload-title, #upload-folder-input, #upload-file-input").text('');
+			$("#upload-percent, #upload-filename, #upload-title").text('');
 			$("#upload").removeClass("hidden");
 			FileManager.uploadRunning = true;
 			window.onbeforeunload = Util.refreshWarning();
@@ -655,8 +586,18 @@ var FileManager = {
 		FileManager.filter('');
 	},
 
+	closeGallery: function() {
+		FileManager.galleryMode = false;
+		FileManager.filter('');
+		$("#sidebar").removeClass("hidden");
+		$("#files").addClass(FileManager.originalFileview);
+		if (FileManager.originalFileview == 'list') {
+			$(".list-header").removeClass("hidden");
+		}
+	},
+
 	clearHierarchy: function() {
-		FileManager.id = FileManager.hierarchy[0].id;
+		FileManager.id = 0;
 		FileManager.hierarchy = [];
 	},
 
@@ -665,12 +606,6 @@ var FileManager = {
 	 */
 	closeRename: function() {
 		$('#renameform').remove();
-	},
-
-	closeTrash: function() {
-		FileManager.view = "files";
-		FileManager.clearHierarchy();
-		FileManager.fetch();
 	},
 
 	compareName: function(a, b) {
@@ -840,10 +775,6 @@ var FileManager = {
 
 		var elem = (FileManager.filteredElem.length == 1) ? " element" : " elements";
 		$("#foldersize").text(FileManager.filteredElem.length + elem);
-
-		if (ImageManager.isGalleryLoaded()) {
-			ImageManager.openGallery();
-		}
 	},
 
 	download: function() {
@@ -965,6 +896,32 @@ var FileManager = {
 		return FileManager.filteredElem;
 	},
 
+	getAllSelectedIDs: function() {
+		var ids = [];
+		for (var i in FileManager.selected) {
+			ids.push(FileManager.selected[i].id);
+		}
+
+		return ids;
+	},
+
+	filterForType: function(needle) {
+		if (FileManager.allElem.length > 0) {
+			FileManager.filteredElem = [];
+
+			for (var i in FileManager.allElem) {
+				if (FileManager.allElem[i].type.toLowerCase().indexOf(needle) != -1) {
+					FileManager.filteredElem.push(FileManager.allElem[i]);
+				}
+			}
+			FileManager.display();
+			FileManager.unselectAll();
+			if (FileManager.filteredElem.length > 0) {
+				FileManager.select(0);
+			}
+		}
+	},
+
 	getAllSelected: function() {
 		return FileManager.selected;
 	},
@@ -1020,12 +977,6 @@ var FileManager = {
 		return Object.keys(FileManager.clipboard).length > 0;
 	},
 
-	listShares: function(mode) {
-		FileManager.view = mode;
-		FileManager.clearHierarchy();
-		FileManager.fetch();
-	},
-
 	loadPublic: function() {
 		var key = $("#pub-key").val();
 
@@ -1052,14 +1003,14 @@ var FileManager = {
 				$("#pub-key, #pub-error").addClass("hidden");
 				FileManager.filteredElem = [data.msg.share];
 				$("#pub-filename").removeClass("hidden").text(data.msg.share.filename);
-				$("#unlock").val("Download");
+				$("#pubfile button").val("Download");
 				FileManager.downloadPub = true;
 			}
 			$(window).resize();
 		}).fail(function(xhr, statusText, error) {
 			var parsedError = Util.getError(xhr);
-			if (xhr.status == "403") {
-				$("#pubfile, #pub-key, #pub-header").removeClass("hidden");
+			if (xhr.status == '403') {
+				$("#pubfile, #pub-key").removeClass("hidden");
 				$("#pub-key").focus();
 				if (FileManager.publicLoginAttempt > 0) {
 					$("#pub-error").removeClass("hidden").text(parsedError);
@@ -1067,7 +1018,7 @@ var FileManager = {
 				FileManager.publicLoginAttempt++;
 			}
 			else {
-				$("#pub-key, #bLoad, #pub-error, #unlock").addClass("hidden");
+				$("#pub-key, #pubfile button").addClass("hidden");
 				$("#pubfile, #pub-error").removeClass("hidden");
 				$("#pub-error").text(parsedError);
 			}
@@ -1087,7 +1038,7 @@ var FileManager = {
 			Util.notify(data.msg, true);
 			FileManager.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(Util.getError(xhr), false, true);
 			Util.busy(false);
 			FileManager.fetch();
 		});
@@ -1135,6 +1086,16 @@ var FileManager = {
 		FileManager.fetch();
 	},
 
+	openGallery: function() {
+		$(".list-header").addClass("hidden");
+		$("#sidebar").addClass("hidden");
+		FileManager.originalFileview = ($("#files").hasClass("list")) ? 'list' : 'grid';
+		$("#files").removeClass("list").addClass("grid");
+		FileManager.filterForType('image');
+		FileManager.galleryMode = true;
+
+	},
+
 	openODT: function(elem) {
 		$('<form id="odt-form" class="hidden" action="files/odfeditor/' + elem.id + '" target="_blank" method="post"><input name="token"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
@@ -1151,12 +1112,6 @@ var FileManager = {
 		$('[name="token"]').val(token);
 		$('[name="public"]').val(FileManager.public);
 		$('#text-form').submit();
-	},
-
-	openTrash: function() {
-		FileManager.view = "trash";
-		FileManager.clearHierarchy();
-		FileManager.fetch();
 	},
 
 	paste: function() {
@@ -1180,7 +1135,7 @@ var FileManager = {
 		});
 	},
 
-	rename: function() {
+	rename: function(id) {
 		Util.busy(true);
 		newFilename = $("#renameinput").val();
 		var oldFilename = FileManager.getFirstSelected().item.filename;
@@ -1220,15 +1175,6 @@ var FileManager = {
 			Util.busy(false);
 			Util.notify(Util.getError(xhr), true, true);
 		});
-	},
-
-	getAllSelectedIDs: function() {
-		var ids = [];
-		for (var i in FileManager.selected) {
-			ids.push(FileManager.selected[i].id);
-		}
-
-		return ids;
 	},
 
 	remove: function() {
@@ -1272,11 +1218,11 @@ var FileManager = {
 		FileManager.updateSelStatus();
 	},
 
-	selectAll: function() {
+	selectAll: function(checkboxClicked) {
 		for (var i = 0; i < Object.keys(FileManager.filteredElem).length; i++) {
 			FileManager.selected[i] = FileManager.filteredElem[i];
 		}
-		FileManager.updateSelStatus();
+		FileManager.updateSelStatus(checkboxClicked);
 	},
 
 	selectNext: function() {
@@ -1373,16 +1319,17 @@ var FileManager = {
 
 		var form = document.createElement('form');
 		form.id = "renameform";
-		form.className = "col1";
-		$("#item" + elem.id).append(form);
+		form.className = "renameform col1";
+		$("#item" + elem.id + " .col1").append(form);
 
 		var input = document.createElement('input');
 		input.id = "renameinput";
+		input.className = "renameinput";
 		input.autocomplete = "off";
 		form.appendChild(input);
 
-		$("#renameinput").val(newfilename).focus().select();
-		$("#renameform").on('submit', function(e) {
+		$(input).val(newfilename).focus().select();
+		$(form).on('submit', function(e) {
 			e.preventDefault();
 			FileManager.rename();
 		});
@@ -1476,10 +1423,10 @@ var FileManager = {
 
 	toggleSelection: function() {
 		if (Object.keys(FileManager.selected).length > 0) {
-			FileManager.unselectAll();
+			FileManager.unselectAll(true);
 		}
 		else {
-			FileManager.selectAll();
+			FileManager.selectAll(true);
 		}
 	},
 
@@ -1504,9 +1451,9 @@ var FileManager = {
 		FileManager.updateSelStatus();
 	},
 
-	unselectAll: function() {
+	unselectAll: function(checkboxClicked) {
 		FileManager.selected = {};
-		FileManager.updateSelStatus();
+		FileManager.updateSelStatus(checkboxClicked);
 	},
 
 	updateClipboard: function() {
@@ -1584,7 +1531,7 @@ var FileManager = {
 	/**
 	 * Highlights all selected elements in the fileview
 	 */
-	updateSelStatus: function() {
+	updateSelStatus: function(checkboxClicked) {
 		var count = FileManager.getSelectedCount();
 		$(".item").removeClass("selected");
 
@@ -1609,11 +1556,13 @@ var FileManager = {
 			$("#foldersize").text(count + " " + files + postfix);
 		}
 
-		if (count > 0 && count == FileManager.getAllElements().length) {
-			$("#fSelect").addClass("checkbox-checked");
-		}
-		else {
-			$("#fSelect").removeClass("checkbox-checked");
+		if (!checkboxClicked) {
+			if (count > 0 && count == FileManager.getAllElements().length) {
+				$("#fSelect").addClass("checkbox-checked");
+			}
+			else {
+				$("#fSelect").removeClass("checkbox-checked");
+			}
 		}
 	},
 

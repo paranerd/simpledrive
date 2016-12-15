@@ -9,29 +9,6 @@ var username,
 	token,
 	code;
 
-$(window).resize(function() {
-	$("#content").width(window.innerWidth - $("#sidebar").outerWidth());
-	$("#sidebar, #content").height(window.innerHeight - $("#header").height());
-
-	// Position centered divs
-	$('.center').each(function(i, obj) {
-		$(this).css({
-			top : ($(this).parent().height() - $(this).outerHeight()) / 2,
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-
-	$('.center-hor').each(function(i, obj) {
-		$(this).css({
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-
-	setTimeout(function() {
-		simpleScroll.update();
-	}, 200);
-});
-
 $(document).ready(function() {
 	username = $("#data-username").val();
 	token = $("#data-token").val();
@@ -58,24 +35,6 @@ $(document).ready(function() {
 
 var Binder = {
 	init: function() {
-		$("#username").click(function(e) {
-			$("#menu").toggleClass("hidden");
-		});
-
-		$(".close").on('click', function(e) {
-			if ($(this).parents('.popup').length) {
-				Util.closePopup($(this).parent().attr('id'));
-			}
-		});
-
-		$("#shield").click(function(e) {
-			Util.closePopup();
-		});
-
-		$(".checkbox-box").on('click', function(e) {
-			$(this).toggleClass("checkbox-checked icon-check");
-		});
-
 		$("#fileview").on('change', function(e) {
 			General.setFileview($(this).val());
 		});
@@ -89,8 +48,12 @@ var Binder = {
 			General.setAutoscan(enable);
 		});
 
-		$("#sidebar-general").on('click', function(e) {
-			General.load();
+		$(".sidebar-navigation").on('click', function(e) {
+			switch ($(this).find('input').val()) {
+				case 'general':
+					General.load();
+					break;
+			}
 		});
 
 		$("#invalidate-token").on('click', function(e) {
@@ -107,11 +70,6 @@ var Binder = {
 			Backup.toggleEnable();
 		});
 
-		$("#change-password-button").on('click', function(e) {
-			Util.showPopup('change-password');
-			$("#change-password-pass0").focus();
-		});
-
 		$("#clear-temp-button").on('click', function(e) {
 			General.clearTemp();
 		});
@@ -119,10 +77,6 @@ var Binder = {
 		$("#change-password").on('submit', function(e) {
 			e.preventDefault();
 			General.changePassword();
-		});
-
-		$("#menu-item-info").on('click', function(e) {
-			$("#info, #shield").removeClass("hidden");
 		});
 
 		$("#setupBackup").on('submit', function(e) {
@@ -162,7 +116,7 @@ var Backup = {
 			Backup.disable();
 		}
 		else {
-			$("#setupbackup, #shield").removeClass("hidden");
+			Util.showPopup('setupbackup');
 		}
 	},
 
@@ -195,7 +149,7 @@ var Backup = {
 			Util.notify("Passwords don't match", true, true);
 		}
 		else {
-			$("#setupbackup, #shield").addClass("hidden");
+			Util.closePopup('setupbackup');
 
 			$.ajax({
 				url: 'api/backup/enable',
@@ -211,7 +165,7 @@ var Backup = {
 	},
 
 	start: function() {
-		$("#backup-toggle-button").text("starting...").addClass("button-disabled");
+		$("#backup-toggle-button").prop('disabled', true).text("starting...");
 
 		$.ajax({
 			url: 'api/backup/start',
@@ -219,7 +173,7 @@ var Backup = {
 			data: {token: token},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			$("#backup-toggle-button").text("Start").removeClass("button-disabled");
+			$("#backup-toggle-button").prop('disabled', true).text("Start");
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -418,7 +372,7 @@ var General = {
 			token = data.msg;
 			Util.notify("Password changed", true);
 			$("#change-password-pass0, #change-password-pass1, #change-password-pass2").val('');
-			$("#change-password, #shield").addClass("hidden");
+			Util.closePopup('change-pass');
 		}).fail(function(xhr, statusText, error) {
 			$("#change-password-error").removeClass("hidden").text(Util.getError(xhr));
 		});

@@ -32,7 +32,7 @@ var AudioManager = {
 			AudioManager.prev();
 		});
 
-		$("#audio-play").on('click', function(e) {
+		$("#audio-play, #audio-play-small").on('click', function(e) {
 			AudioManager.togglePlay();
 		});
 
@@ -73,11 +73,11 @@ var AudioManager = {
 		});
 
 		AudioManager.sound.addEventListener('playing', function() {
-			$("#audio-play").removeClass('icon-play').addClass('icon-pause');
+			$("#audio-play, #audio-play-small").removeClass('icon-play').addClass('icon-pause');
 		});
 
 		AudioManager.sound.addEventListener('pause', function() {
-			$("#audio-play").removeClass('icon-pause').addClass('icon-play');
+			$("#audio-play, #audio-play-small").removeClass('icon-pause').addClass('icon-play');
 		});
 	},
 

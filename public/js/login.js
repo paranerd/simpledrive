@@ -7,22 +7,6 @@
 
 var base;
 
-$(window).resize(function() {
-	// Position centered divs
-	$('.center').each(function(i, obj) {
-		$(this).css({
-			top : ($(this).parent().height() - $(this).outerHeight()) / 2,
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-
-	$('.center-hor').each(function(i, obj) {
-		$(this).css({
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-});
-
 $(document).ready(function() {
 	base = $("#data-base").val();
 
@@ -66,20 +50,19 @@ function login() {
 		$("#error").removeClass("hidden").text("No blank fields!");
 	}
 	else {
-		$("#submit").prop('disabled', true).addClass("button-disabled");
+		$("#submit").prop('disabled', true);
 		$.ajax({
 			url: 'api/core/login',
 			type: 'post',
 			data: {user: $("#user").val(), pass: $("#pass").val()},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			$("#submit").removeClass("button-disabled");
-			$("#submit").removeClass("button-disabled").prop('disabled', false);
+			$("#submit").prop('disabled', false);
 			window.location.href = base + "files";
 		}).fail(function(xhr, statusText, error) {
 			$("#error").removeClass("hidden").text(error);
 			$("#pass").val("");
-			$("#submit").removeClass("button-disabled").prop('disabled', false);
+			$("#submit").prop('disabled', false);
 		});
 	}
 }

@@ -51,7 +51,7 @@
 
 	<!-- Sidebar -->
 	<div id="sidebar">
-		<div id="sidebar-general" class="menu-item focus" title="Status info"><div class="menu-thumb icon-info"></div><div class="menu-text">General</div></div>
+		<div id="sidebar-general" class="sidebar-navigation menu-item focus" title="Status info"><input type="hidden" value="general" /><div class="menu-thumb icon-info"></div><div class="menu-text">General</div></div>
 	</div>
 
 	<!-- Content -->
@@ -72,11 +72,11 @@
 			<div class="settings-title">Security</div>
 			<div class="row">
 				<div class="cell settings-label">Password</div>
-				<div class="cell"><button id="change-password-button" class="button">Change</button></div>
+				<div class="cell"><button class="popup-trigger" data-target="change-password">Change</button></div>
 			</div>
 			<div class="row">
 				<div class="cell settings-label">Active token (<span id="active-token">0</span>)</div>
-				<div class="cell"><button id="invalidate-token" class="button">Invalidate</button></div>
+				<div class="cell"><button id="invalidate-token">Invalidate</button></div>
 			</div>
 
 			<div class="divider"></div>
@@ -85,8 +85,8 @@
 			<div class="row">
 				<div class="cell settings-label">Cloud Backup</div>
 				<div class="cell">
-					<button id="backup-toggle-button" class="button hidden">Start</button>
-					<button id="backup-enable-button" class="button">loading...</button>
+					<button id="backup-toggle-button" class="hidden">Start</button>
+					<button id="backup-enable-button">loading...</button>
 				</div>
 			</div>
 
@@ -96,19 +96,23 @@
 			<div class="row">
 				<div class="cell settings-label">Color theme</div>
 				<div class="cell">
-					<select id="color">
-						<option value="light">Light</option>
-						<option value="dark">Dark</option>
-					</select>
+					<div class="selector">
+						<select id="color">
+							<option value="light">Light</option>
+							<option value="dark">Dark</option>
+						</select>
+					</div>
 				</div>
 			</div>
 			<div class="row">
 				<div class="cell settings-label">Fileview</div>
 				<div class="cell">
-					<select id="fileview">
-						<option value="list">List</option>
-						<option value="grid">Grid</option>
-					</select>
+					<div class="selector">
+						<select id="fileview">
+							<option value="list">List</option>
+							<option value="grid">Grid</option>
+						</select>
+					</div>
 				</div>
 			</div>
 
@@ -117,11 +121,11 @@
 			<div class="settings-title">Misc</div>
 			<div class="row">
 				<div class="cell settings-label multi-line">Auto-Scan<br><span class="settings-info">Scan directories to cache before listing. Disable if you only insert data through simpleDrive-Interface.</span></div>
-				<div class="cell"><div class="checkbox"><div id="autoscan" class="checkbox-box icon-check"></div></div></div>
+				<div class="cell"><div class="checkbox"><div id="autoscan" class="checkbox-box"></div></div></div>
 			</div>
 			<div class="row">
 				<div class="cell settings-label">Temp Folder</div>
-				<div class="cell"><button id="clear-temp-button" class="button">Clear</button></div>
+				<div class="cell"><button id="clear-temp-button">Clear</button></div>
 			</div>
 
 			<div class="divider"></div>
@@ -135,7 +139,7 @@
 		<?php if ($admin) : ?>
 		<div class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>
 		<?php endif; ?>
-		<div id="menu-item-info" class="menu-item"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></div>
+		<div class="menu-item popup-trigger" data-target="info"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></div>
 		<div class="menu-item"><a href="core/logout?token=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
 	</div>
 
@@ -153,7 +157,7 @@
 			<div id="setupbackup-encrypt" class="checkbox-box"></div>
 			<div class="checkbox-label">Encrypt filenames</div>
 		</div>
-		<button class="button">OK</button>
+		<button>OK</button>
 	</form>
 
 	<!-- User password popup -->
@@ -171,7 +175,7 @@
 		<input id="change-password-pass2" type="password" placeholder="New password (repeat)"></input>
 
 		<div id="change-password-error" class="error hidden"></div>
-		<button class="button">OK</button>
+		<button>OK</button>
 	</form>
 
 	<!-- Notification -->

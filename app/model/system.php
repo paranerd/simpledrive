@@ -186,7 +186,7 @@ class System_Model {
 
 		// MD5-Hashes for integrity-check
 		$plugins = array(
-			'webodf'	=> 'b1763b275ace38d8993cf3aeeff36f10',
+			'webodf'	=> '6a1c443d3c846409246dbe8ff05068ce',
 			'sabredav'	=> '0fc7e4a845e4a1b0902db293216364e9',
 			'phpmailer'	=> 'd78dab2aba41a7cb508c9b513f403374'
 		);

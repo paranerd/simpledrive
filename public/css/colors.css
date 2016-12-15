@@ -13,7 +13,41 @@ input {
 }
 
 button {
+	border: 1px solid #2e8b5e;
+	color: white;
+	background-color: #2e8b5e;
 	outline: 0px solid transparent;
+}
+
+button:hover a {
+	color: #2e8b5e;
+}
+
+button:hover {
+	background-color: white;
+	color: #2e8b5e;
+/*
+	background-color: #47a276;
+	color: white;
+*/
+	border: 1px solid #2e8b5e;
+}
+
+button.inverted {
+	background-color: white;
+	color: #2e8b5e;
+	border: 1px solid #2e8b5e;
+}
+
+button.inverted:hover {
+	background-color: #2e8b5e;
+	color: white;
+	border: 1px solid #2e8b5e;
+}
+
+.grid .col1 {
+	background-color: rgba(0,0,0,0.3);
+	color: white;
 }
 
 .error-page-code {
@@ -39,23 +73,12 @@ button {
 .major-input {
 	background-color: rgba(0,0,0,0);
 	color: #b3b3b3;
-	border: none;
-	border-bottom: 1px dotted #b3b3b3;
+	border: none !important;
+	border-bottom: 1px dotted #b3b3b3 !important;
 }
 
 .major-error {
 	color: red;
-}
-
-.major-submit {
-	color: white;
-	border-radius: 3px;
-	background-color: #2e8b5e;
-	border: 1px solid #2e8b5e;
-}
-
-.major-submit:hover {
-	background-color: #47a276;
 }
 
 .footer {
@@ -70,9 +93,13 @@ button {
 	color: red;
 }
 
-.item:hover {
+.light .list .item:hover {
 	background-color: #2e8b5e !important;
 	color: white !important;
+}
+
+.dark .item:hover {
+	background-color: #555 !important;
 }
 
 .item:hover .thumbnail {
@@ -81,13 +108,17 @@ button {
 	border: 2px solid white;
 }
 
+.dark .item:hover .thumbnail {
+	color: #2e8b5e;
+	background-color: #444;
+}
+
 .item.highlight-folder {
 	border: 1px solid #2e8b5e !important;
 	background-color: rgba(0,0,0,0) !important;
 }
 
 .item.selected .thumbnail {
-	border-radius: 30px;
 	border: 2px solid white;
 }
 
@@ -139,14 +170,23 @@ button {
 	color: #2e8b5e;
 }
 
-.selected {
+.list .selected {
 	color: white !important;
 	background-color: #2e8b5e !important;
 }
 
-.selected .thumbnail {
+.light .selected .thumbnail {
 	color: #2e8b5e !important;
+	background-color: #ddd !important;
+}
+
+.light .list .selected .thumbnail {
 	background-color: white !important;
+}
+
+.dark .selected .thumbnail {
+	color: #2e8b5e !important;
+	background-color: #444 !important;
 }
 
 .sidebar-widget-icon:hover {
@@ -166,34 +206,6 @@ button {
 
 .checkbox-box {
 	border: 1px solid #8c8c8c;
-}
-
-.button {
-	border: 1px solid #2e8b5e;
-	color: white;
-	background-color: #2e8b5e;
-}
-
-.button:hover a {
-	color: #2e8b5e;
-}
-
-.button:hover {
-	background-color: white;
-	color: #2e8b5e;
-	border: 1px solid #2e8b5e;
-}
-
-.button.inverted {
-	background-color: white;
-	color: #2e8b5e;
-	border: 1px solid #2e8b5e;
-}
-
-.button.inverted:hover {
-	background-color: #2e8b5e;
-	color: white;
-	border: 1px solid #2e8b5e;
 }
 
 .error-page-text, .error-page-text a {
@@ -243,9 +255,11 @@ button {
 	color: #2e8b5e;
 }
 
-.input-popup .error {
-	color: white;
+.error {
+	color: red;
+/*
 	background-color: red;
+*/
 }
 
 .loadIndicator {
@@ -271,7 +285,7 @@ button {
 	background-color: #FF7722;
 }
 
-.button.button-disabled, .button.button-disabled:hover {
+button:disabled, button:disabled:hover {
 	color: white;
 	background-color: grey !important;
 	border: 1px solid grey;
@@ -303,6 +317,10 @@ button {
 
 /* Light */
 
+.light .grid .thumbnail {
+	border: 2px solid #eee;
+}
+
 .light .settings-label {
 	color: #555;
 }
@@ -318,17 +336,12 @@ button {
 	border-bottom: 1px dotted #2e8b5e !important;
 }
 
-.light #log-footer {
+.light .list-footer {
 	background-color: rgba(0,0,0,0);
 	border-top: 1px solid #ccc;
-	border-left: 1px solid #ccc;
 }
 
-#log-pages {
-	border: 1px solid #2e8b5e;
-}
-
-.light #log-pages-label {
+.light .selector-label {
 	color: #555;
 }
 
@@ -396,7 +409,7 @@ button {
 .light .item {
 	color: #555;
 	border: 0px solid transparent;
-	border-bottom: 1px solid #E0E0E0;
+	border-bottom: 1px solid #e0e0e0;
 	background-color: rgba(0,0,0,0);
 }
 
@@ -508,6 +521,14 @@ button {
 
 /* Dark */
 
+.dark .grid .thumbnail {
+	border: 2px solid #353535;
+}
+
+.dark .grid .item {
+	background-color: #353535;
+}
+
 .dark .settings-label {
 	color: white;
 }
@@ -587,13 +608,12 @@ button {
 	background-color: #303030;
 }
 
-.dark #log-footer {
+.dark .list-footer {
 	background-color: #303030;
 	border-top: 1px solid #555;
-	border-left: 1px solid #555;
 }
 
-.dark #log-pages-label {
+.dark .selector-label {
 	color: #eee;
 }
 

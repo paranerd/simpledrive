@@ -1,3 +1,59 @@
+.col0 {
+	width: 60px;
+	cursor: pointer;
+}
+
+.col0 .checkbox-box {
+	left: 25px;
+}
+
+.col1 {
+	width: 43%;
+}
+
+.col2 {
+	width: 15%;
+}
+
+.col3 {
+	width: 15%;
+}
+
+.col4 {
+	width: 10%;
+}
+
+.col5 {
+	width: 10%;
+	text-align: right;
+}
+
+.col5 span {
+	float: right;
+}
+
+.item-elem {
+	position: relative;
+	height: 50px;
+	font-size: 0.9rem;
+	font-family: robotoregular, sans-serif;
+	text-align: left;
+	line-height: 50px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	float: left;
+}
+
+.renameinput {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	font-size: 0.8rem;
+}
+
 .list-header {
 	position: relative;
 	height: 50px;
@@ -45,21 +101,12 @@
 	overflow: hidden;
 }
 
-.list .item:hover .thumbnail {
+.list .item.selected .thumbnail {
 	border-radius: 30px;
 }
 
-.item-elem {
-	position: relative;
-	height: 50px;
-	font-size: 0.9rem;
-	font-family: robotoregular, sans-serif;
-	text-align: left;
-	line-height: 50px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	float: left;
+.list .item:hover .thumbnail {
+	border-radius: 30px;
 }
 
 .list .thumbnail {
@@ -84,39 +131,79 @@
 	font-size: 0.6rem;
 }
 
-.list #renameform {
+.renameform {
 	position: absolute;
-	left: 60px;
+	top: 12%;
+	left: 0;
+	height: 70% !important;
+	width: 95% !important;
 }
 
-.list #renameinput {
+.list .renameform {
+	top: 12%;
+}
+
+.grid .shared {
 	position: absolute;
-	top: 8px;
-	width: 95%;
-	height: 30px;
-	font-size: 0.8rem;
+	top: 10px;
+	right: 10px;
+	font-size: 1rem;
 }
 
 .grid .item {
 	position: relative;
-	width: 90px;
-	height: 90px;
-	cursor: pointer;
-	border: none;
+	margin: 5px;
+	padding: 0;
+	height: 150px;
+	width: 150px;
+	text-align: center;
+	font-size: 2rem;
+	line-height: 150px;
+	-webkit-transition: all .1s ease-in-out;
+	-moz-transition: all .1s ease-in-out;
+	-o-transition: all .1s ease-in-out;
+	-ms-transition: all .1s ease-in-out;
 	float: left;
 }
 
-.grid .item:hover .thumbnail {
-	border-radius: 25px;
+.grid .item:hover {
+	-webkit-transform: scale(1.05);
+	-moz-transform: scale(1.05);
+	-o-transform: scale(1.05);
+	-ms-transform: scale(1.05);
+	z-index: 2;
+}
+
+.grid .col0 {
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+}
+
+.grid .col1 {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	height: 30px;
+	width: 100%;
+	line-height: 30px;
+	text-align: center;
+	cursor: pointer;
+}
+
+.grid .col2, .grid .col3, .grid .col4, .grid .col5 {
+	display: none;
 }
 
 .grid .thumbnail {
-	position: relative;
-	height: 46px;
-	width: 46px;
-	font-family: 'icomoon';
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 146px;
+	width: 146px;
 	text-align: center;
-	line-height: 46px;
+	line-height: 146px;
 	background-size: cover;
 	background-repeat: no-repeat;
 	background-position: center;
@@ -128,90 +215,6 @@
 	float: left;
 }
 
-.grid .col0 {
-	top: 10px;
-	left: 20px;
-	width: 50px;
-	height: 50px;
-	clear: both;
-}
-
-.grid .col2, .grid .col3, .grid .col4, .grid .col5 {
-	display: none;
-}
-
-.grid #renameinput {
-	left: 3px;
-	width: 80px;
-	text-align: center;
-}
-
-.grid .col1 {
-	top: 10px;
-	left: 0;
-	height: 30px;
-	width: 100%;
-	line-height: 30px;
-	text-align: center;
-}
-
-.grid .shared {
-	position: absolute;
-	top: 30px;
-	margin-left: -10px;
-	font-size: 1rem;
-}
-
-.grid #renameform {
-	position: absolute;
-	top: 59px;
-	left: 1%;
-	width: 98%;
-	height: 30px;
-}
-
-.grid #renameinput {
-	position: absolute;
-	left: 0;
-	margin: 0;
-	padding: 0;
-	border-radius: 0;
-	border: none;
-	width: 100%;
-	height: 100%;
-	font-size: 0.8rem;
-}
-
-.col0 {
-	width: 60px;
-	cursor: pointer;
-}
-
-.col0 .checkbox-box {
-	left: 25px;
-}
-
-.col1 {
-	width: 43%;
-}
-
-.col2 {
-	width: 15%;
-}
-
-.col3 {
-	width: 15%;
-}
-
-.col4 {
-	width: 10%;
-}
-
-.col5 {
-	width: 10%;
-	text-align: right;
-}
-
-.col5 span {
-	float: right;
+.grid .item .thumbnail {
+	border-radius: 0px;
 }

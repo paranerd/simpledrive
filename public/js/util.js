@@ -5,6 +5,62 @@
  * @link		http://simpledrive.org
  */
 
+$(window).resize(function() {
+	$("#content, #sidebar, #fileinfo, #texteditor").height(window.innerHeight - $("#header").height());
+
+	var listFooterAdapt = ($(".list-footer").hasClass("hidden")) ? 0 : $(".list-footer").outerHeight();
+	$(".list, .grid").height($("#content").outerHeight() - $(".list-header").outerHeight() - listFooterAdapt);
+
+	$("#content").width(($("#fileinfo").hasClass("hidden")) ? window.innerWidth - $("#sidebar").outerWidth() : window.innerWidth - $("#sidebar").outerWidth() - $("#fileinfo").outerWidth());
+
+	// Position centered divs
+	$('.center').each(function(i, obj) {
+		$(this).css({
+			top : ($(this).parent().height() - $(this).outerHeight()) / 2,
+			left : ($(this).parent().width() - $(this).outerWidth()) / 2
+		});
+	});
+
+	$('.center-hor').each(function(i, obj) {
+		$(this).css({
+			left : ($(this).parent().width() - $(this).outerWidth()) / 2
+		});
+	});
+
+	setTimeout(function() {
+		simpleScroll.update();
+	}, 200);
+});
+
+$(".close").on('click', function(e) {
+	if ($(this).parents('.popup').length) {
+		Util.closePopup($(this).parent().attr('id'));
+	}
+	else if ($(this).parents('.sidebar-widget').length) {
+		Util.closeWidget($(this).parent().attr('id'));
+	}
+});
+
+$(document).on('click', '.popup-trigger', function(e) {
+	Util.showPopup($(this).data('target'));
+});
+
+$("#shield").click(function(e) {
+	Util.closePopup();
+});
+
+$(document).on('click', '.checkbox-box', function(e) {
+	$(this).toggleClass("checkbox-checked");
+});
+
+$(".popup .menu-item").on('click', function() {
+	$(this).parent().addClass("hidden");
+});
+
+$("#username").on('click', function(e) {
+	$("#menu").toggleClass("hidden");
+});
+
 var Util = {
 	busyCount: 0,
 
@@ -68,7 +124,15 @@ var Util = {
 	},
 
 	showPopup: function(id) {
-		$("#" + id + ", #shield").removeClass("hidden");
+		Util.closePopup();
+
+		if ($("#" + id).hasClass('input-popup')) {
+			$("#" + id + ", #shield").removeClass("hidden");
+			$("#" + id).find('*').filter(':input:visible:first').focus();
+		}
+		else {
+			$("#" + id).removeClass("hidden");
+		}
 	},
 
 	closePopup: function(id) {
@@ -136,7 +200,7 @@ var Util = {
 		var type = (error) ? "warning" : "info";
 		$("#note-icon").removeClass().addClass("icon-" + type);
 		$("#note-msg").text(msg);
-		$("#notification").removeClass().addClass("light center-hor notification-" + type);
+		$("#notification").removeClass().addClass("popup light center-hor notification-" + type);
 
 		if (autohide) {
 			setTimeout(function() { Util.closePopup('notification'); }, 3000);

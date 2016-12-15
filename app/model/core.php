@@ -33,6 +33,7 @@ class Core_Model {
 		$datadir	= ($datadir != "") ? $datadir : dirname(dirname(__DIR__)) . "/docs/";
 		$db_server	= (strlen($db_server) > 0) ? $db_server : 'localhost';
 		$db_name	= (strlen($db_name) > 0) ? $db_name : 'simpledrive';
+		$db_setup;
 
 		// Check if datadir contains '.' or '../'
 		if (preg_match('/(\.\.\/|\.)/', $datadir)) {
@@ -49,39 +50,37 @@ class Core_Model {
 			throw new Exception('Already installed', '403');
 		}
 
-		// Setup database
-		$db_setup = Database::setup($username, $pass, $db_server, $db_name, $db_user, $db_pass);
-		if (array_key_exists('error', $db_setup)) {
-			throw new Exception($db_setup['error'], '500');
-		}
-
-		// Set log path in htaccess
-		$this->update_main_htaccess();
-
-		// Create documents folder
-		if (!file_exists($datadir) && !mkdir($datadir, 0755)) {
-			throw new Exception('Could not create documents folder', '500');
-		}
-
-		if (!file_exists($datadir . $username) && !mkdir($datadir . $username, 0755)) {
-			throw new Exception('Could not create user directory', '500');
-		}
-
-		// Write config file
-		if (!$this->create_config($datadir, $db_server, $db_name, $db_setup['user'], $db_setup['pass'], $mail, $mail_pass)) {
-			throw new Exception('Could not write config file', '500');
-		}
-
-		// Create new user
 		try {
-			$this->db = Database::getInstance();
-		} catch (Exception $e) {
-			unlink($this->config_path);
-			throw new Exception($e->getMessage(), '500');
-		}
+			$db_setup = Database::setup($username, $pass, $db_server, $db_name, $db_user, $db_pass);
 
-		if ($id = $this->db->user_create($username, Crypto::generate_password($pass), 1, $mail)) {
-			return Crypto::generate_token($id);
+			// Set log path in htaccess
+			$this->update_main_htaccess();
+
+			// Create documents folder
+			if (!file_exists($datadir) && !mkdir($datadir, 0755)) {
+				throw new Exception('Could not create documents folder', '500');
+			}
+
+			// Create user directory
+			if (!file_exists($datadir . $username) && !mkdir($datadir . $username, 0755)) {
+				throw new Exception('Could not create user directory', '500');
+			}
+
+			// Write config file
+			if (!$this->create_config($datadir, $db_server, $db_name, $db_setup['user'], $db_setup['pass'], $mail, $mail_pass)) {
+				throw new Exception('Could not write config file', '500');
+			}
+
+			$this->db = Database::getInstance();
+
+			if ($id = $this->db->user_create($username, Crypto::generate_password($pass), 1, $mail)) {
+				return Crypto::generate_token($id);
+			}
+		} catch (Exception $e) {
+			if (file_exists($this->config_path)) {
+				unlink($this->config_path);
+			}
+			throw new Exception($e->getMessage(), $e->getCode());
 		}
 
 		unlink($this->config_path);

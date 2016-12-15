@@ -25,7 +25,7 @@ $demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 
-<body>
+<body class="dark">
 	<input type="hidden" id="data-demo" value="<?php echo $demo; ?>"></span>
 
 	<div class="major-wrapper">
@@ -33,10 +33,13 @@ $demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'
 
 		<form id="login" class="major-form center" action="#">
 			<div class="major-title">Login</div>
+
 			<input id="user" type="text" class="major-input" placeholder="Username" value="" required autofocus>
 			<input id="pass" type="password" class="major-input" placeholder="Password" value="" required>
-			<div id="error" class="hidden major-error"></div>
-			<button id="submit" class="major-submit button">Login</button>
+
+			<div id="error" class="hidden error"></div>
+
+			<button id="submit" class="major-submit">Login</button>
 		</form>
 
 		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>
@@ -45,6 +48,7 @@ $demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'
 	<input id="data-base" type="hidden" value="<?php echo $base; ?>"/>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript" src="public/js/util.js"></script>
 	<script type="text/javascript" src="public/js/login.js"></script>
 </body>
 </html>

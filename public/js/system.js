@@ -10,38 +10,6 @@ var username,
 	view,
 	strengths = ["Very weak", "Weak", "Ok", "Better", "Strong", "Very strong"];
 
-$(window).resize(function() {
-	var contentWidth = window.innerWidth - $("#sidebar").outerWidth();
-	$("#content").width(contentWidth);
-	$("#status, #plugins").width(contentWidth - 20);
-
-	var contentHeight = ($("#log-footer").hasClass("hidden")) ? window.innerHeight - $("#header").outerHeight() : window.innerHeight - $("#header").outerHeight() - $("#log-footer").outerHeight();
-	contentHeight = ($(".list-filter").hasClass("hidden")) ? contentHeight : contentHeight - $(".list-filter").outerHeight();
-
-	$("#content").height(contentHeight);
-	$("#content, #log-footer").width(window.innerWidth - $("#sidebar").outerWidth());
-	$("#users, #log").height($("#content").outerHeight() - $(".list-header").outerHeight());
-	$("#sidebar").height(window.innerHeight - $("#header").outerHeight());
-
-	// Position centered divs
-	$('.center').each(function(i, obj) {
-		$(this).css({
-			top : ($(this).parent().height() - $(this).outerHeight()) / 2,
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-
-	$('.center-hor').each(function(i, obj) {
-		$(this).css({
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-
-	setTimeout(function() {
-		simpleScroll.update();
-	}, 200);
-});
-
 $(document).ready(function() {
 	username = $("#data-username").val();
 	token = $("#data-token").val();
@@ -75,10 +43,6 @@ $(document).ready(function() {
 
 var Binder = {
 	init: function() {
-		$("#username").click(function(e) {
-			$("#menu").toggleClass("hidden");
-		});
-
 		$('#upload-max').on('change', function(e){
 			Status.setUploadLimit($("#upload-max").val());
 		});
@@ -92,32 +56,41 @@ var Binder = {
 			Status.useSSL(enable);
 		});
 
-		$("#shield").click(function(e) {
-			Util.closePopup();
+		$(".sidebar-navigation").on('click', function(e) {
+			switch ($(this).find('input').val()) {
+				case 'status':
+					Status.fetch(true);
+					break;
+
+				case 'users':
+					Users.fetch(true);
+					break;
+
+				case 'plugins':
+					Plugins.fetch(true);
+					break;
+
+				case 'log':
+					Log.fetch(true, 0);
+					break;
+			}
 		});
 
-		$("#sidebar-status").on('click', function() {
-			Status.fetch(true);
-		});
+		$("#contextmenu .menu-item").on('click', function(e) {
+			var id = $(this).attr('id')
+			var action = id.substr(id.indexOf('-') + 1);
 
-		$("#sidebar-users").on('click', function() {
-			Users.fetch(true);
-		});
+			switch (action) {
+				case 'create':
+					Util.showPopup('createuser');
+					break;
+			}
 
-		$("#sidebar-plugins").on('click', function() {
-			Plugins.fetch(true);
-		});
-
-		$("#sidebar-log").on('click', function() {
-			Log.fetch(true, 0);
+			$("#contextmenu").addClass("hidden");
 		});
 
 		$("#users-filter .close").on('click', function() {
 			Users.closeFilter();
-		});
-
-		$("#confirm .close").on('click', function() {
-			Util.closePopup();
 		});
 
 		$(".plugin-install").on('click', function(e) {
@@ -132,27 +105,12 @@ var Binder = {
 			Log.closeFilter();
 		});
 
-		$("#context-create").on('click', function(e) {
-			Util.showPopup('createuser');
-			$("#createuser-name").focus();
-		});
-
 		$("#context-delete").on('click', function(e) {
 			Users.remove();
 		});
 
 		$("#context-clearlog").on('click', function(e) {
 			Log.clear();
-		});
-
-		$("#menu-item-info").on('click', function(e) {
-			$("#info, #shield").removeClass("hidden");
-		});
-
-		$(".close").on('click', function(e) {
-			if ($(this).parents('.popup').length) {
-				Util.closePopup($(this).parent().attr('id'));
-			}
 		});
 
 		$("#createuser").on('submit', function(e) {
@@ -211,10 +169,6 @@ var Binder = {
 			Users.select(this.value);
 		});
 
-		$('[id^="sidebar-"]').mousedown(function() {
-			Util.closePopup();
-		});
-
 		$("#content").on('mouseup', function(e) {
 			if (e.which != 3) {
 				$("#contextmenu").addClass("hidden");
@@ -268,8 +222,8 @@ var Binder = {
 
 			switch(e.keyCode) {
 				case 27: // Esc
-					$(".popup, #shield").addClass("hidden");
-					$("#user-quota-total-change").remove();
+					$("#user-quota-total-change-form").remove();
+					Util.closePopup();
 					Users.editUser = null;
 					Log.closeFilter();
 					Users.closeFilter();
@@ -281,16 +235,6 @@ var Binder = {
 
 		$(document).on('mousedown', '#content', function(e) {
 			Util.closePopup();
-		});
-
-		$(document).on('mouseup', '.checkbox-box', function(e) {
-			$(this).toggleClass("checkbox-checked");
-		});
-
-		$(document).on('mouseup', '#users', function(e) {
-			if (Users.editUser != null && !$(e.target).hasClass('checkbox-box')) {
-				Users.setQuotaMax();
-			}
 		});
 	}
 }
@@ -464,16 +408,16 @@ var Log = {
 		simpleScroll.empty("users");
 		simpleScroll.empty("log");
 		$("#log-pages").empty();
-		$("#status, .list-header, #plugins, #log-footer, #users, #log").addClass("hidden");
+		$("#status, .list-header, #plugins, #users, #log").addClass("hidden");
 		$(".focus").removeClass("focus");
 
 		// Set right view
 		$(".path-element").text("Log");
 		$("#sidebar-log").addClass("focus");
-		$("#log, #log-header, #log-footer").removeClass("hidden");
+		$("#log, #log-header").removeClass("hidden");
 
 		if (Log.pageTotal > 0) {
-			$("#log-footer").removeClass("hidden");
+			$(".list-footer").removeClass("hidden");
 
 			for (var i = 0; i < Log.pageTotal; i++) {
 				var option = document.createElement('option');
@@ -486,10 +430,10 @@ var Log = {
 
 		if (Log.filteredLog.length == 0) {
 			Log.setEmptyView("No entries...");
-			$("#log-footer").addClass("hidden");
+			$(".list-footer").addClass("hidden");
 		}
 		else {
-			$("#log-footer").removeClass("hidden");
+			$(".list-footer").removeClass("hidden");
 		}
 
 		for (var i in Log.filteredLog) {
@@ -599,7 +543,7 @@ var Plugins = {
 		simpleScroll.empty("users");
 		simpleScroll.empty("log");
 		$("#log-pages").empty();
-		$("#status, .list-header, #plugins, #log-footer, #users, #log").addClass("hidden");
+		$("#status, .list-header, .list-footer, #plugins, #users, #log").addClass("hidden");
 		$(".focus").removeClass("focus");
 
 		// Set right view
@@ -623,7 +567,7 @@ var Plugins = {
 
 	install: function(name) {
 		Util.notify("Installing " + name + "...", true);
-		$("#get-" + name).addClass("button-disabled").text("loading...");
+		$("#get-" + name).prop('disabled', true).text("loading...");
 
 		$.ajax({
 			url: 'api/system/getplugin',
@@ -670,7 +614,7 @@ var Users = {
 		simpleScroll.empty("users");
 		simpleScroll.empty("log");
 		$("#log-pages").empty();
-		$("#status, .list-header, #plugins, #log-footer, #users, #log").addClass("hidden");
+		$("#status, .list-header, #plugins, .list-footer, #users, #log").addClass("hidden");
 		$(".focus").removeClass("focus");
 
 		// Set right view
@@ -723,20 +667,12 @@ var Users = {
 			quotaMax.id = "user-quota-total" + i;
 			quotaMax.className = "item-elem col3";
 			quotaMax.innerHTML = "calculating...";
-			$("#item"+i).append(quotaMax);
+			$("#item" + i).append(quotaMax);
 
 			quotaMax.onclick = function(e) {
 				var id = e.target.id.replace(/[^0-9]/g,'');
 				Users.editUser = id;
-
-				var changeSize = document.createElement("input");
-				changeSize.id = "user-quota-total-change";
-				changeSize.className = "item-elem";
-				changeSize.style.left = $("#user-quota-total" + id).offset().left - $("#sidebar").width() + "px";
-				$("#item"+id).append(changeSize);
-
-				var currTotal = $("#user-quota-total" + id).val();
-				$("#user-quota-total-change").val(currTotal).focus().select();
+				Users.showChangeQuota(id);
 			};
 
 			var quotaUsed = document.createElement("span");
@@ -755,6 +691,27 @@ var Users = {
 		}
 
 		$(window).resize();
+	},
+
+	showChangeQuota: function(id) {
+		var currTotal = $("#user-quota-total" + id).text();
+
+		var form = document.createElement('form');
+		form.id = "user-quota-total-change-form";
+		form.className = "renameform col3";
+		$("#item" + id + " .col3").append(form);
+
+		var input = document.createElement('input');
+		input.id = "user-quota-total-change";
+		input.className = "renameinput";
+		input.autocomplete = "off";
+		form.appendChild(input);
+
+		$(input).val(currTotal).focus().select();
+		$(form).on('submit', function(e) {
+			e.preventDefault();
+			Users.setQuotaMax();
+		});
 	},
 
 	fetch: function(pushState) {
@@ -856,7 +813,7 @@ var Users = {
 
 	setQuotaMax: function() {
 		var size = ($("#user-quota-total-change").val()) ? $("#user-quota-total-change").val() : $("#user-quota-total" + Users.editUser).text();
-		$("#user-quota-total-change").remove();
+		$("#user-quota-total-change-form").remove();
 
 		if (size != 0 && size != "Unlimited" && !Util.stringToByte(size)) {
 			Util.notify("Invalid quota value", true, true);
@@ -873,7 +830,7 @@ var Users = {
 			data: {token: token, user: Users.all[Users.selected]['username'], value: size},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Saved changes", true, true);
+			Util.notify("Saved changes", true, false);
 			Users.fetch();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);

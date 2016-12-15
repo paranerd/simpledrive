@@ -9,26 +9,6 @@ var username,
 	token,
 	file;
 
-$(window).resize(function() {
-	$("#texteditor").css({
-		height : window.innerHeight - $("#header").outerHeight() - 20
-	});
-
-	// Position centered divs
-	$('.center').each(function(i, obj) {
-		$(this).css({
-			top : ($(this).parent().height() - $(this).outerHeight()) / 2,
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-
-	$('.center-hor').each(function(i, obj) {
-		$(this).css({
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-});
-
 $(document).ready(function() {
 	username = $("#data-username").val();
 	token = $("#data-token").val();
@@ -56,14 +36,6 @@ $(document).ready(function() {
 		if ($(this).parents('.popup').length) {
 			Util.closePopup($(this).parent().attr('id'));
 		}
-	});
-
-	$("#shield").click(function() {
-		Util.closePopup();
-	});
-
-	$("#username").click(function(e) {
-		$("#menu").toggleClass("hidden");
 	});
 
 	$("#texteditor").bind('input propertychange', function() {
@@ -105,7 +77,6 @@ $(document).on('keydown', function(e) {
 });
 
 $("#path").on('click', function() {
-	Util.showPopup('rename');
 	$("#rename-filename").val(file['filename']).focus().select();
 });
 

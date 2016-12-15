@@ -60,13 +60,15 @@ class Database {
 
 	public static function setup($username, $pass, $db_server, $db_name, $db_user, $db_pass) {
 		if (!function_exists('mysqli_connect')) {
-			return array('error' => "MySQLi is not installed");
+			throw new Exception('MySQLi is not installed', '500');
+			//return array('error' => "MySQLi is not installed");
 		}
 
 		$link = new mysqli($db_server, $db_user, $db_pass);
 
 		if ($link->connect_error) {
-			return array('error' => "Could not connect to database");
+			throw new Exception('Could not connect to database', '500');
+			//return array('error' => "Could not connect to database");
 		}
 
 		if (!$db_selected = $link->select_db($db_name)) {
@@ -74,7 +76,8 @@ class Database {
 			$stmt->execute();
 
 			if (!$select = $link->select_db($db_name)) {
-				return array('error' => "Could not create database");
+				throw new Exception('Could not create database', '500');
+				//return array('error' => "Could not create database");
 			}
 		}
 
@@ -115,7 +118,7 @@ class Database {
 			id varchar(32),
 			PRIMARY KEY (id),
 			userto int(11),
-			pass varchar(100),
+			pass varchar(64),
 			public tinyint(1),
 			access int(11),
 			hash varchar(32))');
@@ -373,15 +376,15 @@ class Database {
 			return true;
 		}
 
-		$stmt2 = $this->link->prepare('UPDATE sd_users SET admin = ? WHERE user = ?');
-		$stmt2->bind_param('is', $admin, $username);
+		$stmt2 = $this->link->prepare('UPDATE sd_users SET admin = ? WHERE id = ?');
+		$stmt2->bind_param('is', $admin, $uid);
 		$stmt2->execute();
 		return ($stmt2->affected_rows != 0);
 	}
 
 	public function user_set_autoscan($uid, $enable) {
 		// Check if real changes (update-error when trying to update exact same values)
-		if ($this->user_autoscan()) {
+		if ($this->user_autoscan($uid)) {
 			return true;
 		}
 
@@ -410,8 +413,8 @@ class Database {
 
 	public function user_set_storage_max($uid, $max_storage) {
 		// Check if real changes (update-error when trying to update exact same values)
-		$stmt1 = $this->link->prepare('SELECT user FROM sd_users WHERE user = ? AND max_storage = ? LIMIT 1');
-		$stmt1->bind_param('ss', $username, $max_storage);
+		$stmt1 = $this->link->prepare('SELECT user FROM sd_users WHERE max_storage = ? AND id = ? LIMIT 1');
+		$stmt2->bind_param('si', $max_storage, $uid);
 		$stmt1->execute();
 		$stmt1->store_result();
 		$stmt1->fetch();
@@ -420,10 +423,10 @@ class Database {
 			return true;
 		}
 
-		$stmt2 = $this->link->prepare('UPDATE sd_users SET max_storage = ? WHERE user = ?');
-		$stmt2->bind_param('ss', $max_storage, $username);
+		$stmt2 = $this->link->prepare('UPDATE sd_users SET max_storage = ? WHERE id = ?');
+		$stmt2->bind_param('si', $max_storage, $uid);
 		$stmt2->execute();
-		return ($stmt2->affected_rows != 0);
+		return ($stmt2->affected_rows == 1);
 	}
 
 	/**
@@ -671,7 +674,7 @@ class Database {
 	 */
 
 	public function share($id, $userto, $pass, $public, $access) {
-		$hash = $this->share_get_unique_hash();
+		$hash = ($public) ? $this->share_get_unique_hash() : "";
 		$stmt = $this->link->prepare('INSERT INTO sd_shares (id, hash, userto, pass, public, access) VALUES (?, ?, ?, ?, ?, ?)');
 		$stmt->bind_param('ssisii', $id, $hash, $userto, $pass, $public, $access);
 		$stmt->execute();
@@ -911,6 +914,32 @@ class Database {
 		return true;
 	}
 
+	public function cache_get_size($id, $uid, $access_request) {
+		return $this->cache_get_size_recursive($id, $uid, $access_request);
+	}
+
+	private function cache_get_size_recursive($id, $uid, $access_request) {
+		$total = 0;
+
+		$stmt = $this->link->prepare('SELECT id, size, filename FROM sd_cache WHERE parent = ?');
+		$stmt->bind_param('s', $id);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($id, $size, $filename);
+
+		while ($stmt->fetch()) {
+			$total += $size;
+
+			if ($children = $this->cache_children($id, $uid, $access_request)) {
+				for ($i = 0; $i < sizeof($children); $i++) {
+					$total += $this->cache_get_size_recursive($children[$i]['id'], $uid, $access_request);;
+				}
+			}
+		}
+
+		return $total;
+	}
+
 	/**
 	 * Sets the size of a directory
 	 * @param id
@@ -1023,7 +1052,9 @@ class Database {
 	}
 
 	public function cache_get($id, $uid, $access_request, $hash) {
+		file_put_contents(LOG, "cache get uid: " . $uid . "\n", FILE_APPEND);
 		$share_base = $this->share_get_base($id, $uid);
+
 		$stmt = $this->link->prepare('
 			SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.hash
 			FROM sd_users
@@ -1031,9 +1062,9 @@ class Database {
 			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id
 			LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
 			WHERE sd_cache.id = ?
-			AND (sd_cache.owner = ? OR ((SELECT access FROM sd_shares WHERE id = ?) >= ? AND (SELECT hash FROM sd_shares WHERE id = ?) = ?))
+			AND (sd_cache.owner = ? OR ((SELECT COUNT(id) FROM sd_shares WHERE id = ? AND access >= ? AND (userto = ? OR (public = 1 OR hash = ?))) = 1))
 		');
-		$stmt->bind_param('sisiss', $id, $uid, $share_base, $access_request, $share_base, $hash);
+		$stmt->bind_param('sisiis', $id, $uid, $share_base, $access_request, $uid, $hash);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($id, $filename, $parent, $type, $size, $edit, $md5, $ownerid, $owner, $trash);
@@ -1091,6 +1122,61 @@ class Database {
 		return $files;
 	}
 
+	// Returns true if parent has a file that is not trashed
+	public function cache_has_child($owner, $parent, $filename) {
+		$stmt = $this->link->prepare('SELECT sd_cache.id FROM sd_cache LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE owner = ? AND parent = ? AND filename = ? AND sd_trash.hash IS NULL');
+		$stmt->bind_param('iss', $owner, $parent, $filename);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($id);
+		$stmt->fetch();
+
+		return ($stmt->affected_rows > 0) ? $id : null;
+	}
+
+	public function cache_children($id, $uid, $access_request, $hash) {
+		$uid = ($uid) ? $uid : 0;
+		$share_base = $this->share_get_base($id, $uid);
+
+		if ($this->cache_trashed($id)) {
+			return array();
+		}
+
+		$stmt = $this->link->prepare('
+			SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.id
+			FROM sd_users
+			RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner
+			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id
+			LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
+			WHERE sd_cache.parent = ?
+			AND sd_trash.hash IS NULL
+			AND (sd_cache.owner = ? OR (SELECT COUNT(id) FROM sd_shares WHERE id = ? AND access >= ? AND (userto = ? OR (public = 1 OR hash = ?))) = 1)
+		');
+		//file_put_contents(LOG, 'SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.parent = "' . $id . '" AND sd_trash.hash IS NULL AND (sd_cache.owner = ' . $uid . ' OR (SELECT COUNT(id) FROM sd_shares WHERE id = "' . $share_base . '" AND access >= ' . $access_request . ' AND (userto = ' . $uid . ' OR (public = 1 OR hash = "' . $hash . '"))) = 1)' . "\n", FILE_APPEND);
+		$stmt->bind_param('sisiis', $id, $uid, $share_base, $access_request, $uid, $hash);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $id, $share_id);
+
+		$files = array();
+		while ($stmt->fetch()) {
+			array_push($files, array(
+				'id'			=> $id,
+				'filename'		=> $filename,
+				'parent'		=> $parent,
+				'type'			=> $type,
+				'size'			=> $size,
+				'owner'			=> $owner,
+				'edit'			=> $edit,
+				'md5'			=> $md5,
+				'shared'		=> ($share_base != "0" || $share_id),
+				'selfshared'	=> $share_id != null
+			));
+		}
+
+		return $files;
+	}
+
 	public function cache_get_trash_hash($id) {
 		$stmt = $this->link->prepare('SELECT hash FROM sd_trash WHERE id = ?');
 		$stmt->bind_param('s', $id);
@@ -1137,50 +1223,6 @@ class Database {
 		} while ($stmt->num_rows > 0 && sizeof($path) > 0 && $id != null);
 
 		return $id;
-	}
-
-	// Returns true if parent has a file that is not trashed
-	public function cache_has_child($owner, $parent, $filename) {
-		$stmt = $this->link->prepare('SELECT sd_cache.id FROM sd_cache LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE owner = ? AND parent = ? AND filename = ? AND sd_trash.hash IS NULL');
-		$stmt->bind_param('iss', $owner, $parent, $filename);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($id);
-		$stmt->fetch();
-
-		return ($stmt->affected_rows > 0) ? $id : null;
-	}
-
-	public function cache_children($id, $uid, $access_request) {
-		$share_base = $this->share_get_base($id, $uid);
-
-		if ($this->cache_trashed($id)) {
-			return array();
-		}
-
-		$stmt = $this->link->prepare('SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.parent = ? AND sd_trash.hash IS NULL AND owner = ?');
-		$stmt->bind_param('si', $id, $uid);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $id, $share_id);
-
-		$files = array();
-		while ($stmt->fetch()) {
-			array_push($files, array(
-				'filename'		=> $filename,
-				'parent'		=> $parent,
-				'type'			=> $type,
-				'size'			=> $size,
-				'owner'			=> $owner,
-				'edit'			=> $edit,
-				'md5'			=> $md5,
-				'id'			=> $id,
-				'shared'		=> ($share_base != "0" || $share_id),
-				'selfshared'	=> $share_id != null
-			));
-		}
-
-		return $files;
 	}
 
 	public function cache_relative_path($id) {

@@ -19,8 +19,8 @@ class User_Model {
 	}
 
 	public function get($username) {
-		if ($this->user) {
-			return $this->user;
+		if ($username == $this->username || $this->user['admin']) {
+			return $this->db->user_get_by_name($username);
 		}
 		else {
 			throw new Exception('Permission denied', '403');
@@ -123,6 +123,7 @@ class User_Model {
 	}
 
 	public function set_admin($username, $admin) {
+		file_put_contents(LOG, "set admin for " . $username . " to " . $admin . "\n", FILE_APPEND);
 		$be_admin = ($admin == "1") ? 1 : 0;
 		$user = $this->db->user_get_by_name($username);
 		if (!$user || !$this->user['admin']) {

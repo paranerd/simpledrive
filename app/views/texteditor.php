@@ -53,7 +53,7 @@
 				<span class="logo-text">Editor</span>
 			</a>
 		</div>
-		<div id="path" title="Click to rename">
+		<div id="path" title="Click to rename" class="popup-trigger" data-target="rename">
 			<div id="doc-name" class="path-element path-current"></div>
 			<span id="doc-savestatus" class="path-element"></span>
 		</div>
@@ -84,15 +84,15 @@
 		<div class="popup-title">Rename</div>
 
 		<label for="rename-filename">New filename</label>
-		<input id="rename-filename" type="text" placeholder="Filename" autofocus autocomplete="off">
-		<button type="submit" class="button">Rename</button>
+		<input id="rename-filename" type="text" placeholder="Filename" autocomplete="off" autofocus>
+		<button>Rename</button>
 	</form>
 
 	<!-- Notification -->
 	<div id="notification" class="center-hor notification-info light hidden">
 		<div id="note-icon" class="icon-info"></div>
 		<div id="note-msg"></div>
-		<span class="light close"> &times;</span>
+		<span class="close"> &times;</span>
 	</div>
 
 	<input id="data-username" type="hidden" value="<?php echo $username; ?>"/>

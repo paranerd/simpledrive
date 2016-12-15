@@ -34,6 +34,7 @@
 	<input id="data-base" type="hidden" value="<?php echo $base; ?>"/>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript" src="public/js/util.js"></script>
 	<script type="text/javascript" src="public/js/logout.js"></script>
 </body>
 </html>

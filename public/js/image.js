@@ -8,7 +8,6 @@
 var ImageManager = {
 	loading: false,
 	active: null,
-	galleryMode: false,
 	slide: null,
 	slideshowStarted: false,
 	image: null,
@@ -28,59 +27,6 @@ var ImageManager = {
 		}
 	},
 
-	closeGallery: function() {
-		$("#gallery").addClass("hidden");
-		ImageManager.galleryMode = false;
-	},
-
-	fillGallery: function(i) {
-		if (!ImageManager.galleryMode) {
-			return;
-		}
-		else if (FileManager.getElementAt(i).type == "image") {
-			var elementsPerLine = 7;
-			var size = $("#gallery").width() * ((1 / elementsPerLine))  - elementsPerLine * 4;
-
-			var galleryItem = document.createElement("div");
-			galleryItem.id = "gallery" + i;
-			galleryItem.value = i;
-			galleryItem.className = "gallery-container icon-gallery";
-			$("#gallery" + i).height(size).width(size);
-			simpleScroll.append("gallery", galleryItem);
-
-			var title = document.createElement("div");
-			title.id = "title" + i;
-			title.className = "img-title hidden";
-			title.innerHTML = Util.escape(FileManager.getElementAt(i).filename);
-			$("#gallery" + i).append(title);
-
-			var img = new Image();
-			img.src = 'api/files/get?target=' + JSON.stringify([FileManager.getElementAt(i).id]) + '&width=250&height=250&token=' + token;
-			img.onload = function() {
-				galleryItem.style.backgroundImage = "url(" + this.src + ")";
-				simpleScroll.update();
-
-				$("#gallery" + i).removeClass("icon-gallery");
-				$("#gallery" + i).click(function() {
-					ImageManager.open(this.value);
-				}).hover(function() {
-					$(this).addClass('transition');
-					$("#title" + this.value).removeClass('hidden');
-				}, function() {
-					$(this).removeClass('transition');
-					$("#title" + this.value).addClass('hidden');
-				});
-
-				if (i < FileManager.getAllElements().length - 1) {
-					ImageManager.fillGallery(i + 1);
-				}
-			}
-		}
-		else if (i < FileManager.getAllElements().length - 1) {
-			ImageManager.fillGallery(i + 1);
-		}
-	},
-
 	getBackgroundSize: function(img) {
 		var imgHeight = img.naturalHeight || img.height;
 		var imgWidth = img.naturalWidth || img.width;
@@ -94,8 +40,6 @@ var ImageManager = {
 
 	init: function() {
 		ImageManager.active = null;
-		simpleScroll.init("gallery");
-		$("#gallery").addClass("hidden");
 
 		$("#img-close").on('click', function(e) {
 			ImageManager.close();
@@ -117,10 +61,6 @@ var ImageManager = {
 			ImageManager.next();
 		});
 
-	},
-
-	isGalleryLoaded: function() {
-		return ImageManager.galleryMode;
 	},
 
 	next: function(slideshow) {
@@ -198,14 +138,6 @@ var ImageManager = {
 			ImageManager.loading = false;
 			Util.busy(false);
 		}
-	},
-
-	openGallery: function() {
-		FileManager.unselectAll();
-		ImageManager.galleryMode = true;
-		simpleScroll.empty("gallery");
-		$("#gallery").removeClass("hidden");
-		ImageManager.fillGallery(0);
 	},
 
 	prev: function() {

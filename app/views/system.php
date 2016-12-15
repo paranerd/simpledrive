@@ -49,21 +49,10 @@
 
 	<!-- Sidebar -->
 	<div id="sidebar">
-		<div id="sidebar-status" class="menu-item" title="Status info"><div class="menu-thumb icon-info"></div><div class="sidebarText">Status</div></div>
-		<div id="sidebar-users" class="menu-item" title="Users"><div class="menu-thumb icon-users"></div><div class="sidebarText">Users</div></div>
-		<div id="sidebar-plugins" class="menu-item" title="Show Plugins"><div class="menu-thumb icon-add"></div><div class="sidebarText">Plugins</div></div>
-		<div id="sidebar-log" class="menu-item" title="Show log"><div class="menu-thumb icon-log"></div><div class="sidebarText">Log</div></div>
-	</div>
-
-	<!-- Menu -->
-	<div id="menu" class="popup hidden">
-		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
-		<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div><?php echo $lang['settings']; ?></a></div>
-		<?php if ($admin) : ?>
-		<div class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>
-		<?php endif; ?>
-		<div id="menu-item-info" class="menu-item"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></div>
-		<div class="menu-item"><a href="core/logout?token=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
+		<div id="sidebar-status" class="sidebar-navigation menu-item" title="Status info"><input type="hidden" value="status" /><div class="menu-thumb icon-info"></div><div class="sidebarText">Status</div></div>
+		<div id="sidebar-users" class="sidebar-navigation menu-item" title="Users"><input type="hidden" value="users" /><div class="menu-thumb icon-users"></div><div class="sidebarText">Users</div></div>
+		<div id="sidebar-plugins" class="sidebar-navigation menu-item" title="Show Plugins"><input type="hidden" value="plugins" /><div class="menu-thumb icon-add"></div><div class="sidebarText">Plugins</div></div>
+		<div id="sidebar-log" class="sidebar-navigation menu-item" title="Show log"><input type="hidden" value="log" /><div class="menu-thumb icon-log"></div><div class="sidebarText">Log</div></div>
 	</div>
 
 	<!-- Content -->
@@ -136,8 +125,8 @@
 				<div class="settings-title">WebODF</div>
 				<div class="cell settings-label multi-line">WebODF is a JavaScript library that makes it easy to add Open Document Format (ODF) support to your website and to your mobile or desktop application. It uses HTML and CSS to display ODF documents.</div>
 				<div class="cell">
-					<button id="get-webodf" class="button plugin-install hidden" value="webodf">Download</button>
-					<button id="remove-webodf" class="button plugin-remove hidden" value="webodf">Remove</button>
+					<button id="get-webodf" class="plugin-install hidden" value="webodf">Download</button>
+					<button id="remove-webodf" class="plugin-remove hidden" value="webodf">Remove</button>
 				</div>
 			</div>
 
@@ -147,8 +136,8 @@
 				<div class="settings-title">SabreDAV</div>
 				<div class="cell settings-label multi-line">sabre/dav is an open source WebDAV server, developed by fruux and built in PHP. It is an implementation of the WebDAV protocol (with extensions for CalDAV[1] and CardDAV), providing a native PHP server implementation which operates on Apache 2 and Nginx web servers.</div>
 				<div class="cell">
-					<button id="get-sabredav" class="button plugin-install hidden" value="sabredav">Download</button>
-					<button id="remove-sabredav" class="button plugin-remove hidden" value="sabredav">Remove</button>
+					<button id="get-sabredav" class="plugin-install hidden" value="sabredav">Download</button>
+					<button id="remove-sabredav" class="plugin-remove hidden" value="sabredav">Remove</button>
 				</div>
 			</div>
 
@@ -158,8 +147,8 @@
 				<div class="settings-title">PHPMailer</div>
 				<div class="cell settings-label multi-line">A full-featured email creation and transfer class for PHP</div>
 				<div class="cell">
-					<button id="get-phpmailer" class="button plugin-install hidden" value="phpmailer">Download</button>
-					<button id="remove-phpmailer" class="button plugin-remove hidden" value="phpmailer">Remove</button>
+					<button id="get-phpmailer" class="plugin-install hidden" value="phpmailer">Download</button>
+					<button id="remove-phpmailer" class="plugin-remove hidden" value="phpmailer">Remove</button>
 				</div>
 			</div>
 
@@ -167,7 +156,7 @@
 		</div>
 
 		<!-- Log -->
-		<div id="log-filter" class="list-filter hidden">
+		<div class="list-filter hidden">
 			<input id="log-filter-input" class="list-filter-input" placeholder="Filter..."/>
 			<div class="close"> &times;</div>
 		</div>
@@ -180,12 +169,14 @@
 			<span class="col5">Timestamp</span>
 		</div>
 		<div id="log" class="list"></div>
-	</div>
 
-	<!-- Log Footer -->
-	<div id="log-footer" class="hidden">
-		<div id="log-pages-label">Select page:</div>
-		<select id="log-pages"></select>
+		<!-- Log Footer -->
+		<div class="list-footer hidden">
+			<div id="log-page-selector" class="selector">
+				<div class="selector-label">Page:</div>
+				<select id="log-pages"></select>
+			</div>
+		</div>
 	</div>
 
 	<!-- Context Menu -->
@@ -193,6 +184,17 @@
 		<div id="context-create" class="menu-item hidden"><div class="menu-thumb icon-user-plus"></div>Create User</div>
 		<div id="context-delete" class="menu-item hidden"><div class="menu-thumb icon-user-minus"></div>Delete User</div>
 		<div id="context-clearlog" class="menu-item hidden"><div class="menu-thumb icon-trash"></div>Clear log</div>
+	</div>
+
+	<!-- Menu -->
+	<div id="menu" class="popup hidden">
+		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
+		<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div><?php echo $lang['settings']; ?></a></div>
+		<?php if ($admin) : ?>
+		<div class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>
+		<?php endif; ?>
+		<div class="menu-item popup-trigger" data-target="info"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></div>
+		<div class="menu-item"><a href="core/logout?token=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
 	</div>
 
 	<!-- Shield -->
@@ -216,7 +218,7 @@
 			<div id="createuser-admin" class="checkbox-box"></div>
 			<div class="checkbox-label">Admin</div>
 		</div>
-		<button class="button" type="submit">OK</button>
+		<button>OK</button>
 	</form>
 
 	<!-- Version info -->
@@ -236,8 +238,8 @@
 
 	<div id="confirm" class="popup input-popup center hidden">
 		<div id="confirm-title" class="popup-title">Confirm</div>
-		<button id="confirm-no" class="button inverted">Cancel</button>
-		<button id="confirm-yes" class="button">OK</button>
+		<button id="confirm-no" class="inverted">Cancel</button>
+		<button id="confirm-yes">OK</button>
 		<span class="light close"> &times;</span>
 	</div>
 

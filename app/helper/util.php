@@ -102,6 +102,10 @@ class Util {
 		return true;
 	}
 
+	/**
+	 * Takes a size string with optional "G", "M" or "K" suffix and converts it into the byte-size
+	 */
+
 	public function convert_size($size_string) {
 		switch (substr($size_string, -1)) {
 			case 'G':
@@ -112,6 +116,22 @@ class Util {
 				return floatval($size_string) * 1024;
 			default:
 				return floatval($size_string);
+		}
+	}
+
+	public function bytes_to_string($byte_string) {
+		$size = $byte_string;
+		if ($size > (1024 * 1024 * 1024)) {
+			return floor(($size / (1024 * 1024 * 1024)) * 100) / 100 . " GB";
+		}
+		else if ($size > (1024 * 1024)) {
+			return floor(($size / (1024 * 1024)) * 100) / 100 . " MB";
+		}
+		else if ($size > 1024) {
+			return floor(($size / 1024) * 100) / 100 . " KB";
+		}
+		else {
+			return $size . " Byte";
 		}
 	}
 

@@ -138,8 +138,6 @@ class File_Model {
 
 	private function get_temp_dir($file) {
 		$temp = $this->config['datadir'] . $file['owner'] . self::$TEMP;
-		file_put_contents(LOG, "file: " . print_r($file, true) . "\n", FILE_APPEND);
-		file_put_contents(LOG, "creating temp folder: " . $temp . "\n", FILE_APPEND);
 
 		if ($file['owner'] != "" && !file_exists($temp)) {
 			mkdir($temp);
@@ -343,7 +341,8 @@ class File_Model {
 			$files = $this->db->share_get_with($this->uid, self::$PERMISSION_READ);
 		}
 		else {
-			$files = $this->db->cache_children($target, $file['ownerid'], self::$PERMISSION_READ);
+			//$files = $this->db->cache_children($target, $file['ownerid'], self::$PERMISSION_READ);
+			$files = $this->db->cache_children($target, $this->uid, self::$PERMISSION_READ, $this->db->get_hash_from_token($this->token));
 		}
 
 		//throw new Exception('WORX', '403');
@@ -504,7 +503,7 @@ class File_Model {
 	 * @param string $key access password
 	 */
 
-	public function share($target, $userto, $mail, $write, $public, $key) {
+	public function share($target, $userto, $mail, $write, $public, $pass) {
 		$file = $this->get_cached($target, self::$PERMISSION_WRITE);
 		$user = $this->db->user_get_by_name($userto);
 		$userto_uid = ($user) ? $user['id'] : null;
@@ -522,15 +521,14 @@ class File_Model {
 		}
 
 		$access = ($write) ? self::$PERMISSION_WRITE : self::$PERMISSION_READ;
-		$crypt_pass = ($key) ? hash('sha256', $key . $this->config['salt']) : '';
 
-		if ($hash = $this->db->share($target, $userto_uid, $crypt_pass, $public, $access)) {
+		if (($hash = $this->db->share($target, $userto_uid, Crypto::generate_password($pass), $public, $access)) !== null) {
 			if ($public == 1) {
 				$link = $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/pub/" . $hash;
 				// Regex for verifying email: '/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/'
 				/*if (isset($_POST['mail']) && $_POST['mail'] != "" && $this->config['mailuser'] != '' && $this->config['mailpass'] != '') {
 					$subject = $this->username . " wants to share a file";
-					$msg = $link . "\n Password: " + $key;
+					$msg = $link . "\n Password: " + $pass;
 					Util::send_mail($subject, $_POST['mail'], $msg);
 				}*/
 				return $link;
@@ -693,7 +691,6 @@ class File_Model {
 
 		$zip->close();
 
-		file_put_contents(LOG, "destination: " . $destination . "\n", FILE_APPEND);
 		if (file_exists($destination)) {
 			return $destination;
 		}
@@ -854,8 +851,7 @@ class File_Model {
 		throw new Exception('No files to upload', '500');
 	}
 
-	public function get_public($hash, $key) {
-		$key = ($key != "") ? hash('sha256', $key . $this->config['salt']) : "";
+	public function get_public($hash, $pass) {
 		$share = $this->db->share_get_by_hash($hash);
 
 		// File not shared at all
@@ -871,7 +867,7 @@ class File_Model {
 		}
 
 		// Incorrect password
-		else if ($share['pass'] != $key && !$this->db->share_is_unlocked($hash, $this->token)) {
+		else if (!Crypto::verify_password($pass, $share['pass']) && !$this->db->share_is_unlocked($hash, $this->token)) {
 			throw new Exception('Wrong password', '403');
 		}
 		else {
@@ -973,8 +969,6 @@ class File_Model {
 	}
 
 	public function load_text($target) {
-		file_put_contents(LOG, "load text target: " . print_r($target, true) . "\n", FILE_APPEND);
-		file_put_contents(LOG, "token: " . $this->token . " | uid: " . $this->uid . "\n", FILE_APPEND);
 		$file = $this->get_cached($target, self::$PERMISSION_READ);
 
 		if (!$file) {
