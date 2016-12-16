@@ -9,20 +9,17 @@
  * Only load displayed thumbnails
  */
 
-var startDrag = false,
-	dragging = false,
-	mouseStart = {x: 0, y: 0},
-	seekPos = null,
-	username,
+var	username,
 	token;
 
 $(document).ready(function() {
-	username = $("#data-username").val();
-	token = $("#data-token").val();
-	simpleScroll.init("files");
+	username = $('head').data('username');
+	token = $('head').data('token');
+
+	simpleScroll.init('files');
 	ImageManager.init();
 	Binder.init();
-	FileManager.init($("#data-view").val(), $("#data-id").val(), $("#data-public").val());
+	FileManager.init($('head').data('view'), $('head').data('id'), $('head').data('public'));
 
 	if (username) {
 		Util.getVersion();
@@ -33,6 +30,11 @@ $(document).ready(function() {
 });
 
 var Binder = {
+	startDrag: false,
+	dragging: false,
+	mouseStart: {x: 0, y: 0},
+	seekPos: null,
+
 	init: function() {
 		$("#files-filter .list-filter-input").on('input', function(e) {
 			FileManager.filter($(this).val());
@@ -135,7 +137,7 @@ var Binder = {
 		});
 
 		$(".sidebar-navigation").on('click', function(e) {
-			FileManager.view = $(this).find('input').val();
+			FileManager.view = $(this).data('action');
 			FileManager.clearHierarchy();
 			FileManager.fetch();
 		});
@@ -197,10 +199,6 @@ var Binder = {
 		$("#fileinfo .close").on('click', function(e) {
 			$("#fileinfo").addClass("hidden");
 			$(window).resize();
-		});
-
-		$("#share-public").on('click', function(e) {
-			FileManager.toggleShareLink();
 		});
 
 		$("#contextmenu .menu-item").on('click', function(e) {
@@ -286,11 +284,11 @@ var Binder = {
 		});
 
 		$("#audio-seekbar").on('mousedown', function(e) {
-			seekPos = (e.pageX - $(this).offset().left) / $(this).width();
+			Binder.seekPos = (e.pageX - $(this).offset().left) / $(this).width();
 		});
 
 		$("#sidebar-trash").on('mouseup', function(e) {
-			if (dragging) { FileManager.remove(); }
+			if (Binder.dragging) { FileManager.remove(); }
 		});
 
 		$("#files").on('mousedown', function(e) {
@@ -395,7 +393,7 @@ var Binder = {
 				return;
 			}
 
-			mouseStart = {x: e.clientX, y: e.clientY};
+			Binder.mouseStart = {x: e.clientX, y: e.clientY};
 
 			if (!$("#item" + e.target.parentNode.value).hasClass("selected")) {
 				FileManager.unselectAll();
@@ -403,7 +401,7 @@ var Binder = {
 			}
 
 			FileManager.select(this.value);
-			startDrag = true;
+			Binder.startDrag = true;
 
 			FileManager.updateSelStatus();
 		});
@@ -415,17 +413,17 @@ var Binder = {
 			}
 
 			var id = this.value;
-			if (dragging && FileManager.getElementAt(id).type == "folder" && FileManager.view != "trash" && typeof FileManager.getSelectedAt(id) === 'undefined') {
+			if (Binder.dragging && FileManager.getElementAt(id).type == "folder" && FileManager.view != "trash" && typeof FileManager.getSelectedAt(id) === 'undefined') {
 				FileManager.move(FileManager.getElementAt(id).id);
 			}
-			else if (e.which == 1 && !dragging) {
+			else if (e.which == 1 && !Binder.dragging) {
 				FileManager.select(this.value);
 				FileManager.open();
 			}
 		});
 
 		$(document).on('mouseenter', '.item', function(e) {
-			if (FileManager.getElementAt(this.value).type == 'folder' && dragging) {
+			if (FileManager.getElementAt(this.value).type == 'folder' && Binder.dragging && this.value != FileManager.getFirstSelected().id) {
 				$(this).addClass("highlight-folder");
 			}
 		});
@@ -457,21 +455,21 @@ var Binder = {
 		});
 
 		$(document).on('mouseleave', '.item .col1', function(e) {
-			if (!dragging) {
+			if (!Binder.dragging) {
 				$("#dragstatus").addClass("hidden");
 			}
 		});
 
 		$(document).on('mousemove', function(e) {
-			if (seekPos != null && e.pageX > $("#audio-seekbar").offset().left && e.pageX < $("#audio-seekbar").offset().left + $("#audio-seekbar").width()) {
-				seekPos = (e.pageX - $("#audio-seekbar").offset().left) / $("#audio-seekbar").width();
-				$("#audio-seekbar-progress").width($("#audio-seekbar").width() * seekPos);
+			if (Binder.seekPos != null && e.pageX > $("#audio-seekbar").offset().left && e.pageX < $("#audio-seekbar").offset().left + $("#audio-seekbar").width()) {
+				Binder.seekPos = (e.pageX - $("#audio-seekbar").offset().left) / $("#audio-seekbar").width();
+				$("#audio-seekbar-progress").width($("#audio-seekbar").width() * Binder.seekPos);
 			}
-			else if (startDrag) {
-				var distMoved = Math.round(Math.sqrt(Math.pow(mouseStart.y - e.clientY, 2) + Math.pow(mouseStart.x - e.clientX, 2)));
+			else if (Binder.startDrag) {
+				var distMoved = Math.round(Math.sqrt(Math.pow(Binder.mouseStart.y - e.clientY, 2) + Math.pow(Binder.mouseStart.x - e.clientX, 2)));
 				if (distMoved > 10) {
 					$("#sidebar-trash").addClass("trashact");
-					dragging = true;
+					Binder.dragging = true;
 					$("#dragstatus").css({
 						'top' : e.pageY + 10,
 						'left' : e.pageX + 10
@@ -481,14 +479,14 @@ var Binder = {
 		});
 
 		$(document).on('mouseup', function(e) {
-			if (seekPos != null) {
-				AudioManager.seekTo(seekPos);
-				seekPos = null;
+			if (Binder.seekPos != null) {
+				AudioManager.seekTo(Binder.seekPos);
+				Binder.seekPos = null;
 			}
 
 			$("#dragstatus").addClass("hidden");
-			startDrag = false;
-			dragging = false;
+			Binder.startDrag = false;
+			Binder.dragging = false;
 
 			$("#sidebar-trash").removeClass("trashact");
 
@@ -665,7 +663,7 @@ var FileManager = {
 			Util.closePopup('create');
 		}).fail(function(xhr, statusText, error) {
 			Util.busy(false);
-			$("#create-error").removeClass("hidden").text(Util.getError(xhr));
+			Util.showFormError('create', Util.getError(xhr));
 		});
 	},
 
@@ -1013,7 +1011,7 @@ var FileManager = {
 				$("#pubfile, #pub-key").removeClass("hidden");
 				$("#pub-key").focus();
 				if (FileManager.publicLoginAttempt > 0) {
-					$("#pub-error").removeClass("hidden").text(parsedError);
+					Util.showFormError('loadPublic', parsedError);
 				}
 				FileManager.publicLoginAttempt++;
 			}
@@ -1283,7 +1281,7 @@ var FileManager = {
 		var target = FileManager.getFirstSelected().item;
 
 		if (!user && !$("#share-public").hasClass("checkbox-checked")) {
-			$("#share-error").removeClass("hidden").text("No username provided");
+			Util.showFormError('create', 'No username provided');
 		}
 		else {
 			$.ajax({
@@ -1304,7 +1302,7 @@ var FileManager = {
 				FileManager.fetch();
 			}).fail(function(xhr, statusText, error) {
 				Util.busy(false);
-				$("#share-error").removeClass("hidden").text(Util.getError(xhr));
+				Util.showFormError('share', Util.getError(xhr));
 			});
 		}
 	},
@@ -1333,19 +1331,6 @@ var FileManager = {
 			e.preventDefault();
 			FileManager.rename();
 		});
-	},
-
-	/**
-	 * Displays/hides mail and password fields for sharing depending on public-status
-	 */
-	toggleShareLink: function() {
-		if ($("#share-public").hasClass("checkbox-checked")) {
-			$("#share .toggle-hidden").addClass("hidden");
-		}
-		else {
-			$("#share .toggle-hidden").removeClass("hidden");
-		}
-		$(window).resize();
 	},
 
 	sortByName: function(order) {

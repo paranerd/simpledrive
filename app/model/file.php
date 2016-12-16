@@ -203,6 +203,7 @@ class File_Model {
 
 			$thumb = imagecreatetruecolor($target_width, $target_height);
 
+			// GIF
 			if ($info[2] == 1) {
 				$thumb_name = ($thumb_name) ? $thumb_name : md5($src) . ".gif";
 
@@ -222,6 +223,7 @@ class File_Model {
 				ImageGIF($thumb, $temp . $thumb_name);
 				return $temp . $thumb_name;
 			}
+			// JPEG
 			else if ($info[2] == 2) {
 				$thumb_name = ($thumb_name) ? $thumb_name : md5($src) . ".jpg";
 
@@ -240,6 +242,7 @@ class File_Model {
 				$this->db->thumbnail_create($file['id'], $thumb_name);
 				return $temp . $thumb_name;
 			}
+			// PNG
 			else if ($info[2] == 3) {
 				$thumb_name = ($thumb_name) ? $thumb_name : md5($src) . ".png";
 

@@ -10,9 +10,9 @@ var username,
 	file;
 
 $(document).ready(function() {
-	username = $("#data-username").val();
-	token = $("#data-token").val();
-	file = $("#data-file").val();
+	username = $('head').data('username');
+	token = $('head').data('token');
+	file = $('head').data('file');
 
 	$("#username").html(Util.escape(username) + " &#x25BE");
 

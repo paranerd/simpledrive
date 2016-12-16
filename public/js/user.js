@@ -10,9 +10,9 @@ var username,
 	code;
 
 $(document).ready(function() {
-	username = $("#data-username").val();
-	token = $("#data-token").val();
-	code = $("#data-code").val();
+	username = $('head').data('username');
+	token = $('head').data('token');
+	code = $('head').data('code');
 
 	simpleScroll.init("status");
 
@@ -79,7 +79,7 @@ var Binder = {
 			General.changePassword();
 		});
 
-		$("#setupBackup").on('submit', function(e) {
+		$("#setupbackup").on('submit', function(e) {
 			e.preventDefault();
 			Backup.enable();
 		});
@@ -146,7 +146,7 @@ var Backup = {
 		var enc = ($("#setupbackup-encrypt").hasClass("checkbox-checked")) ? 1 : 0;
 
 		if (enc && (pass == "" || (pass != passConfirm))) {
-			Util.notify("Passwords don't match", true, true);
+			Util.showFormError('setupbackup', 'Passwords do not match');
 		}
 		else {
 			Util.closePopup('setupbackup');
@@ -354,12 +354,12 @@ var General = {
 		var newpass2 = $("#change-password-pass2").val();
 
 		if (currpass.length == 0 || newpass1.length == 0 || newpass2.length == 0) {
-			$("#change-password-error").removeClass("hidden").text("Fields cannot be empty", true, true);
+			Util.showFormError('change-password', "Fields cannot be empty");
 			return;
 		}
 
 		if (newpass1 != newpass2) {
-			$("#change-password-error").removeClass("hidden").text("New passwords don't match", true, true);
+			Util.showFormError('change-password', "New passwords do not match");
 			return;
 		}
 
@@ -374,7 +374,7 @@ var General = {
 			$("#change-password-pass0, #change-password-pass1, #change-password-pass2").val('');
 			Util.closePopup('change-pass');
 		}).fail(function(xhr, statusText, error) {
-			$("#change-password-error").removeClass("hidden").text(Util.getError(xhr));
+			Util.showFormError('change-password', Util.getError(xhr));
 		});
 	}
 }

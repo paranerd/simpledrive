@@ -111,7 +111,7 @@ class Database {
 			user int(11),
 			type int(11),
 			source varchar(30),
-			msg varchar(500),
+			msg text,
 			date varchar(20))');
 
 		$link->query('CREATE TABLE IF NOT EXISTS sd_shares (

@@ -25,8 +25,8 @@ class Backup_Model {
 		$this->username			= ($this->user) ? $this->user['username'] : "";
 		$this->config			= json_decode(file_get_contents('config/config.json'), true);
 
-		$this->credentials		= ($this->user) ? $this->config['installdir'] . 'config/googledrive/client_secret.json' : "";
-		$this->token			= ($this->user) ? $this->config['installdir'] . 'config/googledrive/access-token_' . $this->username . '.json' : "";
+		$this->credentials		= ($this->user) ? $_SERVER['DOCUMENT_ROOT'] . $this->config['installdir'] . 'config/googledrive/client_secret.json' : "";
+		$this->token			= ($this->user) ? $_SERVER['DOCUMENT_ROOT'] . $this->config['installdir'] . 'config/googledrive/access-token_' . $this->username . '.json' : "";
 		$this->temp				= ($this->user) ? $this->config['datadir'] . $this->username . "/.tmp/" : "";
 		$this->lock				= ($this->user) ? $this->config['datadir'] . $this->username . "/.lock/backup" : "";
 
@@ -262,7 +262,7 @@ class Backup_Model {
 			throw new Exception('Permission denied', '403');
 		}
 
-		if (strlen($pass) == 0) {
+		if ($enc_filename && strlen($pass) == 0) {
 			throw new Exception('Password not set', '400');
 		}
 		else if ($pass && !$this->db->backup_enable($this->uid, $pass, intval($enc_filename))) {

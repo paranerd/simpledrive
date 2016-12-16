@@ -8,10 +8,10 @@
 var base;
 
 $(document).ready(function() {
-	base = $("#data-base").val();
+	base = $('head').data('base');
 
 	$(window).resize();
-	if ($("#data-demo").val()) {
+	if ($('head').data('demo')) {
 		demoLogin();
 	}
 });
@@ -44,10 +44,8 @@ function demoLogin() {
 }
 
 function login() {
-	$("#error").addClass("hidden").text("");
-
 	if ($("#user").val() == "" || $("#pass").val() == "") {
-		$("#error").removeClass("hidden").text("No blank fields!");
+		Util.showFormError('setup', "No blank fields");
 	}
 	else {
 		$("#submit").prop('disabled', true);
@@ -60,9 +58,9 @@ function login() {
 			$("#submit").prop('disabled', false);
 			window.location.href = base + "files";
 		}).fail(function(xhr, statusText, error) {
-			$("#error").removeClass("hidden").text(error);
-			$("#pass").val("");
+			$("#pass").val('');
 			$("#submit").prop('disabled', false);
+			Util.showFormError('setup', Util.getError(xhr));
 		});
 	}
 }

@@ -7,13 +7,12 @@
 
 var username,
 	token,
-	view,
-	strengths = ["Very weak", "Weak", "Ok", "Better", "Strong", "Very strong"];
+	view;
 
 $(document).ready(function() {
-	username = $("#data-username").val();
-	token = $("#data-token").val();
-	view = $("#data-view").val();
+	username = $('head').data('username');
+	token = $('head').data('token');
+	view = $('head').data('view');
 
 	$("#username").html(Util.escape(username) + " &#x25BE");
 
@@ -57,7 +56,7 @@ var Binder = {
 		});
 
 		$(".sidebar-navigation").on('click', function(e) {
-			switch ($(this).find('input').val()) {
+			switch ($(this).data('action')) {
 				case 'status':
 					Status.fetch(true);
 					break;
@@ -116,22 +115,6 @@ var Binder = {
 		$("#createuser").on('submit', function(e) {
 			e.preventDefault();
 			Users.create();
-		});
-
-		$("#createuser-pass1").on('keyup', function() {
-			if ($(this).val()) {
-				var strength = Util.checkPasswordStrength($(this).val());
-				if (strength > 1) {
-					$("#strength").removeClass().addClass("password-ok");
-				}
-				else {
-					$("#strength").removeClass().addClass("password-bad");
-				}
-				$("#strength").text(strengths[strength]);
-			}
-			else {
-				$("#strength").text("");
-			}
 		});
 
 		$(document).on('contextmenu', '#content', function(e) {
@@ -556,10 +539,12 @@ var Plugins = {
 			var installed = plugins[plugin];
 
 			if (installed) {
-				$("#remove-" + plugin).removeClass("hidden");
+				$("#remove-" + plugin).removeClass("hidden").prop('disabled', false).text("Remove");
+				$("#get-" + plugin).addClass("hidden");
 			}
 			else {
-				$("#get-" + plugin).removeClass("hidden");
+				$("#get-" + plugin).removeClass("hidden").prop('disabled', false).text("Download");
+				$("#remove-" + plugin).addClass("hidden");
 			}
 		}
 		$(window).resize();
@@ -842,7 +827,7 @@ var Users = {
 		var admin = ($("#createuser-admin").hasClass("checkbox-checked")) ? 1 : 0;
 
 		if ($("#createuser-name").val() == "" || $("#createuser-pass1").val() == "" || $("#createuser-pass2").val() == "") {
-			$("#createuser-error").text("Username / password not set!");
+			Util.showFormError('createuser', 'Username / Password not set');
 		}
 		else if ($("#createuser-pass1").val() == $("#createuser-pass2").val()) {
 			$.ajax({
@@ -859,7 +844,7 @@ var Users = {
 			});
 		}
 		else {
-			$("#createuser-error").text("Passwords don't match!");
+			Util.showFormError('createuser', 'Passwords do not match');
 			$("#createuser-pass1, #createuser-pass2").val("");
 		}
 	},

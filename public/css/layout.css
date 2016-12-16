@@ -592,6 +592,10 @@ select {
 	font-size: 1rem;
 }
 
+.popup .checkbox {
+	margin-bottom: 10px;
+}
+
 .menu-item {
 	width: 196px;
 	height: 50px;
@@ -681,9 +685,6 @@ button:disabled, button:disabled:hover {
 }
 
 .error {
-/*
-	margin-top: 10px;
-*/
 	margin-bottom: 20px;
 	width: 100%;
 	text-align: center;
@@ -696,19 +697,23 @@ button:disabled, button:disabled:hover {
 	position: absolute;
 	top: 10px;
 	right: 10px;
-	font-family: robotolight, sans-serif;
-	font-size: 24px;
+	font-family: icomoon;
+	font-size: 0.75rem;
 	line-height: 20px;
 	cursor: pointer;
+}
+
+.close:before {
+	content: "\e923";
+}
+
+.list-filter .close {
+	line-height: 30px;
 }
 
 .input-popup .close {
 	top: 30px;
 	right: 30px;
-}
-
-.close:hover {
-	font-weight: bold;
 }
 
 .hidden {
@@ -741,6 +746,7 @@ label {
 	text-align: center;
 	font-family: robotoregular, sans-serif;
 	font-size: 14px;
+	z-index: 3;
 }
 
 #dropzone {
@@ -824,7 +830,8 @@ label {
 }
 
 .major-subtitle {
-	margin-top: 35px;
+	margin-top: 10px;
+	margin-bottom: 10px;
 	font-size: 1.5rem;
 	font-family: robotolight, sans-serif;
 }
@@ -945,8 +952,8 @@ label {
 	font-size: 4rem;
 }
 
-#setupbackup-pass1 {
-	margin-top: 10px;
+.password-strength {
+	margin-bottom: 20px;
 }
 
 @keyframes flip-animation {
@@ -964,14 +971,6 @@ label {
 	100% { opacity: 0.2; transform: scale(1); }
 }
 
-.busy-animation {
-	animation-name: flip-animation;
-	animation-duration: 2000ms;
-	transform-origin: 50% 50%;
-	animation-iteration-count: infinite;
-	animation-timing-function: linear;
-}
-
 #busy {
 	position: absolute;
 	right: 20px;
@@ -984,6 +983,12 @@ label {
 	font-family: robotoregular, sans-serif;
 	font-size: 0.9rem;
 	z-index: 103;
+
+	animation-name: flip-animation;
+	animation-duration: 2000ms;
+	transform-origin: 50% 50%;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
 }
 
 #editor-container {

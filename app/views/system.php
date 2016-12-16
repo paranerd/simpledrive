@@ -7,21 +7,21 @@
  * @link		http://simpledrive.org
  */
 
-	if (!$user) {
-		header('Location: ' . $base . 'core/login');
-		exit();
-	}
+if (!$user) {
+	header('Location: ' . $base . 'core/login');
+	exit();
+}
 
-	$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-	$username 	= ($user) ? $user['username'] : '';
-	$admin 		= ($user) ? $user['admin'] : false;
-	$color 		= ($user) ? $user['color'] : 'light';
-	$fileview 	= ($user) ? $user['fileview'] : 'list';
+$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
+$username 	= ($user) ? $user['username'] : '';
+$admin 		= ($user) ? $user['admin'] : false;
+$color 		= ($user) ? $user['color'] : 'light';
+$fileview 	= ($user) ? $user['fileview'] : 'list';
 ?>
 
 <!DOCTYPE html>
 <html>
-<head>
+<head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-view="<?php echo $section; ?>">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<title>System | simpleDrive</title>
 
@@ -44,15 +44,15 @@
 			</a>
 		</div>
 		<div id="path"><div class="path-element path-current">Status</div></div>
-		<div id="username"></div>
+		<div id="username" class="popup-trigger" data-target="menu"></div>
 	</div>
 
 	<!-- Sidebar -->
 	<div id="sidebar">
-		<div id="sidebar-status" class="sidebar-navigation menu-item" title="Status info"><input type="hidden" value="status" /><div class="menu-thumb icon-info"></div><div class="sidebarText">Status</div></div>
-		<div id="sidebar-users" class="sidebar-navigation menu-item" title="Users"><input type="hidden" value="users" /><div class="menu-thumb icon-users"></div><div class="sidebarText">Users</div></div>
-		<div id="sidebar-plugins" class="sidebar-navigation menu-item" title="Show Plugins"><input type="hidden" value="plugins" /><div class="menu-thumb icon-add"></div><div class="sidebarText">Plugins</div></div>
-		<div id="sidebar-log" class="sidebar-navigation menu-item" title="Show log"><input type="hidden" value="log" /><div class="menu-thumb icon-log"></div><div class="sidebarText">Log</div></div>
+		<div id="sidebar-status" class="sidebar-navigation menu-item" title="Status info" data-action="status"><div class="menu-thumb icon-info"></div><div class="sidebarText">Status</div></div>
+		<div id="sidebar-users" class="sidebar-navigation menu-item" title="Users" data-action="users"><div class="menu-thumb icon-users"></div><div class="sidebarText">Users</div></div>
+		<div id="sidebar-plugins" class="sidebar-navigation menu-item" title="Show Plugins" data-action="plugins"><div class="menu-thumb icon-add"></div><div class="sidebarText">Plugins</div></div>
+		<div id="sidebar-log" class="sidebar-navigation menu-item" title="Show log" data-action="log"><div class="menu-thumb icon-log"></div><div class="sidebarText">Log</div></div>
 	</div>
 
 	<!-- Content -->
@@ -107,7 +107,7 @@
 		<!-- Users -->
 		<div id="users-filter" class="list-filter hidden">
 			<input id="users-filter-input" class="list-filter-input" placeholder="Filter..."/>
-			<div class="close"> &times;</div>
+			<span class="close"></span>
 		</div>
 		<div id="users-header" class="list-header">
 			<span class="col0">&nbsp;</span>
@@ -158,7 +158,7 @@
 		<!-- Log -->
 		<div class="list-filter hidden">
 			<input id="log-filter-input" class="list-filter-input" placeholder="Filter..."/>
-			<div class="close"> &times;</div>
+			<span class="close"></span>
 		</div>
 		<div id="log-header" class="list-header">
 			<span class="col0">&nbsp;</span>
@@ -202,15 +202,19 @@
 
 	<!-- New user -->
 	<form id="createuser" class="popup input-popup center hidden" action="#">
-		<span class="close"> &times;</span>
+		<span class="close"></span>
 		<div class="popup-title">New User</div>
 
 		<label for="createuser-name">Username</label>
-		<input id="createuser-name" type="text" name="username" autofocus autocomplete="off" placeholder="Username"/>
+		<input id="createuser-name" type="text" name="username" autocomplete="off" placeholder="Username" autofocus />
+
 		<label for="createuser-pass1">Password</label>
-		<input id="createuser-pass1" type="password" placeholder="Password"/><span id="strength" class="hidden"></span>
+		<input id="createuser-pass1" class="password-check" data-strength="createuser-strength" type="password" placeholder="Password"/>
+		<div id="createuser-strength" class="password-strength hidden"></div>
+
 		<label for="createuser-pass2">Repeat Password</label>
 		<input id="createuser-pass2" type="password" placeholder="Repeat Password"/>
+
 		<label for="createuser-mail">E-Mail</label>
 		<input id="createuser-mail" type="text" placeholder="E-Mail (optional)"/>
 
@@ -218,6 +222,7 @@
 			<div id="createuser-admin" class="checkbox-box"></div>
 			<div class="checkbox-label">Admin</div>
 		</div>
+		<div class="error hidden"></div>
 		<button>OK</button>
 	</form>
 
@@ -230,22 +235,18 @@
 	</div>
 
 	<!-- Notification -->
-	<div id="notification" class="center-hor notification-info light hidden">
+	<div id="notification" class="center-hor notification-info hidden">
 		<div id="note-icon" class="icon-info"></div>
 		<div id="note-msg"></div>
-		<span class="light close"> &times;</span>
+		<span class="close"></span>
 	</div>
 
 	<div id="confirm" class="popup input-popup center hidden">
 		<div id="confirm-title" class="popup-title">Confirm</div>
 		<button id="confirm-no" class="inverted">Cancel</button>
 		<button id="confirm-yes">OK</button>
-		<span class="light close"> &times;</span>
+		<span class="close"></span>
 	</div>
-
-	<input id="data-username" type="hidden" value="<?php echo $username; ?>"/>
-	<input id="data-token" type="hidden" value="<?php echo $token;?>"/>
-	<input id="data-view" type="hidden" value="<?php echo $section;?>"/>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/simplescroll.js"></script>

@@ -31,7 +31,7 @@
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
-<head>
+<head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-file="<?php echo $id; ?>">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<title>Editor | simpleDrive</title>
 
@@ -59,7 +59,7 @@
 		</div>
 
 		<!-- Username -->
-		<div id="username"></div>
+		<div id="username" class="popup-trigger" data-target="menu"></div>
 	</div>
 
 	<!-- Content -->
@@ -80,7 +80,7 @@
 
 	<!-- Rename popup -->
 	<form id="rename" class="popup input-popup center hidden" action="#">
-		<div class="close"> &times;</div>
+		<span class="close"></span>
 		<div class="popup-title">Rename</div>
 
 		<label for="rename-filename">New filename</label>
@@ -89,15 +89,11 @@
 	</form>
 
 	<!-- Notification -->
-	<div id="notification" class="center-hor notification-info light hidden">
+	<div id="notification" class="center-hor notification-info hidden">
 		<div id="note-icon" class="icon-info"></div>
 		<div id="note-msg"></div>
-		<span class="close"> &times;</span>
+		<span class="close"></span>
 	</div>
-
-	<input id="data-username" type="hidden" value="<?php echo $username; ?>"/>
-	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
-	<input id="data-file" type="hidden" value="<?php echo $id; ?>"/>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util.js"></script>

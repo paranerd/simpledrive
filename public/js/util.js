@@ -5,64 +5,89 @@
  * @link		http://simpledrive.org
  */
 
-$(window).resize(function() {
-	$("#content, #sidebar, #fileinfo, #texteditor").height(window.innerHeight - $("#header").height());
-
-	var listFooterAdapt = ($(".list-footer").hasClass("hidden")) ? 0 : $(".list-footer").outerHeight();
-	$(".list, .grid").height($("#content").outerHeight() - $(".list-header").outerHeight() - listFooterAdapt);
-
-	$("#content").width(($("#fileinfo").hasClass("hidden")) ? window.innerWidth - $("#sidebar").outerWidth() : window.innerWidth - $("#sidebar").outerWidth() - $("#fileinfo").outerWidth());
-
-	// Position centered divs
-	$('.center').each(function(i, obj) {
-		$(this).css({
-			top : ($(this).parent().height() - $(this).outerHeight()) / 2,
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-
-	$('.center-hor').each(function(i, obj) {
-		$(this).css({
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-
-	setTimeout(function() {
-		simpleScroll.update();
-	}, 200);
-});
-
-$(".close").on('click', function(e) {
-	if ($(this).parents('.popup').length) {
-		Util.closePopup($(this).parent().attr('id'));
-	}
-	else if ($(this).parents('.sidebar-widget').length) {
-		Util.closeWidget($(this).parent().attr('id'));
-	}
-});
-
-$(document).on('click', '.popup-trigger', function(e) {
-	Util.showPopup($(this).data('target'));
-});
-
-$("#shield").click(function(e) {
-	Util.closePopup();
-});
-
-$(document).on('click', '.checkbox-box', function(e) {
-	$(this).toggleClass("checkbox-checked");
-});
-
-$(".popup .menu-item").on('click', function() {
-	$(this).parent().addClass("hidden");
-});
-
-$("#username").on('click', function(e) {
-	$("#menu").toggleClass("hidden");
-});
-
 var Util = {
 	busyCount: 0,
+	strengths: ["Very weak", "Weak", "Ok", "Better", "Strong", "Very strong"],
+
+	init: function() {
+		$(window).resize(function() {
+			$("#content, #sidebar, #fileinfo, #texteditor").height(window.innerHeight - $("#header").height());
+
+			var listFooterAdapt = ($(".list-footer").hasClass("hidden")) ? 0 : $(".list-footer").outerHeight();
+			$(".list, .grid").height($("#content").outerHeight() - $(".list-header").outerHeight() - listFooterAdapt);
+
+			$("#content").width(($("#fileinfo").hasClass("hidden")) ? window.innerWidth - $("#sidebar").outerWidth() : window.innerWidth - $("#sidebar").outerWidth() - $("#fileinfo").outerWidth());
+
+			// Position centered divs
+			$('.center').each(function(i, obj) {
+				$(this).css({
+					top : ($(this).parent().height() - $(this).outerHeight()) / 2,
+					left : ($(this).parent().width() - $(this).outerWidth()) / 2
+				});
+			});
+
+			$('.center-hor').each(function(i, obj) {
+				$(this).css({
+					left : ($(this).parent().width() - $(this).outerWidth()) / 2
+				});
+			});
+
+			setTimeout(function() {
+				simpleScroll.update();
+			}, 200);
+		});
+
+		$(document).on('click', '.checkbox-box', function(e) {
+			$(this).toggleClass("checkbox-checked");
+		});
+
+		$(document).on('click', '.popup-trigger', function(e) {
+			if ($("#" + $(this).data('target')).hasClass('hidden')) {
+				Util.showPopup($(this).data('target'));
+			}
+			else {
+				Util.closePopup($(this).data('target'));
+			}
+		});
+
+		$(document).on('click', 'form .toggle-hidden', function(e) {
+			var form = $(this).closest('form');
+			$(form).find('.form-hidden').toggleClass("hidden");
+			$(window).resize();
+		});
+
+		$(document).on('keyup', '.password-check', function(e) {
+			var id = $(this).data('strength');
+
+			if ($(this).val()) {
+				$("#" + id).removeClass("hidden");
+				var strength = Util.checkPasswordStrength($(this).val());
+				var cls = (strength.score > 1) ? 'password-ok' : 'password-bad';
+				$("#" + id).removeClass().addClass('password-strength ' + cls).text(strength.text);
+			}
+			else {
+				$("#" + id).addClass("hidden");
+				$("#" + id).text("");
+			}
+		});
+
+		$(".close").on('click', function(e) {
+			if ($(this).parents('.popup').length) {
+				Util.closePopup($(this).parent().attr('id'));
+			}
+			else if ($(this).parents('.sidebar-widget').length) {
+				Util.closeWidget($(this).parent().attr('id'));
+			}
+		});
+
+		$(".popup .menu-item").on('click', function() {
+			$(this).parent().addClass("hidden");
+		});
+
+		$("#shield").click(function(e) {
+			Util.closePopup();
+		});
+	},
 
 	busy: function(start) {
 		Util.busyCount = (start) ? ++Util.busyCount : --Util.busyCount;
@@ -120,7 +145,10 @@ var Util = {
 		// Contains special char
 		if (password.match(/[\ -\/\:-\@\[-\`\{-\~]/)) score++;
 
-		return (password.length <= 6) ? Math.min(score, 1) : score;
+		// Password with 6 or less characters is always a bad idea
+		score = (password.length <= 6) ? (Math.min(score, 1)) : score;
+
+		return {score: score, text: Util.strengths[score]};
 	},
 
 	showPopup: function(id) {
@@ -136,16 +164,16 @@ var Util = {
 	},
 
 	closePopup: function(id) {
-		if (id) {
-			$("#" + id + ", .overlay, .toggle-hidden").addClass("hidden");
-			$("#" + id + " input[type=text]").val("");
-			$("#" + id + " .checkbox-box").removeClass("checkbox-checked");
-		}
-		else {
-			$(".popup, .overlay, .toggle-hidden").addClass("hidden");
-			$(".popup input[type=text]").val("");
-			$(".popup .checkbox-box").removeClass("checkbox-checked");
-		}
+		var target = (id) ? '#' + id : '.popup';
+
+		$(target + ", .overlay, .form-hidden").addClass("hidden");
+		$(target + " input").val('');
+		$(target + " .checkbox-box").removeClass("checkbox-checked");
+		$(target + " .password-strength").addClass("hidden").text('');
+	},
+
+	showFormError: function(id, msg) {
+		$("#" + id + " .error").removeClass("hidden").text(msg);
 	},
 
 	closeWidget: function(id) {
@@ -200,7 +228,7 @@ var Util = {
 		var type = (error) ? "warning" : "info";
 		$("#note-icon").removeClass().addClass("icon-" + type);
 		$("#note-msg").text(msg);
-		$("#notification").removeClass().addClass("popup light center-hor notification-" + type);
+		$("#notification").removeClass().addClass("popup center-hor notification-" + type);
 
 		if (autohide) {
 			setTimeout(function() { Util.closePopup('notification'); }, 3000);
@@ -281,3 +309,5 @@ var Util = {
 		return (new Date(newDate).getTime()) / 1000;
 	}
 }
+
+Util.init();

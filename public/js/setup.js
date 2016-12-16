@@ -5,44 +5,11 @@
  * @link		http://simpledrive.org
  */
 
-var strengths = ["Very weak", "Weak", "Ok", "Better", "Strong", "Very strong"];
-
-$(window).resize(function() {
-	// Position centered divs
-	$('.center').each(function(i, obj) {
-		$(this).css({
-			top : ($(this).parent().height() - $(this).outerHeight()) / 2,
-			left : ($(this).parent().width() - $(this).outerWidth()) / 2
-		});
-	});
-
-	$('.center-hor').each(function(i, obj) {
-		$(this).css({
-			left : (window.innerWidth - $(this).outerWidth()) / 2
-		});
-	});
-});
-
 $(window).resize();
-
-$("#advanced").on('click', function() {
-	toggleAdvanced();
-});
 
 $("#setup").on('submit', function(e) {
 	e.preventDefault();
 	setup();
-});
-
-$("#pass").on('keyup', function() {
-	var strength = Util.checkPasswordStrength($(this).val());
-	if (strength > 1) {
-		$("#strength").removeClass().addClass("password-ok");
-	}
-	else {
-		$("#strength").removeClass().addClass("password-bad");
-	}
-	$("#strength").text(strengths[strength]);
 });
 
 function setup() {
@@ -57,7 +24,7 @@ function setup() {
 	var datadir		= $("#datadir").val();
 
 	if (user == "" || pass == "" || dbuser == "" || dbpass == "") {
-		$("#error").removeClass("hidden").text("Username / password not set!");
+		Util.showFormError('setup', "Username / Password not set");
 	}
 	else {
 		$("#submit").prop('disabled', true);
@@ -72,21 +39,7 @@ function setup() {
 			//window.location.href = "files";
 		}).fail(function(xhr, statusText, error) {
 			$("#submit").prop('disabled', false);
-			$("#error").removeClass("hidden").text(getError(xhr));
+			Util.showFormError('setup', Util.getError(xhr));
 		});
 	}
-}
-
-function toggleAdvanced() {
-	if ($(".toggle-hidden").hasClass("hidden")) {
-		$(".toggle-hidden").removeClass("hidden");
-	}
-	else {
-		$(".toggle-hidden").addClass("hidden");
-	}
-	$(window).resize();
-}
-
-function getError(xhr) {
-	return (JSON.parse(xhr.responseText).msg) ? JSON.parse(xhr.responseText).msg : xhr.statusText;
 }

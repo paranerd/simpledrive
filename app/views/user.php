@@ -7,22 +7,22 @@
  * @link		http://simpledrive.org
  */
 
-	if (!$user) {
-		header('Location: ' . $base . 'core/login');
-		exit();
-	}
+if (!$user) {
+	header('Location: ' . $base . 'core/login');
+	exit();
+}
 
-	$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-	$code		= (isset($_GET['code'])) ? $_GET['code'] : "";
-	$username 	= ($user) ? $user['username'] : '';
-	$admin 		= ($user) ? $user['admin'] : false;
-	$color 		= ($user) ? $user['color'] : 'light';
-	$fileview 	= ($user) ? $user['fileview'] : 'list';
+$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
+$code		= (isset($_GET['code'])) ? $_GET['code'] : "";
+$username 	= ($user) ? $user['username'] : '';
+$admin 		= ($user) ? $user['admin'] : false;
+$color 		= ($user) ? $user['color'] : 'light';
+$fileview 	= ($user) ? $user['fileview'] : 'list';
 ?>
 
 <!DOCTYPE html>
 <html>
-<head>
+<head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-code="<?php echo $code; ?>">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<title>User settings | simpleDrive</title>
 
@@ -46,17 +46,17 @@
 			</a>
 		</div>
 		<div id="path"><div class="path-element path-current">User Settings</div></div>
-		<div id="username"></div>
+		<div id="username" class="popup-trigger" data-target="menu"></div>
 	</div>
 
 	<!-- Sidebar -->
 	<div id="sidebar">
-		<div id="sidebar-general" class="sidebar-navigation menu-item focus" title="Status info"><input type="hidden" value="general" /><div class="menu-thumb icon-info"></div><div class="menu-text">General</div></div>
+		<div id="sidebar-general" class="sidebar-navigation menu-item focus" title="Status info" data-action="general"><div class="menu-thumb icon-info"></div><div class="menu-text">General</div></div>
 	</div>
 
 	<!-- Content -->
 	<div id="content">
-		<div id="status" class="hidden">
+		<div id="status">
 			<div class="settings-title">Quota</div>
 			<div class="row">
 				<div class="cell settings-label">Total</div>
@@ -147,42 +147,49 @@
 	<div id="shield" class="overlay hidden"></div>
 
 	<!-- Backup password popup -->
-	<form id="setupbackup" class="popup hidden center input-popup" action="#">
+	<form id="setupbackup" class="popup input-popup center hidden" action="#">
+		<span class="close"></span>
 		<div class="popup-title">Enable cloud backup</div>
 
-		<input id="setupbackup-pass1" type="password" placeholder="Password" required></input>
-		<input id="setupbackup-pass2" type="password" placeholder="Password (repeat)" required></input>
+		<label for="setupbackup-pass1">Password</label>
+		<input id="setupbackup-pass1" class="password-check" data-strength="backup-strength" type="password" placeholder="Password" />
+		<div id="backup-strength" class="password-strength hidden"></div>
+
+		<label for="setupbackup-pass2">Password (repeat)</label>
+		<input id="setupbackup-pass2" type="password" placeholder="Password (repeat)" />
 
 		<div class="checkbox">
 			<div id="setupbackup-encrypt" class="checkbox-box"></div>
 			<div class="checkbox-label">Encrypt filenames</div>
 		</div>
+		<div class="error hidden"></div>
 		<button>OK</button>
 	</form>
 
 	<!-- User password popup -->
 	<form id="change-password" class="popup input-popup center hidden" action="#">
-		<span class="close"> &times;</span>
+		<span class="close"></span>
 		<div class="popup-title">Change password</div>
 
 		<label for="change-password-pass0">Current password</label>
 		<input id="change-password-pass0" type="password" placeholder="Current password"></input>
 
 		<label for="change-password-pass1">New password</label>
-		<input id="change-password-pass1" type="password" placeholder="New password"></input>
+		<input id="change-password-pass1" class="password-check" type="password" data-strength="change-strength" placeholder="New password"></input>
+		<div id="change-strength" class="password-strength hidden"></div>
 
 		<label for="change-password-pass2">New password (repeat)</label>
 		<input id="change-password-pass2" type="password" placeholder="New password (repeat)"></input>
 
-		<div id="change-password-error" class="error hidden"></div>
+		<div class="error hidden"></div>
 		<button>OK</button>
 	</form>
 
 	<!-- Notification -->
-	<div id="notification" class="center-hor notification-info light hidden">
+	<div id="notification" class="center-hor notification-info hidden">
 		<div id="note-icon" class="icon-info"></div>
 		<div id="note-msg"></div>
-		<span class="light close"> &times;</span>
+		<span class="close"></span>
 	</div>
 
 	<!-- Version info -->
@@ -192,10 +199,6 @@
 		<div class="clearer"></div>
 		<div id="info-footer">paranerd 2013-2016 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 	</div>
-
-	<input id="data-username" type="hidden" value="<?php echo $username; ?>"/>
-	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
-	<input id="data-code" type="hidden" value="<?php echo $code; ?>"/>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/simplescroll.js"></script>

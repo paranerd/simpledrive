@@ -29,7 +29,7 @@ if (!$public && !$user) {
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
-<head>
+<head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-view="<?php echo $section; ?>" data-id="<?php echo $id; ?>" data-public="<?php echo $public; ?>">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<title>Files | simpleDrive</title>
 
@@ -54,7 +54,7 @@ if (!$public && !$user) {
 		<div id="path"></div>
 
 		<?php if ($section != 'pub') : ?>
-		<div id="username"></div>
+		<div id="username" class="popup-trigger" data-target="menu"></div>
 		<?php endif; ?>
 	</div>
 
@@ -64,10 +64,10 @@ if (!$public && !$user) {
 		<div id="sidebar-upload" class="menu-item popup-trigger" title="Upload file(s)" data-target="upload-menu"><div class="menu-thumb icon-upload"></div><div class="menu-text">Upload</div></div>
 		<?php if ($section != 'pub') : ?>
 		<div class="divider"></div>
-		<div id="sidebar-files" class="sidebar-navigation menu-item focus" title="Show all files"><input type="hidden" value="files" /><div class="menu-thumb icon-files"></div><div class="menu-text"><?php echo $lang['myfiles']; ?></div></div>
-		<div id="sidebar-shareout" class="sidebar-navigation menu-item" title="Show your shares"><input type="hidden" value="shareout" /><div class="menu-thumb icon-users"></div><div class="menu-text"><?php echo $lang['yourshares']; ?></div></div>
-		<div id="sidebar-sharein" class="sidebar-navigation menu-item" title="Show files shared with you"><input type="hidden" value="sharein" /><div class="menu-thumb icon-share"></div><div class="menu-text"><?php echo $lang['sharedwithyou']; ?></div></div>
-		<div id="sidebar-trash" class="sidebar-navigation menu-item" title="Show trash"><input type="hidden" value="trash" /><div class="menu-thumb icon-trash"></div><div class="menu-text"><?php echo $lang['trash']; ?></div></div>
+		<div id="sidebar-files" class="sidebar-navigation menu-item focus" title="Show all files" data-action="files"><div class="menu-thumb icon-files"></div><div class="menu-text"><?php echo $lang['myfiles']; ?></div></div>
+		<div id="sidebar-shareout" class="sidebar-navigation menu-item" title="Show your shares" data-action="shareout"><div class="menu-thumb icon-users"></div><div class="menu-text"><?php echo $lang['yourshares']; ?></div></div>
+		<div id="sidebar-sharein" class="sidebar-navigation menu-item" title="Show files shared with you" data-action="sharein"><div class="menu-thumb icon-share"></div><div class="menu-text"><?php echo $lang['sharedwithyou']; ?></div></div>
+		<div id="sidebar-trash" class="sidebar-navigation menu-item" title="Show trash" data-action="trash"><div class="menu-thumb icon-trash"></div><div class="menu-text"><?php echo $lang['trash']; ?></div></div>
 		<?php endif; ?>
 
 		<!-- Upload -->
@@ -82,7 +82,7 @@ if (!$public && !$user) {
 
 			<div class="progressbar"><div id="upload-progress" class="progressbar-progress"></div></div>
 			<div id="upload-percent" class="widget-small">33%</div>
-			<span id="upload-cancel" class="close"> &times; </span>
+			<span id="upload-cancel" class="close"></span>
 		</div>
 
 		<!-- Audio Player -->
@@ -112,7 +112,7 @@ if (!$public && !$user) {
 			</div>
 
 			<div id="audio-play-small" class="sidebar-widget-icon widget-small icon-play"></div>
-			<span class="close"> &times; </span>
+			<span class="close"></span>
 		</div>
 
 		<div id="clipboard" class="sidebar-widget hidden">
@@ -122,7 +122,7 @@ if (!$public && !$user) {
 
 			<div id="clipboard-content" class="sidebar-widget-row widget-text">1</div>
 			<div id="clipboard-count" class="widget-small">2</div>
-			<span class="close"> &times; </span>
+			<span class="close"></span>
 		</div>
 
 		<!-- Folder size -->
@@ -136,7 +136,7 @@ if (!$public && !$user) {
 	<div id="content">
 		<div id="files-filter" class="list-filter hidden">
 			<input class="list-filter-input" placeholder="Filter..."/>
-			<span class="close"> &times;</span>
+			<span class="close"></span>
 		</div>
 		<div id="list-header" class="list-header <?php if ($fileview == 'grid') echo 'hidden'; ?>">
 			<span class="col0 checkbox"><span id="fSelect" class="checkbox-box"></span></span>
@@ -170,7 +170,7 @@ if (!$public && !$user) {
 
 	<!-- File Info Panel -->
 	<div id="fileinfo" class="hidden">
-		<span class="close"> &times;</span>
+		<span class="close"></span>
 		<div id="fileinfo-icon" class="menu-thumb icon-files"></div><div id="fileinfo-name" class="menu-text"></div>
 
 		<div class="menu-item"><div id="fileinfo-header" class="menu-text">Details:</div></div>
@@ -218,41 +218,41 @@ if (!$public && !$user) {
 
 	<!-- Create popup -->
 	<form id="create" class="popup input-popup center hidden" action="#">
-		<span class="close"> &times;</span>
+		<span class="close icon-cross"></span>
 		<div class="popup-title"><?php echo $lang['create']; ?></div>
 
 		<label for="create-input"><?php echo $lang['filename']; ?></label>
 		<input id="create-input" type="text" placeholder="<?php echo $lang['filename']; ?>" />
 
-		<div id="create-error" class="error hidden"></div>
+		<div class="error hidden"></div>
 		<input id="create-type" type="hidden" name="type" />
 		<button>OK</button>
 	</form>
 
 	<!-- Share popup -->
 	<form id="share" class="popup input-popup center hidden" action="#">
-		<span class="close"> &times;</span>
+		<span class="close"></span>
 		<div class="popup-title"><?php echo $lang['share']; ?></div>
 
 		<label><?php echo $lang['username']; ?></label>
 		<input id="share-user" type="text" placeholder="<?php echo $lang['username']; ?>">
 
-		<label for="share-key" class="hidden toggle-hidden"><?php echo $lang['password']; ?></label>
-		<input id="share-key" type="text" class="hidden toggle-hidden" placeholder="<?php echo $lang['password']; ?> (optional)" autocomplete="off">
+		<label for="share-key" class="hidden form-hidden"><?php echo $lang['password']; ?></label>
+		<input id="share-key" type="text" class="hidden form-hidden" placeholder="<?php echo $lang['password']; ?> (optional)" autocomplete="off">
 
-		<label for="share-mail" class="hidden toggle-hidden">Mail</label>
-		<input id="share-mail" type="text" class="hidden toggle-hidden" placeholder="Mail (optional)">
+		<label for="share-mail" class="hidden form-hidden">Mail</label>
+		<input id="share-mail" type="text" class="hidden form-hidden" placeholder="Mail (optional)">
 
 		<div class="checkbox">
 			<div id="share-write" class="checkbox-box"></div>
 			<div class="checkbox-label"><?php echo $lang['write']; ?></div>
 		</div>
 		<div class="checkbox">
-			<div id="share-public" class="checkbox-box"></div>
+			<div id="share-public" class="checkbox-box toggle-hidden"></div>
 			<div class="checkbox-label"><?php echo $lang['public']; ?></div>
 		</div>
 
-		<div id="share-error" class="error hidden"></div>
+		<div class="error hidden"></div>
 		<button>OK</button>
 	</form>
 
@@ -267,12 +267,12 @@ if (!$public && !$user) {
 	</div>
 
 	<!-- Notification -->
-	<div id="notification" class="popup center-hor light hidden">
+	<div id="notification" class="popup center-hor hidden">
 		<div>
 			<div id="note-icon" class="icon-info"></div>
-			<div id="note-msg"></div>
+			<div id="note-msg">Error</div>
 		</div>
-		<span class="close"> &times;</span>
+		<span class="close"></span>
 	</div>
 
 	<!-- Version info -->
@@ -293,7 +293,7 @@ if (!$public && !$user) {
 	<div id="dropzone" class="hidden">Drop to upload</div>
 
 	<!-- Progress circle -->
-	<div id="busy" class="busy-animation hidden">busy</div>
+	<div id="busy" class="hidden">busy</div>
 
 	<div id="pubfile" class="major-wrapper hidden">
 		<div class="major-logo menu-item" title="Create new element"><div class="menu-thumb icon-cloud"></div><div class="menu-text">simpleDrive</div></div>
@@ -309,12 +309,6 @@ if (!$public && !$user) {
 
 		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>
 	</div>
-
-	<input id="data-username" type="hidden" value="<?php echo $username; ?>"/>
-	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
-	<input id="data-view" type="hidden" value="<?php echo $section; ?>"/>
-	<input id="data-id" type="hidden" value="<?php echo $id; ?>"/>
-	<input id="data-public" type="hidden" value="<?php echo $public; ?>"/>
 
 	<script src="public/js/jquery-1.11.3.min.js"></script>
 	<script src="public/js/simplescroll.js"></script>

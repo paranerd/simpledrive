@@ -57,7 +57,6 @@ var simpleScroll = {
 		}
 
 		var content = container.innerHTML;
-
 		container.innerHTML = "";
 
 		var innerNode = document.createElement("div");
@@ -68,6 +67,15 @@ var simpleScroll = {
 		innerNode.innerHTML = content;
 
 		container.appendChild(innerNode);
+
+		/* To keep event listeners, use the following for above:
+		 * var content = $("#" + id).clone(true, true);
+		 * scratch "innerNode.innerHTML = content;
+		 * while ($(content).children().length > 0) {
+		 *		$(innerNode).append($($(content).children()[0]).clone(true, true));
+		 *		$($(content).children()[0]).remove();
+		 * }
+		 */
 
 		var scrolly = document.createElement("div");
 		scrolly.id = "scrollbar" + self.containers.length;

@@ -24,9 +24,13 @@
 	}
 ?>
 
+   	<input id="data-username" type="hidden" value="<?php echo $username; ?>"/>
+	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
+	<input id="data-file" type="hidden" value="<?php echo $id; ?>"/>
+
 <!DOCTYPE HTML>
 <html xml:lang="en" lang="en">
-  <head>
+<head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-file="<?php echo $id; ?>">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<title>ODF-Editor | simpleDrive</title>
 
@@ -35,26 +39,22 @@
     <link rel="stylesheet" href="public/css/layout.css" />
     <link rel="stylesheet" href="public/css/colors.css" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-  </head>
+</head>
 
-  <body class="light">
+<body class="light">
     <div id="editor-container"></div>
 
    	<!-- Notification -->
-	<div id="notification" class="center-hor notification-info light hidden">
+	<div id="notification" class="center-hor notification-info hidden">
 		<div id="note-icon" class="icon-info"></div>
 		<div id="note-msg"></div>
-		<span class="light close"> &times;</span>
+		<span class="close"></span>
 	</div>
-
-   	<input id="data-username" type="hidden" value="<?php echo $username; ?>"/>
-	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
-	<input id="data-file" type="hidden" value="<?php echo $id; ?>"/>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util.js"></script>
 	<script type="text/javascript" src="plugins/webodf/wodotexteditor.js" type="text/javascript" charset="utf-8"></script>
 	<script type="text/javascript" src="plugins/webodf/FileSaver.js" type="text/javascript" charset="utf-8"></script>
 	<script type="text/javascript" src="plugins/webodf/localfileeditor.js" type="text/javascript" charset="utf-8"></script>
-  </body>
+</body>
 </html>
