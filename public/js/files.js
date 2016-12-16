@@ -652,6 +652,8 @@ var FileManager = {
 	create: function() {
 		Util.busy(true);
 
+		console.log($("#create-type").val());
+		return;
 		$.ajax({
 			url: 'api/files/create',
 			type: 'post',

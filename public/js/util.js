@@ -152,7 +152,7 @@ var Util = {
 	},
 
 	showPopup: function(id) {
-		Util.closePopup();
+		Util.closePopup(null, true);
 
 		if ($("#" + id).hasClass('input-popup')) {
 			$("#" + id + ", #shield").removeClass("hidden");
@@ -163,13 +163,20 @@ var Util = {
 		}
 	},
 
-	closePopup: function(id) {
+	closePopup: function(id, beforeShow) {
 		var target = (id) ? '#' + id : '.popup';
 
 		$(target + ", .overlay, .form-hidden").addClass("hidden");
-		$(target + " input").val('');
 		$(target + " .checkbox-box").removeClass("checkbox-checked");
 		$(target + " .password-strength").addClass("hidden").text('');
+
+		if (beforeShow) {
+			// Don't clear hidden form-inputs before showing popup
+			$(target + " input[type!='hidden']").val('');
+		}
+		else {
+			$(target + " input").val('');
+		}
 	},
 
 	showFormError: function(id, msg) {

@@ -24,10 +24,6 @@
 	}
 ?>
 
-   	<input id="data-username" type="hidden" value="<?php echo $username; ?>"/>
-	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
-	<input id="data-file" type="hidden" value="<?php echo $id; ?>"/>
-
 <!DOCTYPE HTML>
 <html xml:lang="en" lang="en">
 <head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-file="<?php echo $id; ?>">

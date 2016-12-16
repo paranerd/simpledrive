@@ -11,7 +11,7 @@
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
-<head>
+<head data-token="<?php echo $token; ?>" data-base="<?php echo $base; ?>">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<title>Logout | simpleDrive</title>
 
@@ -20,8 +20,6 @@
 	<link rel="stylesheet" href="public/css/colors.css" />
 	<link rel="stylesheet" href="public/css/layout.css" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-
-
 </head>
 <body>
 	<div class="major-wrapper">
@@ -29,9 +27,6 @@
 		<div class="error-page-text">Logging out...<br>If you're not being redirected, click <a href="<?php echo $base; ?>core/login">here</a></div>
 		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>
 	</div>
-
-	<input id="data-token" type="hidden" value="<?php echo $token; ?>"/>
-	<input id="data-base" type="hidden" value="<?php echo $base; ?>"/>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util.js"></script>

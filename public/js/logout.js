@@ -9,8 +9,8 @@ var token,
 	base;
 
 $(document).ready(function() {
-	token = $("#data-token").val();
-	base = $("#data-base").val();
+	token = $('head').data('token');
+	base = $('head').data('base');
 	$(window).resize();
 	logout();
 });
