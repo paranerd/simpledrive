@@ -140,11 +140,11 @@ if (!$public && !$user) {
 		</div>
 		<div id="list-header" class="list-header <?php if ($fileview == 'grid') echo 'hidden'; ?>">
 			<span class="col0 checkbox"><span id="fSelect" class="checkbox-box"></span></span>
-			<span class="col1"><span><?php echo $lang['name']; ?> </span><span id="file-name-ord"></span></span>
-			<span class="col2"><span><?php echo $lang['owner']; ?></span><span id="file-owner-ord"></span></span>
-			<span class="col3"><span><?php echo $lang['type']; ?> </span><span id="file-type-ord"></span></span>
-			<span class="col4"><span><?php echo $lang['size']; ?> </span><span id="file-size-ord"></span></span>
-			<span class="col5"><span id="file-edit-ord"></span><span><?php echo $lang['edit']; ?> </span></span>
+			<span class="col1"><span><?php echo $lang['name']; ?> </span><span id="file-name-ord" class="order-direction"></span></span>
+			<span class="col2"><span><?php echo $lang['owner']; ?></span><span id="file-owner-ord" class="order-direction"></span></span>
+			<span class="col3"><span><?php echo $lang['type']; ?> </span><span id="file-type-ord" class="order-direction"></span></span>
+			<span class="col4"><span><?php echo $lang['size']; ?> </span><span id="file-size-ord" class="order-direction"></span></span>
+			<span class="col5"><span id="file-edit-ord" class="order-direction"></span><span><?php echo $lang['edit']; ?> </span></span>
 		</div>
 
 		<div id="files" class="<?php echo $fileview; ?>"></div>
@@ -210,14 +210,14 @@ if (!$public && !$user) {
 		<div class="menu-item"><a href="core/logout?token=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
 	</div>
 
-	<!-- Drag status -->
-	<div id="dragstatus" class="hidden"></div>
+	<!-- Cursor Info -->
+	<div id="cursorinfo" class="hidden"></div>
 
 	<!-- Shield -->
 	<div id="shield" class="overlay hidden"></div>
 
 	<!-- Create popup -->
-	<form id="create" class="popup input-popup center hidden" action="#">
+	<form id="create" class="popup center hidden" action="#">
 		<span class="close icon-cross"></span>
 		<div class="popup-title"><?php echo $lang['create']; ?></div>
 
@@ -230,7 +230,7 @@ if (!$public && !$user) {
 	</form>
 
 	<!-- Share popup -->
-	<form id="share" class="popup input-popup center hidden" action="#">
+	<form id="share" class="popup center hidden" action="#">
 		<span class="close"></span>
 		<div class="popup-title"><?php echo $lang['share']; ?></div>
 
@@ -276,7 +276,8 @@ if (!$public && !$user) {
 	</div>
 
 	<!-- Version info -->
-	<div id="info" class="popup input-popup center hidden">
+	<div id="info" class="popup center hidden">
+		<span class="close"></span>
 		<div id="info-title">simpleDrive</div>
 		<div id="info-subtitle">Private. Secure. Simple.</div>
 		<div class="clearer"></div>

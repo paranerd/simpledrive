@@ -55,7 +55,7 @@
 		</div>
 		<div id="path" title="Click to rename" class="popup-trigger" data-target="rename">
 			<div id="doc-name" class="path-element path-current"></div>
-			<span id="doc-savestatus" class="path-element"></span>
+			<span id="doc-savestatus" class="path-element path-current"></span>
 		</div>
 
 		<!-- Username -->
@@ -65,8 +65,8 @@
 	<!-- Content -->
 	<textarea id="texteditor"></textarea>
 
-	<!-- Drag status -->
-	<div id="dragstatus"></div>
+	<!-- Cursor Info -->
+	<div id="cursorinfo"></div>
 
 	<!-- Shield -->
 	<div id="shield" class="overlay hidden"></div>
@@ -79,12 +79,14 @@
 	</div>
 
 	<!-- Rename popup -->
-	<form id="rename" class="popup input-popup center hidden" action="#">
+	<form id="rename" class="popup center hidden" action="#">
 		<span class="close"></span>
 		<div class="popup-title">Rename</div>
 
 		<label for="rename-filename">New filename</label>
 		<input id="rename-filename" type="text" placeholder="Filename" autocomplete="off" autofocus>
+
+		<div class="error hidden"></div>
 		<button>Rename</button>
 	</form>
 

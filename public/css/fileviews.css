@@ -25,7 +25,7 @@
 
 .col5 {
 	width: 10%;
-	text-align: right;
+	text-align: right !important;
 }
 
 .col5 span {
@@ -68,6 +68,11 @@
 	position: relative;
 	cursor: pointer;
 	float: left;
+}
+
+.list-header .col5 span {
+	text-align: right;
+	float: right;
 }
 
 .list-header span:hover {

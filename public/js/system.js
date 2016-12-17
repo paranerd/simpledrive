@@ -6,33 +6,23 @@
  */
 
 var username,
-	token,
-	view;
+	token;
 
 $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
-	view = $('head').data('view');
 
-	$("#username").html(Util.escape(username) + " &#x25BE");
-
-	simpleScroll.init("status");
-	simpleScroll.init("users");
-	simpleScroll.init("log");
-	simpleScroll.init("plugins");
-
-	Binder.init();
+	View.init($('head').data('view'));
 
 	Util.getVersion();
-	$(window).resize();
 
-	if (view == "users") {
+	if (View.current == "users") {
 		Users.fetch(true);
 	}
-	else if (view == "log") {
+	else if (View.current == "log") {
 		Log.fetch(true, 0);
 	}
-	else if (view == "plugins") {
+	else if (View.current == "plugins") {
 		Plugins.fetch(true);
 	}
 	else {
@@ -40,14 +30,25 @@ $(document).ready(function() {
 	}
 });
 
-var Binder = {
-	init: function() {
+var View = {
+	current: '',
+
+	init: function(current) {
+		View.current = current;
+
+		$("#username").html(Util.escape(username) + " &#x25BE");
+
+		simpleScroll.init("status");
+		simpleScroll.init("users");
+		simpleScroll.init("log");
+		simpleScroll.init("plugins");
+
 		$('#upload-max').on('change', function(e){
-			Status.setUploadLimit($("#upload-max").val());
+			Status.setUploadLimit($(this).val());
 		});
 
 		$('#domain').on('change', function(e){
-			Status.setDomain($("#domain").val());
+			Status.setDomain($(this).val());
 		});
 
 		$("#force-ssl.checkbox-box").on('click', function(e) {
@@ -104,31 +105,22 @@ var Binder = {
 			Log.closeFilter();
 		});
 
-		$("#context-delete").on('click', function(e) {
-			Users.remove();
-		});
-
-		$("#context-clearlog").on('click', function(e) {
-			Log.clear();
-		});
-
 		$("#createuser").on('submit', function(e) {
 			e.preventDefault();
 			Users.create();
 		});
 
+		/**
+		 * Prepare contextmenu
+		 */
 		$(document).on('contextmenu', '#content', function(e) {
 			e.preventDefault();
 			$('[id^="context-"]').addClass("hidden");
 
-			if (!$("#sidebar-log").hasClass("focus") && !$("#sidebar-users").hasClass("focus")) {
-				return false;
-			}
-
 			if ($("#sidebar-log").hasClass("focus")) {
 				$("#context-clearlog").removeClass("hidden");
 			}
-			else {
+			else if ($("#sidebar-users").hasClass("focus")) {
 				var target = (typeof e.target.parentNode.value === "undefined") ? null : Users.getUserAt(e.target.parentNode.value);
 
 				if (target !== null) {
@@ -139,13 +131,29 @@ var Binder = {
 				}
 			}
 
-			var top = (e.clientY + $("#contextmenu").height() < window.innerHeight) ? e.clientY : e.clientY - $("#contextmenu").height();
-			$("#contextmenu").css({
-				left : e.clientX,
-				top : top
-			}).removeClass("hidden");
+			Util.showContextmenu(e);
 
 			return false;
+		});
+
+		/**
+		 * Contextmenu action
+		 */
+		$("#contextmenu .menu-item").on('click', function(e) {
+			var id = $(this).attr('id')
+			var action = id.substr(id.indexOf('-') + 1);
+
+			switch (action) {
+				case 'delete':
+					Users.remove();
+					break;
+
+				case 'clearlog':
+					Log.clear();
+					break;
+			}
+
+			$("#contextmenu").addClass("hidden");
 		});
 
 		$(document).on('mousedown', '#users .item', function(e) {
@@ -156,10 +164,6 @@ var Binder = {
 			if (e.which != 3) {
 				$("#contextmenu").addClass("hidden");
 			}
-		});
-
-		$("#contextmenu").on('click', function(e) {
-			$("#contextmenu").addClass("hidden");
 		});
 
 		$("#log-pages").on('change', function() {
@@ -176,7 +180,7 @@ var Binder = {
 
 		$(document).on('keyup', function(e) {
 			// Filter
-			if ((view == "log" || view == "users") && !e.shiftKey && !$(e.target).is('input') && !e.ctrlKey &&
+			if ((View.current == "log" || View.current == "users") && !e.shiftKey && !$(e.target).is('input') && !e.ctrlKey &&
 				((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 96 && e.keyCode <= 105)))
 			{
 				if (!$("#log").hasClass('hidden') && $("#log-filter").hasClass('hidden')) {
@@ -219,25 +223,233 @@ var Binder = {
 		$(document).on('mousedown', '#content', function(e) {
 			Util.closePopup();
 		});
-	}
+
+		$(window).resize();
+	},
+
+	update: function(current) {
+		View.current = current;
+
+		// Hide all
+		simpleScroll.empty("users");
+		simpleScroll.empty("log");
+		$("#log-pages").empty();
+		$("#status, #users, #log, #plugins, .list-header, #plugins, .list-footer").addClass("hidden");
+
+		// Set right view
+		Util.sidebarFocus(current);
+
+		switch (current) {
+			case 'users':
+				$(".path-element").text("Users");
+				$("#users, #users-header").removeClass("hidden");
+				break;
+
+			case 'log':
+				$(".path-element").text("Log");
+				$("#log, #log-header").removeClass("hidden");
+				break;
+
+			case 'plugins':
+				$(".path-element").text("Plugins");
+				$("#plugins").removeClass("hidden");
+				$("#plugins button").addClass("hidden");
+				break;
+
+			case 'status':
+				$("#status").removeClass("hidden");
+				break;
+		}
+	},
+
+	displayStatus: function(data) {
+		View.update('status');
+		$("#users-count").text(data.msg.users);
+		$("#upload-max").val(Util.byteToString(data.msg.upload_max));
+		$("#domain").val(data.msg.domain);
+		$("#storage-total").text(Util.byteToString(data.msg.storage_total));
+		$("#storage-used").text(Util.byteToString(data.msg.storage_used) + " (" + (data.msg.storage_used / data.msg.storage_total * 100).toFixed(0) + "%)");
+		$("#status-version").text(data.msg.version);
+		if (data.msg.ssl) { $("#force-ssl").addClass("checkbox-checked"); }
+	},
+
+	displayLog: function() {
+		View.update('log');
+
+		if (Log.pageTotal > 0) {
+			$(".list-footer").removeClass("hidden");
+
+			for (var i = 0; i < Log.pageTotal; i++) {
+				var option = document.createElement('option');
+				option.value = i;
+				option.innerHTML = i + 1;
+				$("#log-pages").append(option);
+			}
+			$("#log-pages").val(Log.pageCurrent);
+		}
+
+		if (Log.filteredLog.length == 0) {
+			Log.setEmptyView("No entries...");
+			$(".list-footer").addClass("hidden");
+		}
+		else {
+			$(".list-footer").removeClass("hidden");
+		}
+
+		for (var i in Log.filteredLog) {
+			var entry = Log.filteredLog[i];
+			var type = (entry.type == 0) ? "info" : ((entry.type == 1) ? "warning" : "error");
+
+			var listItem = document.createElement("div");
+			listItem.id = "item" + i;
+			listItem.className = "item";
+			simpleScroll.append("log", listItem);
+
+			// Thumbnail
+			var thumbnailWrapper = document.createElement("span");
+			thumbnailWrapper.className = "item-elem col0";
+			listItem.appendChild(thumbnailWrapper);
+
+			var thumbnail = document.createElement('span');
+			thumbnail.id = "thumbnail" + i;
+			thumbnail.value = i;
+			thumbnail.className = "item-elem thumbnail icon-" + type;
+			thumbnailWrapper.appendChild(thumbnail);
+
+			// Message text
+			var logMsg = document.createElement("span");
+			logMsg.className = "item-elem col1";
+			logMsg.innerHTML = Util.escape(entry.msg);
+			$("#item" + i).append(logMsg);
+
+			// Type
+			var logType = document.createElement("span");
+			logType.className = "item-elem col2";
+			logType.innerHTML = Util.escape(type);
+			$("#item" + i).append(logType);
+
+			// Source
+			var logSource = document.createElement("span");
+			logSource.className = "item-elem col3";
+			logSource.innerHTML = Util.escape(entry.source);
+			$("#item" + i).append(logSource);
+
+			// User
+			var logUser = document.createElement("span");
+			logUser.className = "item-elem col4";
+			logUser.innerHTML = Util.escape(entry.user);
+			$("#item" + i).append(logUser);
+
+			// Date
+			var logDate = document.createElement("span");
+			logDate.className = "item-elem col5";
+			logDate.innerHTML = Util.escape(entry.date);
+			$("#item" + i).append(logDate);
+		}
+		$(window).resize();
+	},
+
+	displayPlugins: function(plugins) {
+		View.update('plugins');
+
+		for (var plugin in plugins) {
+			var installed = plugins[plugin];
+
+			if (installed) {
+				$("#remove-" + plugin).removeClass("hidden").prop('disabled', false).text("Remove");
+			}
+			else {
+				$("#get-" + plugin).removeClass("hidden").prop('disabled', false).text("Download");
+			}
+		}
+		$(window).resize();
+	},
+
+	displayUsers: function() {
+		View.update('users');
+
+		for(var i in Users.filtered) {
+			var item = Users.filtered[i];
+
+			var listItem = document.createElement("div");
+			listItem.id = "item" + i;
+			listItem.value = i;
+			listItem.className = "item";
+			simpleScroll.append("users", listItem);
+
+			// Thumbnail
+			var thumbnailWrapper = document.createElement("span");
+			thumbnailWrapper.className = "item-elem col0";
+			listItem.appendChild(thumbnailWrapper);
+
+			var thumbnail = document.createElement('span');
+			var type = (item.admin == "1") ? "admin" : "user";
+			thumbnail.id = "thumbnail" + i;
+			thumbnail.value = i;
+			thumbnail.className = "thumbnail icon-" + type;
+			thumbnailWrapper.appendChild(thumbnail);
+
+			// Username
+			var username = document.createElement("span");
+			username.className = "item-elem col1";
+			username.value = i;
+			username.innerHTML = Util.escape(item.username);
+			$("#item" + i).append(username);
+
+			// Admin
+			var admin = document.createElement("span");
+			admin.className = "item-elem col2 checkbox";
+			$("#item" + i).append(admin);
+
+			var checkbox = document.createElement("div");
+			checkbox.id = "user-admin" + i;
+			checkbox.value = i;
+			checkbox.className = (item.admin == "1") ? "checkbox-box checkbox-checked" : "checkbox-box";
+			checkbox.addEventListener('click', function() {
+				Users.editUser = this.value;
+				Users.setAdmin();
+			});
+			admin.appendChild(checkbox);
+
+			// Quota Max
+			var quotaMax = document.createElement("span");
+			quotaMax.id = "user-quota-total" + i;
+			quotaMax.className = "item-elem col3";
+			quotaMax.innerHTML = "calculating...";
+			$("#item" + i).append(quotaMax);
+
+			quotaMax.onclick = function(e) {
+				var id = e.target.id.replace(/[^0-9]/g,'');
+				Users.editUser = id;
+				Users.showChangeQuota(id);
+			};
+
+			// Quota Used
+			var quotaUsed = document.createElement("span");
+			quotaUsed.id = "user-quota-free" + i;
+			quotaUsed.className = "item-elem col4";
+			quotaUsed.value = i;
+			quotaUsed.innerHTML = "calculating...";
+			$("#item" + i).append(quotaUsed);
+
+			Users.getQuota(item.username, i);
+
+			// Last Update
+			var lastUpdate = document.createElement("span");
+			lastUpdate.className = "item-elem col5";
+			lastUpdate.innerHTML = Util.timestampToDate(item.last_login);
+			$("#item" + i).append(lastUpdate);
+		}
+
+		$(window).resize();
+	},
 }
 
 var Status = {
 	fetch: function(pushState) {
-		view = "status";
-
 		if (pushState) {
 			window.history.pushState(null, '', 'system/status');
 		}
-
-		// Set right view
-		$(".path-element").text("Status");
-		$(".focus").removeClass("focus");
-		$("#sidebar-status").addClass("focus");
-		$("#status").removeClass("hidden");
-		$("#users, #users-filter, #users-header, #log, #log-filter, #log-header").addClass("hidden");
-		simpleScroll.empty("users");
-		simpleScroll.empty("log");
 
 		$.ajax({
 			url: 'api/system/status',
@@ -245,38 +457,7 @@ var Status = {
 			data: {token: token},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			$("#users-count").text(data.msg.users);
-			$("#upload-max").val(Util.byteToString(data.msg.upload_max));
-			$("#domain").val(data.msg.domain);
-			$("#storage-total").text(Util.byteToString(data.msg.storage_total));
-			$("#storage-used").text(Util.byteToString(data.msg.storage_used) + " (" + (data.msg.storage_used / data.msg.storage_total * 100).toFixed(0) + "%)");
-			$("#status-version").text(data.msg.version);
-			if (data.msg.ssl) { $("#force-ssl").addClass("checkbox-checked"); }
-		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
-		});
-	},
-
-	saveChanges: function() {
-		var size = Util.stringToByte($("#upload-max").val());
-
-		if (!size) {
-			Util.notify("Invalid input", true, true);
-			return false;
-		}
-		if (size < 1024) {
-			Util.notify("Upload size too small", true, true);
-			return false;
-		}
-
-		$.ajax({
-			url: 'api/system/save',
-			type: 'post',
-			data: {token: token, size: size, ssl: $("#force-ssl").hasClass("checkbox-checked"), domain: $("#domain").val()},
-			dataType: 'json'
-		}).done(function(data, statusText, xhr) {
-			Util.notify("Saved changes", true);
-			Status.fetch();
+			View.displayStatus(data);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -343,8 +524,6 @@ var Log = {
 	pageTotal: 0,
 
 	fetch: function(pushState, page) {
-		view = "log";
-
 		if (pushState) {
 			window.history.pushState(null, '', 'system/log');
 		}
@@ -359,7 +538,7 @@ var Log = {
 			Log.filteredLog = data.msg.log;
 			Log.pageCurrent = page;
 			Log.pageTotal = data.msg.total;
-			Log.display();
+			View.displayLog();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -386,94 +565,8 @@ var Log = {
 		Log.filter('');
 	},
 
-	display: function() {
-		// Hide all
-		simpleScroll.empty("users");
-		simpleScroll.empty("log");
-		$("#log-pages").empty();
-		$("#status, .list-header, #plugins, #users, #log").addClass("hidden");
-		$(".focus").removeClass("focus");
-
-		// Set right view
-		$(".path-element").text("Log");
-		$("#sidebar-log").addClass("focus");
-		$("#log, #log-header").removeClass("hidden");
-
-		if (Log.pageTotal > 0) {
-			$(".list-footer").removeClass("hidden");
-
-			for (var i = 0; i < Log.pageTotal; i++) {
-				var option = document.createElement('option');
-				option.value = i;
-				option.innerHTML = i + 1;
-				$("#log-pages").append(option);
-			}
-			$("#log-pages").val(Log.pageCurrent);
-		}
-
-		if (Log.filteredLog.length == 0) {
-			Log.setEmptyView("No entries...");
-			$(".list-footer").addClass("hidden");
-		}
-		else {
-			$(".list-footer").removeClass("hidden");
-		}
-
-		for (var i in Log.filteredLog) {
-			var entry = Log.filteredLog[i];
-			var type = (entry.type == 0) ? "info" : ((entry.type == 1) ? "warning" : "error");
-
-			var listItem = document.createElement("div");
-			listItem.id = "item" + i;
-			listItem.className = "item";
-			simpleScroll.append("log", listItem);
-
-			// Thumbnail
-			var thumbnailWrapper = document.createElement("span");
-			thumbnailWrapper.className = "item-elem col0";
-			listItem.appendChild(thumbnailWrapper);
-
-			var thumbnail = document.createElement('span');
-			thumbnail.id = "thumbnail" + i;
-			thumbnail.value = i;
-			thumbnail.className = "item-elem thumbnail icon-" + type;
-			thumbnailWrapper.appendChild(thumbnail);
-
-			// Message text
-			var logMsg = document.createElement("span");
-			logMsg.className = "item-elem col1";
-			logMsg.innerHTML = Util.escape(entry.msg);
-			$("#item" + i).append(logMsg);
-
-			// Type
-			var logType = document.createElement("span");
-			logType.className = "item-elem col2";
-			logType.innerHTML = Util.escape(type);
-			$("#item" + i).append(logType);
-
-			var logSource = document.createElement("span");
-			logSource.className = "item-elem col3";
-			logSource.innerHTML = Util.escape(entry.source);
-			$("#item" + i).append(logSource);
-
-			var logUser = document.createElement("span");
-			logUser.className = "item-elem col4";
-			logUser.innerHTML = Util.escape(entry.user);
-			$("#item" + i).append(logUser);
-
-			var logDate = document.createElement("span");
-			logDate.className = "item-elem col5";
-			logDate.innerHTML = Util.escape(entry.date);
-			$("#item" + i).append(logDate);
-		}
-		$(window).resize();
-	},
-
 	clear: function() {
-		$("#confirm-title").text("Clear log?");
-		Util.showPopup('confirm');
-
-		$("#confirm-yes").unbind('click').on('click', function() {
+		Util.showConfirm('Clear log?', function() {
 			$.ajax({
 				url: 'api/system/clearlog',
 				type: 'post',
@@ -484,10 +577,6 @@ var Log = {
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 			});
-			Util.closePopup('confirm');
-		});
-		$("#confirm-no").unbind('click').on('click', function() {
-			Util.closePopup('confirm');
 		});
 	},
 
@@ -503,8 +592,6 @@ var Log = {
 
 var Plugins = {
 	fetch: function(pushState) {
-		view = "plugins";
-
 		if (pushState) {
 			window.history.pushState(null, '', 'system/plugins');
 		}
@@ -515,39 +602,10 @@ var Plugins = {
 			data: {token: token},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Plugins.display(data.msg.plugins);
+			View.displayPlugins(data.msg.plugins);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
-	},
-
-	display: function(plugins) {
-		// Hide all
-		simpleScroll.empty("users");
-		simpleScroll.empty("log");
-		$("#log-pages").empty();
-		$("#status, .list-header, .list-footer, #plugins, #users, #log").addClass("hidden");
-		$(".focus").removeClass("focus");
-
-		// Set right view
-		$(".path-element").text("Plugins");
-		$("#sidebar-plugins").addClass("focus");
-		$("#plugins").removeClass("hidden");
-		$("#plugins .button").addClass("hidden");
-
-		for (var plugin in plugins) {
-			var installed = plugins[plugin];
-
-			if (installed) {
-				$("#remove-" + plugin).removeClass("hidden").prop('disabled', false).text("Remove");
-				$("#get-" + plugin).addClass("hidden");
-			}
-			else {
-				$("#get-" + plugin).removeClass("hidden").prop('disabled', false).text("Download");
-				$("#remove-" + plugin).addClass("hidden");
-			}
-		}
-		$(window).resize();
 	},
 
 	install: function(name) {
@@ -594,90 +652,6 @@ var Users = {
 		Users.filter('');
 	},
 
-	display: function() {
-		// Hide all
-		simpleScroll.empty("users");
-		simpleScroll.empty("log");
-		$("#log-pages").empty();
-		$("#status, .list-header, #plugins, .list-footer, #users, #log").addClass("hidden");
-		$(".focus").removeClass("focus");
-
-		// Set right view
-		$(".path-element").text("Users");
-		$("#sidebar-users").addClass("focus");
-		$("#users, #users-header").removeClass("hidden");
-
-		for(var i in Users.filtered) {
-			var item = Users.filtered[i];
-
-			var listItem = document.createElement("div");
-			listItem.id = "item" + i;
-			listItem.value = i;
-			listItem.className = "item";
-			simpleScroll.append("users", listItem);
-
-			// Thumbnail
-			var thumbnailWrapper = document.createElement("span");
-			thumbnailWrapper.className = "item-elem col0";
-			listItem.appendChild(thumbnailWrapper);
-
-			var thumbnail = document.createElement('span');
-			var type = (item.admin == "1") ? "admin" : "user";
-			thumbnail.id = "thumbnail" + i;
-			thumbnail.value = i;
-			thumbnail.className = "thumbnail icon-" + type;
-			thumbnailWrapper.appendChild(thumbnail);
-
-			var username = document.createElement("span");
-			username.className = "item-elem col1";
-			username.value = i;
-			username.innerHTML = Util.escape(item.username);
-			$("#item" + i).append(username);
-
-			var admin = document.createElement("span");
-			admin.className = "item-elem col2 checkbox";
-			$("#item" + i).append(admin);
-
-			var checkbox = document.createElement("div");
-			checkbox.id = "user-admin" + i;
-			checkbox.value = i;
-			checkbox.className = (item.admin == "1") ? "checkbox-box checkbox-checked" : "checkbox-box";
-			checkbox.addEventListener('click', function() {
-				Users.editUser = this.value;
-				Users.setAdmin();
-			});
-			admin.appendChild(checkbox);
-
-			var quotaMax = document.createElement("span");
-			quotaMax.id = "user-quota-total" + i;
-			quotaMax.className = "item-elem col3";
-			quotaMax.innerHTML = "calculating...";
-			$("#item" + i).append(quotaMax);
-
-			quotaMax.onclick = function(e) {
-				var id = e.target.id.replace(/[^0-9]/g,'');
-				Users.editUser = id;
-				Users.showChangeQuota(id);
-			};
-
-			var quotaUsed = document.createElement("span");
-			quotaUsed.id = "user-quota-free" + i;
-			quotaUsed.className = "item-elem col4";
-			quotaUsed.value = i;
-			quotaUsed.innerHTML = "calculating...";
-			$("#item" + i).append(quotaUsed);
-
-			Users.getQuota(item.username, i);
-
-			var lastUpdate = document.createElement("span");
-			lastUpdate.className = "item-elem col5";
-			lastUpdate.innerHTML = Util.timestampToDate(item.last_login);
-			$("#item" + i).append(lastUpdate);
-		}
-
-		$(window).resize();
-	},
-
 	showChangeQuota: function(id) {
 		var currTotal = $("#user-quota-total" + id).text();
 
@@ -700,8 +674,6 @@ var Users = {
 	},
 
 	fetch: function(pushState) {
-		view = "users";
-
 		if (pushState) {
 			window.history.pushState(null, '', 'system/users');
 		}
@@ -714,7 +686,7 @@ var Users = {
 		}).done(function(data, statusText, xhr) {
 			Users.all = data.msg;
 			Users.filtered = data.msg;
-			Users.display();
+			View.displayUsers();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -753,10 +725,7 @@ var Users = {
 	},
 
 	remove: function() {
-		$("#confirm-title").text("Delete user?");
-		Util.showPopup('confirm');
-
-		$("#confirm-yes").unbind('click').on('click', function() {
+		Util.showConfirm('Delete user?', function() {
 			$.ajax({
 				url: 'api/user/delete',
 				type: 'post',
@@ -767,10 +736,6 @@ var Users = {
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 			});
-			Util.closePopup('confirm');
-		});
-		$("#confirm-no").unbind('click').on('click', function() {
-			Util.closePopup('confirm');
 		});
 	},
 

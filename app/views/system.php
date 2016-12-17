@@ -201,7 +201,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	<div id="shield" class="overlay hidden"></div>
 
 	<!-- New user -->
-	<form id="createuser" class="popup input-popup center hidden" action="#">
+	<form id="createuser" class="popup center hidden" action="#">
 		<span class="close"></span>
 		<div class="popup-title">New User</div>
 
@@ -241,7 +241,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<span class="close"></span>
 	</div>
 
-	<div id="confirm" class="popup input-popup center hidden">
+	<div id="confirm" class="popup center hidden">
 		<div id="confirm-title" class="popup-title">Confirm</div>
 		<button id="confirm-no" class="inverted">Cancel</button>
 		<button id="confirm-yes">OK</button>

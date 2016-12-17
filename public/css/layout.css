@@ -575,7 +575,7 @@ select {
 	float: right;
 }
 
-.input-popup {
+form.popup {
 	width: 268px;
 	padding: 30px;
 }
@@ -711,7 +711,7 @@ button:disabled, button:disabled:hover {
 	line-height: 30px;
 }
 
-.input-popup .close {
+form.popup .close, #info .close {
 	top: 30px;
 	right: 30px;
 }
@@ -736,7 +736,7 @@ label {
 	font-size: 1.1rem;
 }
 
-#dragstatus {
+#cursorinfo {
 	position: absolute;
 	height: 20px;
 	padding-left: 6px;

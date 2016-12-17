@@ -16,26 +16,290 @@ $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
 
-	simpleScroll.init('files');
 	ImageManager.init();
-	Binder.init();
+	View.init();
 	FileManager.init($('head').data('view'), $('head').data('id'), $('head').data('public'));
 
 	if (username) {
 		Util.getVersion();
 		$("#username").html(Util.escape(username) + " &#x25BE");
 	}
-
-	$(window).resize();
 });
 
-var Binder = {
+var View = {
 	startDrag: false,
 	dragging: false,
 	mouseStart: {x: 0, y: 0},
 	seekPos: null,
 
+	/**
+	 * Adds a loading-placeholder or indicator of empty folder
+	 */
+	setEmptyView: function() {
+		var empty = document.createElement("div");
+		empty.style.lineHeight = $("#files").height() + "px";
+		empty.className = "empty";
+		empty.innerHTML = "Nothing to see here...";
+		simpleScroll.append("files", empty);
+		simpleScroll.update();
+	},
+
+	/**
+	 * Displays the files
+	 */
+
+	displayFiles: function() {
+		simpleScroll.empty("files");
+		FileManager.unselectAll();
+		View.updatePath();
+		FileManager.requestID = new Date().getTime();
+
+		if (FileManager.filteredElem.length == 0) {
+			View.setEmptyView();
+		}
+
+		for (var i in FileManager.filteredElem) {
+			var item = FileManager.filteredElem[i];
+
+			var listItem = document.createElement("div");
+			listItem.id = "item" + i;
+			listItem.value = i;
+			listItem.className = "item";
+			simpleScroll.append("files", listItem);
+
+			// Thumbnail
+			var thumbnailWrapper = document.createElement("span");
+			thumbnailWrapper.className = "item-elem col0";
+			listItem.appendChild(thumbnailWrapper);
+
+			var thumbnail = document.createElement('span');
+			thumbnail.id = "thumbnail" + i;
+			thumbnail.value = i;
+			thumbnail.className = "thumbnail icon-" + item.type;
+			thumbnailWrapper.appendChild(thumbnail);
+
+			// Shared icon
+			if (item.shared) {
+				var shareIcon = document.createElement("span");
+				shareIcon.className = "shared icon-users";
+				thumbnail.appendChild(shareIcon);
+			}
+
+			// Filename
+			var filename = document.createElement("span");
+			filename.className = "item-elem col1";
+			listItem.appendChild(filename);
+			filename.innerHTML = Util.escape(item.filename);
+
+			// Owner
+			var owner = document.createElement("span");
+			owner.className = "item-elem col2";
+			owner.innerHTML = (item.owner != username) ? Util.escape(item.owner) : username;
+			listItem.appendChild(owner);
+
+			// Type
+			var type = document.createElement("span");
+			type.className = "item-elem col3";
+			type.innerHTML = item.type;
+			listItem.appendChild(type);
+
+			// Size
+			var size = document.createElement("span");
+			size.className = "item-elem col4";
+			size.innerHTML = (item.type == "folder") ? ((item.size == 1) ? item.size + " file" : item.size + " files") : Util.byteToString(item.size);
+			listItem.appendChild(size);
+
+			// Edit
+			var edit = document.createElement("span");
+			edit.className = "item-elem col5";
+			edit.innerHTML = Util.timestampToDate(item.edit);
+			listItem.appendChild(edit);
+		}
+
+		if (FileManager.view != "trash") {
+			FileManager.setImgthumbnail(0, FileManager.requestID);
+		}
+
+		var elemPerLine = parseInt($("#files").width() / $(".item").width());
+		var lines = Math.ceil(FileManager.filteredElem.length / elemPerLine);
+		lines = (isNaN(lines)) ? 0 : lines;
+
+		$(window).resize();
+
+		var elem = (FileManager.filteredElem.length == 1) ? " element" : " elements";
+		$("#foldersize").text(FileManager.filteredElem.length + elem);
+	},
+
+	/**
+	 * Shows/hides the fileinfo-panel
+	 */
+	toggleFileInfo: function(elem) {
+		$("#fileinfo-link-cont").addClass("hidden").unbind('click');
+
+		if (elem) {
+			$("#fileinfo-icon").removeClass().addClass('menu-thumb icon-' + elem.type);
+			$("#fileinfo-name").text(elem.filename);
+			$("#fileinfo-size").text(Util.byteToString(elem.size));
+			$("#fileinfo-type").text(elem.type);
+			$("#fileinfo-edit").text(Util.timestampToDate(elem.edit));
+
+			if (elem.selfshared) {
+				$("#fileinfo-link-cont").on('click', function() {
+					FileManager.getLink(elem);
+				}).removeClass("hidden");
+			}
+			else {
+				$("#fileinfo-link-cont").addClass("hidden");
+			}
+			$("#fileinfo").removeClass("hidden");
+		}
+		else {
+			$("#fileinfo").addClass("hidden");
+		}
+		$(window).resize();
+	},
+
+	/**
+	 * Displays the rename input field
+	 */
+	showRename: function(e) {
+		var elem = FileManager.getFirstSelected();
+		var filename = elem.item.filename
+		var newfilename = (filename.lastIndexOf('.') != -1) ? filename.substr(0, filename.lastIndexOf('.')) : filename;
+
+		var form = document.createElement('form');
+		form.id = "renameform";
+		form.className = "renameform col1";
+		$("#item" + elem.id + " .col1").append(form);
+
+		var input = document.createElement('input');
+		input.id = "renameinput";
+		input.className = "renameinput";
+		input.autocomplete = "off";
+		form.appendChild(input);
+
+		$(input).val(newfilename).focus().select();
+		$(form).on('submit', function(e) {
+			e.preventDefault();
+			FileManager.rename();
+		});
+	},
+
+	/**
+	 * Closes the rename input field
+	 */
+	closeRename: function() {
+		$('#renameform').remove();
+	},
+
+	updateClipboard: function() {
+		var count = Object.keys(FileManager.clipboard).length;
+		var content = (count == 1) ? count + " file" : count + " files";
+		$("#clipboard").removeClass("hidden");
+		$("#clipboard-content").text(content);
+		$("#clipboard-count").text(count);
+	},
+
+	/**
+	 * Highlights all selected elements in the fileview
+	 */
+	updateSelStatus: function(checkboxClicked) {
+		var count = FileManager.getSelectedCount();
+		$(".item").removeClass("selected");
+
+		if (count == 0) {
+			var filecount = FileManager.getAllElements().length;
+			var elem = (filecount == 1) ? " element" : " elements";
+			if (elem.type != "folder") {
+				$("#foldersize").text(filecount + elem);
+			}
+		}
+		else {
+			var size = 0;
+			var allSel = FileManager.getAllSelected();
+			for (var i in allSel) {
+				if (allSel[i].type != "folder") {
+					size += allSel[i].size;
+				}
+				$("#item" + i).addClass("selected");
+			}
+			var files = (count > 1) ? "files" : "file";
+			var postfix = (size > 0) ? " (" + Util.byteToString(size) + ")" : "";
+			$("#foldersize").text(count + " " + files + postfix);
+		}
+
+		if (!checkboxClicked) {
+			if (count > 0 && count == FileManager.getAllElements().length) {
+				$("#fSelect").addClass("checkbox-checked");
+			}
+			else {
+				$("#fSelect").removeClass("checkbox-checked");
+			}
+		}
+	},
+
+	/**
+	 * Displays the current path with independently clickable elements
+	 */
+	updatePath: function() {
+		$("#path").empty();
+		var h = FileManager.hierarchy;
+		for (var s = 0; s < h.length; s++) {
+			var filename = h[s].filename;
+
+			if (s > 0) {
+				var pathSep = document.createElement("span");
+				pathSep.className = "path-seperator";
+				pathSep.innerHTML = "&#x25B8";
+				$("#path").append(pathSep);
+			}
+
+			var pathItem = document.createElement("span");
+			pathItem.value = parseInt(s);
+			pathItem.className = (s == h.length - 1) ? 'path-element path-current' : 'path-element';
+
+			if (filename) {
+				pathItem.innerHTML = Util.escape(filename);
+			}
+			else if (s == 0 && FileManager.view == "trash") {
+				pathItem.innerHTML = "Trash";
+			}
+			else if (s == 0 && FileManager.view == "shareout") {
+				pathItem.innerHTML = "My Shares";
+			}
+			else if (s == 0 && FileManager.view == "sharein") {
+				pathItem.innerHTML = "Shared";
+			}
+			else if (s == 0 && !filename) {
+				pathItem.innerHTML = "Homefolder";
+			}
+			else {
+				pathItem.innerHTML = Util.escape(filename);
+			}
+
+			document.title = pathItem.innerHTML + " | simpleDrive";
+
+			$("#path").append(pathItem);
+		}
+	},
+
 	init: function() {
+		simpleScroll.init('files');
+
+		$(document).on('mousedown', '.path-element', function(e) {
+			FileManager.unselectAll();
+		}).on('mouseup', '.path-element', function(e) {
+			var pos = parseInt(this.value);
+
+			if (FileManager.getSelectedCount() > 0) {
+				FileManager.move(FileManager.hierarchy[pos].id);
+			}
+			else {
+				FileManager.id = FileManager.hierarchy[pos].id;
+				FileManager.fetch();
+			}
+		});
+
 		$("#files-filter .list-filter-input").on('input', function(e) {
 			FileManager.filter($(this).val());
 		});
@@ -130,7 +394,7 @@ var Binder = {
 
 					Util.closePopup();
 					FileManager.closeFilter();
-					FileManager.closeRename();
+					View.closeRename();
 					$(window).resize();
 					break;
 			}
@@ -154,28 +418,33 @@ var Binder = {
 			FileManager.emptyClipboard();
 		});
 
-		$("#scan").on('click', function(e) {
-			FileManager.scan();
-		});
-
 		$("#files-filter .close").on('click', function(e) {
 			FileManager.closeFilter();
 		});
 
+		$("#fileinfo .close").on('click', function(e) {
+			$("#fileinfo").addClass("hidden");
+			$(window).resize();
+		});
+
+		$("#scan").on('click', function(e) {
+			FileManager.scan();
+		});
+
 		$("#list-header .col1").on('click', function(e) {
-			FileManager.sortByName();
+			FileManager.sortBy('name');
 		});
 
 		$("#list-header .col3").on('click', function(e) {
-			FileManager.sortByType();
+			FileManager.sortBy('type');
 		});
 
 		$("#list-header .col4").on('click', function(e) {
-			FileManager.sortBySize();
+			FileManager.sortBy('size');
 		});
 
 		$("#list-header .col5").on('click', function(e) {
-			FileManager.sortByEdit();
+			FileManager.sortBy('edit');
 		});
 
 		$("#create-file").on('click', function(e) {
@@ -186,6 +455,7 @@ var Binder = {
 			$("#create-type").val('folder');
 		});
 
+		// Forms
 		$("#create").on('submit', function(e) {
 			e.preventDefault();
 			FileManager.create();
@@ -196,144 +466,33 @@ var Binder = {
 			FileManager.share();
 		});
 
-		$("#fileinfo .close").on('click', function(e) {
-			$("#fileinfo").addClass("hidden");
-			$(window).resize();
-		});
-
-		$("#contextmenu .menu-item").on('click', function(e) {
-			var id = $(this).attr('id')
-			var action = id.substr(id.indexOf('-') + 1);
-
-			switch (action) {
-				case 'restore':
-					FileManager.restore();
-					break;
-
-				case 'copy':
-					FileManager.copy();
-					break;
-
-				case 'cut':
-					FileManager.cut();
-					break;
-
-				case 'paste':
-					FileManager.paste();
-					break;
-
-				case 'share':
-					Util.showPopup('share');
-					break;
-
-				case 'unshare':
-					FileManager.unshare();
-					break;
-
-				case 'rename':
-					FileManager.showRename();
-					break;
-
-				case 'zip':
-					FileManager.zip();
-					break;
-
-				case 'download':
-					FileManager.download();
-					break;
-
-				case 'delete':
-					FileManager.remove();
-					break;
-
-				case 'gallery':
-					FileManager.openGallery();
-					break;
-
-				case 'closegallery':
-					FileManager.closeGallery();
-					break;
-			}
-
-			$("#contextmenu").addClass("hidden");
-		});
-
 		$("#load-public").on('submit', function(e) {
 			e.preventDefault();
 			FileManager.loadPublic();
 		});
 
-		$(".upload-button").on('click', function(e) {
-			$(this).find('input').trigger('click');
-		});
-
-		$(".upload-input").on('change', function(e) {
-			FileManager.addUpload(this);
-		});
-
-		$(".upload-input").on('click', function(e) {
-			e.stopPropagation();
-		});
-
-		if (!Util.isDirectorySupported()) {
-			$("#upload-folder").addClass("hidden");
-		}
-
-		$("#fSelect").on('click', function(e) {
-			FileManager.toggleSelection();
-		});
-
-		$("#audio-seekbar").on('mousedown', function(e) {
-			Binder.seekPos = (e.pageX - $(this).offset().left) / $(this).width();
-		});
-
-		$("#sidebar-trash").on('mouseup', function(e) {
-			if (Binder.dragging) { FileManager.remove(); }
-		});
-
-		$("#files").on('mousedown', function(e) {
-			if (typeof e.target.parentNode.value === "undefined" && typeof e.target.value === "undefined" && !$(e.target).is('input')) {
-				$("#contextmenu").addClass("hidden");
-				FileManager.unselectAll();
-			}
-		});
-
 		/**
-		 * Prepares and shows the custom context menu depending on the element(s) selected
+		 * Prepare contextmenu
 		 */
 		$(document).on('contextmenu', '#content', function(e) {
 			e.preventDefault();
-			//var target = (typeof e.target.parentNode.value === "undefined") ? null : FileManager.getElementAt(e.target.parentNode.value);
 			var target = (typeof e.target.value != "undefined") ? FileManager.getElementAt(e.target.value) : ((typeof e.target.parentNode.value != "undefined") ? FileManager.getElementAt(e.target.parentNode.value) : null);
+			var multi = (FileManager.getSelectedCount() > 1);
 
 			$('[id^="context-"]').addClass("hidden");
 			$("#contextmenu .divider").addClass("hidden");
-
-			var multi = (FileManager.getSelectedCount() > 1);
 
 			// Restore
 			if (FileManager.view == "trash") {
 				$("#context-restore").removeClass("hidden");
 			}
-			else if (target == null && FileManager.isClipboardFilled()) {
-				// Paste
+			// Paste
+			else if (FileManager.isClipboardFilled()) {
 				$("#context-paste").removeClass("hidden");
 			}
 			else if (target) {
 				$(".divider").removeClass("hidden");
-				// Is a folder selected?
-				var folderSel = false;
-				var allSel = FileManager.getAllSelected();
-				for (var elem in allSel) {
-					if (allSel[elem].type == "folder") {
-						folderSel = true;
-						continue;
-					}
-				}
-				// Is there something in the clipboard?
-				if (FileManager.isClipboardFilled()) {
-					$("#context-paste").removeClass("hidden");
-				}
+
 				// Open Gallery
 				if (target.type == "image" && !multi && !FileManager.galleryMode) {
 					$("#context-gallery").removeClass("hidden");
@@ -366,22 +525,110 @@ var Binder = {
 
 				// Download
 				$("#context-download").removeClass("hidden");
+
+				// Delete
+				$("#context-delete").removeClass("hidden");
 			}
 			else {
 				return;
 			}
 
-			if (target) {
-				// Delete
-				$("#context-delete").removeClass("hidden");
+			Util.showContextmenu(e);
+		});
+
+		/**
+		 * Contextmenu action
+		 */
+		$("#contextmenu .menu-item").on('click', function(e) {
+			var id = $(this).attr('id')
+			var action = id.substr(id.indexOf('-') + 1);
+
+			switch (action) {
+				case 'restore':
+					FileManager.restore();
+					break;
+
+				case 'copy':
+					FileManager.copy();
+					break;
+
+				case 'cut':
+					FileManager.cut();
+					break;
+
+				case 'paste':
+					FileManager.paste();
+					break;
+
+				case 'share':
+					Util.showPopup('share');
+					break;
+
+				case 'unshare':
+					FileManager.unshare();
+					break;
+
+				case 'rename':
+					View.showRename();
+					break;
+
+				case 'zip':
+					FileManager.zip();
+					break;
+
+				case 'download':
+					FileManager.download();
+					break;
+
+				case 'delete':
+					FileManager.remove();
+					break;
+
+				case 'gallery':
+					FileManager.openGallery();
+					break;
+
+				case 'closegallery':
+					FileManager.closeGallery();
+					break;
 			}
 
-			// Position context menu at mouse
-			var top = (e.clientY + $("#contextmenu").height() < window.innerHeight) ? e.clientY : e.clientY - $("#contextmenu").height();
-			$("#contextmenu").css({
-				'left' : (e.clientX + 5),
-				'top' : (top + 5)
-			}).removeClass("hidden");
+			$("#contextmenu").addClass("hidden");
+		});
+
+		$(".upload-button").on('click', function(e) {
+			$(this).find('input').trigger('click');
+		});
+
+		$(".upload-input").on('change', function(e) {
+			FileManager.addUpload(this);
+		});
+
+		$(".upload-input").on('click', function(e) {
+			e.stopPropagation();
+		});
+
+		if (!Util.isDirectorySupported()) {
+			$("#upload-folder").addClass("hidden");
+		}
+
+		$("#fSelect").on('click', function(e) {
+			FileManager.toggleSelection();
+		});
+
+		$("#audio-seekbar").on('mousedown', function(e) {
+			View.seekPos = (e.pageX - $(this).offset().left) / $(this).width();
+		});
+
+		$("#sidebar-trash").on('mouseup', function(e) {
+			if (View.dragging) { FileManager.remove(); }
+		});
+
+		$("#files").on('mousedown', function(e) {
+			if (typeof e.target.parentNode.value === "undefined" && typeof e.target.value === "undefined" && !$(e.target).is('input')) {
+				$("#contextmenu").addClass("hidden");
+				FileManager.unselectAll();
+			}
 		});
 
 		$(document).on('mousedown', '#content', function(e) {
@@ -393,17 +640,17 @@ var Binder = {
 				return;
 			}
 
-			Binder.mouseStart = {x: e.clientX, y: e.clientY};
+			View.mouseStart = {x: e.clientX, y: e.clientY};
 
 			if (!$("#item" + e.target.parentNode.value).hasClass("selected")) {
 				FileManager.unselectAll();
-				FileManager.closeRename();
+				View.closeRename();
 			}
 
 			FileManager.select(this.value);
-			Binder.startDrag = true;
+			View.startDrag = true;
 
-			FileManager.updateSelStatus();
+			View.updateSelStatus();
 		});
 
 		$(document).on('mouseup', '.item', function(e) {
@@ -413,17 +660,17 @@ var Binder = {
 			}
 
 			var id = this.value;
-			if (Binder.dragging && FileManager.getElementAt(id).type == "folder" && FileManager.view != "trash" && typeof FileManager.getSelectedAt(id) === 'undefined') {
+			if (View.dragging && FileManager.getElementAt(id).type == "folder" && FileManager.view != "trash" && typeof FileManager.getSelectedAt(id) === 'undefined') {
 				FileManager.move(FileManager.getElementAt(id).id);
 			}
-			else if (e.which == 1 && !Binder.dragging) {
+			else if (e.which == 1 && !View.dragging) {
 				FileManager.select(this.value);
 				FileManager.open();
 			}
 		});
 
 		$(document).on('mouseenter', '.item', function(e) {
-			if (FileManager.getElementAt(this.value).type == 'folder' && Binder.dragging && this.value != FileManager.getFirstSelected().id) {
+			if (FileManager.getElementAt(this.value).type == 'folder' && View.dragging && this.value != FileManager.getFirstSelected().id) {
 				$(this).addClass("highlight-folder");
 			}
 		});
@@ -436,62 +683,56 @@ var Binder = {
 			// Un-select
 			if (typeof FileManager.getSelectedAt(this.value) !== "undefined") {
 				FileManager.unselect(this.value);
-				FileManager.toggleFileInfo(null);
+				View.toggleFileInfo(null);
 			}
 			// Select
 			else {
 				FileManager.select(this.value);
-				FileManager.toggleFileInfo(FileManager.getElementAt(this.value));
+				View.toggleFileInfo(FileManager.getElementAt(this.value));
 			}
 		});
 
 		$(document).on('mouseenter', '.item .col1', function(e) {
 			if (this.offsetWidth + 4 < this.scrollWidth && this.offsetHeight <= this.scrollHeight) {
-				$("#dragstatus").css({
-					'top' : e.pageY + 10,
-					'left' : e.pageX + 10
-				}).removeClass("hidden").text(this.innerHTML);
+				Util.showCursorInfo(e, this.innerHTML);
 			}
 		});
 
 		$(document).on('mouseleave', '.item .col1', function(e) {
-			if (!Binder.dragging) {
-				$("#dragstatus").addClass("hidden");
+			if (!View.dragging) {
+				Util.hideCursorInfo();
 			}
 		});
 
 		$(document).on('mousemove', function(e) {
-			if (Binder.seekPos != null && e.pageX > $("#audio-seekbar").offset().left && e.pageX < $("#audio-seekbar").offset().left + $("#audio-seekbar").width()) {
-				Binder.seekPos = (e.pageX - $("#audio-seekbar").offset().left) / $("#audio-seekbar").width();
-				$("#audio-seekbar-progress").width($("#audio-seekbar").width() * Binder.seekPos);
+			if (View.seekPos != null && e.pageX > $("#audio-seekbar").offset().left && e.pageX < $("#audio-seekbar").offset().left + $("#audio-seekbar").width()) {
+				View.seekPos = (e.pageX - $("#audio-seekbar").offset().left) / $("#audio-seekbar").width();
+				$("#audio-seekbar-progress").width($("#audio-seekbar").width() * View.seekPos);
 			}
-			else if (Binder.startDrag) {
-				var distMoved = Math.round(Math.sqrt(Math.pow(Binder.mouseStart.y - e.clientY, 2) + Math.pow(Binder.mouseStart.x - e.clientX, 2)));
+			else if (View.startDrag) {
+				var distMoved = Math.round(Math.sqrt(Math.pow(View.mouseStart.y - e.clientY, 2) + Math.pow(View.mouseStart.x - e.clientX, 2)));
 				if (distMoved > 10) {
 					$("#sidebar-trash").addClass("trashact");
-					Binder.dragging = true;
-					$("#dragstatus").css({
-						'top' : e.pageY + 10,
-						'left' : e.pageX + 10
-					}).removeClass("hidden").text(FileManager.getSelectedCount());
+					View.dragging = true;
+					Util.showCursorInfo(e, FileManager.getSelectedCount());
 				}
 			}
 		});
 
 		$(document).on('mouseup', function(e) {
-			if (Binder.seekPos != null) {
-				AudioManager.seekTo(Binder.seekPos);
-				Binder.seekPos = null;
+			if (View.seekPos != null) {
+				AudioManager.seekTo(View.seekPos);
+				View.seekPos = null;
 			}
 
-			$("#dragstatus").addClass("hidden");
-			Binder.startDrag = false;
-			Binder.dragging = false;
+			Util.hideCursorInfo();
+			View.startDrag = false;
+			View.dragging = false;
 
 			$("#sidebar-trash").removeClass("trashact");
 
 			if (e.target.id != "renameinput") {
-				FileManager.closeRename();
+				View.closeRename();
 			}
 
 			if (e.which != 3) {
@@ -523,6 +764,8 @@ var Binder = {
 			FileManager.id = (!id || id == 'null') ? '0' : id;
 			FileManager.fetch(true);
 		};
+
+		$(window).resize();
 	}
 }
 
@@ -588,7 +831,7 @@ var FileManager = {
 		FileManager.galleryMode = false;
 		FileManager.filter('');
 		$("#sidebar").removeClass("hidden");
-		$("#files").addClass(FileManager.originalFileview);
+		$("#files").removeClass('list grid').addClass(FileManager.originalFileview);
 		if (FileManager.originalFileview == 'list') {
 			$(".list-header").removeClass("hidden");
 		}
@@ -597,13 +840,6 @@ var FileManager = {
 	clearHierarchy: function() {
 		FileManager.id = 0;
 		FileManager.hierarchy = [];
-	},
-
-	/**
-	 * Closes the rename input field
-	 */
-	closeRename: function() {
-		$('#renameform').remove();
 	},
 
 	compareName: function(a, b) {
@@ -646,7 +882,7 @@ var FileManager = {
 		}
 
 		FileManager.deleteAfterCopy = false;
-		FileManager.updateClipboard();
+		View.updateClipboard();
 	},
 
 	create: function() {
@@ -679,7 +915,7 @@ var FileManager = {
 		}
 
 		FileManager.deleteAfterCopy = true;
-		FileManager.updateClipboard();
+		View.updateClipboard();
 	},
 
 	dirUp: function() {
@@ -687,92 +923,6 @@ var FileManager = {
 			FileManager.id = FileManager.hierarchy[FileManager.hierarchy.length - 2].id;
 			FileManager.fetch();
 		}
-	},
-
-	/**
-	 * Displays the files
-	 */
-
-	display: function() {
-		simpleScroll.empty("files");
-		FileManager.unselectAll();
-		FileManager.updatePath();
-		FileManager.requestID = new Date().getTime();
-
-		if (FileManager.filteredElem.length == 0) {
-			FileManager.setEmptyView("Nothing to see here...");
-		}
-
-		for (var i in FileManager.filteredElem) {
-			var item = FileManager.filteredElem[i];
-
-			var listItem = document.createElement("div");
-			listItem.id = "item" + i;
-			listItem.value = i;
-			listItem.className = "item";
-			simpleScroll.append("files", listItem);
-
-			// Thumbnail
-			var thumbnailWrapper = document.createElement("span");
-			thumbnailWrapper.className = "item-elem col0";
-			listItem.appendChild(thumbnailWrapper);
-
-			var thumbnail = document.createElement('span');
-			thumbnail.id = "thumbnail" + i;
-			thumbnail.value = i;
-			thumbnail.className = "thumbnail icon-" + item.type;
-			thumbnailWrapper.appendChild(thumbnail);
-
-			// Shared icon
-			if (item.shared) {
-				var shareIcon = document.createElement("span");
-				shareIcon.className = "shared icon-users";
-				thumbnail.appendChild(shareIcon);
-			}
-
-			// Filename
-			var filename = document.createElement("span");
-			filename.className = "item-elem col1";
-			listItem.appendChild(filename);
-			filename.innerHTML = Util.escape(item.filename);
-
-			// Owner
-			var owner = document.createElement("span");
-			owner.className = "item-elem col2";
-			owner.innerHTML = (item.owner != username) ? Util.escape(item.owner) : username;
-			listItem.appendChild(owner);
-
-			// Type
-			var type = document.createElement("span");
-			type.className = "item-elem col3";
-			type.innerHTML = item.type;
-			listItem.appendChild(type);
-
-			// Size
-			var size = document.createElement("span");
-			size.className = "item-elem col4";
-			size.innerHTML = (item.type == "folder") ? ((item.size == 1) ? item.size + " file" : item.size + " files") : Util.byteToString(item.size);
-			listItem.appendChild(size);
-
-			// Edit
-			var edit = document.createElement("span");
-			edit.className = "item-elem col5";
-			edit.innerHTML = Util.timestampToDate(item.edit);
-			listItem.appendChild(edit);
-		}
-
-		if (FileManager.view != "trash") {
-			FileManager.setImgthumbnail(0, FileManager.requestID);
-		}
-
-		var elemPerLine = parseInt($("#files").width() / $(".item").width());
-		var lines = Math.ceil(FileManager.filteredElem.length / elemPerLine);
-		lines = (isNaN(lines)) ? 0 : lines;
-
-		$(window).resize();
-
-		var elem = (FileManager.filteredElem.length == 1) ? " element" : " elements";
-		$("#foldersize").text(FileManager.filteredElem.length + elem);
 	},
 
 	download: function() {
@@ -825,7 +975,7 @@ var FileManager = {
 		var back = back || false;
 		//AudioManager.stopAudio();
 		FileManager.unselectAll();
-		FileManager.updateSidebar();
+		Util.sidebarFocus(FileManager.view);
 		FileManager.currentSelected = -1;
 		$("#contextmenu").addClass("hidden");
 		Util.busy(true);
@@ -841,7 +991,7 @@ var FileManager = {
 			FileManager.allElem = data.msg.files;
 			FileManager.filteredElem = FileManager.allElem;
 			FileManager.hierarchy = data.msg.hierarchy;
-			FileManager.sortByName(1);
+			FileManager.sortBy('name', 1);
 
 			if (!back) {
 				if (FileManager.id.length > 1) {
@@ -866,7 +1016,24 @@ var FileManager = {
 					FileManager.filteredElem.push(FileManager.allElem[i]);
 				}
 			}
-			FileManager.display();
+			View.displayFiles();
+			FileManager.unselectAll();
+			if (FileManager.filteredElem.length > 0) {
+				FileManager.select(0);
+			}
+		}
+	},
+
+	filterForType: function(needle) {
+		if (FileManager.allElem.length > 0) {
+			FileManager.filteredElem = [];
+
+			for (var i in FileManager.allElem) {
+				if (FileManager.allElem[i].type.toLowerCase().indexOf(needle) != -1) {
+					FileManager.filteredElem.push(FileManager.allElem[i]);
+				}
+			}
+			View.displayFiles();
 			FileManager.unselectAll();
 			if (FileManager.filteredElem.length > 0) {
 				FileManager.select(0);
@@ -901,23 +1068,6 @@ var FileManager = {
 		}
 
 		return ids;
-	},
-
-	filterForType: function(needle) {
-		if (FileManager.allElem.length > 0) {
-			FileManager.filteredElem = [];
-
-			for (var i in FileManager.allElem) {
-				if (FileManager.allElem[i].type.toLowerCase().indexOf(needle) != -1) {
-					FileManager.filteredElem.push(FileManager.allElem[i]);
-				}
-			}
-			FileManager.display();
-			FileManager.unselectAll();
-			if (FileManager.filteredElem.length > 0) {
-				FileManager.select(0);
-			}
-		}
 	},
 
 	getAllSelected: function() {
@@ -1088,10 +1238,10 @@ var FileManager = {
 		$(".list-header").addClass("hidden");
 		$("#sidebar").addClass("hidden");
 		FileManager.originalFileview = ($("#files").hasClass("list")) ? 'list' : 'grid';
-		$("#files").removeClass("list").addClass("grid");
+		$("#files").removeClass('list').addClass("grid");
 		FileManager.filterForType('image');
 		FileManager.galleryMode = true;
-
+		$(window).resize();
 	},
 
 	openODT: function(elem) {
@@ -1102,7 +1252,7 @@ var FileManager = {
 	},
 
 	openPDF: function(elem) {
-		window.location.href = 'api/files/get?target=' + encodeURIComponent(JSON.stringify([elem])).replace('(', '%28').replace(')', '%29') + '&token=' + token;
+		window.location.href = 'api/files/get?target=' + JSON.stringify([elem.id])+ '&token=' + token;
 	},
 
 	openText: function(elem) {
@@ -1146,7 +1296,7 @@ var FileManager = {
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				Util.busy(false);
-				FileManager.closeRename();
+				View.closeRename();
 				FileManager.fetch();
 			}).fail(function(xhr, statusText, error) {
 				Util.busy(false);
@@ -1167,7 +1317,6 @@ var FileManager = {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.busy(false);
-			FileManager.closeRename();
 			FileManager.fetch();
 		}).fail(function(xhr, statusText, error) {
 			Util.busy(false);
@@ -1213,14 +1362,14 @@ var FileManager = {
 	select: function(id) {
 		FileManager.selected[id] = FileManager.filteredElem[id];
 		FileManager.currentSelected = id;
-		FileManager.updateSelStatus();
+		View.updateSelStatus();
 	},
 
 	selectAll: function(checkboxClicked) {
 		for (var i = 0; i < Object.keys(FileManager.filteredElem).length; i++) {
 			FileManager.selected[i] = FileManager.filteredElem[i];
 		}
-		FileManager.updateSelStatus(checkboxClicked);
+		View.updateSelStatus(checkboxClicked);
 	},
 
 	selectNext: function() {
@@ -1233,18 +1382,6 @@ var FileManager = {
 		FileManager.unselectAll();
 		FileManager.currentSelected = (FileManager.currentSelected > 0) ? FileManager.currentSelected - 1 : 0;
 		FileManager.select(FileManager.currentSelected);
-	},
-
-	/**
-	 * Adds a loading-placeholder or indicator of empty folder
-	 */
-	setEmptyView: function(text) {
-		var empty = document.createElement("div");
-		empty.style.lineHeight = $("#files").height() + "px";
-		empty.className = "empty";
-		empty.innerHTML = text;
-		simpleScroll.append("files", empty);
-		simpleScroll.update();
 	},
 
 	/**
@@ -1281,7 +1418,7 @@ var FileManager = {
 		var target = FileManager.getFirstSelected().item;
 
 		if (!user && !$("#share-public").hasClass("checkbox-checked")) {
-			Util.showFormError('create', 'No username provided');
+			Util.showFormError('share', 'No username provided');
 		}
 		else {
 			$.ajax({
@@ -1307,103 +1444,31 @@ var FileManager = {
 		}
 	},
 
-	/**
-	 * Displays the rename input field
-	 */
-	showRename: function(e) {
-		var elem = FileManager.getFirstSelected();
-		var filename = elem.item.filename
-		var newfilename = (filename.lastIndexOf('.') != -1) ? filename.substr(0, filename.lastIndexOf('.')) : filename;
-
-		var form = document.createElement('form');
-		form.id = "renameform";
-		form.className = "renameform col1";
-		$("#item" + elem.id + " .col1").append(form);
-
-		var input = document.createElement('input');
-		input.id = "renameinput";
-		input.className = "renameinput";
-		input.autocomplete = "off";
-		form.appendChild(input);
-
-		$(input).val(newfilename).focus().select();
-		$(form).on('submit', function(e) {
-			e.preventDefault();
-			FileManager.rename();
-		});
-	},
-
-	sortByName: function(order) {
+	sortBy: function(colName, order) {
 		FileManager.sortOrder = (order) ? order : FileManager.sortOrder *= -1;
-		FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareName);
 
-		var text = (FileManager.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
-		$("#file-name-ord").html(text);
+		switch (colName) {
+			case 'name':
+				FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareName);
+				break;
 
-		$("#file-type-ord, #file-size-ord, #file-edit-ord").text('');
-		FileManager.display();
-	},
+			case 'edit':
+				FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareEdit);
+				break;
 
-	sortByEdit: function(order) {
-		FileManager.sortOrder = (order) ? order : FileManager.sortOrder *= -1;
-		FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareEdit);
+			case 'type':
+				FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareType);
+				break;
 
-		var text = (FileManager.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
-		$("#file-edit-ord").html(text);
-
-		$("#file-name-ord, #file-type-ord, #file-size-ord").text('');
-		FileManager.display();
-	},
-
-	sortByType: function(order) {
-		FileManager.sortOrder = (order) ? order : FileManager.sortOrder *= -1;
-		FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareType);
-
-		var text = (FileManager.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
-		$("#file-type-ord").html(text);
-
-		$("#file-name-ord, #file-size-ord, #file-edit-ord").text('');
-		FileManager.display();
-	},
-
-	sortBySize: function(order) {
-		FileManager.sortOrder = (order) ? order : FileManager.sortOrder *= -1;
-		FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareSize);
-
-		var text = (FileManager.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
-		$("#file-size-ord").html(text);
-
-		$("#file-name-ord, #file-type-ord, #file-edit-ord").text('');
-		FileManager.display();
-	},
-
-	/**
-	 * Shows/hides the fileinfo-panel
-	 */
-	toggleFileInfo: function(elem) {
-		$("#fileinfo-link-cont").addClass("hidden").unbind('click');
-
-		if (elem) {
-			$("#fileinfo-icon").removeClass().addClass('menu-thumb icon-' + elem.type);
-			$("#fileinfo-name").text(elem.filename);
-			$("#fileinfo-size").text(Util.byteToString(elem.size));
-			$("#fileinfo-type").text(elem.type);
-			$("#fileinfo-edit").text(Util.timestampToDate(elem.edit));
-
-			if (elem.selfshared) {
-				$("#fileinfo-link-cont").on('click', function() {
-					FileManager.getLink(elem);
-				}).removeClass("hidden");
-			}
-			else {
-				$("#fileinfo-link-cont").addClass("hidden");
-			}
-			$("#fileinfo").removeClass("hidden");
+			case 'size':
+				FileManager.filteredElem = FileManager.filteredElem.sort(FileManager.compareSize);
+				break;
 		}
-		else {
-			$("#fileinfo").addClass("hidden");
-		}
-		$(window).resize();
+
+		var text = (FileManager.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
+		$(".order-direction").text('');
+		$("#file-" + colName + "-ord").html(text);
+		View.displayFiles();
 	},
 
 	toggleSelection: function() {
@@ -1433,130 +1498,12 @@ var FileManager = {
 
 	unselect: function(id) {
 		delete FileManager.selected[id];
-		FileManager.updateSelStatus();
+		View.updateSelStatus();
 	},
 
 	unselectAll: function(checkboxClicked) {
 		FileManager.selected = {};
-		FileManager.updateSelStatus(checkboxClicked);
-	},
-
-	updateClipboard: function() {
-		var content = (Object.keys(FileManager.clipboard).length == 1) ? Object.keys(FileManager.clipboard).length + " file" : Object.keys(FileManager.clipboard).length + " files";
-		$("#clipboard").removeClass("hidden");
-		$("#clipboard-content").text(content);
-		$("#clipboard-count").text(Object.keys(FileManager.clipboard).length);
-	},
-
-	/**
-	 * Displays the current path with independently clickable elements
-	 */
-	updatePath: function() {
-		$("#path").empty();
-		var h = FileManager.hierarchy;
-		for (var s = 0; s < h.length; s++) {
-			var filename = h[s].filename;
-
-			if (s > 0) {
-				var pathSep = document.createElement("span");
-				pathSep.className = "path-seperator";
-				pathSep.innerHTML = "&#x25B8";
-				$("#path").append(pathSep);
-			}
-
-			var pathItem = document.createElement("span");
-			pathItem.id = "path-element" + s;
-			pathItem.value = parseInt(s);
-			pathItem.className = "path-element";
-
-			if (filename) {
-				pathItem.innerHTML = Util.escape(filename);
-				document.title = Util.escape(filename + " | simpleDrive");
-			}
-			else if (s == 0 && FileManager.view == "trash") {
-				pathItem.innerHTML = "Trash";
-				document.title = "Trash | simpleDrive";
-			}
-			else if (s == 0 && FileManager.view == "shareout") {
-				pathItem.innerHTML = "My Shares";
-				document.title = "My Shares | simpleDrive";
-			}
-			else if (s == 0 && FileManager.view == "sharein") {
-				pathItem.innerHTML = "Shared";
-				document.title = "Shared | simpleDrive";
-			}
-			else if (s == 0 && !filename) {
-				pathItem.innerHTML = "Homefolder";
-				document.title = "Homefolder | simpleDrive";
-			}
-			else {
-				pathItem.innerHTML = Util.escape(filename);
-				document.title = Util.escape(filename + " | simpleDrive");
-			}
-
-			$("#path").append(pathItem);
-
-			$("#path-element" + s).mousedown(function() {
-				FileManager.unselectAll();
-			}).mouseup(function() {
-				var pos = parseInt(this.value);
-
-				if (FileManager.getSelectedCount() > 0) {
-					FileManager.move(FileManager.hierarchy[pos].id);
-				}
-				else {
-					FileManager.id = FileManager.hierarchy[pos].id;
-					FileManager.fetch();
-				}
-			});
-		}
-		$("#path-element" + (FileManager.hierarchy.length - 1)).addClass("path-current");
-	},
-
-	/**
-	 * Highlights all selected elements in the fileview
-	 */
-	updateSelStatus: function(checkboxClicked) {
-		var count = FileManager.getSelectedCount();
-		$(".item").removeClass("selected");
-
-		if (count == 0) {
-			var filecount = FileManager.getAllElements().length;
-			var elem = (filecount == 1) ? " element" : " elements";
-			if (elem.type != "folder") {
-				$("#foldersize").text(filecount + elem);
-			}
-		}
-		else {
-			var size = 0;
-			var allSel = FileManager.getAllSelected();
-			for (var i in allSel) {
-				if (allSel[i].type != "folder") {
-					size += allSel[i].size;
-				}
-				$("#item" + i).addClass("selected");
-			}
-			var files = (count > 1) ? "files" : "file";
-			var postfix = (size > 0) ? " (" + Util.byteToString(size) + ")" : "";
-			$("#foldersize").text(count + " " + files + postfix);
-		}
-
-		if (!checkboxClicked) {
-			if (count > 0 && count == FileManager.getAllElements().length) {
-				$("#fSelect").addClass("checkbox-checked");
-			}
-			else {
-				$("#fSelect").removeClass("checkbox-checked");
-			}
-		}
-	},
-
-	/**
-	 * Sets the selection status for the current section
-	 */
-	updateSidebar: function() {
-		$(".focus").removeClass('focus');
-		$("#sidebar-" + FileManager.view).addClass('focus');
+		View.updateSelStatus(checkboxClicked);
 	},
 
 	upload: function() {

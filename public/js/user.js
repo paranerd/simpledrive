@@ -14,18 +14,12 @@ $(document).ready(function() {
 	token = $('head').data('token');
 	code = $('head').data('code');
 
-	simpleScroll.init("status");
-
-	Binder.init();
-
 	if (code.length > 0) {
 		Backup.setToken(code);
 		return;
 	}
 
-	$("#username").html(Util.escape(username) + " &#x25BE");
-
-	$(window).resize()
+	View.init();
 	Util.getVersion();
 	General.load();
 	General.getQuota();
@@ -33,8 +27,12 @@ $(document).ready(function() {
 	Backup.getStatus();
 });
 
-var Binder = {
+var View = {
 	init: function() {
+		$("#username").html(Util.escape(username) + " &#x25BE");
+
+		simpleScroll.init("status");
+
 		$("#fileview").on('change', function(e) {
 			General.setFileview($(this).val());
 		});
@@ -95,6 +93,8 @@ var Binder = {
 					break;
 			}
 		});
+
+		$(window).resize();
 	}
 }
 

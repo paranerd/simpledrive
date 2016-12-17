@@ -217,7 +217,7 @@ button.inverted:hover {
 	color: white;
 }
 
-#dragstatus {
+#cursorinfo {
 	border: 1px solid #2e8b5e;
 	color: #2e8b5e;
 	background-color: white;
@@ -558,6 +558,7 @@ body.dark {
 }
 
 .dark #header {
+	color: #b3b3b3;
 	background-color: #303030;
 }
 

@@ -147,7 +147,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	<div id="shield" class="overlay hidden"></div>
 
 	<!-- Backup password popup -->
-	<form id="setupbackup" class="popup input-popup center hidden" action="#">
+	<form id="setupbackup" class="popup center hidden" action="#">
 		<span class="close"></span>
 		<div class="popup-title">Enable cloud backup</div>
 
@@ -167,7 +167,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	</form>
 
 	<!-- User password popup -->
-	<form id="change-password" class="popup input-popup center hidden" action="#">
+	<form id="change-password" class="popup center hidden" action="#">
 		<span class="close"></span>
 		<div class="popup-title">Change password</div>
 
