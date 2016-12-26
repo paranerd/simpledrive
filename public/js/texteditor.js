@@ -11,14 +11,14 @@ var username,
 $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
-	View.init();
-	Editor.init($('head').data('file'));
+
+	EditorController.init();
+	EditorView.init();
+	EditorModel.init($('head').data('file'));
 });
 
-var View = {
+var EditorController = {
 	init: function() {
-		$("#username").html(Util.escape(username) + " &#x25BE");
-
 		$("#doc-name").mouseenter(function(e) {
 			if ((this.offsetWidth < this.scrollWidth || this.offsetHeight < this.scrollHeight)) {
 				Util.showCursorInfo(e, $("#doc-name").text());
@@ -32,7 +32,7 @@ var View = {
 		});
 
 		$("#texteditor").bind('input propertychange', function() {
-			Editor.changed = true;
+			EditorModel.changed = true;
 			$("#doc-savestatus").text("*");
 		}).keydown(function(e) {
 			switch(e.keyCode) {
@@ -42,7 +42,7 @@ var View = {
 					var pos = $("#texteditor").prop('selectionStart');
 					var v = $("#texteditor").val();
 					$("#texteditor").val(v.substring(0, pos) + '    ' + v.substring(pos, v.length));
-					Editor.changed = true;
+					EditorModel.changed = true;
 					$("#doc-savestatus").text("*");
 					break;
 			}
@@ -58,7 +58,7 @@ var View = {
 				case 83: // S
 					if (e.ctrlKey) {
 						e.preventDefault();
-						Editor.save();
+						EditorModel.save();
 					}
 					break;
 			}
@@ -66,40 +66,45 @@ var View = {
 
 		$("#rename").on('submit', function(e) {
 			e.preventDefault();
-			Editor.rename();
+			EditorModel.rename();
 		});
+	}
+}
 
+var EditorView = {
+	init: function() {
+		$("#username").html(Util.escape(username) + " &#x25BE");
 		$(window).resize();
 	}
 }
 
-var Editor = {
+var EditorModel = {
 	file: null,
 	saveLoop: null,
 	changed: false,
 
 	init: function(file) {
-		Editor.file = file;
-		Editor.load(file);
+		EditorModel.file = file;
+		EditorModel.load();
 	},
 
 	autosave: function() {
-		Editor.saveLoop = setInterval(function() {
-			if (Editor.changed) {
-				Editor.save();
+		EditorModel.saveLoop = setInterval(function() {
+			if (EditorModel.changed) {
+				EditorModel.save();
 			}
 		}, 5000);
 	},
 
 	save: function() {
-		if (Editor.file) {
+		if (EditorModel.file) {
 			var content = $("#texteditor").val();
-			Editor.changed = false;
+			EditorModel.changed = false;
 
 			$.ajax({
 				url: 'api/files/savetext',
 				type: 'post',
-				data: {token: token, target: Editor.file, data: content},
+				data: {token: token, target: EditorModel.file, data: content},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				$("#doc-savestatus").text("");
@@ -109,17 +114,17 @@ var Editor = {
 		}
 	},
 
-	load: function(file) {
+	load: function() {
 		$.ajax({
 			url: 'api/files/loadtext',
 			type: 'post',
-			data: {token: token, target: file},
+			data: {token: token, target: EditorModel.file},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			$("#doc-name").text(data.msg.filename);
 			document.title = Util.escape(data.msg.filename + " | simpleDrive");
 			$("#texteditor").text(data.msg.content).focus().scrollTop(0);
-			Editor.autosave();
+			EditorModel.autosave();
 			window.onbeforeunload = Util.unsavedWarning();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
@@ -127,19 +132,19 @@ var Editor = {
 	},
 
 	rename: function() {
-		Editor.save();
-		clearTimeout(Editor.saveLoop);
+		EditorModel.save();
+		clearTimeout(EditorModel.saveLoop);
 		var newFilename = $("#rename-filename").val();
 
-		if (newFilename != "" && newFilename != Editor.file['filename']) {
+		if (newFilename != "" && newFilename != EditorModel.file['filename']) {
 			$.ajax({
 				url: 'api/files/rename',
 				type: 'post',
-				data: {token: token, newFilename: newFilename, target: JSON.stringify(Editor.file)},
+				data: {token: token, newFilename: newFilename, target: EditorModel.file},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				Util.closePopup('rename');
-				Editor.load();
+				EditorModel.load();
 			}).fail(function(xhr, statusText, error) {
 				Util.showFormError('rename', Util.getError(xhr));
 			});

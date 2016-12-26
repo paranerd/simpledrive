@@ -406,6 +406,7 @@ class File_Model {
 	 */
 
 	public function rename($id, $newname) {
+		file_put_contents(LOG, "rename id: " . print_r($id, true) . "\n", FILE_APPEND);
 		if (preg_match('/[\/\\\\]/', $newname)) {
 			throw new Exception('Filename not allowed', '400');
 		}
@@ -986,6 +987,7 @@ class File_Model {
 	}
 
 	public function save_text($target, $msg) {
+		file_put_contents(LOG, "target: " . print_r($target, true) . "\n", FILE_APPEND);
 		$file = $this->get_cached($target, self::$PERMISSION_WRITE);
 
 		if (!$file) {

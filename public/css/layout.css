@@ -575,7 +575,7 @@ select {
 	float: right;
 }
 
-form.popup {
+form.popup, #confirm {
 	width: 268px;
 	padding: 30px;
 }
@@ -711,7 +711,7 @@ button:disabled, button:disabled:hover {
 	line-height: 30px;
 }
 
-form.popup .close, #info .close {
+form.popup .close, #info .close, #confirm .close {
 	top: 30px;
 	right: 30px;
 }

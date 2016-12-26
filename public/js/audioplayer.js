@@ -24,7 +24,7 @@ var AudioManager = {
 			AudioManager.aborted = false;
 		}
 		catch (e) {
-			Util.notify("Browser does not support audio", true, true);
+			Util.notify("Your browser does not support audio", true, true);
 			return;
 		}
 
@@ -120,7 +120,7 @@ var AudioManager = {
 	},
 
 	next: function(auto) {
-		var files = FileManager.getAllElements();
+		var files = FileModel.getAll();
 		for (var i = AudioManager.active + 1; i < AudioManager.active + files.length + 1; i++) {
 			if (auto && i >= files.length && AudioManager.modes[AudioManager.currMode] != 'loop') {
 				return;
@@ -133,7 +133,7 @@ var AudioManager = {
 	},
 
 	prev: function() {
-		var files = FileManager.getAllElements();
+		var files = FileModel.getAll();
 		for (var i = active - 1; i > active - files.length; i--) {
 			var index = (i % files.length + files.length) % files.length;
 			if (files[index].type == 'audio') {

@@ -16,11 +16,9 @@
 
 	if ($public) {
 		$token = (isset($_COOKIE['public_token'])) ? $_COOKIE['public_token'] : null;
-		file_put_contents(LOG, "texteditor.php | public token: " . $token . "\n", FILE_APPEND);
 	}
 	else {
 		$token = (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-		file_put_contents(LOG, "texteditor.php | token: " . $token . "\n", FILE_APPEND);
 	}
 
 	if ((!$public && !$user) || !$id) {

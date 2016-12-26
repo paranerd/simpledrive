@@ -12,32 +12,27 @@ $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
 
-	View.init($('head').data('view'));
+	SystemController.init();
+	SystemView.init($('head').data('view'));
 
 	Util.getVersion();
 
-	if (View.current == "users") {
-		Users.fetch(true);
+	if (SystemView.view == "users") {
+		UsersModel.fetch(true);
 	}
-	else if (View.current == "log") {
-		Log.fetch(true, 0);
+	else if (SystemView.view == "log") {
+		LogModel.fetch(true, 0);
 	}
-	else if (View.current == "plugins") {
-		Plugins.fetch(true);
+	else if (SystemView.view == "plugins") {
+		PluginsModel.fetch(true);
 	}
 	else {
 		Status.fetch(true);
 	}
 });
 
-var View = {
-	current: '',
-
-	init: function(current) {
-		View.current = current;
-
-		$("#username").html(Util.escape(username) + " &#x25BE");
-
+var SystemController = {
+	init: function() {
 		simpleScroll.init("status");
 		simpleScroll.init("users");
 		simpleScroll.init("log");
@@ -57,21 +52,22 @@ var View = {
 		});
 
 		$(".sidebar-navigation").on('click', function(e) {
+			SystemView.view = $(this).data('action');
 			switch ($(this).data('action')) {
 				case 'status':
 					Status.fetch(true);
 					break;
 
 				case 'users':
-					Users.fetch(true);
+					UsersModel.fetch(true);
 					break;
 
 				case 'plugins':
-					Plugins.fetch(true);
+					PluginsModel.fetch(true);
 					break;
 
 				case 'log':
-					Log.fetch(true, 0);
+					LogModel.fetch(true, 0);
 					break;
 			}
 		});
@@ -90,24 +86,24 @@ var View = {
 		});
 
 		$("#users-filter .close").on('click', function() {
-			Users.closeFilter();
+			UsersModel.closeFilter();
 		});
 
 		$(".plugin-install").on('click', function(e) {
-			Plugins.install($(this).val());
+			PluginsModel.install($(this).val());
 		});
 
 		$(".plugin-remove").on('click', function(e) {
-			Plugins.remove($(this).val());
+			PluginsModel.remove($(this).val());
 		});
 
 		$("#log-filter .close").on('click', function(e) {
-			Log.closeFilter();
+			LogModel.closeFilter();
 		});
 
 		$("#createuser").on('submit', function(e) {
 			e.preventDefault();
-			Users.create();
+			UsersModel.create();
 		});
 
 		/**
@@ -121,7 +117,7 @@ var View = {
 				$("#context-clearlog").removeClass("hidden");
 			}
 			else if ($("#sidebar-users").hasClass("focus")) {
-				var target = (typeof e.target.parentNode.value === "undefined") ? null : Users.getUserAt(e.target.parentNode.value);
+				var target = (typeof e.target.parentNode.value === "undefined") ? null : UsersModel.getById(e.target.parentNode.value);
 
 				if (target !== null) {
 					$("#context-delete").removeClass("hidden");
@@ -145,11 +141,11 @@ var View = {
 
 			switch (action) {
 				case 'delete':
-					Users.remove();
+					UsersModel.remove();
 					break;
 
 				case 'clearlog':
-					Log.clear();
+					LogModel.clear();
 					break;
 			}
 
@@ -157,7 +153,7 @@ var View = {
 		});
 
 		$(document).on('mousedown', '#users .item', function(e) {
-			Users.select(this.value);
+			UsersModel.select(this.value);
 		});
 
 		$("#content").on('mouseup', function(e) {
@@ -167,20 +163,20 @@ var View = {
 		});
 
 		$("#log-pages").on('change', function() {
-			Log.fetch(false, $(this).val());
+			LogModel.fetch(false, $(this).val());
 		});
 
 		$("#log-filter-input").on('input', function(e) {
-			Log.filter($(this).val());
+			LogModel.filter($(this).val());
 		});
 
 		$("#users-filter-input").on('input', function(e) {
-			Users.filter($(this).val());
+			UsersModel.filter($(this).val());
 		});
 
 		$(document).on('keyup', function(e) {
 			// Filter
-			if ((View.current == "log" || View.current == "users") && !e.shiftKey && !$(e.target).is('input') && !e.ctrlKey &&
+			if ((SystemView.view == "log" || SystemView.view == "users") && !e.shiftKey && !$(e.target).is('input') && !e.ctrlKey &&
 				((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 96 && e.keyCode <= 105)))
 			{
 				if (!$("#log").hasClass('hidden') && $("#log-filter").hasClass('hidden')) {
@@ -192,7 +188,7 @@ var View = {
 						// Place cursor behind text
 						$("#log-filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
 					}, 1);
-					Log.filter(String.fromCharCode(e.keyCode).toLowerCase());
+					LogModel.filter(String.fromCharCode(e.keyCode).toLowerCase());
 				}
 				else if (!$("#users").hasClass('hidden') && $("#users-filter").hasClass('hidden')) {
 					$("#users-filter").removeClass('hidden');
@@ -203,7 +199,7 @@ var View = {
 						// Place cursor behind text
 						$("#users-filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
 					}, 1);
-					Users.filter(String.fromCharCode(e.keyCode).toLowerCase());
+					UsersModel.filter(String.fromCharCode(e.keyCode).toLowerCase());
 				}
 			}
 
@@ -211,9 +207,9 @@ var View = {
 				case 27: // Esc
 					$("#user-quota-total-change-form").remove();
 					Util.closePopup();
-					Users.editUser = null;
-					Log.closeFilter();
-					Users.closeFilter();
+					UsersModel.unselect();
+					LogModel.closeFilter();
+					UsersModel.closeFilter();
 					break;
 			}
 
@@ -223,23 +219,33 @@ var View = {
 		$(document).on('mousedown', '#content', function(e) {
 			Util.closePopup();
 		});
+	}
+}
+
+var SystemView = {
+	view: '',
+
+	init: function(view) {
+		SystemView.view = view;
+
+		$("#username").html(Util.escape(username) + " &#x25BE");
 
 		$(window).resize();
 	},
 
-	update: function(current) {
-		View.current = current;
+	update: function(view) {
+		SystemView.view = view;
 
 		// Hide all
 		simpleScroll.empty("users");
 		simpleScroll.empty("log");
 		$("#log-pages").empty();
-		$("#status, #users, #log, #plugins, .list-header, #plugins, .list-footer").addClass("hidden");
+		$("#status, #users, #log, #plugins, .list-header, .list-footer").addClass("hidden");
 
 		// Set right view
-		Util.sidebarFocus(current);
+		Util.sidebarFocus(view);
 
-		switch (current) {
+		switch (view) {
 			case 'users':
 				$(".path-element").text("Users");
 				$("#users, #users-header").removeClass("hidden");
@@ -263,7 +269,7 @@ var View = {
 	},
 
 	displayStatus: function(data) {
-		View.update('status');
+		SystemView.update('status');
 		$("#users-count").text(data.msg.users);
 		$("#upload-max").val(Util.byteToString(data.msg.upload_max));
 		$("#domain").val(data.msg.domain);
@@ -273,31 +279,31 @@ var View = {
 		if (data.msg.ssl) { $("#force-ssl").addClass("checkbox-checked"); }
 	},
 
-	displayLog: function() {
-		View.update('log');
+	displayLog: function(log) {
+		SystemView.update('log');
 
-		if (Log.pageTotal > 0) {
+		if (LogModel.pageTotal > 0) {
 			$(".list-footer").removeClass("hidden");
 
-			for (var i = 0; i < Log.pageTotal; i++) {
+			for (var i = 0; i < LogModel.pageTotal; i++) {
 				var option = document.createElement('option');
 				option.value = i;
 				option.innerHTML = i + 1;
 				$("#log-pages").append(option);
 			}
-			$("#log-pages").val(Log.pageCurrent);
+			$("#log-pages").val(LogModel.pageCurrent);
 		}
 
-		if (Log.filteredLog.length == 0) {
-			Log.setEmptyView("No entries...");
+		if (log.length == 0) {
+			LogModel.setEmptyView("No entries...");
 			$(".list-footer").addClass("hidden");
 		}
 		else {
 			$(".list-footer").removeClass("hidden");
 		}
 
-		for (var i in Log.filteredLog) {
-			var entry = Log.filteredLog[i];
+		for (var i in log) {
+			var entry = log[i];
 			var type = (entry.type == 0) ? "info" : ((entry.type == 1) ? "warning" : "error");
 
 			var listItem = document.createElement("div");
@@ -350,7 +356,7 @@ var View = {
 	},
 
 	displayPlugins: function(plugins) {
-		View.update('plugins');
+		SystemView.update('plugins');
 
 		for (var plugin in plugins) {
 			var installed = plugins[plugin];
@@ -365,11 +371,11 @@ var View = {
 		$(window).resize();
 	},
 
-	displayUsers: function() {
-		View.update('users');
+	displayUsers: function(users) {
+		SystemView.update('users');
 
-		for(var i in Users.filtered) {
-			var item = Users.filtered[i];
+		for(var i in users) {
+			var item = users[i];
 
 			var listItem = document.createElement("div");
 			listItem.id = "item" + i;
@@ -406,8 +412,10 @@ var View = {
 			checkbox.value = i;
 			checkbox.className = (item.admin == "1") ? "checkbox-box checkbox-checked" : "checkbox-box";
 			checkbox.addEventListener('click', function() {
-				Users.editUser = this.value;
-				Users.setAdmin();
+				UsersModel.select(this.value);
+				setTimeout(function() {
+					UsersModel.setAdmin();
+				}, 10);
 			});
 			admin.appendChild(checkbox);
 
@@ -420,8 +428,8 @@ var View = {
 
 			quotaMax.onclick = function(e) {
 				var id = e.target.id.replace(/[^0-9]/g,'');
-				Users.editUser = id;
-				Users.showChangeQuota(id);
+				UsersModel.select(id);
+				UsersModel.showChangeQuota(id);
 			};
 
 			// Quota Used
@@ -432,7 +440,7 @@ var View = {
 			quotaUsed.innerHTML = "calculating...";
 			$("#item" + i).append(quotaUsed);
 
-			Users.getQuota(item.username, i);
+			UsersModel.getQuota(item.username, i);
 
 			// Last Update
 			var lastUpdate = document.createElement("span");
@@ -457,7 +465,7 @@ var Status = {
 			data: {token: token},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			View.displayStatus(data);
+			SystemView.displayStatus(data);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -517,9 +525,9 @@ var Status = {
 	}
 }
 
-var Log = {
+var LogModel = {
 	log: [],
-	filteredLog: [],
+	filtered: [],
 	pageCurrent: 0,
 	pageTotal: 0,
 
@@ -534,35 +542,35 @@ var Log = {
 			data: {token: token, page: page},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Log.log = data.msg.log;
-			Log.filteredLog = data.msg.log;
-			Log.pageCurrent = page;
-			Log.pageTotal = data.msg.total;
-			View.displayLog();
+			LogModel.log = data.msg.log;
+			LogModel.filtered = data.msg.log;
+			LogModel.pageCurrent = page;
+			LogModel.pageTotal = data.msg.total;
+			SystemView.displayLog(LogModel.filtered);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
 	filter: function(needle) {
-		if (Log.log.length > 0) {
-			Log.filteredLog = [];
+		if (LogModel.log.length > 0) {
+			LogModel.filtered = [];
 
-			for (var i in Log.log) {
-				if (Log.log[i].msg.toLowerCase().indexOf(needle) != -1 ||
-					Log.log[i].source.toLowerCase().indexOf(needle) != -1 ||
-					Log.log[i].user.toLowerCase().indexOf(needle) != -1)
+			for (var i in LogModel.log) {
+				if (LogModel.log[i].msg.toLowerCase().indexOf(needle) != -1 ||
+					LogModel.log[i].source.toLowerCase().indexOf(needle) != -1 ||
+					LogModel.log[i].user.toLowerCase().indexOf(needle) != -1)
 				{
-					Log.filteredLog.push(Log.log[i]);
+					LogModel.filtered.push(LogModel.log[i]);
 				}
 			}
-			Log.display();
+			SystemView.displayLog(LogModel.filtered);
 		}
 	},
 
 	closeFilter: function() {
 		$("#log-filter").addClass("hidden");
-		Log.filter('');
+		LogModel.filter('');
 	},
 
 	clear: function() {
@@ -573,7 +581,7 @@ var Log = {
 				data: {token: token},
 				dataType: 'json'
 			}).done(function(data, statusText, xhr) {
-				Log.fetch(false, 0);
+				LogModel.fetch(false, 0);
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 			});
@@ -590,7 +598,7 @@ var Log = {
 	}
 }
 
-var Plugins = {
+var PluginsModel = {
 	fetch: function(pushState) {
 		if (pushState) {
 			window.history.pushState(null, '', 'system/plugins');
@@ -602,7 +610,7 @@ var Plugins = {
 			data: {token: token},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			View.displayPlugins(data.msg.plugins);
+			SystemView.displayPlugins(data.msg.plugins);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -619,10 +627,10 @@ var Plugins = {
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Installation complete", true);
-			Plugins.fetch();
+			PluginsModel.fetch();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
-			Plugins.fetch();
+			PluginsModel.fetch();
 		});
 	},
 
@@ -634,22 +642,21 @@ var Plugins = {
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Plugin " + name + " removed", true);
-			Plugins.fetch();
+			PluginsModel.fetch();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
 	}
 }
 
-var Users = {
+var UsersModel = {
 	all: [],
 	filtered: [],
 	selected: {},
-	editUser: null,
 
 	closeFilter: function() {
 		$("#users-filter").addClass("hidden");
-		Users.filter('');
+		UsersModel.filter('');
 	},
 
 	showChangeQuota: function(id) {
@@ -669,7 +676,7 @@ var Users = {
 		$(input).val(currTotal).focus().select();
 		$(form).on('submit', function(e) {
 			e.preventDefault();
-			Users.setQuotaMax();
+			UsersModel.setQuotaMax();
 		});
 	},
 
@@ -684,24 +691,24 @@ var Users = {
 			data: {token: token},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Users.all = data.msg;
-			Users.filtered = data.msg;
-			View.displayUsers();
+			UsersModel.all = data.msg;
+			UsersModel.filtered = data.msg;
+			SystemView.displayUsers(UsersModel.filtered);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
 	filter: function(needle) {
-		if (Users.all.length > 0) {
-			Users.filtered = [];
+		if (UsersModel.all.length > 0) {
+			UsersModel.filtered = [];
 
-			for (var i in Users.all) {
-				if (Users.all[i].username.toLowerCase().indexOf(needle) != -1) {
-					Users.filtered.push(Users.all[i]);
+			for (var i in UsersModel.all) {
+				if (UsersModel.all[i].username.toLowerCase().indexOf(needle) != -1) {
+					UsersModel.filtered.push(UsersModel.all[i]);
 				}
 			}
-			Users.display();
+			SystemView.displayUsers(UsersModel.filtered);
 		}
 	},
 
@@ -714,14 +721,14 @@ var Users = {
 		}).done(function(data, statusText, xhr) {
 			$("#user-quota-free" + id).text(Util.byteToString(data.msg.used));
 			$("#user-quota-total" + id).text(Util.byteToString(data.msg.max));
-			Users.all[id]['usedspace'] = data.msg.used;
+			UsersModel.all[id]['usedspace'] = data.msg.used;
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
-	getUserAt: function(id) {
-		return (id >= 0 && id < Users.filtered.length) ? Users.filtered[id] : null;
+	getById: function(id) {
+		return (id >= 0 && id < UsersModel.filtered.length) ? UsersModel.filtered[id] : null;
 	},
 
 	remove: function() {
@@ -729,10 +736,10 @@ var Users = {
 			$.ajax({
 				url: 'api/user/delete',
 				type: 'post',
-				data: {token: token, user: Users.all[Users.selected]['username']},
+				data: {token: token, user: UsersModel.all[UsersModel.selected]['username']},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
-				Users.fetch();
+				UsersModel.fetch();
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 			});
@@ -740,29 +747,35 @@ var Users = {
 	},
 
 	select: function(id) {
-		Users.selected = id;
+		UsersModel.selected = id;
+	},
+
+	unselect: function() {
+		UsersModel.selected = null;
 	},
 
 	setAdmin: function() {
-		var admin = ($("#user-admin" + Users.editUser).hasClass('checkbox-checked')) ? 1 : 0;
-		Users.editUser = null;
+		var admin = ($("#user-admin" + UsersModel.selected).hasClass('checkbox-checked')) ? 1 : 0;
+		var elem = document.getElementById("user-admin" + UsersModel.selected);
 
 		$.ajax({
 			url: 'api/user/setadmin',
 			type: 'post',
-			data: {token: token, user: Users.all[Users.selected]['username'], enable: admin},
+			data: {token: token, user: UsersModel.all[UsersModel.selected]['username'], enable: admin},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.notify("Saved changes", true, true);
-			Users.fetch();
+			Util.notify("Saved changes", true, false);
+			UsersModel.fetch();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
-			Users.fetch();
+			UsersModel.fetch();
 		});
+
+		UsersModel.unselect();
 	},
 
 	setQuotaMax: function() {
-		var size = ($("#user-quota-total-change").val()) ? $("#user-quota-total-change").val() : $("#user-quota-total" + Users.editUser).text();
+		var size = ($("#user-quota-total-change").val()) ? $("#user-quota-total-change").val() : $("#user-quota-total" + UsersModel.selected).text();
 		$("#user-quota-total-change-form").remove();
 
 		if (size != 0 && size != "Unlimited" && !Util.stringToByte(size)) {
@@ -772,20 +785,20 @@ var Users = {
 
 		size = (size == 0 || size == "Unlimited") ? 0 : Util.stringToByte(size);
 
-		Users.editUser = null;
-
 		$.ajax({
 			url: 'api/user/setquota',
 			type: 'post',
-			data: {token: token, user: Users.all[Users.selected]['username'], value: size},
+			data: {token: token, user: UsersModel.all[UsersModel.selected]['username'], value: size},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true, false);
-			Users.fetch();
+			UsersModel.fetch();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
-			Users.fetch();
+			UsersModel.fetch();
 		});
+
+		UsersModel.unselect();
 	},
 
 	create: function() {
@@ -802,7 +815,7 @@ var Users = {
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				Util.closePopup('createuser');
-				Users.fetch();
+				UsersModel.fetch();
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 				$("#createuser-pass1, #createuser-pass2").val("");

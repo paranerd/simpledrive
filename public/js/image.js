@@ -68,7 +68,7 @@ var ImageManager = {
 			return;
 		}
 
-		var files = FileManager.getAllElements();
+		var files = FileModel.getAll();
 		for (var i = parseInt(ImageManager.active) + 1; i < parseInt(ImageManager.active) + files.length + 1; i++) {
 			if (files[i % files.length].type == 'image') {
 				ImageManager.open(i % files.length);
@@ -88,7 +88,7 @@ var ImageManager = {
 			ImageManager.abort();
 		}
 
-		var elem = FileManager.getElementAt(id);
+		var elem = FileModel.getElementAt(id);
 
 		// Reset image
 		$("#img-viewer").find("img").remove();
@@ -141,7 +141,7 @@ var ImageManager = {
 	},
 
 	prev: function() {
-		var files = FileManager.getAllElements();
+		var files = FileModel.getAll();
 		for (var i = parseInt(ImageManager.active) - 1; i > parseInt(ImageManager.active) - files.length; i--) {
 			var index = (i % files.length + files.length) % files.length;
 			if (files[index].type == 'image') {
@@ -152,8 +152,8 @@ var ImageManager = {
 	},
 
 	remove: function() {
-		FileManager.select(ImageManager.active);
-		FileManager.remove();
+		FileModel.select(ImageManager.active);
+		FileModel.remove();
 
 		if (ImageManager.prev() == null) {
 			ImageManager.close();

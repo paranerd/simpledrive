@@ -45,6 +45,10 @@ button.inverted:hover {
 	border: 1px solid #2e8b5e;
 }
 
+.major-wrapper {
+	background-color: #303030;
+}
+
 .error-page-code {
 	color: #2e8b5e;
 }
@@ -306,6 +310,10 @@ button:disabled, button:disabled:hover {
 }
 
 /* Light - General */
+
+body.light {
+	background-color: white;
+}
 
 .light .settings-label {
 	color: #555;

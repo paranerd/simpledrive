@@ -178,7 +178,7 @@ var Util = {
 
 		$(target + ", .overlay, .form-hidden").addClass("hidden");
 		$(target + " .checkbox-box").removeClass("checkbox-checked");
-		$(target + " .password-strength").addClass("hidden").text('');
+		$(target + " .password-strength, .error").addClass("hidden").text('');
 
 		if (beforeShow) {
 			// Don't clear hidden form-inputs before showing popup

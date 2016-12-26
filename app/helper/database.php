@@ -414,7 +414,7 @@ class Database {
 	public function user_set_storage_max($uid, $max_storage) {
 		// Check if real changes (update-error when trying to update exact same values)
 		$stmt1 = $this->link->prepare('SELECT user FROM sd_users WHERE max_storage = ? AND id = ? LIMIT 1');
-		$stmt2->bind_param('si', $max_storage, $uid);
+		$stmt1->bind_param('si', $max_storage, $uid);
 		$stmt1->execute();
 		$stmt1->store_result();
 		$stmt1->fetch();
@@ -437,8 +437,8 @@ class Database {
 	 */
 
 	public function user_change_password($uid, $pass) {
-		$stmt = $this->link->prepare('UPDATE sd_users SET pass = ?, salt = ? WHERE id = ?');
-		$stmt->bind_param('sss', $pass, $salt, $uid);
+		$stmt = $this->link->prepare('UPDATE sd_users SET pass = ? WHERE id = ?');
+		$stmt->bind_param('ss', $pass, $uid);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();
@@ -1052,7 +1052,6 @@ class Database {
 	}
 
 	public function cache_get($id, $uid, $access_request, $hash) {
-		file_put_contents(LOG, "cache get uid: " . $uid . "\n", FILE_APPEND);
 		$share_base = $this->share_get_base($id, $uid);
 
 		$stmt = $this->link->prepare('
@@ -1152,7 +1151,7 @@ class Database {
 			AND sd_trash.hash IS NULL
 			AND (sd_cache.owner = ? OR (SELECT COUNT(id) FROM sd_shares WHERE id = ? AND access >= ? AND (userto = ? OR (public = 1 OR hash = ?))) = 1)
 		');
-		//file_put_contents(LOG, 'SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.parent = "' . $id . '" AND sd_trash.hash IS NULL AND (sd_cache.owner = ' . $uid . ' OR (SELECT COUNT(id) FROM sd_shares WHERE id = "' . $share_base . '" AND access >= ' . $access_request . ' AND (userto = ' . $uid . ' OR (public = 1 OR hash = "' . $hash . '"))) = 1)' . "\n", FILE_APPEND);
+
 		$stmt->bind_param('sisiis', $id, $uid, $share_base, $access_request, $uid, $hash);
 		$stmt->execute();
 		$stmt->store_result();

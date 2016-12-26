@@ -19,43 +19,43 @@ $(document).ready(function() {
 		return;
 	}
 
-	View.init();
+	UserController.init();
+	UserView.init();
+	UserModel.load();
+	UserModel.getQuota();
+	UserModel.activeToken();
+
 	Util.getVersion();
-	General.load();
-	General.getQuota();
-	General.activeToken();
 	Backup.getStatus();
 });
 
-var View = {
+var UserController = {
 	init: function() {
-		$("#username").html(Util.escape(username) + " &#x25BE");
-
 		simpleScroll.init("status");
 
 		$("#fileview").on('change', function(e) {
-			General.setFileview($(this).val());
+			UserModel.setFileview($(this).val());
 		});
 
 		$("#color").on('change', function(e) {
-			General.setColor($(this).val());
+			UserModel.setColor($(this).val());
 		});
 
 		$("#autoscan.checkbox-box").on('click', function(e) {
 			var enable = $("#autoscan").hasClass("checkbox-checked") ? 1 : 0;
-			General.setAutoscan(enable);
+			UserModel.setAutoscan(enable);
 		});
 
 		$(".sidebar-navigation").on('click', function(e) {
 			switch ($(this).find('input').val()) {
 				case 'general':
-					General.load();
+					UserModel.load();
 					break;
 			}
 		});
 
 		$("#invalidate-token").on('click', function(e) {
-			General.invalidateToken();
+			UserModel.invalidateToken();
 		});
 
 		$("#backup-toggle-button").on('click', function(e) {
@@ -69,12 +69,12 @@ var View = {
 		});
 
 		$("#clear-temp-button").on('click', function(e) {
-			General.clearTemp();
+			UserModel.clearTemp();
 		});
 
 		$("#change-password").on('submit', function(e) {
 			e.preventDefault();
-			General.changePassword();
+			UserModel.changePassword();
 		});
 
 		$("#setupbackup").on('submit', function(e) {
@@ -93,7 +93,12 @@ var View = {
 					break;
 			}
 		});
+	}
+}
 
+var UserView = {
+	init: function() {
+		$("#username").html(Util.escape(username) + " &#x25BE");
 		$(window).resize();
 	}
 }
@@ -233,7 +238,7 @@ var Backup = {
 	},
 }
 
-var General = {
+var UserModel = {
 	invalidateToken: function() {
 		$.ajax({
 			url: 'api/user/invalidatetoken',
@@ -242,7 +247,7 @@ var General = {
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Tokens invalidated", true, false);
-			General.activeToken();
+			UserModel.activeToken();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -372,7 +377,7 @@ var General = {
 			token = data.msg;
 			Util.notify("Password changed", true);
 			$("#change-password-pass0, #change-password-pass1, #change-password-pass2").val('');
-			Util.closePopup('change-pass');
+			Util.closePopup('change-password');
 		}).fail(function(xhr, statusText, error) {
 			Util.showFormError('change-password', Util.getError(xhr));
 		});
