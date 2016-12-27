@@ -186,9 +186,9 @@ class System_Model {
 
 		// MD5-Hashes for integrity-check
 		$plugins = array(
-			'webodf'	=> 'e3bd0441c496df12c8e61fae892565e1',
-			'sabredav'	=> '0fc7e4a845e4a1b0902db293216364e9',
-			'phpmailer'	=> 'd78dab2aba41a7cb508c9b513f403374'
+			'webodf'	=> '3ea6feaff56a63e1d4924d2e143ae944',
+			'sabredav'	=> '27a3b16e1ad67c23160aa1573713206d',
+			'phpmailer'	=> '080d71b0bf8f88aa04400ec3133cd91a'
 		);
 
 		if (!array_key_exists($name, $plugins)) {
@@ -230,13 +230,14 @@ class System_Model {
 
 		// Integrity-check
 		if (md5_file($zip_target) != $plugins[$name]) {
+			unlink($zip_target);
 			throw new Exception('Plugin integrity check failed', '500');
 		}
 		// Extract file
 		else if (file_exists($zip_target)) {
 			$zip = new ZipArchive;
 			if ($zip->open($zip_target)) {
-				$zip->extractTo($plugin_path . "/" . $name);
+				$zip->extractTo($plugin_path);
 				$zip->close();
 				unlink($zip_target);
 				return null;
