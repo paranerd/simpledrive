@@ -60,7 +60,7 @@ function login() {
 		}).fail(function(xhr, statusText, error) {
 			$("#pass").val('');
 			$("#submit").prop('disabled', false);
-			Util.showFormError('setup', Util.getError(xhr));
+			Util.showFormError('login', Util.getError(xhr));
 		});
 	}
 }
