@@ -226,7 +226,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	</div>
 
 	<!-- Notification -->
-	<div id="notification" class="popup center-hor">
+	<div id="notification" class="popup center-hor hidden">
 		<span id="note-icon" class="icon icon-info"></span>
 		<span id="note-msg">Error</span>
 		<span class="close">&times;</span>

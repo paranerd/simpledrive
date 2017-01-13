@@ -167,6 +167,7 @@ select {
 }
 
 #sidebar .icon {
+	width: 54px;
 	font-size: 0.7rem;
 }
 
@@ -718,8 +719,6 @@ label {
 	font-size: 1rem;
 	margin-left: 5px;
 }
-
-/* Editor */
 
 #texteditor {
 	position: relative;

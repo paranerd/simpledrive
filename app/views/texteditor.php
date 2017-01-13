@@ -92,9 +92,9 @@
 	</form>
 
 	<!-- Notification -->
-	<div id="notification" class="center-hor notification-info hidden">
-		<div id="note-icon" class="icon-info"></div>
-		<div id="note-msg"></div>
+	<div id="notification" class="popup center-hor hidden">
+		<span id="note-icon" class="icon icon-info"></span>
+		<span id="note-msg">Error</span>
 		<span class="close">&times;</span>
 	</div>
 
