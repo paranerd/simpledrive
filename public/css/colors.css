@@ -5,7 +5,7 @@
 	brightgrey = #292929;
 */
 
-/* General */
+/* General - General */
 
 input {
 	outline: 0px solid transparent;
@@ -175,6 +175,8 @@ button.inverted:hover {
 	background-color: #2e8b5e;
 }
 
+/* General - List */
+
 .list-filter {
 	color: #555;
 	border: 1px solid #2e8b5e;
@@ -315,6 +317,15 @@ body.light {
 	background-color: white;
 }
 
+.light .menu li, .light .menu li a {
+	color: #555;
+}
+
+.light .menu li:hover, .light li a:hover {
+	background-color: #eee;
+	color: #555 !important;
+}
+
 .light .settings-label {
 	color: #555;
 }
@@ -339,97 +350,12 @@ body.light {
 	color: #555;
 }
 
-.light #logo {
-	border-right: 1px solid #ccc;
-}
-
-.light #logo, .light #logo a {
-	color: white;
-}
-
-.light #username {
-	color: white;
-}
-
 .light #shield {
 	background-color: rgba(242,242,242,0.7);
 }
 
-.light #header {
-	background-color: #2e8b5e;
-}
-
-.light #sidebar {
-	color: #575757;
-	background-color: white;
-	border-right: 1px solid #ccc;
-}
-
-.light .focus, .light .focus a {
-	color: #2e8b5e !important;
-	background-color: #eee;
-}
-
-.light .path-element, .light .path-seperator {
-	color: rgba(255,255,255,0.6);
-}
-
-.light .path-current {
-	color: white;
-}
-
-.light .path-element:hover {
-	border-bottom: 1px solid #FF7722;
-	color: white;
-}
-
-.light .list-filter, .light .list-header {
-	color: #555;
-}
-
-.light .list-header {
-	border-bottom: 1px solid #bbb;
-}
-
-.light #content {
-	background-color: white;
-}
-
-.light #fileinfo {
-	color: #555;
-	border-left: 1px solid lightgrey;
-}
-
-.light .item {
-	color: #555;
-	border: 0px solid transparent;
-	border-bottom: 1px solid #e0e0e0;
-	background-color: rgba(0,0,0,0);
-}
-
-.light .thumbnail {
-	color: #8c8c8c;
-	border: 2px solid white;
-}
-
-.light .widget {
-	color: #555;
-	background-color: #eee;
-	border-top: 1px solid #bbb;
-	border-bottom: 1px solid #bbb;
-}
-
-.light #sidebar-footer {
-	color: #555;
-	border-top: 1px solid lightgrey;
-}
-
-.light #scan {
-	color: black;
-}
-
-.light .fileinfo-elem {
-	color: #555;
+.light input {
+	border: 1px solid lightgrey;
 }
 
 .light .popup {
@@ -437,20 +363,6 @@ body.light {
 	color: #555;
 	border: 1px solid #ccc;
 	box-shadow: 0px 0px 15px 3px rgba(0,0,0,0.2) !important;
-}
-
-.light input {
-	border: 1px solid lightgrey;
-}
-
-.light #logo:hover {
-	background-color: #eee;
-	color: #555 !important;
-}
-
-.light .trashact:hover {
-	color: white;
-	background-color: rgba(255,0,0,0.5);
 }
 
 .light #loading {
@@ -486,13 +398,112 @@ body.light {
 	background-color: rgba(255,255,255,0.2);
 }
 
-.light input.table-cell {
-	background-color: rgba(0,0,0,0);
+/* Light - Header */
+
+.light #header {
+	background-color: #2e8b5e;
+}
+
+.light #logo {
+	border-right: 1px solid #ccc;
+}
+
+.light #logo, .light #logo a {
+	color: white;
+}
+
+.light #logo .back:hover {
+	background-color: #eee;
+	color: #555 !important;
+}
+
+.light #username {
+	color: white;
+}
+
+.light .path-element, .light .path-seperator {
+	color: rgba(255,255,255,0.6);
+}
+
+.light .path-current {
+	color: white;
+}
+
+.light .path-element:hover {
+	border-bottom: 1px solid #FF7722;
+	color: white;
+}
+
+/* Light - Sidebar */
+
+.light #sidebar {
+	color: #575757;
+	background-color: white;
+	border-right: 1px solid #ccc;
+}
+
+.light .focus, .light .focus a {
+	color: #2e8b5e !important;
+	background-color: #eee;
+}
+
+.light .widget {
 	color: #555;
-	border: 1px solid #b3b3b3;
+	background-color: #eee;
+	border-top: 1px solid #bbb;
+	border-bottom: 1px solid #bbb;
+}
+
+.light #sidebar-footer {
+	color: #555;
+	border-top: 1px solid lightgrey;
+}
+
+.light #scan {
+	color: black;
+}
+
+.light .trashact:hover {
+	color: white;
+	background-color: rgba(255,0,0,0.5);
+}
+
+/* Content */
+
+.light #content {
+	background-color: white;
+}
+
+.light #fileinfo {
+	color: #555;
+	border-left: 1px solid lightgrey;
+}
+
+.light .item {
+	color: #555;
+	border: 0px solid transparent;
+	border-bottom: 1px solid #e0e0e0;
+	background-color: rgba(0,0,0,0);
+}
+
+.light .thumbnail {
+	color: #8c8c8c;
+	border: 2px solid white;
+}
+
+.light .fileinfo-elem {
+	color: #555;
 }
 
 /* Light - List */
+
+.light .list-filter, .light .list-header {
+	color: #555;
+}
+
+.light .list-header {
+	border-bottom: 1px solid #bbb;
+}
 
 .light .list .item:hover {
 	background-color: #e5e5e5;
@@ -537,75 +548,8 @@ body.dark {
 	background-color: #303030;
 }
 
-.dark #logo {
-	border-right: 1px solid #555;
-}
-
-.dark #logo, .dark #logo a {
-	color: #2e8b5e;
-}
-
-.dark #username {
-	color: #b3b3b3;
-}
-
 .dark #shield {
 	background-color: rgba(0,0,0,0.4);
-}
-
-.dark #header {
-	color: #b3b3b3;
-	background-color: #303030;
-}
-
-.dark .thumbnail {
-	color: #bcbcbc;
-	border: 2px solid transparent;
-}
-
-.dark #sidebar {
-	background-color: #303030;
-	border-right: 1px solid #555;
-}
-
-.dark .trashact:hover {
-	background-color: rgba(255,0,0,0.5) !important;
-}
-
-.dark .list-header, .dark .list-filter {
-	color: #aaa;
-	border-bottom: 1px solid #555;
-}
-
-.dark .item {
-	color: #ccc;
-	border-bottom: 1px solid #444;
-}
-
-.dark .focus, .dark .focus a {
-	color: #2e8b5e !important;
-	background-color: #404040;
-}
-
-.dark .path-element, .dark .path-seperator {
-	color: #555;
-}
-
-.dark .path-element:hover {
-	color: #b3b3b3;
-}
-
-.dark .path-current {
-	color: #b3b3b3;
-}
-
-.dark #content {
-	background-color: #303030;
-}
-
-.dark .list-footer {
-	background-color: #303030;
-	border-top: 1px solid #555;
 }
 
 .dark .selector-label {
@@ -640,41 +584,6 @@ body.dark {
 .dark .menu li:hover, .dark li a:hover {
 	color: white;
 	background-color: #555;
-}
-
-.dark #logo:hover {
-	background-color: #555;
-}
-
-.dark #sidebar-footer {
-	color: #aaa;
-	border-top: 1px solid #555;
-}
-
-.dark #scan {
-	color: white;
-}
-
-.dark .fileinfo-elem {
-	color: white;
-}
-
-.dark #loading {
-	background-color: #202020;
-	border: 1px solid #393939;
-}
-
-.dark #fileinfo {
-	color: #eee;
-	border-left: 1px solid #555;
-	background-color: #303030;
-}
-
-.dark .widget {
-	color: #aaa;
-	border-top: 1px solid #555;
-	border-bottom: 1px solid #555;
-	background-color: #393939;
 }
 
 .dark .close {
@@ -713,6 +622,116 @@ body.dark {
 
 .dark .settings-label {
 	color: white;
+}
+
+/* Dark - Header */
+
+.dark #header {
+	color: #b3b3b3;
+	background-color: #303030;
+}
+
+.dark #logo {
+	border-right: 1px solid #555;
+}
+
+.dark #logo .back:hover {
+	background-color: #555;
+}
+
+.dark #logo, .dark #logo a {
+	color: #2e8b5e;
+}
+
+.dark #username {
+	color: #b3b3b3;
+}
+
+.dark .path-element, .dark .path-seperator {
+	color: #555;
+}
+
+.dark .path-element:hover {
+	color: #b3b3b3;
+}
+
+.dark .path-current {
+	color: #b3b3b3;
+}
+
+/* Dark - Sidebar */
+
+.dark #sidebar {
+	background-color: #303030;
+	border-right: 1px solid #555;
+}
+
+.dark .trashact:hover {
+	background-color: rgba(255,0,0,0.5) !important;
+}
+
+.dark .focus, .dark .focus a {
+	color: #2e8b5e !important;
+	background-color: #404040;
+}
+
+.dark .widget {
+	color: #aaa;
+	border-top: 1px solid #555;
+	border-bottom: 1px solid #555;
+	background-color: #393939;
+}
+
+.dark #scan {
+	color: white;
+}
+
+.dark #sidebar-footer {
+	color: #aaa;
+	border-top: 1px solid #555;
+}
+
+/* Dark - Content */
+
+.dark .thumbnail {
+	color: #bcbcbc;
+	border: 2px solid transparent;
+}
+
+.dark .item {
+	color: #ccc;
+	border-bottom: 1px solid #444;
+}
+
+.dark #content {
+	background-color: #303030;
+}
+
+.dark .fileinfo-elem {
+	color: white;
+}
+
+.dark #fileinfo {
+	color: #eee;
+	border-left: 1px solid #555;
+	background-color: #303030;
+}
+
+.dark #loading {
+	background-color: #202020;
+	border: 1px solid #393939;
+}
+
+/* Dark - List */
+
+.dark .list-header, .dark .list-filter {
+	color: #aaa;
+	border-bottom: 1px solid #555;
+}
+
+.dark .list-footer {
+	background-color: #303030;
+	border-top: 1px solid #555;
 }
 
 /* Dark - Grid */
