@@ -46,10 +46,7 @@ if (!$public && !$user) {
 	<!-- Header -->
 	<div id="header">
 		<div id="logo">
-			<a href="files">
-				<div class="menu-thumb icon-cloud"></div>
-				<span class="menu-text">Files</span>
-			</a>
+			<a href="files"><span class="icon icon-cloud"></span>Files</a>
 		</div>
 		<div id="path"></div>
 
@@ -60,74 +57,64 @@ if (!$public && !$user) {
 
 	<!-- Sidebar -->
 	<div id="sidebar">
-		<div id="sidebar-create" class="menu-item popup-trigger" title="Create new element" data-target="create-menu"><div class="menu-thumb icon-add"></div><div class="menu-text"><?php echo $lang['new']; ?></div></div>
-		<div id="sidebar-upload" class="menu-item popup-trigger" title="Upload file(s)" data-target="upload-menu"><div class="menu-thumb icon-upload"></div><div class="menu-text">Upload</div></div>
-		<?php if ($section != 'pub') : ?>
-		<div class="divider"></div>
-		<div id="sidebar-files" class="sidebar-navigation menu-item focus" title="Show all files" data-action="files"><div class="menu-thumb icon-files"></div><div class="menu-text"><?php echo $lang['myfiles']; ?></div></div>
-		<div id="sidebar-shareout" class="sidebar-navigation menu-item" title="Show your shares" data-action="shareout"><div class="menu-thumb icon-users"></div><div class="menu-text"><?php echo $lang['yourshares']; ?></div></div>
-		<div id="sidebar-sharein" class="sidebar-navigation menu-item" title="Show files shared with you" data-action="sharein"><div class="menu-thumb icon-share"></div><div class="menu-text"><?php echo $lang['sharedwithyou']; ?></div></div>
-		<div id="sidebar-trash" class="sidebar-navigation menu-item" title="Show trash" data-action="trash"><div class="menu-thumb icon-trash"></div><div class="menu-text"><?php echo $lang['trash']; ?></div></div>
-		<?php endif; ?>
+		<ul class="menu">
+			<li id="sidebar-create" class="popup-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span> <?php echo $lang['new']; ?></li>
+			<li id="sidebar-upload" class="popup-trigger" title="Upload file(s)" data-target="upload-menu"><span class="icon icon-upload"></span> Upload</li>
+			<?php if ($section != 'pub') : ?>
+			<hr>
+			<li id="sidebar-files" class="sidebar-navigation focus" title="Show all files" data-action="files"><span class="icon icon-files"></span> <?php echo $lang['myfiles']; ?></li>
+			<li id="sidebar-shareout" class="sidebar-navigation" title="Show your shares" data-action="shareout"><span class="icon icon-users"></span> <?php echo $lang['yourshares']; ?></li>
+			<li id="sidebar-sharein" class="sidebar-navigation" title="Show files shared with you" data-action="sharein"><span class="icon icon-share"></span> <?php echo $lang['sharedwithyou']; ?></li>
+			<li id="sidebar-trash" class="sidebar-navigation" title="Show trash" data-action="trash"><span class="icon icon-trash"></span> <?php echo $lang['trash']; ?></li>
+			<?php endif; ?>
+		</ul>
 
 		<!-- Upload -->
-		<div id="upload" class="sidebar-widget hidden">
-			<div id="upload-title" class="sidebar-widget-row widget-text widget-title"></div>
-
-			<div class="divider"></div>
-
-			<div id="upload-filename" class="sidebar-widget-row widget-text">Filename</div>
-
-			<div class="divider"></div>
-
+		<div id="upload" class="widget hidden">
+			<div id="upload-title" class="widget-row widget-text widget-title"></div>
+			<hr>
+			<div id="upload-filename" class="widget-row widget-text">Filename</div>
+			<hr>
 			<div class="progressbar"><div id="upload-progress" class="progressbar-progress"></div></div>
 			<div id="upload-percent" class="widget-small">33%</div>
-			<span id="upload-cancel" class="close"></span>
+			<span class="close">&times;</span>
 		</div>
 
 		<!-- Audio Player -->
-		<div id="audioplayer" class="sidebar-widget hidden">
-			<div id="audio-title" class="sidebar-widget-row widget-text widget-title"></div>
-
-			<div class="divider"></div>
-
+		<div id="audioplayer" class="widget hidden">
+			<div id="audio-title" class="widget-row widget-text widget-title"></div>
+			<hr>
 			<div id="audio-seekbar" class="progressbar">
 				<div id="audio-seekbar-buffer" class="progressbar-buffer"></div>
 				<div id="audio-seekbar-progress" class="progressbar-progress"></div>
 			</div>
-
-			<div class="divider"></div>
-
-			<div class="sidebar-widget-row">
+			<hr>
+			<div class="widget-row">
 				<div id="audio-playpos">00:00</div>
 				<div id="audio-duration">00:00</div>
 			</div>
-
-			<div class="divider"></div>
-
-			<div class="sidebar-widget-row sidebar-widget-icons">
-				<div id="audio-prev" class="sidebar-widget-icon icon-prev"></div>
-				<div id="audio-play" class="sidebar-widget-icon icon-play"></div>
-				<div id="audio-next" class="sidebar-widget-icon icon-next"></div>
+			<hr>
+			<div class="widget-row widget-row-centered">
+				<div id="audio-prev" class="icon widget-icon icon-prev"></div>
+				<div id="audio-play" class="icon widget-icon icon-play"></div>
+				<div id="audio-next" class="icon widget-icon icon-next"></div>
 			</div>
 
-			<div id="audio-play-small" class="sidebar-widget-icon widget-small icon-play"></div>
-			<span class="close"></span>
+			<div id="audio-play-small" class="icon widget-icon widget-small icon-play"></div>
+			<span class="close">&times;</span>
 		</div>
 
-		<div id="clipboard" class="sidebar-widget hidden">
-			<div class="sidebar-widget-row widget-text widget-title">Clipboard</div>
-
-			<div class="divider"></div>
-
-			<div id="clipboard-content" class="sidebar-widget-row widget-text">1</div>
-			<div id="clipboard-count" class="widget-small">2</div>
-			<span class="close"></span>
+		<div id="clipboard" class="widget hidden">
+			<div class="widget-row widget-text widget-title">Clipboard</div>
+			<hr>
+			<div id="clipboard-content" class="widget-row widget-text">Content</div>
+			<div id="clipboard-count" class="widget-small"></div>
+			<span class="close">&times;</span>
 		</div>
 
 		<!-- Folder size -->
 		<div id="sidebar-footer">
-			<span id="scan" class="menu-thumb icon-sync"></span>
+			<span id="scan" class="icon icon-sync"></span>
 			<span id="foldersize"></span>
 		</div>
 	</div>
@@ -136,7 +123,7 @@ if (!$public && !$user) {
 	<div id="content">
 		<div id="files-filter" class="list-filter hidden">
 			<input class="list-filter-input" placeholder="Filter..."/>
-			<span class="close"></span>
+			<span class="close">&times;</span>
 		</div>
 		<div id="list-header" class="list-header <?php if ($fileview == 'grid') echo 'hidden'; ?>">
 			<span class="col0 checkbox"><span id="fSelect" class="checkbox-box"></span></span>
@@ -152,62 +139,70 @@ if (!$public && !$user) {
 
 	<!-- Upload menu -->
 	<div id="upload-menu" class="popup hidden">
-		<div id="upload-file" class="menu-item upload-button">
-			<div class="menu-thumb icon-unknown"></div><?php echo "Upload " . $lang['file']; ?>
-			<input class="upload-input hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="">
-		</div>
-		<div id="upload-folder" class="menu-item upload-button">
-			<div class="menu-thumb icon-folder"></div><?php echo "Upload " . $lang['folder']; ?>
-			<input class="upload-input hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="" directory="" webkitdirectory="" mozdirectory="">
-		</div>
+		<ul class="menu">
+			<li id="upload-file" class="upload-button">
+				<span class="icon icon-unknown"></span><?php echo "Upload " . $lang['file']; ?>
+				<input class="upload-input hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="">
+			</li>
+			<li id="upload-folder" class="upload-button">
+				<span class="icon icon-folder"></span><?php echo "Upload " . $lang['folder']; ?>
+				<input class="upload-input hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="" directory="" webkitdirectory="" mozdirectory="">
+			</li>
+		</ul>
 	</div>
 
 	<!-- Create menu -->
 	<div id="create-menu" class="popup hidden">
-		<div id="create-file" class="menu-item popup-trigger" data-target="create"><div class="menu-thumb icon-unknown"></div><?php echo $lang['new'] . " " . $lang['file']; ?></div>
-		<div id="create-folder" class="menu-item popup-trigger" data-target="create"><div class="menu-thumb icon-folder"></div><?php echo $lang['new'] . " " . $lang['folder']; ?></div>
+		<ul class="menu">
+			<li id="create-file" class="popup-trigger" data-target="create"><span class="icon icon-unknown"></span><?php echo $lang['new'] . " " . $lang['file']; ?></li>
+			<li id="create-folder" class="popup-trigger" data-target="create"><span class="icon icon-folder"></span><?php echo $lang['new'] . " " . $lang['folder']; ?></li>
+		</ul>
 	</div>
 
 	<!-- File Info Panel -->
 	<div id="fileinfo" class="hidden">
-		<span class="close"></span>
-		<div id="fileinfo-icon" class="menu-thumb icon-files"></div><div id="fileinfo-name" class="menu-text"></div>
+		<span class="close">&times;</span>
 
-		<div class="menu-item"><div id="fileinfo-header" class="menu-text">Details:</div></div>
+		<div class="fileinfo-elem"><span id="fileinfo-icon" class="icon icon-files"></span><span id="fileinfo-name">Filename</span></div>
+		<div class="fileinfo-elem"><span id="fileinfo-header">Details:</span></div>
 
-		<div class="menu-item"><div class="menu-thumb icon-files"></div><div id="fileinfo-size" class="menu-text"></div></div>
-		<div class="menu-item"><div class="menu-thumb icon-info"></div><div id="fileinfo-type" class="menu-text"></div></div>
-		<div class="menu-item"><div class="menu-thumb icon-rename"></div><div id="fileinfo-edit" class="menu-text"></div></div>
-		<div class="menu-item" id="fileinfo-link-cont"><div class="menu-thumb icon-share"></div><div id="fileinfo-link" class="menu-text">Share Link</div></div>
+		<div class="fileinfo-elem"><span class="icon icon-files"></span><span id="fileinfo-size"></span></div>
+		<div class="fileinfo-elem"><span class="icon icon-info"></span><span id="fileinfo-type"></span></div>
+		<div class="fileinfo-elem"><span class="icon icon-rename"></span><span id="fileinfo-edit"></span>Edit</div>
+		<div class="fileinfo-elem" id="fileinfo-link"><span class="icon icon-share"></span>Share Link</div>
 	</div>
 
 	<!-- Context menu -->
 	<div id="contextmenu" class="popup hidden">
-		<div id="context-gallery" class="menu-item hidden"><div class="menu-thumb icon-image"></div><?php echo $lang['gallery']; ?></div>
-		<div id="context-closegallery" class="menu-item hidden"><div class="menu-thumb icon-image"></div>Close <?php echo $lang['gallery']; ?></div>
-		<div id="context-restore" class="menu-item hidden"><div class="menu-thumb icon-restore"></div><?php echo $lang['restore']; ?></div>
-		<div id="context-copy" class="menu-item hidden"><div class="menu-thumb icon-copy"></div><?php echo $lang['copy']; ?></div>
-		<div id="context-cut" class="menu-item hidden"><div class="menu-thumb icon-cut"></div><?php echo $lang['cut']; ?></div>
-		<div id="context-paste" class="menu-item hidden"><div class="menu-thumb icon-paste"></div><?php echo $lang['paste']; ?></div>
-		<div id="context-share" class="menu-item hidden"><div class="menu-thumb icon-share"></div><?php echo $lang['share']; ?></div>
-		<div id="context-unshare" class="menu-item hidden"><div class="menu-thumb icon-share"></div><?php echo $lang['unshare']; ?></div>
-		<div class="divider hidden"></div>
-		<div id="context-rename" class="menu-item hidden"><div class="menu-thumb icon-rename"></div><?php echo $lang['rename']; ?></div>
-		<div id="context-zip" class="menu-item hidden"><div class="menu-thumb icon-zip"></div><?php echo $lang['zip']; ?></div>
-		<div id="context-download" class="menu-item hidden"><div class="menu-thumb icon-download"></div><?php echo $lang['download']; ?></div>
-		<div class="divider hidden"></div>
-		<div id="context-delete" class="menu-item hidden"><div class="menu-thumb icon-trash"></div><?php echo $lang['delete']; ?></div>
+		<ul class="menu">
+			<li id="context-gallery" class="hidden"><span class="icon icon-image"></span><?php echo $lang['gallery']; ?></li>
+			<li id="context-closegallery" class="hidden"><span class="icon icon-image"></span>Close <?php echo $lang['gallery']; ?></li>
+			<li id="context-restore" class="hidden"><span class="icon icon-restore"></span><?php echo $lang['restore']; ?></li>
+			<li id="context-copy" class="hidden"><span class="icon icon-copy"></span><?php echo $lang['copy']; ?></li>
+			<li id="context-cut" class="hidden"><span class="icon icon-cut"></span><?php echo $lang['cut']; ?></li>
+			<li id="context-paste" class="hidden"><span class="icon icon-paste"></span><?php echo $lang['paste']; ?></li>
+			<li id="context-share" class="hidden"><span class="icon icon-share"></span><?php echo $lang['share']; ?></li>
+			<li id="context-unshare" class="hidden"><span class="icon icon-share"></span><?php echo $lang['unshare']; ?></li>
+			<hr class="hidden">
+			<li id="context-rename" class="hidden"><span class="icon icon-rename"></span><?php echo $lang['rename']; ?></li>
+			<li id="context-zip" class="hidden"><span class="icon icon-zip"></span><?php echo $lang['zip']; ?></li>
+			<li id="context-download" class="hidden"><span class="icon icon-download"></span><?php echo $lang['download']; ?></li>
+			<hr class="hidden">
+			<li id="context-delete" class="hidden"><span class="icon icon-trash"></span><?php echo $lang['delete']; ?></li>
+		</ul>
 	</div>
 
 	<!-- Menu -->
 	<div id="menu" class="popup hidden">
-		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
-		<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div><?php echo $lang['settings']; ?></a></div>
-		<?php if ($admin) : ?>
-		<div class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>
-		<?php endif; ?>
-		<div class="menu-item popup-trigger" data-target="info"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></div>
-		<div class="menu-item"><a href="core/logout?token=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
+		<ul class="menu">
+			<li><a href="files"><span class="icon icon-files"></span>Files</a></li>
+			<li><a href="user"><span class="icon icon-settings"></span>Settings</a></li>
+			<?php if ($admin) : ?>
+			<li><a href="system"><span class="icon icon-admin"></span>System</a></li>
+			<?php endif; ?>
+			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><?php echo $lang['info']; ?></li>
+			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><?php echo $lang['logout']; ?></a></li>
+		</ul>
 	</div>
 
 	<!-- Cursor Info -->
@@ -218,7 +213,7 @@ if (!$public && !$user) {
 
 	<!-- Create popup -->
 	<form id="create" class="popup center hidden" action="#">
-		<span class="close icon-cross"></span>
+		<span class="close">&times;</span>
 		<div class="popup-title"><?php echo $lang['create']; ?></div>
 
 		<label for="create-input"><?php echo $lang['filename']; ?></label>
@@ -231,7 +226,7 @@ if (!$public && !$user) {
 
 	<!-- Share popup -->
 	<form id="share" class="popup center hidden" action="#">
-		<span class="close"></span>
+		<span class="close">&times;</span>
 		<div class="popup-title"><?php echo $lang['share']; ?></div>
 
 		<label><?php echo $lang['username']; ?></label>
@@ -268,16 +263,14 @@ if (!$public && !$user) {
 
 	<!-- Notification -->
 	<div id="notification" class="popup center-hor hidden">
-		<div>
-			<div id="note-icon" class="icon-info"></div>
-			<div id="note-msg">Error</div>
-		</div>
-		<span class="close"></span>
+		<span id="note-icon" class="icon icon-info"></span>
+		<span id="note-msg">Error</span>
+		<span class="close">&times;</span>
 	</div>
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<span class="close"></span>
+		<span class="close">&times;</span>
 		<div id="info-title">simpleDrive</div>
 		<div id="info-subtitle">Private. Secure. Simple.</div>
 		<div class="clearer"></div>
@@ -297,7 +290,7 @@ if (!$public && !$user) {
 	<div id="busy" class="hidden">busy</div>
 
 	<div id="pubfile" class="major-wrapper hidden">
-		<div class="major-logo menu-item" title="Create new element"><div class="menu-thumb icon-cloud"></div><div class="menu-text">simpleDrive</div></div>
+		<div class="major-logo" title="Logo"><div><span class="icon icon-cloud"></span>simpleDrive</div></div>
 
 		<form id="load-public" class="major-form center">
 			<div class="major-title">Public share</div>
@@ -308,7 +301,7 @@ if (!$public && !$user) {
 			<button class="major-submit">Unlock</button>
 		</form>
 
-		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>
+		<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
 	</div>
 
 	<script src="public/js/jquery-1.11.3.min.js"></script>

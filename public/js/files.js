@@ -223,7 +223,7 @@ var FileController = {
 			var multi = (FileModel.getSelectedCount() > 1);
 
 			$('[id^="context-"]').addClass("hidden");
-			$("#contextmenu .divider").addClass("hidden");
+			$("#contextmenu hr").addClass("hidden");
 
 			// Paste
 			if (FileModel.isClipboardFilled()) {
@@ -231,7 +231,7 @@ var FileController = {
 			}
 
 			if (target) {
-				$(".divider").removeClass("hidden");
+				$("#contextmenu hr").removeClass("hidden");
 
 				// Delete
 				$("#context-delete").removeClass("hidden");
@@ -282,7 +282,8 @@ var FileController = {
 		/**
 		 * Contextmenu action
 		 */
-		$("#contextmenu .menu-item").on('click', function(e) {
+		$("#contextmenu .menu li").on('click', function(e) {
+			console.log("click");
 			var id = $(this).attr('id')
 			var action = id.substr(id.indexOf('-') + 1);
 
@@ -645,22 +646,22 @@ var FileView = {
 	 * Shows/hides the fileinfo-panel
 	 */
 	toggleFileInfo: function(elem) {
-		$("#fileinfo-link-cont").addClass("hidden").unbind('click');
+		$("#fileinfo-link").addClass("hidden").unbind('click');
 
 		if (elem) {
-			$("#fileinfo-icon").removeClass().addClass('menu-thumb icon-' + elem.type);
+			$("#fileinfo-icon").removeClass().addClass('icon icon-' + elem.type);
 			$("#fileinfo-name").text(elem.filename);
 			$("#fileinfo-size").text(Util.byteToString(elem.size));
 			$("#fileinfo-type").text(elem.type);
 			$("#fileinfo-edit").text(Util.timestampToDate(elem.edit));
 
 			if (elem.selfshared) {
-				$("#fileinfo-link-cont").on('click', function() {
+				$("#fileinfo-link").on('click', function() {
 					FileModel.getLink(elem);
 				}).removeClass("hidden");
 			}
 			else {
-				$("#fileinfo-link-cont").addClass("hidden");
+				$("#fileinfo-link").addClass("hidden");
 			}
 			$("#fileinfo").removeClass("hidden");
 		}

@@ -72,19 +72,6 @@ var SystemController = {
 			}
 		});
 
-		$("#contextmenu .menu-item").on('click', function(e) {
-			var id = $(this).attr('id')
-			var action = id.substr(id.indexOf('-') + 1);
-
-			switch (action) {
-				case 'create':
-					Util.showPopup('createuser');
-					break;
-			}
-
-			$("#contextmenu").addClass("hidden");
-		});
-
 		$("#users-filter .close").on('click', function() {
 			UsersModel.closeFilter();
 		});
@@ -135,11 +122,15 @@ var SystemController = {
 		/**
 		 * Contextmenu action
 		 */
-		$("#contextmenu .menu-item").on('click', function(e) {
+		$("#contextmenu .menu li").on('click', function(e) {
 			var id = $(this).attr('id')
 			var action = id.substr(id.indexOf('-') + 1);
 
 			switch (action) {
+				case 'create':
+					Util.showPopup('createuser');
+					break;
+
 				case 'delete':
 					UsersModel.remove();
 					break;

@@ -26,7 +26,7 @@
 	<div class="major-wrapper">
 		<div class="major-logo" title="Logo"><div>simpleDrive</div></div>
 		<div class="error-page-text"><span class="error-page-code"><?php echo $code; ?></span><br><?php echo $msg; ?><br>Return to <a href="<?php echo $base; ?>core/login">Login</a></div>
-		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>
+		<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
 	</div>
 </body>
 </html>

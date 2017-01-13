@@ -106,15 +106,10 @@ select {
 	line-height: 80px;
 }
 
-#logo .menu-thumb {
+#logo .icon {
 	font-size: 1rem;
 	height: 80px;
-	line-height: 80px;
 	display: none;
-}
-
-.back-icon {
-	display: block !important;
 }
 
 #logo a {
@@ -125,6 +120,10 @@ select {
 
 .back {
 	margin-left: 0 !important;
+}
+
+.back .icon {
+	display: inline-block !important;
 }
 
 #username {
@@ -149,6 +148,14 @@ select {
 	width: 200px;
 }
 
+.icon {
+	font-family: icomoon;
+	text-align: center;
+	font-size: 0.8rem;
+	display: inline-block;
+	vertical-align: top;
+}
+
 /* Sidebar */
 
 #sidebar {
@@ -159,23 +166,15 @@ select {
 	float: left;
 }
 
-#sidebar .menu-item {
-	width: 200px;
-}
-
-#sidebar .menu-thumb {
+#sidebar .icon {
 	font-size: 0.7rem;
-}
-
-#sidebar .menu-text {
-	font-size: 1.1rem;
 }
 
 .focus, .focus a {
 	font-family: robotoregular, sans-serif !important;
 }
 
-.sidebar-widget {
+.widget {
 	position: relative;
 	margin-top: 20px;
 	width: 100%;
@@ -184,7 +183,7 @@ select {
 	text-align: left;
 }
 
-.sidebar-widget-row {
+.widget-row {
 	position: relative;
 	width: 100%;
 	height: 40px;
@@ -195,9 +194,22 @@ select {
 	white-space: nowrap;
 }
 
-.sidebar-widget-row.widget-text {
+.widget-row-centered {
+	margin: 0 auto;
+	text-align: center;
+}
+
+.widget-row.widget-text {
 	padding-left: 5%;
 	width: 95%;
+}
+
+.widget-icon {
+	height: 40px !important;
+	width: 40px !important;
+	font-size: 1rem !important;
+	border-radius: 20px !important;
+	cursor: pointer !important;
 }
 
 #create-menu {
@@ -211,9 +223,9 @@ select {
 }
 
 .widget-small {
-	height: 48px;
-	width: 48px;
-	line-height: 48px;
+	height: 48px !important;
+	width: 48px !important;
+	line-height: 48px !important;
 	font-family: robotoregular, sans-serif;
 	text-align: center;
 	display: none !important;
@@ -262,10 +274,7 @@ select {
 }
 
 #note-icon {
-	margin-right: 10px;
-	line-height: 20px;
-	display: inline-block;
-	float: left;
+	width: 30px;
 }
 
 #note-msg {
@@ -283,6 +292,16 @@ select {
 	width: 200px;
 	height: 100%;
 	font-family: robotolight, sans-serif;
+	font-size: 1rem;
+}
+
+.fileinfo-elem {
+	width: 100%;
+	height: 50px;
+	line-height: 50px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 #fileinfo-header {
@@ -291,30 +310,19 @@ select {
 }
 
 #fileinfo-icon {
-	position: relative;
-	height: 50px;
-	width: 50px;
-	line-height: 50px;
 	font-size: 1rem;
-	text-align: middle;
+}
+
+#fileinfo .icon {
+	width: 50px;
 }
 
 #fileinfo-name {
-	height: 50px;
-	width: 150px;
-	line-height: 50px;
-	font-family: robotolight, sans-serif;
 	font-size: 1.5rem;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-#fileinfo .menu-item:hover {
-	background-color: rgba(0,0,0,0);
 }
 
 #fileinfo-link:hover {
+	cursor: pointer;
 	font-family: robotoregular, sans-serif;
 }
 
@@ -340,16 +348,6 @@ select {
 	font-size: 1rem;
 }
 
-.clearer {
-	position: relative;
-	left: 10%;
-	width: 80%;
-	height: 1px;
-	margin-top: 20px;
-	margin-bottom: 20px;
-	clear: both;
-}
-
 /* Audio player */
 
 #audio-playpos {
@@ -362,23 +360,6 @@ select {
 	position: absolute;
 	right: 10px;
 	text-align: right;
-}
-
-.sidebar-widget-icons {
-	margin: 0 auto;
-	text-align: center;
-}
-
-.sidebar-widget-icon {
-	height: 40px;
-	width: 40px;
-	font-family: 'icomoon';
-	font-size: 1rem;
-	line-height: 40px;
-	border-radius: 20px;
-	color: #777;
-	display: inline-block;
-	cursor: pointer;
 }
 
 .progressbar {
@@ -596,48 +577,7 @@ form.popup, #confirm {
 	margin-bottom: 10px;
 }
 
-.menu-item {
-	width: 196px;
-	height: 50px;
-	line-height: 50px;
-	font-family: robotolight, sans-serif;
-	font-size: 1rem;
-	cursor: pointer;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.menu-item a {
-	font-family: robotolight, sans-serif;
-	display: block;
-}
-
-.menu-text {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.menu-thumb {
-	width: 54px;
-	height: 50px;
-	line-height: 50px;
-	font-family: icomoon;
-	text-align: center;
-	font-size: 1rem;
-	float: left;
-}
-
-.divider {
-	position: relative;
-	height: 1px;
-	width: 100%;
-	float: left;
-	clear: both;
-}
-
-#status .divider, #plugins .divider {
+#status hr, #plugins hr {
 	margin-top: 20px;
 	margin-bottom: 20px;
 }
@@ -697,14 +637,10 @@ button:disabled, button:disabled:hover {
 	position: absolute;
 	top: 10px;
 	right: 10px;
-	font-family: icomoon;
-	font-size: 0.75rem;
+	font-family: Arial;
+	font-size: 1.5rem;
 	line-height: 20px;
 	cursor: pointer;
-}
-
-.close:before {
-	content: "\e923";
 }
 
 .list-filter .close {
@@ -881,10 +817,6 @@ label {
 
 /* Settings */
 
-#status .divider {
-	margin-bottom: 20px;
-}
-
 #status, #plugins {
 	position: relative;
 	height: 100%;
@@ -1001,9 +933,9 @@ label {
 
 .row {
 	position: relative;
-	margin-bottom: 20px;
 	width: 100%;
-	clear: both;
+	display: inline-block;
+	margin: 0;
 }
 
 .row .cell {
@@ -1032,31 +964,31 @@ label {
 		margin-top: 30px;
 	}
 
-	#logo, #sidebar, #sidebar .menu-item {
-		width: 54px;
+	#logo, #sidebar, #sidebar .menu li {
+		width: 54px !important;
+	}
+
+	#logo a {
+		margin-left: 0;
 	}
 
 	#path {
 		left: 74px;
 	}
 
-	#logo .menu-thumb {
-		display: block;
+	#logo .icon {
+		display: inline-block;
 	}
 
-	#sidebar .menu-text, #logo .menu-text, #foldersize, .sidebar-widget *{
+	#foldersize, .widget *{
 		display: none;
 	}
 
 	.widget-small {
-		width: 48px;
-		height: 48px;
-		line-height: 48px;
-		text-align: center;
 		display: block !important;
 	}
 
-	.sidebar-widget {
+	.widget {
 		left: 1px !important;
 		width: 48px !important;
 		height: 48px !important;
@@ -1077,4 +1009,53 @@ label {
 .overlay-close {
 	top: 20px;
 	right: 20px;
+}
+
+.menu {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+.menu li {
+	height: 50px;
+	line-height: 50px;
+	font-family: robotolight, sans-serif;
+	font-size: 1rem;
+	cursor: pointer;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#logo .icon, .menu li .icon {
+	width: 54px;
+}
+
+.menu li a, #logo a {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#sidebar .menu li {
+	font-size: 1.1rem;
+}
+
+hr {
+	border: 0;
+	width: 100%;
+	height: 1px;
+	margin: 0;
+}
+
+.clearer {
+	position: relative;
+	left: 10%;
+	width: 80%;
+	height: 1px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	clear: both;
 }

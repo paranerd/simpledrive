@@ -45,11 +45,8 @@
 	<!-- Header -->
 	<div id="header">
 		<!-- Title -->
-		<div id="logo" class="menu-item" title="Return to files">
-			<a href="files" class="back">
-				<div class="menu-thumb back-icon icon-arrow-left"></div>
-				<span class="logo-text">Editor</span>
-			</a>
+		<div id="logo" title="Return to files">
+			<a href="files" class="back"><span class="icon icon-arrow-left"></span> Texteditor</a>
 		</div>
 		<div id="path" title="Click to rename" class="popup-trigger" data-target="rename">
 			<div id="doc-name" class="path-element path-current"></div>
@@ -71,14 +68,20 @@
 
 	<!-- Menu -->
 	<div id="menu" class="popup hidden">
-		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
-		<div class="menu-item"><a href="user"><div class="menu-thumb icon-users"></div>Settings</a></div>
-		<div class="menu-item"><a href="core/logout?token=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
+		<ul class="menu">
+			<li><a href="files"><span class="icon icon-files"></span>Files</a></li>
+			<li><a href="user"><span class="icon icon-settings"></span>Settings</a></li>
+			<?php if ($admin) : ?>
+			<li><a href="system"><span class="icon icon-admin"></span>System</a></li>
+			<?php endif; ?>
+			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><?php echo $lang['info']; ?></li>
+			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><?php echo $lang['logout']; ?></a></li>
+		</ul>
 	</div>
 
 	<!-- Rename popup -->
 	<form id="rename" class="popup center hidden" action="#">
-		<span class="close"></span>
+		<span class="close">&times;</span>
 		<div class="popup-title">Rename</div>
 
 		<label for="rename-filename">New filename</label>
@@ -92,7 +95,7 @@
 	<div id="notification" class="center-hor notification-info hidden">
 		<div id="note-icon" class="icon-info"></div>
 		<div id="note-msg"></div>
-		<span class="close"></span>
+		<span class="close">&times;</span>
 	</div>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>

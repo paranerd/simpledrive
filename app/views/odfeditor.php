@@ -44,7 +44,7 @@
 	<div id="notification" class="center-hor notification-info hidden">
 		<div id="note-icon" class="icon-info"></div>
 		<div id="note-msg"></div>
-		<span class="close"></span>
+		<span class="close">&times;</span>
 	</div>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>

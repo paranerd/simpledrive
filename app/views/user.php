@@ -39,11 +39,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	<!-- Header -->
 	<div id="header">
 		<!-- Title -->
-		<div id="logo" class="menu-item" title="Return to files">
-			<a href="files" class="back">
-				<div class="menu-thumb back-icon icon-arrow-left"></div>
-				<span class="logo-text">Settings</span>
-			</a>
+		<div id="logo" title="Return to files">
+			<a href="files" class="back"><span class="icon icon-arrow-left"></span>Settings</a>
 		</div>
 		<div id="path"><div class="path-element path-current">User Settings</div></div>
 		<div id="username" class="popup-trigger" data-target="menu"></div>
@@ -51,7 +48,9 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 
 	<!-- Sidebar -->
 	<div id="sidebar">
-		<div id="sidebar-general" class="sidebar-navigation menu-item focus" title="Status info" data-action="general"><div class="menu-thumb icon-info"></div><div class="menu-text">General</div></div>
+		<ul class="menu">
+			<li id="sidebar-general" class="sidebar-navigation focus" title="Status info" data-action="general"><span class="icon icon-info"></span> Status</li>
+		</ul>
 	</div>
 
 	<!-- Content -->
@@ -66,9 +65,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 				<div class="cell settings-label">Used</div>
 				<div class="cell" id="mem-used">Loading...</div>
 			</div>
-
-			<div class="divider"></div>
-
+			<hr>
 			<div class="settings-title">Security</div>
 			<div class="row">
 				<div class="cell settings-label">Password</div>
@@ -78,9 +75,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 				<div class="cell settings-label">Active token (<span id="active-token">0</span>)</div>
 				<div class="cell"><button id="invalidate-token">Invalidate</button></div>
 			</div>
-
-			<div class="divider"></div>
-
+			<hr>
 			<div class="settings-title">Backup</div>
 			<div class="row">
 				<div class="cell settings-label">Cloud Backup</div>
@@ -89,9 +84,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 					<button id="backup-enable-button">loading...</button>
 				</div>
 			</div>
-
-			<div class="divider"></div>
-
+			<hr>
 			<div class="settings-title">Appearance</div>
 			<div class="row">
 				<div class="cell settings-label">Color theme</div>
@@ -115,9 +108,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 					</div>
 				</div>
 			</div>
-
-			<div class="divider"></div>
-
+			<hr>
 			<div class="settings-title">Misc</div>
 			<div class="row">
 				<div class="cell settings-label multi-line">Auto-Scan<br><span class="settings-info">Scan directories to cache before listing. Disable if you only insert data through simpleDrive-Interface.</span></div>
@@ -127,20 +118,21 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 				<div class="cell settings-label">Temp Folder</div>
 				<div class="cell"><button id="clear-temp-button">Clear</button></div>
 			</div>
-
-			<div class="divider"></div>
+			<hr>
 		</div>
 	</div>
 
 	<!-- Menu -->
 	<div id="menu" class="popup hidden">
-		<div class="menu-item"><a href="files"><div class="menu-thumb icon-files"></div>Files</a></div>
-		<div class="menu-item"><a href="user"><div class="menu-thumb icon-settings"></div><?php echo $lang['settings']; ?></a></div>
-		<?php if ($admin) : ?>
-		<div class="menu-item"><a href="system"><div class="menu-thumb icon-admin"></div>System</a></div>
-		<?php endif; ?>
-		<div class="menu-item popup-trigger" data-target="info"><div class="menu-thumb icon-info"></div><?php echo $lang['info']; ?></div>
-		<div class="menu-item"><a href="core/logout?token=<?php echo $token; ?>"><div class="menu-thumb icon-logout"></div><?php echo $lang['logout']; ?></a></div>
+		<ul class="menu">
+			<li><a href="files"><span class="icon icon-files"></span>Files</a></li>
+			<li><a href="user"><span class="icon icon-settings"></span>Settings</a></li>
+			<?php if ($admin) : ?>
+			<li><a href="system"><span class="icon icon-admin"></span>System</a></li>
+			<?php endif; ?>
+			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><?php echo $lang['info']; ?></li>
+			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><?php echo $lang['logout']; ?></a></li>
+		</ul>
 	</div>
 
 	<!-- Shield -->
@@ -148,7 +140,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 
 	<!-- Backup password popup -->
 	<form id="setupbackup" class="popup center hidden" action="#">
-		<span class="close"></span>
+		<span class="close">&times;</span>
 		<div class="popup-title">Enable cloud backup</div>
 
 		<label for="setupbackup-pass1">Password</label>
@@ -168,7 +160,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 
 	<!-- User password popup -->
 	<form id="change-password" class="popup center hidden" action="#">
-		<span class="close"></span>
+		<span class="close">&times;</span>
 		<div class="popup-title">Change password</div>
 
 		<label for="change-password-pass0">Current password</label>
@@ -186,10 +178,10 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	</form>
 
 	<!-- Notification -->
-	<div id="notification" class="center-hor notification-info hidden">
-		<div id="note-icon" class="icon-info"></div>
-		<div id="note-msg"></div>
-		<span class="close"></span>
+	<div id="notification" class="popup center-hor">
+		<span id="note-icon" class="icon icon-info"></span>
+		<span id="note-msg">Error</span>
+		<span class="close">&times;</span>
 	</div>
 
 	<!-- Version info -->
@@ -197,7 +189,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<div id="info-title">simpleDrive</div>
 		<div id="info-subtitle">Private. Secure. Simple.</div>
 		<div class="clearer"></div>
-		<div id="info-footer">paranerd 2013-2016 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		<div id="info-footer">paranerd 2013-2017 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 	</div>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>

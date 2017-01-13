@@ -55,7 +55,7 @@ $enabled = isset($_SERVER['HTACCESS']);
 			<button id="submit" class="major-submit">Setup</button>
 		</form>
 
-		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>
+		<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
 	</div>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>

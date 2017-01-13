@@ -25,7 +25,7 @@
 	<div class="major-wrapper">
 		<div class="major-logo" title="Logo"><div>simpleDrive</div></div>
 		<div class="error-page-text">Logging out...<br>If you're not being redirected, click <a href="<?php echo $base; ?>core/login">here</a></div>
-		<div class="footer">simpleDrive by paranerd | 2013 - 2016</div>
+		<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
 	</div>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>

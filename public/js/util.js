@@ -80,13 +80,13 @@ var Util = {
 			if ($(this).parents('.popup').length) {
 				Util.closePopup($(this).parent().attr('id'));
 			}
-			else if ($(this).parents('.sidebar-widget').length) {
+			else if ($(this).parents('.widget').length) {
 				Util.closeWidget($(this).parent().attr('id'));
 			}
 		});
 
-		$(".popup .menu-item").on('click', function() {
-			$(this).parent().addClass("hidden");
+		$(".popup .menu li").on('click', function() {
+			$(this).closest('.popup').addClass("hidden");
 		});
 
 		$("#shield").click(function(e) {
@@ -221,19 +221,19 @@ var Util = {
 	/**
 	 * Sets the selection status for the current section
 	 */
-	sidebarFocus(id) {
+	sidebarFocus: function(id) {
 		$(".focus").removeClass("focus");
 		$("#sidebar-" + id).addClass("focus");
 	},
 
-	showCursorInfo(e, text) {
+	showCursorInfo: function(e, text) {
 		$("#cursorinfo").css({
 			'top' : e.pageY + 10,
 			'left' : e.pageX + 10
 		}).removeClass("hidden").text(text);
 	},
 
-	hideCursorInfo() {
+	hideCursorInfo: function() {
 		$("#cursorinfo").addClass("hidden");
 	},
 
@@ -281,7 +281,7 @@ var Util = {
 
 	notify: function(msg, autohide, error) {
 		var type = (error) ? "warning" : "info";
-		$("#note-icon").removeClass().addClass("icon-" + type);
+		$("#note-icon").removeClass().addClass("icon icon-" + type);
 		$("#note-msg").text(msg);
 		$("#notification").removeClass().addClass("popup center-hor notification-" + type);
 
