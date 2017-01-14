@@ -225,7 +225,7 @@ if (!$public && !$user) {
 	</form>
 
 	<!-- Share popup -->
-	<form id="share" class="popup center" action="#">
+	<form id="share" class="popup center hidden" action="#">
 		<span class="close">&times;</span>
 		<div class="popup-title"><?php echo $lang['share']; ?></div>
 
