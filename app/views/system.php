@@ -85,7 +85,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			</div>
 			<div class="row">
 				<div class="cell settings-label">Use SSL</div>
-				<div class="cell"><div class="checkbox"><div id="force-ssl2" class="checkbox-box"></div></div></div>
+				<div class="cell"><span class="checkbox"><span id="force-ssl2" class="checkbox-box"></span></span></div>
 			</div>
 			<hr>
 			<div class="settings-title">Info</div>
@@ -117,8 +117,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 				<div class="settings-title">WebODF</div>
 				<div class="cell settings-label multi-line">WebODF is a JavaScript library that makes it easy to add Open Document Format (ODF) support to your website and to your mobile or desktop application. It uses HTML and CSS to display ODF documents.</div>
 				<div class="cell">
-					<button id="get-webodf" class="plugin-install hidden" value="webodf">Download</button>
-					<button id="remove-webodf" class="plugin-remove hidden" value="webodf">Remove</button>
+					<button id="get-webodf" class="btn plugin-install hidden" value="webodf">Download</button>
+					<button id="remove-webodf" class="btn plugin-remove hidden" value="webodf">Remove</button>
 				</div>
 			</div>
 			<hr>
@@ -126,8 +126,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 				<div class="settings-title">SabreDAV</div>
 				<div class="cell settings-label multi-line">sabre/dav is an open source WebDAV server, developed by fruux and built in PHP. It is an implementation of the WebDAV protocol (with extensions for CalDAV[1] and CardDAV), providing a native PHP server implementation which operates on Apache 2 and Nginx web servers.</div>
 				<div class="cell">
-					<button id="get-sabredav" class="plugin-install hidden" value="sabredav">Download</button>
-					<button id="remove-sabredav" class="plugin-remove hidden" value="sabredav">Remove</button>
+					<button id="get-sabredav" class="btn plugin-install hidden" value="sabredav">Download</button>
+					<button id="remove-sabredav" class="btn plugin-remove hidden" value="sabredav">Remove</button>
 				</div>
 			</div>
 			<hr>
@@ -135,8 +135,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 				<div class="settings-title">PHPMailer</div>
 				<div class="cell settings-label multi-line">A full-featured email creation and transfer class for PHP</div>
 				<div class="cell">
-					<button id="get-phpmailer" class="plugin-install hidden" value="phpmailer">Download</button>
-					<button id="remove-phpmailer" class="plugin-remove hidden" value="phpmailer">Remove</button>
+					<button id="get-phpmailer" class="btn plugin-install hidden" value="phpmailer">Download</button>
+					<button id="remove-phpmailer" class="btn plugin-remove hidden" value="phpmailer">Remove</button>
 				</div>
 			</div>
 			<hr>
@@ -210,11 +210,11 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<input id="createuser-mail" type="text" placeholder="E-Mail (optional)"/>
 
 		<div class="checkbox">
-			<div id="createuser-admin" class="checkbox-box"></div>
-			<div class="checkbox-label">Admin</div>
+			<span id="createuser-admin" class="checkbox-box"></span>
+			<span class="checkbox-label">Admin</span>
 		</div>
 		<div class="error hidden"></div>
-		<button>OK</button>
+		<button class="btn">OK</button>
 	</form>
 
 	<!-- Version info -->
@@ -234,8 +234,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 
 	<div id="confirm" class="popup center hidden">
 		<div id="confirm-title" class="popup-title">Confirm</div>
-		<button id="confirm-no" class="inverted">Cancel</button>
-		<button id="confirm-yes">OK</button>
+		<button id="confirm-no" class="btn btn-inverted">Cancel</button>
+		<button id="confirm-yes" class="btn">OK</button>
 		<span class="close">&times;</span>
 	</div>
 

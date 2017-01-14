@@ -89,7 +89,7 @@ if (!$public && !$user) {
 				<div id="audio-seekbar-progress" class="progressbar-progress"></div>
 			</div>
 			<hr>
-			<div class="widget-row">
+			<div class="widget-row widget-text widget-row-centered">
 				<div id="audio-playpos">00:00</div>
 				<div id="audio-duration">00:00</div>
 			</div>
@@ -221,11 +221,11 @@ if (!$public && !$user) {
 
 		<div class="error hidden"></div>
 		<input id="create-type" type="hidden" name="type" />
-		<button>OK</button>
+		<button class="btn">OK</button>
 	</form>
 
 	<!-- Share popup -->
-	<form id="share" class="popup center hidden" action="#">
+	<form id="share" class="popup center" action="#">
 		<span class="close">&times;</span>
 		<div class="popup-title"><?php echo $lang['share']; ?></div>
 
@@ -239,25 +239,27 @@ if (!$public && !$user) {
 		<input id="share-mail" type="text" class="hidden form-hidden" placeholder="Mail (optional)">
 
 		<div class="checkbox">
-			<div id="share-write" class="checkbox-box"></div>
-			<div class="checkbox-label"><?php echo $lang['write']; ?></div>
+			<span id="share-write" class="checkbox-box"></span>
+			<span class="checkbox-label"><?php echo $lang['write']; ?></span>
 		</div>
 		<div class="checkbox">
-			<div id="share-public" class="checkbox-box toggle-hidden"></div>
-			<div class="checkbox-label"><?php echo $lang['public']; ?></div>
+			<span id="share-public" class="checkbox-box toggle-hidden"></span>
+			<span class="checkbox-label"><?php echo $lang['public']; ?></span>
 		</div>
 
 		<div class="error hidden"></div>
-		<button>OK</button>
+		<button class="btn">OK</button>
 	</form>
 
 	<!-- Image Viewer -->
 	<div id="img-viewer" class="overlay hidden">
-		<button id="img-close" class="img-control overlay-close icon-cross"></button>
-		<button id="img-delete" class="img-control icon-trash"></button>
-		<button id="img-slideshow" class="img-control icon-play"></button>
-		<button id="img-prev" class="img-control icon-prev"></button>
-		<button id="img-next" class="img-control icon-next"></button>
+		<span id="img-close" class="close close-large">&times;</span>
+
+		<button id="img-slideshow" class="btn-circle img-control overlay-action"><span class="icon icon-play"></span></button>
+		<button id="img-delete" class="btn-circle img-control overlay-action"><span class="icon icon-trash"></span></button>
+
+		<button id="img-prev" class="btn-circle img-control overlay-nav"><span class="icon icon-prev"></span></button>
+		<button id="img-next" class="btn-circle img-control overlay-nav"><span class="icon icon-next"></span></button>
 		<div id="img-title"></div>
 	</div>
 
@@ -284,7 +286,7 @@ if (!$public && !$user) {
 	</div>
 
 	<!-- Dropzone -->
-	<div id="dropzone" class="hidden">Drop to upload</div>
+	<div id="dropzone" class="overlay hidden">Drop to upload</div>
 
 	<!-- Progress circle -->
 	<div id="busy" class="hidden">busy</div>
@@ -297,8 +299,10 @@ if (!$public && !$user) {
 
 			<div id="pub-filename" class="major-subtitle hidden"></div>
 			<input id="pub-key" type="password" class="major-input hidden" placeholder="Password" autocomplete="off" autofocus />
+
 			<div id="pub-error" class="error hidden"></div>
-			<button class="major-submit">Unlock</button>
+
+			<button class="btn btn-large center-hor">Unlock</button>
 		</form>
 
 		<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>

@@ -52,7 +52,7 @@ $enabled = isset($_SERVER['HTACCESS']);
 			<input id="dbname" class="major-input major-input-small hidden form-hidden" type="text" placeholder="Database Name" value="">
 
 			<div class="error hidden"></div>
-			<button id="submit" class="major-submit">Setup</button>
+			<button id="submit" class="btn btn-large center-hor">Setup</button>
 		</form>
 
 		<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>

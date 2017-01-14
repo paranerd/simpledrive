@@ -156,17 +156,12 @@ var Util = {
 		return {score: score, text: Util.strengths[score]};
 	},
 
-	showPopup: function(id, success) {
+	showPopup: function(id) {
 		Util.closePopup(null, true);
 
 		if ($("#" + id).is('form') || id == 'info') {
 			$("#" + id + ", #shield").removeClass("hidden");
 			$("#" + id).find('*').filter(':input:visible:first').focus();
-
-			/*if (success) {
-				$("#" + id).on('submit', function(e) { e.preventDefault(); });
-				$("#" + id).on('submit', success);
-			}*/
 		}
 		else {
 			$("#" + id).removeClass("hidden");

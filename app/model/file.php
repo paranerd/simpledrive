@@ -157,7 +157,7 @@ class File_Model {
 
 	private function shrink_image($file, $width, $height) {
 		$src = $this->config['datadir'] . $file['owner'] . $file['path'];
-		$temp = $this->config['datadir'] . $file['owner'] . self::$TEMP;
+		$temp = $this->get_temp_dir($file);
 
 		if (!file_exists($temp)) {
 			return null;
@@ -406,7 +406,6 @@ class File_Model {
 	 */
 
 	public function rename($id, $newname) {
-		file_put_contents(LOG, "rename id: " . print_r($id, true) . "\n", FILE_APPEND);
 		if (preg_match('/[\/\\\\]/', $newname)) {
 			throw new Exception('Filename not allowed', '400');
 		}
@@ -987,7 +986,6 @@ class File_Model {
 	}
 
 	public function save_text($target, $msg) {
-		file_put_contents(LOG, "target: " . print_r($target, true) . "\n", FILE_APPEND);
 		$file = $this->get_cached($target, self::$PERMISSION_WRITE);
 
 		if (!$file) {

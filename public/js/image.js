@@ -162,14 +162,14 @@ var ImageManager = {
 
 	slideshow: function(forceClose) {
 		if (!ImageManager.slideshowStarted && !forceClose) {
-			$("#img-slideshow").removeClass('icon-play').addClass('icon-pause');
+			$("#img-slideshow .icon").removeClass('icon-play').addClass('icon-pause');
 			ImageManager.slide = setInterval(function () {
 				ImageManager.next(true);
 			}, 2000);
 			ImageManager.slideshowStarted = true;
 		}
 		else {
-			$("#img-slideshow").removeClass('icon-pause').addClass('icon-play');
+			$("#img-slideshow .icon").removeClass('icon-pause').addClass('icon-play');
 			ImageManager.slideshowStarted = false;
 			clearTimeout(ImageManager.slide);
 		}

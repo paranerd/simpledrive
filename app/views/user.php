@@ -69,19 +69,19 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			<div class="settings-title">Security</div>
 			<div class="row">
 				<div class="cell settings-label">Password</div>
-				<div class="cell"><button class="popup-trigger" data-target="change-password">Change</button></div>
+				<div class="cell"><button class="btn popup-trigger" data-target="change-password">Change</button></div>
 			</div>
 			<div class="row">
 				<div class="cell settings-label">Active token (<span id="active-token">0</span>)</div>
-				<div class="cell"><button id="invalidate-token">Invalidate</button></div>
+				<div class="cell"><button id="invalidate-token" class="btn">Invalidate</button></div>
 			</div>
 			<hr>
 			<div class="settings-title">Backup</div>
 			<div class="row">
 				<div class="cell settings-label">Cloud Backup</div>
 				<div class="cell">
-					<button id="backup-toggle-button" class="hidden">Start</button>
-					<button id="backup-enable-button">loading...</button>
+					<button id="backup-toggle-button" class="btn hidden">Start</button>
+					<button id="backup-enable-button" class="btn">loading...</button>
 				</div>
 			</div>
 			<hr>
@@ -112,11 +112,11 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			<div class="settings-title">Misc</div>
 			<div class="row">
 				<div class="cell settings-label multi-line">Auto-Scan<br><span class="settings-info">Scan directories to cache before listing. Disable if you only insert data through simpleDrive-Interface.</span></div>
-				<div class="cell"><div class="checkbox"><div id="autoscan" class="checkbox-box"></div></div></div>
+				<div class="cell"><div class="checkbox"><span id="autoscan" class="checkbox-box"></span></span></div>
 			</div>
 			<div class="row">
 				<div class="cell settings-label">Temp Folder</div>
-				<div class="cell"><button id="clear-temp-button">Clear</button></div>
+				<div class="cell"><button id="clear-temp-button" class="btn">Clear</button></div>
 			</div>
 			<hr>
 		</div>
@@ -155,7 +155,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			<div class="checkbox-label">Encrypt filenames</div>
 		</div>
 		<div class="error hidden"></div>
-		<button>OK</button>
+		<button class="btn">OK</button>
 	</form>
 
 	<!-- User password popup -->
@@ -174,7 +174,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<input id="change-password-pass2" type="password" placeholder="New password (repeat)"></input>
 
 		<div class="error hidden"></div>
-		<button>OK</button>
+		<button class="btn">OK</button>
 	</form>
 
 	<!-- Notification -->

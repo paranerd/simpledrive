@@ -761,7 +761,7 @@ var FileView = {
 
 			if (s > 0) {
 				var pathSep = document.createElement("span");
-				pathSep.className = "path-seperator";
+				pathSep.className = "path-element path-seperator";
 				pathSep.innerHTML = "&#x25B8";
 				$("#path").append(pathSep);
 			}

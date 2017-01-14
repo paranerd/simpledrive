@@ -88,7 +88,7 @@
 		<input id="rename-filename" type="text" placeholder="Filename" autocomplete="off" autofocus>
 
 		<div class="error hidden"></div>
-		<button>Rename</button>
+		<button class="btn">Rename</button>
 	</form>
 
 	<!-- Notification -->

@@ -37,7 +37,7 @@ $demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'
 
 			<div class="error hidden"></div>
 
-			<button id="submit" class="major-submit">Login</button>
+			<button id="submit" class="btn btn-large center-hor">Login</button>
 		</form>
 
 		<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
