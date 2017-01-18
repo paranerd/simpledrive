@@ -2,7 +2,7 @@
 
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2016, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		http://simpledrive.org
  */
@@ -34,7 +34,7 @@ class Response {
 
 	// Set interface language
 	static private function lang() {
-		$lang_code = (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && in_array($_SERVER['HTTP_ACCEPT_LANGUAGE'], array('de', 'en'))) ? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en';
+		$lang_code = (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && file_exists('lang/' . substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) . '.json')) ? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en';
 		return json_decode(file_get_contents('lang/' . $lang_code . '.json'), true);
 	}
 

@@ -2,7 +2,7 @@
 
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2016, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		http://simpledrive.org
  */
@@ -226,7 +226,7 @@ if (!$public && !$user) {
 	</form>
 
 	<!-- Share popup -->
-	<form id="share" class="popup center" action="#">
+	<form id="share" class="popup center hidden" action="#">
 		<span class="close">&times;</span>
 		<div class="popup-title"><?php echo $lang['share']; ?></div>
 
