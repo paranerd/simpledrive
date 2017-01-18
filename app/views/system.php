@@ -58,39 +58,39 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	<div id="content">
 		<!-- Status -->
 		<div id="status" class="hidden">
-			<div class="settings-title">General</div>
+			<h2>General</h2>
 			<div class="row">
-				<div class="cell settings-label">Users</div>
+				<div class="cell">Users</div>
 				<div class="cell" id="users-count">Loading...</div>
 			</div>
 			<div class="row">
-				<div class="cell settings-label">Upload max</div>
+				<div class="cell">Upload max</div>
 				<div class="cell"><input id="upload-max" value="Loading..."></div>
 			</div>
 			<hr>
-			<div class="settings-title">Storage</div>
+			<h2>Storage</h2>
 			<div class="row">
-				<div class="cell settings-label">Total</div>
+				<div class="cell">Total</div>
 				<div class="cell" id="storage-total">Loading...</div>
 			</div>
 			<div class="row">
-				<div class="cell settings-label">Used</div>
+				<div class="cell">Used</div>
 				<div class="cell" id="storage-used">Loading...</div>
 			</div>
 			<hr>
-			<div class="settings-title">Connection</div>
+			<h2>Connection</h2>
 			<div class="row">
-				<div class="cell settings-label">Public domain</div>
+				<div class="cell">Public domain</div>
 				<div class="cell"><input id="domain" value="Loading..."></div>
 			</div>
 			<div class="row">
-				<div class="cell settings-label">Use SSL</div>
+				<div class="cell">Use SSL</div>
 				<div class="cell"><span class="checkbox"><span id="force-ssl2" class="checkbox-box"></span></span></div>
 			</div>
 			<hr>
-			<div class="settings-title">Info</div>
+			<h2>Info</h2>
 			<div class="row">
-				<div class="cell settings-label">Version</div>
+				<div class="cell">Version</div>
 				<div class="cell" id="status-version">Loading...</div>
 			</div>
 			<hr>
@@ -114,8 +114,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<!-- Plugins -->
 		<div id="plugins" class="hidden">
 			<div class="row">
-				<div class="settings-title">WebODF</div>
-				<div class="cell settings-label multi-line">WebODF is a JavaScript library that makes it easy to add Open Document Format (ODF) support to your website and to your mobile or desktop application. It uses HTML and CSS to display ODF documents.</div>
+				<h2>WebODF</h2>
+				<div class="cell multi-line">WebODF is a JavaScript library that makes it easy to add Open Document Format (ODF) support to your website and to your mobile or desktop application. It uses HTML and CSS to display ODF documents.</div>
 				<div class="cell">
 					<button id="get-webodf" class="btn plugin-install hidden" value="webodf">Download</button>
 					<button id="remove-webodf" class="btn plugin-remove hidden" value="webodf">Remove</button>
@@ -123,8 +123,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			</div>
 			<hr>
 			<div class="row columns2">
-				<div class="settings-title">SabreDAV</div>
-				<div class="cell settings-label multi-line">sabre/dav is an open source WebDAV server, developed by fruux and built in PHP. It is an implementation of the WebDAV protocol (with extensions for CalDAV[1] and CardDAV), providing a native PHP server implementation which operates on Apache 2 and Nginx web servers.</div>
+				<h2>SabreDAV</h2>
+				<div class="cell multi-line">sabre/dav is an open source WebDAV server, developed by fruux and built in PHP. It is an implementation of the WebDAV protocol (with extensions for CalDAV[1] and CardDAV), providing a native PHP server implementation which operates on Apache 2 and Nginx web servers.</div>
 				<div class="cell">
 					<button id="get-sabredav" class="btn plugin-install hidden" value="sabredav">Download</button>
 					<button id="remove-sabredav" class="btn plugin-remove hidden" value="sabredav">Remove</button>
@@ -132,8 +132,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			</div>
 			<hr>
 			<div class="row">
-				<div class="settings-title">PHPMailer</div>
-				<div class="cell settings-label multi-line">A full-featured email creation and transfer class for PHP</div>
+				<h2>PHPMailer</h2>
+				<div class="cell multi-line">A full-featured email creation and transfer class for PHP</div>
 				<div class="cell">
 					<button id="get-phpmailer" class="btn plugin-install hidden" value="phpmailer">Download</button>
 					<button id="remove-phpmailer" class="btn plugin-remove hidden" value="phpmailer">Remove</button>
@@ -221,7 +221,10 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	<div id="info" class="popup center hidden">
 		<div id="info-title">simpleDrive</div>
 		<div id="info-subtitle">Private. Secure. Simple.</div>
+<!--
 		<div class="clearer"></div>
+-->
+		<hr>
 		<div id="info-footer">paranerd 2013-2017 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 	</div>
 

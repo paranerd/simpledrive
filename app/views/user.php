@@ -56,38 +56,38 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	<!-- Content -->
 	<div id="content">
 		<div id="status">
-			<div class="settings-title">Quota</div>
+			<h2>Quota</h2>
 			<div class="row">
-				<div class="cell settings-label">Total</div>
+				<div class="cell">Total</div>
 				<div class="cell" id="mem-total">Loading...</div>
 			</div>
 			<div class="row">
-				<div class="cell settings-label">Used</div>
+				<div class="cell">Used</div>
 				<div class="cell" id="mem-used">Loading...</div>
 			</div>
 			<hr>
-			<div class="settings-title">Security</div>
+			<h2>Security</h2>
 			<div class="row">
-				<div class="cell settings-label">Password</div>
+				<div class="cell">Password</div>
 				<div class="cell"><button class="btn popup-trigger" data-target="change-password">Change</button></div>
 			</div>
 			<div class="row">
-				<div class="cell settings-label">Active token (<span id="active-token">0</span>)</div>
+				<div class="cell">Active token (<span id="active-token">0</span>)</div>
 				<div class="cell"><button id="invalidate-token" class="btn">Invalidate</button></div>
 			</div>
 			<hr>
-			<div class="settings-title">Backup</div>
+			<h2>Backup</h2>
 			<div class="row">
-				<div class="cell settings-label">Cloud Backup</div>
+				<div class="cell">Cloud Backup</div>
 				<div class="cell">
 					<button id="backup-toggle-button" class="btn hidden">Start</button>
 					<button id="backup-enable-button" class="btn">loading...</button>
 				</div>
 			</div>
 			<hr>
-			<div class="settings-title">Appearance</div>
+			<h2>Appearance</h2>
 			<div class="row">
-				<div class="cell settings-label">Color theme</div>
+				<div class="cell">Color theme</div>
 				<div class="cell">
 					<div class="selector">
 						<select id="color">
@@ -98,7 +98,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 				</div>
 			</div>
 			<div class="row">
-				<div class="cell settings-label">Fileview</div>
+				<div class="cell">Fileview</div>
 				<div class="cell">
 					<div class="selector">
 						<select id="fileview">
@@ -109,13 +109,13 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 				</div>
 			</div>
 			<hr>
-			<div class="settings-title">Misc</div>
+			<h2>Misc</h2>
 			<div class="row">
-				<div class="cell settings-label multi-line">Auto-Scan<br><span class="settings-info">Scan directories to cache before listing. Disable if you only insert data through simpleDrive-Interface.</span></div>
-				<div class="cell"><div class="checkbox"><span id="autoscan" class="checkbox-box"></span></span></div>
+				<div class="cell multi-line">Auto-Scan<br><span class="settings-info">Scan directories to cache before listing. Disable if you only insert data through simpleDrive-Interface.</span></div>
+				<div class="cell"><span class="checkbox"><span id="autoscan" class="checkbox-box"></span></span></div>
 			</div>
 			<div class="row">
-				<div class="cell settings-label">Temp Folder</div>
+				<div class="cell">Temp Folder</div>
 				<div class="cell"><button id="clear-temp-button" class="btn">Clear</button></div>
 			</div>
 			<hr>

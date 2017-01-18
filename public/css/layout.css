@@ -36,6 +36,11 @@ a {
 	text-decoration: none;
 }
 
+h2 {
+	font-size: 1.5rem;
+	font-family: robotolight, sans-serif !important;
+}
+
 input {
 	font-family: robotolight, sans-serif;
 	font-size: 1rem;
@@ -147,16 +152,6 @@ hr {
 
 .password-strength {
 	margin-bottom: 20px;
-}
-
-.clearer {
-	position: relative;
-	left: 10%;
-	width: 80%;
-	height: 1px;
-	margin-top: 20px;
-	margin-bottom: 20px;
-	clear: both;
 }
 
 .overlay {
@@ -573,6 +568,93 @@ label {
 	text-align: center;
 }
 
+/* Content - Settings */
+
+#status, #plugins {
+	position: relative;
+	height: 100%;
+	width: 98%;
+	font-size: 1.2rem;
+	font-family: robotolight, sans-serif;
+	font-family: robotoregular;
+	overflow: hidden;
+	padding-left: 2%;
+}
+
+#status hr, #plugins, #info hr {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	width: 98%;
+}
+
+#info hr {
+	margin-top: 20px;
+	margin-bottom: 20px;
+	margin-left: 5%;
+	width: 90%;
+}
+
+.cell input {
+	width: 200px;
+	padding-left: 10px;
+}
+
+.settings-info {
+	font-family: robotolight, sans-serif;
+	font-size: 1.1rem;
+}
+
+#log-page-selector {
+	position: absolute;
+	top: 5px;
+	right: 50px;
+}
+
+.row {
+	position: relative;
+	margin: 0;
+	width: 100%;
+	display: inline-block;
+}
+
+.row .cell {
+	position: relative;
+	padding-left: 1%;
+	width: 49%;
+	height: 50px;
+	line-height: 50px;
+	font-family: robotolight, sans-serif;
+	float: left;
+}
+
+.cell.multi-line {
+	height: 100%;
+	line-height: 40px;
+}
+
+.cell input {
+	height: 100%;
+}
+
+/* Content - Editor */
+
+#doc-savestatus {
+	font-size: 1rem;
+	margin-left: 5px;
+}
+
+#texteditor {
+	position: relative;
+	padding-top: 20px;
+	padding-left: 1%;
+	padding-right: 1%;
+	width: 98%;
+	padding: none;
+	outline: 0px solid transparent;
+	font-family: monospace;
+	border: none;
+}
+
 #editor-container {
 	width: 100%;
 	height: 100%;
@@ -788,25 +870,6 @@ form.popup, #confirm {
 	width: 15px;
 }
 
-/* Text Editor */
-
-#doc-savestatus {
-	font-size: 1rem;
-	margin-left: 5px;
-}
-
-#texteditor {
-	position: relative;
-	padding-top: 20px;
-	padding-left: 1%;
-	padding-right: 1%;
-	width: 98%;
-	padding: none;
-	outline: 0px solid transparent;
-	font-family: monospace;
-	border: none;
-}
-
 /* Login, Setup, Public */
 
 .major-wrapper {
@@ -879,78 +942,6 @@ form.popup, #confirm {
 	font-family: robotoregular, sans-serif;
 }
 
-/* Settings */
-
-#status, #plugins {
-	position: relative;
-	height: 100%;
-	width: 100%;
-	font-size: 1.2rem;
-	font-family: robotolight, sans-serif;
-	overflow: hidden;
-}
-
-#status hr, #plugins hr {
-	margin-top: 20px;
-	margin-bottom: 20px;
-}
-
-.settings-title {
-	margin-left: 2%;
-	height: 50px;
-	width: 98%;
-	float: left;
-	clear: both;
-	font-family: robotoregular, sans-serif;
-	font-size: 1.5rem;
-	line-height: 50px;
-}
-
-.settings-label {
-	font-family: robotolight, sans-serif
-}
-
-.cell input {
-	width: 200px;
-	padding-left: 10px;
-}
-
-.settings-info {
-	font-size: 1.1rem;
-}
-
-#log-page-selector {
-	position: absolute;
-	top: 5px;
-	right: 50px;
-}
-
-.row {
-	position: relative;
-	width: 100%;
-	display: inline-block;
-	margin: 0;
-}
-
-.row .cell {
-	position: relative;
-	padding-left: 3%;
-	margin-top: 10px;
-	width: 47%;
-	height: 50px;
-	line-height: 50px;
-	float: left;
-}
-
-.cell.multi-line {
-	height: 100%;
-	line-height: 40px;
-}
-
-.cell input {
-	height: 100%;
-}
-
 /* Animations */
 
 @keyframes flip-animation {
@@ -987,7 +978,7 @@ form.popup, #confirm {
 		display: inline-block !important;
 	}
 
-	#foldersize, .widget *{
+	#foldersize, .widget * {
 		display: none;
 	}
 

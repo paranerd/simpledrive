@@ -81,7 +81,7 @@ if (!$public && !$user) {
 		</div>
 
 		<!-- Audio Player -->
-		<div id="audioplayer" class="widget hidden">
+		<div id="audioplayer" class="widget">
 			<div id="audio-title" class="widget-row widget-text widget-title"></div>
 			<hr>
 			<div id="audio-seekbar" class="progressbar">
@@ -114,6 +114,7 @@ if (!$public && !$user) {
 
 		<!-- Folder size -->
 		<div id="sidebar-footer">
+			<hr>
 			<span id="scan" class="icon icon-sync"></span>
 			<span id="foldersize"></span>
 		</div>
@@ -225,7 +226,7 @@ if (!$public && !$user) {
 	</form>
 
 	<!-- Share popup -->
-	<form id="share" class="popup center hidden" action="#">
+	<form id="share" class="popup center" action="#">
 		<span class="close">&times;</span>
 		<div class="popup-title"><?php echo $lang['share']; ?></div>
 

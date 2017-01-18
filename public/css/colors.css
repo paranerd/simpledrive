@@ -10,12 +10,17 @@
 input {
 	outline: 0px solid transparent;
 	border: 1px solid grey;
+	background-color: rgba(0,0,0,0);
+}
+
+h2 {
+	color: #2e8b5e;
 }
 
 .btn {
-	border: 1px solid #2e8b5e;
 	color: white;
 	background-color: #2e8b5e;
+	border: 1px solid #2e8b5e;
 	outline: 0px solid transparent;
 }
 
@@ -38,17 +43,13 @@ input {
 }
 
 .btn-inverted {
-	background-color: white;
 	color: #2e8b5e;
+	background-color: white;
 	border: 1px solid #2e8b5e;
 }
 
 .btn-inverted:hover {
 	background-color: #eee;
-}
-
-.settings-title {
-	color: #2e8b5e;
 }
 
 .overlay {
@@ -62,22 +63,15 @@ input {
 }
 
 .overlay-action:hover, .overlay-nav:hover {
-/*
-	border: 2px solid #2e8b5e;
-*/
 	color: #2e8b5e;
 	background-color: rgba(255,255,255,0.2);
-}
-
-.major-wrapper {
-	background-color: #303030;
 }
 
 .error-page-code {
 	color: #2e8b5e;
 }
 
-.major-title, .major-subtitle, .major-logo {
+.major-subtitle {
 	color: white;
 }
 
@@ -90,18 +84,13 @@ input {
 }
 
 .major-input {
-	background-color: rgba(0,0,0,0);
 	color: #b3b3b3;
 	border: none !important;
 	border-bottom: 1px dotted #b3b3b3 !important;
 }
 
-.footer {
-	color: #555;
-}
-
 .password-ok {
-	color: white;
+	color: green;
 }
 
 .password-bad {
@@ -121,20 +110,20 @@ input {
 	border-left: 4px solid #2e8b5e;
 }
 
-.shared {
+.popup-title {
 	color: #2e8b5e;
 }
 
 .notification-info {
 	color: #2e8b5e !important;
-	background-color: #E0EEE0 !important;
+	background-color: #e0eee0 !important;
 	border: 1px solid #2e8b5e !important;
 }
 
 .notification-warning {
-	color: #8B4500 !important;
-	background-color: #F4A460 !important;
-	border: 1px solid #8B4500 !important;
+	color: #8b4500 !important;
+	background-color: #f4a460 !important;
+	border: 1px solid #8b4500 !important;
 }
 
 .notification-info .close {
@@ -169,20 +158,8 @@ input {
 	background-color: #2e8b5e;
 }
 
-.empty {
-	color: #2e8b5e;
-}
-
-#fileinfo-icon, #fileinfo-name, #fileinfo-link {
-	color: #2e8b5e;
-}
-
 .checkbox-box {
 	border: 1px solid #8c8c8c;
-}
-
-.error-page-text, .error-page-text a {
-	color: #b3b3b3;
 }
 
 #img-title, .img-title {
@@ -201,10 +178,6 @@ input {
 	background-color: white;
 }
 
-.popup-title {
-	color: #2e8b5e;
-}
-
 .error {
 	color: red;
 }
@@ -215,26 +188,8 @@ input {
 	color: white;
 }
 
-.widget-title {
-	color: #2e8b5e;
-}
-
-.widget-icon {
-	color: #777;
-}
-
-.widget-icon:hover {
-	color: white;
-	background-color: #2e8b5e;
-}
-
-.popup input {
-	color: grey;
-	background-color: white;
-}
-
 .highlight {
-	background-color: #FF7722;
+	background-color: #ff7722;
 }
 
 #dropzone {
@@ -248,22 +203,20 @@ input {
 	color: #2e8b5e;
 }
 
-.scrollbar {
-	background-color: rgba(170,170,170,0.4);
-}
-
-.scrollbar:hover {
-	background-color: rgba(170,170,170,1);
-}
-
-#texteditor {
-	color: black;
-	background-color: white;
-}
+/* General - Sidebar */
 
 .trashact {
 	color: white;
 	background-color: rgba(255,0,0,0.3);
+}
+
+.widget-title {
+	color: #2e8b5e;
+}
+
+.widget-icon:hover {
+	color: white;
+	background-color: #2e8b5e;
 }
 
 /* General - Content */
@@ -285,7 +238,36 @@ input {
 	border: 2px solid white;
 }
 
-/* General - List */
+#renameinput {
+	background-color: white;
+}
+
+.scrollbar {
+	background-color: rgba(170,170,170,0.4);
+}
+
+.scrollbar:hover {
+	background-color: rgba(170,170,170,1);
+}
+
+#texteditor {
+	color: black;
+	background-color: white;
+}
+
+.empty {
+	color: #2e8b5e;
+}
+
+.shared {
+	color: #2e8b5e;
+}
+
+#fileinfo-icon, #fileinfo-name, #fileinfo-link {
+	color: #2e8b5e;
+}
+
+/* General - Content - List */
 
 .list-filter {
 	color: #555;
@@ -293,11 +275,7 @@ input {
 	background-color: white;
 }
 
-.list-filter-input {
-	background-color: rgba(0,0,0,0);
-}
-
-/* General - Grid */
+/* General - Content - Grid */
 
 .grid .col1 {
 	background-color: rgba(0,0,0,0.3);
@@ -319,17 +297,12 @@ body.light {
 	background-color: white;
 }
 
-.light .menu li, .light .menu li a {
+body.light, body.light a {
 	color: #555;
 }
 
 .light .menu li:hover, .light li a:hover {
 	background-color: #eee;
-	color: #555 !important;
-}
-
-.light .settings-label {
-	color: #555;
 }
 
 .light select {
@@ -348,10 +321,6 @@ body.light {
 	border-top: 1px solid #ccc;
 }
 
-.light .selector-label {
-	color: #555;
-}
-
 .light #shield {
 	background-color: rgba(242,242,242,0.7);
 }
@@ -362,14 +331,8 @@ body.light {
 
 .light .popup {
 	background-color: white;
-	color: #555;
 	border: 1px solid #ccc;
 	box-shadow: 0px 0px 15px 3px rgba(0,0,0,0.2) !important;
-}
-
-.light #loading {
-	background-color: rgba(255,255,255,0.9);
-	border: 1px solid #bbb;
 }
 
 .light .close {
@@ -380,20 +343,8 @@ body.light {
 	color: #555 !important;
 }
 
-.light hr, .light .clearer {
+.light hr {
 	background-color: #bbb;
-}
-
-.light .checkbox-label {
-	color: #555;
-}
-
-.light #info {
-	color: #555;
-}
-
-.light #status, .light #plugins {
-	color: #555;
 }
 
 .light #busy {
@@ -403,16 +354,15 @@ body.light {
 /* Light - Header */
 
 .light #header {
-	color: white;
 	background-color: #2e8b5e;
+}
+
+.light #header, .light #header a {
+	color: white;
 }
 
 .light #logo {
 	border-right: 1px solid #ccc;
-}
-
-.light #logo, .light #logo a {
-	color: white;
 }
 
 .light #logo .back:hover {
@@ -429,15 +379,12 @@ body.light {
 }
 
 .light .path-element:not(.path-seperator):hover {
-	border-bottom: 1px solid #FF7722;
 	color: white;
 }
 
 /* Light - Sidebar */
 
 .light #sidebar {
-	color: #575757;
-	background-color: white;
 	border-right: 1px solid #ccc;
 }
 
@@ -447,14 +394,12 @@ body.light {
 }
 
 .light .widget {
-	color: #555;
 	background-color: #eee;
 	border-top: 1px solid #bbb;
 	border-bottom: 1px solid #bbb;
 }
 
 .light #sidebar-footer {
-	color: #555;
 	border-top: 1px solid lightgrey;
 }
 
@@ -466,16 +411,14 @@ body.light {
 /* Light - Content */
 
 .light #content {
-	background-color: white;
+	color: #555;
 }
 
 .light #fileinfo {
-	color: #555;
 	border-left: 1px solid lightgrey;
 }
 
 .light .item {
-	color: #555;
 	border: 0px solid transparent;
 	border-bottom: 1px solid #e0e0e0;
 	background-color: rgba(0,0,0,0);
@@ -486,15 +429,7 @@ body.light {
 	border: 2px solid white;
 }
 
-.light .fileinfo-elem {
-	color: #555;
-}
-
 /* Light - Content - List */
-
-.light .list-filter, .light .list-header {
-	color: #555;
-}
 
 .light .list-header {
 	border-bottom: 1px solid #bbb;
@@ -533,12 +468,12 @@ body.dark {
 	background-color: #303030;
 }
 
-.dark .item:hover {
-	background-color: #555;
+body.dark, body.dark a {
+	color: #b3b3b3;
 }
 
 .dark select {
-	color: #eee;
+	color: #ccc;
 	border: 1px solid #555;
 	background-color: #303030;
 }
@@ -551,12 +486,7 @@ body.dark {
 	color: #eee;
 }
 
-.dark .empty {
-	color: #8c8c8c;
-}
-
 .dark .popup {
-	color: #bcbcbc;
 	background-color: #444;
 	box-shadow: 0 3px 9px rgba(0,0,0,.5);
 }
@@ -565,15 +495,12 @@ body.dark {
 	color: #b3b3b3 !important;
 	border: none !important;
 	border-bottom: 1px dotted #2e8b5e !important;
-	background-color: rgba(0,0,0,0);
-}
-
-.dark .checkbox-label {
-	color: #bcbcbc;
 }
 
 .dark .menu li, .dark .menu li a {
+/*
 	color: #b3b3b3;
+*/
 }
 
 .dark .menu li:hover, .dark li a:hover {
@@ -582,22 +509,18 @@ body.dark {
 }
 
 .dark .close {
-	color: #888;
+	color: #b3b3b3;
 }
 
 .dark .close:hover {
-	color: #aaa;
+	color: #ccc;
 }
 
-.dark hr, .dark .clearer {
+.dark hr {
 	background-color: #555;
 }
 
 .dark #info {
-	color: #eee;
-}
-
-.dark #status, .dark #plugins {
 	color: #eee;
 }
 
@@ -610,19 +533,14 @@ body.dark {
 }
 
 .dark .cell input {
+	color: #ccc;
 	background-color: rgba(0,0,0,0);
-	color: #eee;
 	border: 1px solid #555;
-}
-
-.dark .settings-label {
-	color: white;
 }
 
 /* Dark - Header */
 
 .dark #header {
-	color: #b3b3b3;
 	background-color: #303030;
 }
 
@@ -630,12 +548,12 @@ body.dark {
 	border-right: 1px solid #555;
 }
 
-.dark #logo .back:hover {
-	background-color: #555;
-}
-
 .dark #logo, .dark #logo a {
 	color: #2e8b5e;
+}
+
+.dark #logo .back:hover {
+	background-color: #555;
 }
 
 .dark .path-element, .dark .path-seperator {
@@ -667,52 +585,38 @@ body.dark {
 }
 
 .dark .widget {
-	color: #aaa;
 	border-top: 1px solid #555;
 	border-bottom: 1px solid #555;
 	background-color: #393939;
 }
 
-.dark #sidebar-footer {
-	color: #aaa;
-	border-top: 1px solid #555;
-}
-
 /* Dark - Content */
 
+.dark #content {
+	color: #ccc;
+	background-color: #303030;
+	font-family: robotoregular;
+}
 .dark .thumbnail {
-	color: #bcbcbc;
 	border: 2px solid transparent;
 }
 
 .dark .item {
-	color: #ccc;
 	border-bottom: 1px solid #444;
 }
 
-.dark #content {
-	background-color: #303030;
-}
-
-.dark .fileinfo-elem {
-	color: white;
+.dark .item:hover {
+	background-color: #555;
 }
 
 .dark #fileinfo {
-	color: #eee;
 	border-left: 1px solid #555;
 	background-color: #303030;
-}
-
-.dark #loading {
-	background-color: #202020;
-	border: 1px solid #393939;
 }
 
 /* Dark - Content - List */
 
 .dark .list-header, .dark .list-filter {
-	color: #aaa;
 	border-bottom: 1px solid #555;
 }
 
@@ -724,7 +628,6 @@ body.dark {
 /* Dark - Content - Grid */
 
 .dark .grid .item:hover .thumbnail {
-	color: white;
 	background-color: #444;
 }
 

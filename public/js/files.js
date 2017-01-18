@@ -283,7 +283,6 @@ var FileController = {
 		 * Contextmenu action
 		 */
 		$("#contextmenu .menu li").on('click', function(e) {
-			console.log("click");
 			var id = $(this).attr('id')
 			var action = id.substr(id.indexOf('-') + 1);
 
