@@ -141,7 +141,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	<!-- Backup password popup -->
 	<form id="setupbackup" class="popup center hidden" action="#">
 		<span class="close">&times;</span>
-		<div class="popup-title">Enable cloud backup</div>
+		<div class="title">Enable cloud backup</div>
 
 		<label for="setupbackup-pass1">Password</label>
 		<input id="setupbackup-pass1" class="password-check" data-strength="backup-strength" type="password" placeholder="Password" />
@@ -161,7 +161,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	<!-- User password popup -->
 	<form id="change-password" class="popup center hidden" action="#">
 		<span class="close">&times;</span>
-		<div class="popup-title">Change password</div>
+		<div class="title">Change password</div>
 
 		<label for="change-password-pass0">Current password</label>
 		<input id="change-password-pass0" type="password" placeholder="Current password"></input>
@@ -186,9 +186,10 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<div id="info-title">simpleDrive</div>
-		<div id="info-subtitle">Private. Secure. Simple.</div>
-		<div class="clearer"></div>
+		<span class="close">&times;</span>
+		<div id="info-title" class="title title-large">simpleDrive</div>
+		<div class="subtitle">Private. Secure. Simple.</div>
+		<hr>
 		<div id="info-footer">paranerd 2013-2017 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 	</div>
 

@@ -655,12 +655,12 @@ var UsersModel = {
 
 		var form = document.createElement('form');
 		form.id = "user-quota-total-change-form";
-		form.className = "renameform col3";
+		form.className = "col3";
 		$("#item" + id + " .col3").append(form);
 
 		var input = document.createElement('input');
 		input.id = "user-quota-total-change";
-		input.className = "renameinput";
+		input.className = "input-full-border";
 		input.autocomplete = "off";
 		form.appendChild(input);
 

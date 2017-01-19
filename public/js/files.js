@@ -680,12 +680,11 @@ var FileView = {
 
 		var form = document.createElement('form');
 		form.id = "renameform";
-		form.className = "renameform col1";
+		form.className = "col1";
 		$("#item" + elem.id + " .col1").append(form);
 
 		var input = document.createElement('input');
 		input.id = "renameinput";
-		input.className = "renameinput";
 		input.autocomplete = "off";
 		form.appendChild(input);
 
@@ -1123,7 +1122,7 @@ var FileModel = {
 	init: function(id, public) {
 		FileModel.id = id;
 		FileModel.public = public;
-		var isHash = (FileModel.id.length == 8);
+		var isHash = (FileModel.id.toString().length == 8);
 
 		if (FileView.view == 'pub' && (isHash)) {
 			FileModel.loadPublic();
@@ -1161,10 +1160,10 @@ var FileModel = {
 			}
 			else {
 				$("#pubfile").removeClass("hidden");
-				$("#pub-key, #pub-error").addClass("hidden");
+				$("#pub-key").addClass("hidden");
 				FileModel.filtered = [data.msg.share];
 				$("#pub-filename").removeClass("hidden").text(data.msg.share.filename);
-				$("#pubfile button").val("Download");
+				$("#pubfile button").text("Download");
 				FileModel.downloadPub = true;
 			}
 			$(window).resize();
@@ -1180,8 +1179,8 @@ var FileModel = {
 			}
 			else {
 				$("#pub-key, #pubfile button").addClass("hidden");
-				$("#pubfile, #pub-error").removeClass("hidden");
-				$("#pub-error").text(parsedError);
+				$("#pubfile").removeClass("hidden");
+				Util.showFormError('load-public', parsedError);
 			}
 			$(window).resize();
 		});

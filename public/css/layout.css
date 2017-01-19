@@ -42,9 +42,32 @@ h2 {
 }
 
 input {
+	margin: 0;
+	margin-bottom: 10px;
+	padding: 0;
+	height: 50px;
+	width: 100%;
+	text-align: left;
 	font-family: robotolight, sans-serif;
-	font-size: 1rem;
+	font-size: 1.2rem;
 	border-radius: 3px;
+}
+
+.input-medium {
+	margin-bottom: 15px;
+	font-size: 1.5rem;
+}
+
+.input-large {
+	margin-bottom: 20px;
+	height: 55px;
+	border-radius: 0px;
+	font-size: 2rem;
+}
+
+.input-indent {
+	padding-left: 1% !important;
+	width: 99% !important;
 }
 
 select {
@@ -97,6 +120,7 @@ hr {
 }
 
 .btn-large {
+	margin-top: 10px;
 	width: 200px;
 	height: 50px;
 	font-size: 1.3rem;
@@ -202,6 +226,10 @@ hr {
 	font-family: robotoregular, sans-serif;
 	font-size: 1rem;
 	border-radius: 3px;
+}
+
+.error-large {
+	font-size: 1.3rem;
 }
 
 .close {
@@ -531,21 +559,6 @@ label {
 	position: relative;
 	height: 50px;
 	width: 100%;
-	line-height: 50px;
-	font-size: 1rem;
-	font-family: robotoregular, sans-serif;
-}
-
-.list-filter-input {
-	height: 100%;
-	width: 99%;
-	padding-left: 1%;
-	border: none;
-	border-radius: 0px;
-}
-
-.list-filter .close {
-	line-height: 30px;
 }
 
 .list-footer {
@@ -581,7 +594,7 @@ label {
 	padding-left: 2%;
 }
 
-#status hr, #plugins, #info hr {
+#status hr, #plugins hr {
 	margin-top: 10px;
 	margin-bottom: 10px;
 	width: 98%;
@@ -630,10 +643,6 @@ label {
 .cell.multi-line {
 	height: 100%;
 	line-height: 40px;
-}
-
-.cell input {
-	height: 100%;
 }
 
 /* Content - Editor */
@@ -741,11 +750,14 @@ label {
 }
 
 #info-title {
-	font-size: 2.5rem;
+	margin: 0;
 }
 
-#info-subtitle {
+.subtitle {
+	margin-top: 10px;
+	margin-bottom: 10px;
 	font-size: 1.5rem;
+	font-family: robotolight, sans-serif;
 }
 
 #info-footer {
@@ -835,25 +847,17 @@ form.popup, #confirm {
 	padding: 30px;
 }
 
-.popup-title {
+.title {
 	margin: 0;
 	margin-bottom: 20px;
-	width: 80%;
+	width: 100%;
 	padding: 0;
-	font-size: 1.8rem;
+	font-size: 2rem;
 	font-family: robotolight, sans-serif;
 }
 
-.popup input {
-	margin: 0;
-	margin-bottom: 10px;
-	padding: 0;
-	padding-left: 5%;
-	height: 50px;
-	width: 95%;
-	text-align: left;
-	font-family: robotoregular, sans-serif;
-	font-size: 1.1rem;
+.title-large {
+	font-size: 2.5rem;
 }
 
 /* Scrollbar */
@@ -896,38 +900,6 @@ form.popup, #confirm {
 	line-height: 50px;
 }
 
-.major-title {
-	margin-bottom: 15px;
-	font-size: 2rem;
-	font-family: robotolight, sans-serif;
-}
-
-.major-subtitle {
-	margin-top: 10px;
-	margin-bottom: 10px;
-	font-size: 1.5rem;
-	font-family: robotolight, sans-serif;
-}
-
-.major-input {
-	margin-bottom: 20px;
-	width: 100%;
-	height: 55px;
-	outline: hidden;
-	border-radius: 0px;
-	font-size: 2rem;
-	font-family: robotolight, sans-serif;
-}
-
-.major-input-small {
-	margin-top: 0;
-	font-size: 1.5rem;
-}
-
-.major-wrapper .error {
-	font-size: 1.3rem;
-}
-
 .footer {
 	position: absolute;
 	bottom: 10px;
@@ -962,10 +934,6 @@ form.popup, #confirm {
 /* Responsive */
 
 @media screen and (max-width: 1000px) {
-	#major-title {
-		margin-top: 30px;
-	}
-
 	#logo, #sidebar, #sidebar .menu li {
 		width: 54px !important;
 	}

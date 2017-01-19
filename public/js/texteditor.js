@@ -12,6 +12,10 @@ $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
 
+	if (username) {
+		Util.getVersion();
+	}
+
 	EditorController.init();
 	EditorView.init();
 	EditorModel.init($('head').data('file'));

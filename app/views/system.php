@@ -65,7 +65,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			</div>
 			<div class="row">
 				<div class="cell">Upload max</div>
-				<div class="cell"><input id="upload-max" value="Loading..."></div>
+				<div class="cell"><input id="upload-max" class="input-full-border" value="Loading..."></div>
 			</div>
 			<hr>
 			<h2>Storage</h2>
@@ -81,7 +81,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			<h2>Connection</h2>
 			<div class="row">
 				<div class="cell">Public domain</div>
-				<div class="cell"><input id="domain" value="Loading..."></div>
+				<div class="cell"><input id="domain" class="input-full-border" value="Loading..."></div>
 			</div>
 			<div class="row">
 				<div class="cell">Use SSL</div>
@@ -194,7 +194,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	<!-- New user -->
 	<form id="createuser" class="popup center hidden" action="#">
 		<span class="close">&times;</span>
-		<div class="popup-title">New User</div>
+		<div class="title">New User</div>
 
 		<label for="createuser-name">Username</label>
 		<input id="createuser-name" type="text" name="username" autocomplete="off" placeholder="Username" autofocus />
@@ -219,11 +219,9 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<div id="info-title">simpleDrive</div>
-		<div id="info-subtitle">Private. Secure. Simple.</div>
-<!--
-		<div class="clearer"></div>
--->
+		<span class="close">&times;</span>
+		<div id="info-title" class="title title-large">simpleDrive</div>
+		<div class="subtitle">Private. Secure. Simple.</div>
 		<hr>
 		<div id="info-footer">paranerd 2013-2017 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 	</div>
@@ -235,8 +233,9 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<span class="close">&times;</span>
 	</div>
 
+	<!-- Confirm -->
 	<div id="confirm" class="popup center hidden">
-		<div id="confirm-title" class="popup-title">Confirm</div>
+		<div id="confirm-title" class="title">Confirm</div>
 		<button id="confirm-no" class="btn btn-inverted">Cancel</button>
 		<button id="confirm-yes" class="btn">OK</button>
 		<span class="close">&times;</span>

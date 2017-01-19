@@ -81,7 +81,7 @@ if (!$public && !$user) {
 		</div>
 
 		<!-- Audio Player -->
-		<div id="audioplayer" class="widget">
+		<div id="audioplayer" class="widget hidden">
 			<div id="audio-title" class="widget-row widget-text widget-title"></div>
 			<hr>
 			<div id="audio-seekbar" class="progressbar">
@@ -123,7 +123,7 @@ if (!$public && !$user) {
 	<!-- Files -->
 	<div id="content">
 		<div id="files-filter" class="list-filter hidden">
-			<input class="list-filter-input" placeholder="Filter..."/>
+			<input class="list-filter-input input-indent" placeholder="Filter..."/>
 			<span class="close">&times;</span>
 		</div>
 		<div id="list-header" class="list-header <?php if ($fileview == 'grid') echo 'hidden'; ?>">
@@ -215,7 +215,7 @@ if (!$public && !$user) {
 	<!-- Create popup -->
 	<form id="create" class="popup center hidden" action="#">
 		<span class="close">&times;</span>
-		<div class="popup-title"><?php echo $lang['create']; ?></div>
+		<div class="title"><?php echo $lang['create']; ?></div>
 
 		<label for="create-input"><?php echo $lang['filename']; ?></label>
 		<input id="create-input" type="text" placeholder="<?php echo $lang['filename']; ?>" />
@@ -228,10 +228,10 @@ if (!$public && !$user) {
 	<!-- Share popup -->
 	<form id="share" class="popup center hidden" action="#">
 		<span class="close">&times;</span>
-		<div class="popup-title"><?php echo $lang['share']; ?></div>
+		<div class="title"><?php echo $lang['share']; ?></div>
 
 		<label><?php echo $lang['username']; ?></label>
-		<input id="share-user" type="text" placeholder="<?php echo $lang['username']; ?>">
+		<input id="share-user" class="input-indent" type="text" placeholder="<?php echo $lang['username']; ?>">
 
 		<label for="share-key" class="hidden form-hidden"><?php echo $lang['password']; ?></label>
 		<input id="share-key" type="text" class="hidden form-hidden" placeholder="<?php echo $lang['password']; ?> (optional)" autocomplete="off">
@@ -274,10 +274,10 @@ if (!$public && !$user) {
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
 		<span class="close">&times;</span>
-		<div id="info-title">simpleDrive</div>
-		<div id="info-subtitle">Private. Secure. Simple.</div>
-		<div class="clearer"></div>
-		<div id="info-footer">paranerd 2013-2016 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		<div id="info-title" class="title title-large">simpleDrive</div>
+		<div class="subtitle">Private. Secure. Simple.</div>
+		<hr>
+		<div id="info-footer">paranerd 2013-2017 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 	</div>
 
 	<!-- Video player -->
@@ -292,22 +292,24 @@ if (!$public && !$user) {
 	<!-- Progress circle -->
 	<div id="busy" class="hidden">busy</div>
 
-	<div id="pubfile" class="major-wrapper hidden">
-		<div class="major-logo" title="Logo"><div><span class="icon icon-cloud"></span>simpleDrive</div></div>
+	<?php if ($section == 'pub' && strlen($id) == 8) : ?>
+	<div id="pubfile" class="dark major-wrapper">
+		<div class="major-logo" title="Logo"><div>simpleDrive</div></div>
 
-		<form id="load-public" class="major-form center">
-			<div class="major-title">Public share</div>
+		<form id="load-public" class="center">
+			<div class="title">Public share</div>
 
-			<div id="pub-filename" class="major-subtitle hidden"></div>
-			<input id="pub-key" type="password" class="major-input hidden" placeholder="Password" autocomplete="off" autofocus />
+			<div id="pub-filename" class="subtitle hidden"></div>
+			<input id="pub-key" type="password" class="input-large hidden" placeholder="Password" autocomplete="off" autofocus />
 
-			<div id="pub-error" class="error hidden"></div>
+			<div class="error error-large hidden"></div>
 
 			<button class="btn btn-large center-hor">Unlock</button>
 		</form>
 
 		<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
 	</div>
+	<?php endif; ?>
 
 	<script src="public/js/jquery-1.11.3.min.js"></script>
 	<script src="public/js/simplescroll.js"></script>

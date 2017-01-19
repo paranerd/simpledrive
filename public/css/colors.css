@@ -9,8 +9,8 @@
 
 input {
 	outline: 0px solid transparent;
-	border: 1px solid grey;
 	background-color: rgba(0,0,0,0);
+	border: none;
 }
 
 h2 {
@@ -71,22 +71,12 @@ h2 {
 	color: #2e8b5e;
 }
 
-.major-subtitle {
-	color: white;
-}
-
-.major-title {
+.title, .title a {
 	color: #2e8b5e;
 }
 
 .major-logo {
 	font-family: robotolight, sans-serif;
-}
-
-.major-input {
-	color: #b3b3b3;
-	border: none !important;
-	border-bottom: 1px dotted #b3b3b3 !important;
 }
 
 .password-ok {
@@ -108,10 +98,6 @@ h2 {
 
 .popup .menu li:hover {
 	border-left: 4px solid #2e8b5e;
-}
-
-.popup-title {
-	color: #2e8b5e;
 }
 
 .notification-info {
@@ -140,10 +126,6 @@ h2 {
 
 .notification-warning .close:hover {
 	color: #ad5d0f !important;
-}
-
-#info-title, #info a {
-	color: #2e8b5e;
 }
 
 .progressbar {
@@ -238,10 +220,6 @@ h2 {
 	border: 2px solid white;
 }
 
-#renameinput {
-	background-color: white;
-}
-
 .scrollbar {
 	background-color: rgba(170,170,170,0.4);
 }
@@ -270,9 +248,12 @@ h2 {
 /* General - Content - List */
 
 .list-filter {
-	color: #555;
 	border: 1px solid #2e8b5e;
-	background-color: white;
+}
+
+.list-filter-input {
+	border: none !important;
+	border: 1px solid #2e8b5e;
 }
 
 /* General - Content - Grid */
@@ -310,23 +291,20 @@ body.light, body.light a {
 	border: 1px solid #2e8b5e;
 }
 
-.light .popup input {
-	color: #555 !important;
-	border: none !important;
-	border-bottom: 1px dotted #2e8b5e !important;
+.light input {
+	border-bottom: 1px dotted #555;
 }
 
-.light .list-footer {
-	background-color: rgba(0,0,0,0);
-	border-top: 1px solid #ccc;
+.light .input-full-border {
+	border: 1px solid lightgrey !important;
 }
 
 .light #shield {
 	background-color: rgba(242,242,242,0.7);
 }
 
-.light input {
-	border: 1px solid lightgrey;
+.light .subtitle {
+	color: #555;
 }
 
 .light .popup {
@@ -429,10 +407,25 @@ body.light, body.light a {
 	border: 2px solid white;
 }
 
+.light .item form {
+	color: #555;
+	background-color: white;
+}
+
 /* Light - Content - List */
 
 .light .list-header {
 	border-bottom: 1px solid #bbb;
+}
+
+.light .list-footer {
+	background-color: rgba(0,0,0,0);
+	border-top: 1px solid #ccc;
+}
+
+.light .list-filter {
+	color: #555;
+	background-color: white;
 }
 
 .light .list .item:hover {
@@ -464,11 +457,11 @@ body.light, body.light a {
 
 /* Dark - General */
 
-body.dark {
+.dark {
 	background-color: #303030;
 }
 
-body.dark, body.dark a {
+.dark, .dark a {
 	color: #b3b3b3;
 }
 
@@ -478,29 +471,30 @@ body.dark, body.dark a {
 	background-color: #303030;
 }
 
+.dark .selector-label {
+	color: #eee;
+}
+
+.dark input {
+	color: #b3b3b3;
+	border-bottom: 1px dotted #b3b3b3;
+}
+
+.dark .input-full-border {
+	border: 1px solid #555 !important;
+}
+
 .dark #shield {
 	background-color: rgba(0,0,0,0.4);
 }
 
-.dark .selector-label {
-	color: #eee;
+.dark .subtitle {
+	color: white;
 }
 
 .dark .popup {
 	background-color: #444;
 	box-shadow: 0 3px 9px rgba(0,0,0,.5);
-}
-
-.dark .popup input {
-	color: #b3b3b3 !important;
-	border: none !important;
-	border-bottom: 1px dotted #2e8b5e !important;
-}
-
-.dark .menu li, .dark .menu li a {
-/*
-	color: #b3b3b3;
-*/
 }
 
 .dark .menu li:hover, .dark li a:hover {
@@ -530,12 +524,6 @@ body.dark, body.dark a {
 
 .dark .settings-info {
 	color: #b3b3b3;
-}
-
-.dark .cell input {
-	color: #ccc;
-	background-color: rgba(0,0,0,0);
-	border: 1px solid #555;
 }
 
 /* Dark - Header */
@@ -597,9 +585,6 @@ body.dark, body.dark a {
 	background-color: #303030;
 	font-family: robotoregular;
 }
-.dark .thumbnail {
-	border: 2px solid transparent;
-}
 
 .dark .item {
 	border-bottom: 1px solid #444;
@@ -609,6 +594,15 @@ body.dark, body.dark a {
 	background-color: #555;
 }
 
+.dark .thumbnail {
+	border: 2px solid transparent;
+}
+
+.dark .item form {
+	color: #ccc;
+	background-color: #303030;
+}
+
 .dark #fileinfo {
 	border-left: 1px solid #555;
 	background-color: #303030;
@@ -616,8 +610,13 @@ body.dark, body.dark a {
 
 /* Dark - Content - List */
 
-.dark .list-header, .dark .list-filter {
+.dark .list-header {
 	border-bottom: 1px solid #555;
+}
+
+.dark .list-filter {
+	color: #ccc;
+	background-color: #303030;
 }
 
 .dark .list-footer {

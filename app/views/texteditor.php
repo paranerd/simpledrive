@@ -67,6 +67,7 @@
 	<div id="shield" class="overlay hidden"></div>
 
 	<!-- Menu -->
+	<?php if ($username) : ?>
 	<div id="menu" class="popup hidden">
 		<ul class="menu">
 			<li><a href="files"><span class="icon icon-files"></span>Files</a></li>
@@ -78,11 +79,12 @@
 			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><?php echo $lang['logout']; ?></a></li>
 		</ul>
 	</div>
+	<?php endif; ?>
 
 	<!-- Rename popup -->
 	<form id="rename" class="popup center hidden" action="#">
 		<span class="close">&times;</span>
-		<div class="popup-title">Rename</div>
+		<div class="title">Rename</div>
 
 		<label for="rename-filename">New filename</label>
 		<input id="rename-filename" type="text" placeholder="Filename" autocomplete="off" autofocus>
@@ -96,6 +98,15 @@
 		<span id="note-icon" class="icon icon-info"></span>
 		<span id="note-msg">Error</span>
 		<span class="close">&times;</span>
+	</div>
+
+	<!-- Version info -->
+	<div id="info" class="popup center hidden">
+		<span class="close">&times;</span>
+		<div id="info-title" class="title title-large">simpleDrive</div>
+		<div class="subtitle">Private. Secure. Simple.</div>
+		<hr>
+		<div id="info-footer">paranerd 2013-2017 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 	</div>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>

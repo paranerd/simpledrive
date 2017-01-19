@@ -29,13 +29,13 @@ $demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'
 	<div class="major-wrapper">
 		<div class="major-logo" title="Logo"><div>simpleDrive</div></div>
 
-		<form id="login" class="major-form center" action="#">
-			<div class="major-title">Login</div>
+		<form id="login" class="center" action="#">
+			<div class="title">Login</div>
 
-			<input id="user" type="text" class="major-input" placeholder="Username" value="" required autofocus>
-			<input id="pass" type="password" class="major-input" placeholder="Password" value="" required>
+			<input id="user" type="text" class="input-large" placeholder="Username" value="" required autofocus>
+			<input id="pass" type="password" class="input-large" placeholder="Password" value="" required>
 
-			<div class="error hidden"></div>
+			<div class="error error-large hidden"></div>
 
 			<button id="submit" class="btn btn-large center-hor">Login</button>
 		</form>
