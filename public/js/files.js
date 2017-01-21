@@ -704,7 +704,7 @@ var FileView = {
 
 	updateClipboard: function() {
 		var count = Object.keys(FileModel.clipboard).length;
-		var content = (count == 1) ? count + " file" : count + " files";
+		var content = (count == 1) ? count + " element" : count + " elements";
 		$("#clipboard").removeClass("hidden");
 		$("#clipboard-content").text(content);
 		$("#clipboard-count").text(count);

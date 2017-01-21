@@ -256,11 +256,11 @@ if (!$public && !$user) {
 	<div id="img-viewer" class="overlay hidden">
 		<span id="img-close" class="close close-large">&times;</span>
 
-		<button id="img-slideshow" class="btn-circle img-control overlay-action"><span class="icon icon-play"></span></button>
-		<button id="img-delete" class="btn-circle img-control overlay-action"><span class="icon icon-trash"></span></button>
+		<button id="img-slideshow" class="btn-circle overlay-action"><span class="icon icon-play"></span></button>
+		<button id="img-delete" class="btn-circle overlay-action"><span class="icon icon-trash"></span></button>
 
-		<button id="img-prev" class="btn-circle img-control overlay-nav"><span class="icon icon-prev"></span></button>
-		<button id="img-next" class="btn-circle img-control overlay-nav"><span class="icon icon-next"></span></button>
+		<button id="img-prev" class="btn-circle overlay-nav"><span class="icon icon-prev"></span></button>
+		<button id="img-next" class="btn-circle overlay-nav"><span class="icon icon-next"></span></button>
 		<div id="img-title"></div>
 	</div>
 
@@ -282,7 +282,7 @@ if (!$public && !$user) {
 
 	<!-- Video player -->
 	<div id="videoplayer" class="overlay hidden">
-		<button id="video-close" class="img-control overlay-close icon-cross"></button>
+		<span id="video-close" class="close close-large">&times;</span>
 		<video id="video" controls></video>
 	</div>
 
