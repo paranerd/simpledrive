@@ -22,11 +22,9 @@
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body class="dark">
-	<div class="major-wrapper">
-		<div class="major-logo" title="Logo"><div>simpleDrive</div></div>
-		<div class="error-page-text">Logging out...<br>If you're not being redirected, click <a href="<?php echo $base; ?>core/login">here</a></div>
-		<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
-	</div>
+	<div class="brand" title="simpleDrive"><div>simpleDrive</div></div>
+	<div class="error-page-text">Logging out...<br>If you're not being redirected, click <a href="<?php echo $base; ?>core/login">here</a></div>
+	<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util.js"></script>

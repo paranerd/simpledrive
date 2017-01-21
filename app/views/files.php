@@ -122,8 +122,8 @@ if (!$public && !$user) {
 
 	<!-- Files -->
 	<div id="content">
-		<div id="files-filter" class="list-filter hidden">
-			<input class="list-filter-input input-indent" placeholder="Filter..."/>
+		<div id="files-filter" class="filter hidden">
+			<input class="filter-input input-indent" placeholder="Filter..."/>
 			<span class="close">&times;</span>
 		</div>
 		<div id="list-header" class="list-header <?php if ($fileview == 'grid') echo 'hidden'; ?>">
@@ -293,10 +293,10 @@ if (!$public && !$user) {
 	<div id="busy" class="hidden">busy</div>
 
 	<?php if ($section == 'pub' && strlen($id) == 8) : ?>
-	<div id="pubfile" class="dark major-wrapper">
-		<div class="major-logo" title="Logo"><div>simpleDrive</div></div>
+	<div id="pubfile" class="overlay dark">
+		<div class="brand" title="simpleDrive"><div>simpleDrive</div></div>
 
-		<form id="load-public" class="center">
+		<form id="load-public" class="major-form center">
 			<div class="title">Public share</div>
 
 			<div id="pub-filename" class="subtitle hidden"></div>

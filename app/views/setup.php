@@ -8,8 +8,8 @@
  */
 
 if (file_exists('config/config.json')) {
-	//header('Location: ' . $base . 'core/login');
-	//exit();
+	header('Location: ' . $base . 'core/login');
+	exit();
 }
 
 $enabled = isset($_SERVER['HTACCESS']);
@@ -29,34 +29,32 @@ $enabled = isset($_SERVER['HTACCESS']);
 		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 	</head>
 <body class="dark">
-	<div class="major-wrapper">
-		<div class="major-logo" title="Logo"><div>simpleDrive</div></div>
+	<div class="brand" title="simpleDrive"><div>simpleDrive</div></div>
 
-		<form id="setup" class="center" action="#">
-			<div class="title">Setup</div>
-			<div class="subtitle">Admin</div>
-			<input id="user" class="input-medium" type="text" placeholder="Username" value="" required autocomplete="off" autofocus>
-			<input id="pass" class="input-medium password-check" data-strength="setup-strength" type="password" placeholder="Password" value="" required>
-			<div id="setup-strength" class="password-strength hidden"></div>
+	<form id="setup" class="major-form center" action="#">
+		<div class="title">Setup</div>
+		<div class="subtitle">Admin</div>
+		<input id="user" class="input-medium" type="text" placeholder="Username" value="" required autocomplete="off" autofocus>
+		<input id="pass" class="input-medium password-check" data-strength="setup-strength" type="password" placeholder="Password" value="" required>
+		<div id="setup-strength" class="password-strength hidden"></div>
 
-			<div class="subtitle">Database</div>
-			<input id="dbuser" class="input-medium" type="text" placeholder="Database Username" value="" required>
-			<input id="dbpass" class="input-medium" type="password" placeholder="Database Password" value="" required>
+		<div class="subtitle">Database</div>
+		<input id="dbuser" class="input-medium" type="text" placeholder="Database Username" value="" required>
+		<input id="dbpass" class="input-medium" type="password" placeholder="Database Password" value="" required>
 
-			<div id="advanced" class="subtitle toggle-hidden">Advanced &#x25BE;</div>
+		<div id="advanced" class="subtitle toggle-hidden">Advanced &#x25BE;</div>
 
-			<input id="mail" class="input-medium hidden form-hidden" type="text" placeholder="Mail Address" value="">
-			<input id="mailpass" class="input-medium hidden form-hidden" type="password" placeholder="Mail password" value="">
-			<input id="datadir" class="input-medium hidden form-hidden" type="text" placeholder="Data Directory" value="">
-			<input id="dbserver" class="input-medium hidden form-hidden" type="text" placeholder="Database Server" value="">
-			<input id="dbname" class="input-medium hidden form-hidden" type="text" placeholder="Database Name" value="">
+		<input id="mail" class="input-medium hidden form-hidden" type="text" placeholder="Mail Address" value="">
+		<input id="mailpass" class="input-medium hidden form-hidden" type="password" placeholder="Mail password" value="">
+		<input id="datadir" class="input-medium hidden form-hidden" type="text" placeholder="Data Directory" value="">
+		<input id="dbserver" class="input-medium hidden form-hidden" type="text" placeholder="Database Server" value="">
+		<input id="dbname" class="input-medium hidden form-hidden" type="text" placeholder="Database Name" value="">
 
-			<div class="error error-large hidden"></div>
-			<button id="submit" class="btn btn-large center-hor">Setup</button>
-		</form>
+		<div class="error error-large hidden"></div>
+		<button id="submit" class="btn btn-large center-hor">Setup</button>
+	</form>
 
-		<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
-	</div>
+	<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
 
 	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util.js"></script>

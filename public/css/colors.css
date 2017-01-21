@@ -75,7 +75,7 @@ h2 {
 	color: #2e8b5e;
 }
 
-.major-logo {
+.brand {
 	font-family: robotolight, sans-serif;
 }
 
@@ -247,11 +247,11 @@ h2 {
 
 /* General - Content - List */
 
-.list-filter {
+.filter {
 	border: 1px solid #2e8b5e;
 }
 
-.list-filter-input {
+.filter-input {
 	border: none !important;
 	border: 1px solid #2e8b5e;
 }
@@ -313,12 +313,8 @@ body.light, body.light a {
 	box-shadow: 0px 0px 15px 3px rgba(0,0,0,0.2) !important;
 }
 
-.light .close {
-	color: #999;
-}
-
 .light .close:hover {
-	color: #555 !important;
+	color: black !important;
 }
 
 .light hr {
@@ -412,18 +408,18 @@ body.light, body.light a {
 	background-color: white;
 }
 
+.light .content-footer {
+	background-color: rgba(0,0,0,0);
+	border-top: 1px solid #ccc;
+}
+
 /* Light - Content - List */
 
 .light .list-header {
 	border-bottom: 1px solid #bbb;
 }
 
-.light .list-footer {
-	background-color: rgba(0,0,0,0);
-	border-top: 1px solid #ccc;
-}
-
-.light .list-filter {
+.light .filter {
 	color: #555;
 	background-color: white;
 }
@@ -468,11 +464,7 @@ body.light, body.light a {
 .dark select {
 	color: #ccc;
 	border: 1px solid #555;
-	background-color: #303030;
-}
-
-.dark .selector-label {
-	color: #eee;
+	background-color: rgba(0,0,0,0);
 }
 
 .dark input {
@@ -500,10 +492,6 @@ body.light, body.light a {
 .dark .menu li:hover, .dark li a:hover {
 	color: white;
 	background-color: #555;
-}
-
-.dark .close {
-	color: #b3b3b3;
 }
 
 .dark .close:hover {
@@ -608,20 +596,20 @@ body.light, body.light a {
 	background-color: #303030;
 }
 
+.dark .content-footer {
+	background-color: #303030;
+	border-top: 1px solid #555;
+}
+
 /* Dark - Content - List */
 
 .dark .list-header {
 	border-bottom: 1px solid #555;
 }
 
-.dark .list-filter {
+.dark .filter {
 	color: #ccc;
 	background-color: #303030;
-}
-
-.dark .list-footer {
-	background-color: #303030;
-	border-top: 1px solid #555;
 }
 
 /* Dark - Content - Grid */

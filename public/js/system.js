@@ -231,7 +231,7 @@ var SystemView = {
 		simpleScroll.empty("users");
 		simpleScroll.empty("log");
 		$("#log-pages").empty();
-		$("#status, #users, #log, #plugins, .list-header, .list-footer").addClass("hidden");
+		$("#status, #users, #log, #plugins, .list-header, .content-footer").addClass("hidden");
 
 		// Set right view
 		Util.sidebarFocus(view);
@@ -274,7 +274,7 @@ var SystemView = {
 		SystemView.update('log');
 
 		if (LogModel.pageTotal > 0) {
-			$(".list-footer").removeClass("hidden");
+			$(".content-footer").removeClass("hidden");
 
 			for (var i = 0; i < LogModel.pageTotal; i++) {
 				var option = document.createElement('option');
@@ -287,10 +287,10 @@ var SystemView = {
 
 		if (log.length == 0) {
 			LogModel.setEmptyView("No entries...");
-			$(".list-footer").addClass("hidden");
+			$(".content-footer").addClass("hidden");
 		}
 		else {
-			$(".list-footer").removeClass("hidden");
+			$(".content-footer").removeClass("hidden");
 		}
 
 		for (var i in log) {

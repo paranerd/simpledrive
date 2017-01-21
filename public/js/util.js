@@ -13,7 +13,7 @@ var Util = {
 		$(window).resize(function() {
 			$("#content, #sidebar, #fileinfo, #texteditor").height(window.innerHeight - $("#header").height());
 
-			var listFooterAdapt = ($(".list-footer").hasClass("hidden")) ? 0 : $(".list-footer").outerHeight();
+			var listFooterAdapt = ($(".content-footer").hasClass("hidden")) ? 0 : $(".content-footer").outerHeight();
 			$(".list, .grid").height($("#content").outerHeight() - $(".list-header").outerHeight() - listFooterAdapt);
 
 			var contentWidth = window.innerWidth;

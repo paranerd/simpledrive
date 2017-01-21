@@ -44,7 +44,7 @@ var FileController = {
 			}
 		});
 
-		$("#files-filter .list-filter-input").on('input', function(e) {
+		$("#files-filter .filter-input").on('input', function(e) {
 			FileModel.filter($(this).val());
 		});
 
@@ -60,18 +60,18 @@ var FileController = {
 			{
 				$("#files-filter").removeClass('hidden');
 				$(window).resize();
-				$("#files-filter .list-filter-input").focus();
+				$("#files-filter .filter-input").focus();
 
 				setTimeout(function() {
 					// Place cursor behind text
-					$("#files-filter .list-filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
+					$("#files-filter .filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
 				}, 10);
 				FileModel.filter(String.fromCharCode(e.keyCode).toLowerCase());
 			}
 
 			switch(e.keyCode) {
 				case 13: // Return
-					if (FileModel.getSelectedCount() == 1 && (!$(e.target).is('input') || e.target.className == 'list-filter-input')) {
+					if (FileModel.getSelectedCount() == 1 && (!$(e.target).is('input') || e.target.className == 'filter-input')) {
 						FileModel.open();
 					}
 					break;

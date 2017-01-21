@@ -97,8 +97,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		</div>
 
 		<!-- Users -->
-		<div id="users-filter" class="list-filter hidden">
-			<input id="users-filter-input" class="list-filter-input" placeholder="Filter..."/>
+		<div id="users-filter" class="filter hidden">
+			<input id="users-filter-input" class="filter-input" placeholder="Filter..."/>
 			<span class="close">&times;</span>
 		</div>
 		<div id="users-header" class="list-header">
@@ -122,7 +122,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 				</div>
 			</div>
 			<hr>
-			<div class="row columns2">
+			<div class="row">
 				<h2>SabreDAV</h2>
 				<div class="cell multi-line">sabre/dav is an open source WebDAV server, developed by fruux and built in PHP. It is an implementation of the WebDAV protocol (with extensions for CalDAV[1] and CardDAV), providing a native PHP server implementation which operates on Apache 2 and Nginx web servers.</div>
 				<div class="cell">
@@ -143,8 +143,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		</div>
 
 		<!-- Log -->
-		<div class="list-filter hidden">
-			<input id="log-filter-input" class="list-filter-input" placeholder="Filter..."/>
+		<div class="filter hidden">
+			<input id="log-filter-input" class="filter-input" placeholder="Filter..."/>
 			<span class="close">&times;</span>
 		</div>
 		<div id="log-header" class="list-header">
@@ -158,7 +158,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<div id="log" class="list"></div>
 
 		<!-- Log Footer -->
-		<div class="list-footer hidden">
+		<div class="content-footer hidden">
 			<div id="log-page-selector" class="selector">
 				<div class="selector-label">Page:</div>
 				<select id="log-pages"></select>
