@@ -811,31 +811,29 @@ class File_Model {
 				throw new Exception('File too big', '500');
 			}
 
-			$rel_path = $file['path'];
-			$forward_path = explode("/", $_POST['paths']);
-			if (sizeof($forward_path) > 0) {
-				array_shift($forward_path);
-			}
-
 			$parent_id = $target;
+			$base_path = $file['path'];
+
+			$relative_path = rtrim(trim($_POST['paths'], '/'), '/');
+			$relative_path_arr = explode('/', $relative_path);
 
 			// Create folder if not exists and user has the permission (for each sub-folder)
-			while (sizeof($forward_path) > 0) {
-				$next = array_shift($forward_path);
+			while (sizeof($relative_path_arr) > 0) {
+				$next = array_shift($relative_path_arr);
 				$path .= "/" . $next;
-				$rel_path .= "/" . $next;
+				$base_path .= "/" . $next;
 
 				if (!file_exists($path)) {
 					if (mkdir($path, 0755) && $this->get_cached($parent_id, self::$PERMISSION_WRITE)) {
-						$parent_id = $this->add($path, $rel_path, $parent_id, $file['ownerid']);
+						$parent_id = $this->add($path, $base_path, $parent_id, $file['ownerid']);
 					}
 					else {
 						throw new Exception('Error uploading', '500');
 					}
 				}
 				else {
-					$parent_id = $this->db->cache_id_for_path($file['ownerid'], $rel_path);
-					$access_required = (sizeof($forward_path) == 0) ? self::$PERMISSION_WRITE : self::$PERMISSION_READ;
+					$parent_id = $this->db->cache_id_for_path($file['ownerid'], $base_path);
+					$access_required = (sizeof($relative_path_arr) == 0) ? self::$PERMISSION_WRITE : self::$PERMISSION_READ;
 					if (!$this->get_cached($parent_id, $access_required)) {
 						throw new Exception('Access denied', '403');
 					}
@@ -843,7 +841,7 @@ class File_Model {
 			}
 
 			if (move_uploaded_file($_FILES[0]['tmp_name'], $path . "/" . $_FILES[0]['name'])) {
-				$parent_id = $this->add($path . "/" . $_FILES[0]['name'], $rel_path . $_FILES[0]['name'], $parent_id, $file['ownerid']);
+				$parent_id = $this->add($path . "/" . $_FILES[0]['name'], $base_path . $_FILES[0]['name'], $parent_id, $file['ownerid']);
 				return null;
 			}
 			else {
