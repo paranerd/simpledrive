@@ -30,7 +30,7 @@ class Core_Model {
 
 	public function setup($username, $pass, $mail, $mail_pass, $db_server, $db_name, $db_user, $db_pass, $datadir) {
 		$username	= strtolower(str_replace(' ', '', $username));
-		$datadir	= ($datadir != "") ? $datadir : dirname(dirname(__DIR__)) . "/docs/";
+		$datadir	= ($datadir != "") ? rtrim($datadir, '/') . '/' : dirname(dirname(__DIR__)) . "/docs/";
 		$db_server	= (strlen($db_server) > 0) ? $db_server : 'localhost';
 		$db_name	= (strlen($db_name) > 0) ? $db_name : 'simpledrive';
 		$db_setup;
