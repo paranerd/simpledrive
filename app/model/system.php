@@ -272,16 +272,16 @@ class System_Model {
 
 	public function get_version() {
 		$version		= json_decode(file_get_contents('config/version.json'), true);
-		$url			= 'http://simpledrive.org/public/version';
+		$url			= 'http://simpledrive.org/version';
 		$recent_version	= null;
 
 		// Get current version from demo server if internet is available
 		if (@fopen($url, 'r')) {
 			$result = json_decode(file_get_contents($url, false), true);
+			file_put_contents(LOG, print_r($result, true) . "\n", FILE_APPEND);
 			$recent_version = ($result && $result['build'] > $version['build']) ? $result['version'] : null;
 		}
 
-		//return array('recent' => $recent_version, 'current' => $version['version']);
 		return array('recent' => $recent_version, 'current' => $version['version']);
 	}
 }

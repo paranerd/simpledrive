@@ -8,8 +8,8 @@
  */
 
 if (file_exists('config/config.json')) {
-	header('Location: ' . $base . 'core/login');
-	exit();
+	//header('Location: ' . $base . 'core/login');
+	//exit();
 }
 
 $enabled = isset($_SERVER['HTACCESS']);
