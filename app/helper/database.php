@@ -636,9 +636,11 @@ class Database {
 
 	public function session_invalidate_client($uid, $token) {
 		$stmt = $this->link->prepare(
-			'DELETE FROM sd_session
+			'DELETE s, u
+			FROM sd_session s
+			LEFT JOIN sd_unlocked u ON s.token = u.token
 			WHERE user = ?
-			AND token != ?
+			AND s.token != ?
 			AND fingerprint = ?'
 		);
 		$stmt->bind_param('iss', $uid, $token, $this->fingerprint);
@@ -657,8 +659,10 @@ class Database {
 
 	public function session_end($token) {
 		$stmt = $this->link->prepare(
-			'DELETE FROM sd_session
-			WHERE token = ?'
+			'DELETE s, u
+			FROM sd_session s
+			LEFT JOIN sd_unlocked u ON s.token = u.token
+			WHERE s.token = ?'
 		);
 		$stmt->bind_param('s', $token);
 
@@ -683,7 +687,7 @@ class Database {
 		$stmt = $this->link->prepare(
 			'SELECT COUNT(*) as total
 			FROM sd_shares sh
-			LEFT JOIN sd_unlocked u ON sh.hash = u.hash
+			RIGHT JOIN sd_unlocked u ON sh.hash = u.hash
 			WHERE sh.file = ?
 			AND sh.access >= ?
 			AND (userto = ?
