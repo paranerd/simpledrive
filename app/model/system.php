@@ -278,7 +278,6 @@ class System_Model {
 		// Get current version from demo server if internet is available
 		if (@fopen($url, 'r')) {
 			$result = json_decode(file_get_contents($url, false), true);
-			file_put_contents(LOG, print_r($result, true) . "\n", FILE_APPEND);
 			$recent_version = ($result && $result['build'] > $version['build']) ? $result['version'] : null;
 		}
 

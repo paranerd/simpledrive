@@ -7,16 +7,10 @@
  * @link		http://simpledrive.org
  */
 
-	$id			= (sizeof($args) > 0) ? array_shift($args) : null;
+	$id				= (sizeof($args) > 0) ? array_shift($args) : null;
 	$public		= isset($_REQUEST['public']);
-	$username 	= ($user) ? $user['username'] : '';
-
-	if ($public) {
-		$token = (isset($_COOKIE['public_token'])) ? $_COOKIE['public_token'] : null;
-	}
-	else {
-		$token = (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-	}
+	$username	= ($user) ? $user['username'] : '';
+	$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
 
 	if ((!$public && !$user) || !$id) {
 		header('Location: ' . $base . 'core/logout');

@@ -4,7 +4,7 @@
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @link		https://simpledrive.org
  */
 
 class User_Model {
@@ -14,7 +14,7 @@ class User_Model {
 		$this->token	= $token;
 		$this->db		= Database::getInstance();
 		$this->user		= $this->db->user_get_by_token($token);
-		$this->uid		= ($this->user) ? $this->user['id'] : null;
+		$this->uid		= ($this->user) ? $this->user['id'] : 0;
 		$this->username	= ($this->user) ? $this->user['username'] : "";
 	}
 
@@ -170,15 +170,15 @@ class User_Model {
 		throw new Exception('Error deleting user', '500');
 	}
 
-	public function check_quota($username, $add) {
-		$user = $this->db->user_get_by_name($username);
+	public function check_quota($uid, $add) {
+		$user = $this->db->user_get_by_id($uid);
 
-		if (!$user || ($username != $this->username && $username != $this->db->get_owner_from_token($this->token))) {
-			return false;
+		if ($user) {
+			$free = ($user['max_storage'] == '0') ? ((disk_free_space(dirname(__FILE__)) != "") ? disk_free_space(dirname(__FILE__)) : disk_free_space('/')) : $max - $used;
+			return ($add < $free);
 		}
 
-		$free = ($user['max_storage'] == '0') ? ((disk_free_space(dirname(__FILE__)) != "") ? disk_free_space(dirname(__FILE__)) : disk_free_space('/')) : $max - $used;
-		return ($add < $free);
+		return false;
 	}
 
 	public function get_quota($username) {
@@ -203,7 +203,7 @@ class User_Model {
 		}
 
 		if (Crypto::verify_password($currpass, $user['pass'])) {
-			if ($this->db->user_change_password($this->uid, Crypto::generate_password($newpass))) {
+			if ($this->db->user_set_password($this->uid, Crypto::generate_password($newpass))) {
 				$token = Crypto::generate_token($this->uid);
 				$this->db->session_invalidate($this->uid, $token);
 				return $token;

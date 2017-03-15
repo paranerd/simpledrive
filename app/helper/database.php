@@ -4,7 +4,7 @@
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @link		https://simpledrive.org
  */
 
 class Database {
@@ -61,117 +61,180 @@ class Database {
 	public static function setup($username, $pass, $db_server, $db_name, $db_user, $db_pass) {
 		if (!function_exists('mysqli_connect')) {
 			throw new Exception('MySQLi is not installed', '500');
-			//return array('error' => "MySQLi is not installed");
 		}
 
 		$link = new mysqli($db_server, $db_user, $db_pass);
 
 		if ($link->connect_error) {
 			throw new Exception('Could not connect to database', '500');
-			//return array('error' => "Could not connect to database");
 		}
 
 		if (!$db_selected = $link->select_db($db_name)) {
-			$stmt = $link->prepare('CREATE DATABASE IF NOT EXISTS ' . mysqli_real_escape_string($link, $db_name));
+			$stmt = $link->prepare(
+				'CREATE DATABASE IF NOT EXISTS ' . mysqli_real_escape_string($link, $db_name)
+			);
 			$stmt->execute();
 
 			if (!$select = $link->select_db($db_name)) {
 				throw new Exception('Could not create database', '500');
-				//return array('error' => "Could not create database");
 			}
 		}
 
-		$link->query('DROP TABLE IF EXISTS sd_users, sd_log, sd_shares, sd_cache, sd_session, sd_trash, sd_history');
-		$createuser = $link->query("CREATE USER '$username'@'$db_server' IDENTIFIED BY '$pass'");
+		$link->query(
+			'DROP TABLE IF EXISTS sd_users, sd_log, sd_shares, sd_cache, sd_session, sd_trash, sd_history'
+		);
+		$createuser = $link->query(
+			"CREATE USER '$username'@'$db_server'
+			IDENTIFIED BY '$pass'"
+		);
 
 		if ($createuser) {
-			$link->query("GRANT ALL PRIVILEGES ON '$db_name' . * TO '$username'");
+			$link->query(
+				"GRANT ALL PRIVILEGES ON '$db_name' . * TO '$username'"
+			);
 			$db_user = $username;
 			$db_pass = $pass;
 		}
 
-		$link->query('CREATE TABLE IF NOT EXISTS sd_users (
-			id int(11) AUTO_INCREMENT,
-			PRIMARY KEY (id),
-			user varchar(32),
-			pass varchar(64),
-			admin tinyint(1),
-			max_storage varchar(30) default "0",
-			mail varchar(30),
-			color varchar(10) default "light",
-			fileview varchar(10) default "list",
-			login_attempts int(11) default 0,
-			last_login_attempt int(11) default 0,
-			last_login int(11) default 0,
-			autoscan tinyint(1) default 1)');
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_users (
+				id int(11) AUTO_INCREMENT,
+				PRIMARY KEY (id),
+				user varchar(32),
+				pass varchar(64),
+				admin tinyint(1),
+				max_storage varchar(30) default "0",
+				mail varchar(30),
+				color varchar(10) default "light",
+				fileview varchar(10) default "list",
+				login_attempts int(11) default 0,
+				last_login_attempt int(11) default 0,
+				last_login int(11) default 0,
+				autoscan tinyint(1) default 1
+			)'
+		);
 
-		$link->query('CREATE TABLE IF NOT EXISTS sd_log (
-			id int(11) AUTO_INCREMENT,
-			PRIMARY KEY (id),
-			user int(11),
-			type int(11),
-			source varchar(30),
-			msg text,
-			date varchar(20))');
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_log (
+				id int(11) AUTO_INCREMENT,
+				PRIMARY KEY (id),
+				user int(11),
+				type int(11),
+				source varchar(30),
+				msg text,
+				date varchar(20)
+			)'
+		);
 
-		$link->query('CREATE TABLE IF NOT EXISTS sd_shares (
-			id varchar(32),
-			PRIMARY KEY (id),
-			userto int(11),
-			pass varchar(64),
-			public tinyint(1),
-			access int(11),
-			hash varchar(32))');
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_shares (
+				id int(11) AUTO_INCREMENT,
+				PRIMARY KEY (id),
+				file varchar(32),
+				userto int(11),
+				pass varchar(64),
+				access int(11),
+				hash varchar(8)
+			)'
+		);
 
-		$link->query('CREATE TABLE IF NOT EXISTS sd_cache (
-			id varchar(32),
-			PRIMARY KEY (id),
-			filename varchar(100),
-			parent varchar(32),
-			type varchar(10),
-			size int(11),
-			owner int(11),
-			edit int(11),
-			md5 varchar(32),
-			lastscan int(11))');
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_cache (
+				id varchar(32),
+				PRIMARY KEY (id),
+				filename varchar(100),
+				parent varchar(32),
+				type varchar(10),
+				size int(11),
+				owner int(11),
+				edit int(11),
+				md5 varchar(32),
+				lastscan int(11)
+			)'
+		);
 
-		$link->query('CREATE TABLE IF NOT EXISTS sd_trash (
-			id varchar(32),
-			PRIMARY KEY (id),
-			restorepath varchar(200),
-			hash varchar(32))');
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_trash (
+				id varchar(32),
+				PRIMARY KEY (id),
+				restorepath varchar(200),
+				hash varchar(32)
+			)'
+		);
 
-		$link->query('CREATE TABLE IF NOT EXISTS sd_history (
-			deleted tinyint(1),
-			timestamp int(11),
-			path varchar(200),
-			owner int(11))');
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_history (
+				deleted tinyint(1),
+				timestamp int(11),
+				path varchar(200),
+				owner int(11)
+			)'
+		);
 
-		$link->query('CREATE TABLE IF NOT EXISTS sd_session (
-			id int(11) AUTO_INCREMENT,
-			PRIMARY KEY (id),
-			token varchar(32),
-			user int(11),
-			hash varchar(64),
-			fingerprint varchar(64),
-			expires int(11))');
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_session (
+				id int(11) AUTO_INCREMENT,
+				PRIMARY KEY (id),
+				token varchar(32),
+				user int(11),
+				fingerprint varchar(64),
+				expires int(11)
+			)'
+		);
 
-		$link->query('CREATE TABLE IF NOT EXISTS sd_thumbnails (
-			id varchar(32),
-			PRIMARY KEY (id),
-			path varchar(200))');
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_unlocked (
+				id int(11) AUTO_INCREMENT,
+				PRIMARY KEY (id),
+				token varchar(32),
+				hash varchar(8)
+			)'
+		);
 
-		$link->query('CREATE TABLE IF NOT EXISTS sd_backup (
-			id int(11),
-			PRIMARY KEY (id),
-			pass varchar(100),
-			encrypt_filename tinyint(1))');
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_thumbnails (
+				id varchar(32),
+				PRIMARY KEY (id),
+				path varchar(200)
+			)'
+		);
+
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_backup (
+				id int(11),
+				PRIMARY KEY (id),
+				pass varchar(100),
+				encrypt_filename tinyint(1)
+			)'
+		);
 
 		return array('user' => $db_user, 'pass' => $db_pass);
 	}
 
-	public function user_backup_info($uid) {
-		$stmt = $this->link->prepare('SELECT pass, encrypt_filename FROM sd_backup WHERE id = ?');
+	/**
+	 * Set backup password and whether or not to encrypt filenames for cloud backup
+	 * @param user
+	 * @param pass
+	 * @param encrypt_filename
+	 * @return boolean true if successful
+	 */
+
+	public function backup_enable($uid, $pass, $encrypt_filename) {
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_backup (id, pass, encrypt_filename)
+			VALUES (?, ?, ?)
+			ON DUPLICATE KEY UPDATE pass = ?, encrypt_filename = ?'
+		);
+		$stmt->bind_param('isisi', $uid, $pass, $encrypt_filename, $pass, $encrypt_filename);
+		return ($stmt->execute());
+	}
+
+	public function backup_info($uid) {
+		$stmt = $this->link->prepare(
+			'SELECT pass, encrypt_filename
+			FROM sd_backup
+			WHERE id = ?'
+		);
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
@@ -203,7 +266,12 @@ class Database {
 	}
 
 	private function user_get($column, $value, $full = false) {
-		$stmt = $this->link->prepare('SELECT id, user, pass, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan FROM sd_users WHERE ' . $column . ' = ?');
+		$stmt = $this->link->prepare(
+			'SELECT id, user, pass, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan
+			FROM sd_users
+			WHERE ' . $column . ' = ?'
+		);
+
 		if (ctype_digit($value)) {
 			$stmt->bind_param('i', $value);
 		}
@@ -249,7 +317,10 @@ class Database {
 	 */
 
 	public function user_get_all() {
-		$stmt = $this->link->prepare('SELECT id, user, admin, color, fileview, last_login FROM sd_users');
+		$stmt = $this->link->prepare(
+			'SELECT id, user, admin, color, fileview, last_login
+			FROM sd_users'
+		);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($id, $username, $admin, $color, $fileview, $last_login);
@@ -277,7 +348,13 @@ class Database {
 
 	private function user_get_id_by_token($token) {
 		$time = time();
-		$stmt = $this->link->prepare('SELECT user FROM sd_session WHERE token = ? AND fingerprint = ? AND expires > ?');
+		$stmt = $this->link->prepare(
+			'SELECT user
+			FROM sd_session
+			WHERE token = ?
+			AND fingerprint = ?
+			AND expires > ?'
+		);
 		$stmt->bind_param('ssi', $token, $this->fingerprint, $time);
 		$stmt->execute();
 		$stmt->store_result();
@@ -294,14 +371,8 @@ class Database {
 	 */
 
 	public function user_is_admin($token) {
-		$uid = $this->user_get_id_by_token($token);
-		$stmt = $this->link->prepare('SELECT admin FROM sd_users WHERE id = ? AND admin = 1');
-		$stmt->bind_param('i', $uid);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->fetch();
-
-		return ($stmt->affected_rows > 0);
+		$user = $this->user_get_by_token($token);
+		return ($user && $user['admin']);
 	}
 
 	/**
@@ -314,7 +385,10 @@ class Database {
 	 */
 
 	public function user_create($username, $pass, $admin, $mail) {
-		$stmt = $this->link->prepare('INSERT INTO sd_users (user, pass, admin, mail) VALUES (?, ?, ?, ?)');
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_users (user, pass, admin, mail)
+			VALUES (?, ?, ?, ?)'
+		);
 		$stmt->bind_param('ssis', $username, $pass, $admin, $mail);
 		$stmt->execute();
 		$stmt->store_result();
@@ -329,7 +403,10 @@ class Database {
 	 */
 
 	public function user_remove($uid) {
-		$stmt = $this->link->prepare('DELETE FROM sd_users WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'DELETE FROM sd_users
+			WHERE id = ?'
+		);
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 	}
@@ -341,7 +418,11 @@ class Database {
 	 */
 
 	public function user_increase_login_counter($uid, $time) {
-		$stmt = $this->link->prepare('UPDATE sd_users SET login_attempts = login_attempts + 1, last_login_attempt = ? WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'UPDATE sd_users
+			SET login_attempts = login_attempts + 1, last_login_attempt = ?
+			WHERE id = ?'
+		);
 		$stmt->bind_param('ii', $time, $uid);
 		$stmt->execute();
 	}
@@ -352,7 +433,11 @@ class Database {
 	 */
 
 	public function user_set_login($uid, $timestamp) {
-		$stmt = $this->link->prepare('UPDATE sd_users SET login_attempts = 0, last_login = ? WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'UPDATE sd_users
+			SET login_attempts = 0, last_login = ?
+			WHERE id = ?'
+		);
 		$stmt->bind_param('ii', $timestamp, $uid);
 		$stmt->execute();
 	}
@@ -365,43 +450,23 @@ class Database {
 	 */
 
 	public function user_set_admin($uid, $admin) {
-		// Check if real changes (update-error when trying to update exact same values)
-		$stmt1 = $this->link->prepare('SELECT user FROM sd_users WHERE id = ? AND admin = ? LIMIT 1');
-		$stmt1->bind_param('ii', $uid, $admin);
-		$stmt1->execute();
-		$stmt1->store_result();
-		$stmt1->fetch();
-
-		if ($stmt1->affected_rows == 1) {
-			return true;
-		}
-
-		$stmt2 = $this->link->prepare('UPDATE sd_users SET admin = ? WHERE id = ?');
-		$stmt2->bind_param('is', $admin, $uid);
-		$stmt2->execute();
-		return ($stmt2->affected_rows != 0);
+		$stmt = $this->link->prepare(
+			'UPDATE sd_users
+			SET admin = ?
+			WHERE id = ?'
+		);
+		$stmt->bind_param('is', $admin, $uid);
+		return ($stmt->execute());
 	}
 
 	public function user_set_autoscan($uid, $enable) {
-		// Check if real changes (update-error when trying to update exact same values)
-		if ($this->user_autoscan($uid)) {
-			return true;
-		}
-
-		$stmt = $this->link->prepare('UPDATE sd_users SET autoscan = ? WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'UPDATE sd_users
+			SET autoscan = ?
+			WHERE id = ?'
+		);
 		$stmt->bind_param('ii', $enable, $uid);
-		$stmt->execute();
-		return ($stmt->affected_rows != 0);
-	}
-
-	public function user_autoscan($uid) {
-		$stmt = $this->link->prepare('SELECT autoscan FROM sd_users WHERE id = ? AND autoscan = 1');
-		$stmt->bind_param('i', $uid);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->fetch();
-
-		return ($stmt->affected_rows > 0);
+		return ($stmt->execute());
 	}
 
 	/**
@@ -412,21 +477,13 @@ class Database {
 	 */
 
 	public function user_set_storage_max($uid, $max_storage) {
-		// Check if real changes (update-error when trying to update exact same values)
-		$stmt1 = $this->link->prepare('SELECT user FROM sd_users WHERE max_storage = ? AND id = ? LIMIT 1');
-		$stmt1->bind_param('si', $max_storage, $uid);
-		$stmt1->execute();
-		$stmt1->store_result();
-		$stmt1->fetch();
-
-		if ($stmt1->affected_rows == 1) {
-			return true;
-		}
-
-		$stmt2 = $this->link->prepare('UPDATE sd_users SET max_storage = ? WHERE id = ?');
-		$stmt2->bind_param('si', $max_storage, $uid);
-		$stmt2->execute();
-		return ($stmt2->affected_rows == 1);
+		$stmt = $this->link->prepare(
+			'UPDATE sd_users
+			SET max_storage = ?
+			WHERE id = ?'
+		);
+		$stmt->bind_param('si', $max_storage, $uid);
+		return ($stmt->execute());
 	}
 
 	/**
@@ -436,8 +493,12 @@ class Database {
 	 * @return boolean true if successful
 	 */
 
-	public function user_change_password($uid, $pass) {
-		$stmt = $this->link->prepare('UPDATE sd_users SET pass = ? WHERE id = ?');
+	public function user_set_password($uid, $pass) {
+		$stmt = $this->link->prepare(
+			'UPDATE sd_users
+			SET pass = ?
+			WHERE id = ?'
+		);
 		$stmt->bind_param('ss', $pass, $uid);
 		$stmt->execute();
 		$stmt->store_result();
@@ -453,7 +514,11 @@ class Database {
 	 */
 
 	public function user_set_fileview($uid, $fileview) {
-		$stmt = $this->link->prepare('UPDATE sd_users SET fileview = ? WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'UPDATE sd_users
+			SET fileview = ?
+			WHERE id = ?'
+		);
 		$stmt->bind_param('si', $fileview, $uid);
 		$stmt->execute();
 	}
@@ -465,31 +530,37 @@ class Database {
 	 */
 
 	public function user_set_color($uid, $color) {
-		$stmt = $this->link->prepare('UPDATE sd_users SET color = ? WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'UPDATE sd_users
+			SET color = ?
+			WHERE id = ?'
+		);
 		$stmt->bind_param('si', $color, $uid);
 		$stmt->execute();
 	}
 
 	/**
 	 * Save authorization token, expiration date and client's fingerprint
-	 * @param token
-	 * @param user
-	 * @param hash for public share (optional)
+	 * @param uid
 	 * @param expires
-	 * @param fingerprint
 	 * @return boolean true if successful
 	 */
 
-	public function session_start($uid, $hash = '', $expires) {
+	public function session_start($uid, $expires) {
 		$token = $this->session_get_unique_token();
 
-		$stmt = $this->link->prepare('INSERT INTO sd_session (token, user, hash, expires, fingerprint) VALUES (?, ?, ?, ?, ?)');
-		$stmt->bind_param('sisis', $token, $uid, $hash, $expires, $this->fingerprint);
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_session (token, user, expires, fingerprint)
+			VALUES (?, ?, ?, ?)'
+		);
+		$stmt->bind_param('siis', $token, $uid, $expires, $this->fingerprint);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();
 
-		$this->session_invalidate_client($uid, $token);
+		if ($uid) {
+			$this->session_invalidate_client($uid, $token);
+		}
 
 		return ($stmt->affected_rows != 0) ? $token : null;
 	}
@@ -499,7 +570,11 @@ class Database {
 
 		do {
 			$token = Crypto::random(32);
-			$stmt = $this->link->prepare('SELECT token FROM sd_session WHERE token = ?');
+			$stmt = $this->link->prepare(
+				'SELECT token
+				FROM sd_session
+				WHERE token = ?'
+			);
 			$stmt->bind_param('s', $token);
 			$stmt->execute();
 		} while ($stmt->num_rows > 0);
@@ -512,7 +587,12 @@ class Database {
 	 */
 
 	public function session_validate_token($token) {
-		$stmt = $this->link->prepare('SELECT id FROM sd_session WHERE token = ? AND fingerprint = ?');
+		$stmt = $this->link->prepare(
+			'SELECT id
+			FROM sd_session
+			WHERE token = ?
+			AND fingerprint = ?'
+		);
 		$stmt->bind_param('ss', $token, $this->fingerprint);
 		$stmt->execute();
 		$stmt->store_result();
@@ -522,7 +602,11 @@ class Database {
 	}
 
 	public function session_active_token($uid) {
-		$stmt = $this->link->prepare('SELECT COUNT(id) FROM sd_session WHERE user = ?');
+		$stmt = $this->link->prepare(
+			'SELECT COUNT(id)
+			FROM sd_session
+			WHERE user = ?'
+		);
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
@@ -537,7 +621,11 @@ class Database {
 	 */
 
 	public function session_invalidate($uid, $token) {
-		$stmt = $this->link->prepare('DELETE FROM sd_session WHERE user = ? AND token != ?');
+		$stmt = $this->link->prepare(
+			'DELETE FROM sd_session
+			WHERE user = ?
+			AND token != ?'
+		);
 		$stmt->bind_param('is', $uid, $token);
 		$stmt->execute();
 		$stmt->store_result();
@@ -547,7 +635,12 @@ class Database {
 	}
 
 	public function session_invalidate_client($uid, $token) {
-		$stmt = $this->link->prepare('DELETE FROM sd_session WHERE user = ? AND token != ? AND fingerprint = ?');
+		$stmt = $this->link->prepare(
+			'DELETE FROM sd_session
+			WHERE user = ?
+			AND token != ?
+			AND fingerprint = ?'
+		);
 		$stmt->bind_param('iss', $uid, $token, $this->fingerprint);
 		$stmt->execute();
 		$stmt->store_result();
@@ -563,97 +656,66 @@ class Database {
 	 */
 
 	public function session_end($token) {
-		$stmt = $this->link->prepare('DELETE FROM sd_session WHERE token = ?');
+		$stmt = $this->link->prepare(
+			'DELETE FROM sd_session
+			WHERE token = ?'
+		);
 		$stmt->bind_param('s', $token);
 
 		return ($stmt->execute());
 	}
 
 	/**
-	 * Get share-owner from authorization token
-	 * @param token
-	 * @return string owner
-	 */
-
-	public function get_owner_from_token($token) {
-		$time = time();
-		$stmt = $this->link->prepare('SELECT owner FROM sd_shares WHERE hash = (SELECT hash FROM sd_session WHERE token = ? AND fingerprint = ? AND expires > ?)');
-		$stmt->bind_param('sss', $token, $this->fingerprint, $time);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($owner);
-		$stmt->fetch();
-
-		return ($stmt->affected_rows != 0) ? $owner : null;
-	}
-
-	/**
-	 * Get share-hash from authorization token
-	 * @param token
-	 * @return string owner
-	 */
-
-	public function get_hash_from_token($token) {
-		$time = time();
-		$stmt = $this->link->prepare('SELECT hash FROM sd_session WHERE token = ? AND fingerprint = ? AND expires > ?');
-		$stmt->bind_param('sss', $token, $this->fingerprint, $time);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($hash);
-		$stmt->fetch();
-
-		return ($stmt->affected_rows != 0) ? $hash : null;
-	}
-
-	/**
-	 * Set backup password and whether or not to encrypt filenames for cloud backup
-	 * @param user
-	 * @param pass
-	 * @param encrypt_filename
-	 * @return boolean true if successful
-	 */
-
-	public function backup_enable($uid, $pass, $encrypt_filename) {
-		// Delete password before setting it because of problems when setting same password again
-		$stmt = $this->link->prepare('UPDATE sd_backup SET pass = "" WHERE id = ?');
-		$stmt->bind_param('i', $uid);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->fetch();
-
-		$stmt = $this->link->prepare('INSERT INTO sd_backup (id, pass, encrypt_filename) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE pass = ?, encrypt_filename = ?');
-		$stmt->bind_param('isisi', $uid, $pass, $encrypt_filename, $pass, $encrypt_filename);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->fetch();
-
-		return ($stmt->affected_rows !== 0);
-	}
-
-	/**
-	 * Returns true if public share has been unlocked by accessing user
-	 * @param hash
+	 * Check if accessing user is allowed to access a shared file
+	 * @param id
+	 * @param access
 	 * @param token
 	 * @return boolean true if unlocked
 	 */
 
-	public function share_is_unlocked($hash, $token) {
-		$time = time();
-		$stmt = $this->link->prepare('SELECT hash FROM sd_session WHERE hash = ? AND token = ? AND fingerprint = ? AND expires > ?');
-		$stmt->bind_param('ssss', $hash, $token, $this->fingerprint, $time);
+	public function share_is_unlocked($id, $access, $token) {
+		$uid = $this->user_get_id_by_token($token) | 0;
+		$share_base = $this->share_get_base($id, $uid);
+
+		// Check if the share-base is shared with the user
+		// or is public and has been unlocked by the given token
+		// and grants the required access-rights
+		$stmt = $this->link->prepare(
+			'SELECT COUNT(*) as total
+			FROM sd_shares sh
+			LEFT JOIN sd_unlocked u ON sh.hash = u.hash
+			WHERE sh.file = ?
+			AND sh.access >= ?
+			AND (userto = ?
+				OR (userto = 0
+					AND u.token = ?
+				)
+			)
+		');
+		$stmt->bind_param('siis', $share_base, $access, $uid, $token);
 		$stmt->execute();
 		$stmt->store_result();
+		$stmt->bind_result($total);
 		$stmt->fetch();
 
-		return ($stmt->affected_rows != 0);
+		return ($stmt->affected_rows > 0 && $total > 0);
 	}
+
+	/**
+	 * Generates a unique 8-hex hash that is used in public share-links
+	 * @return string share-hash
+	 */
 
 	private function share_get_unique_hash() {
 		$hash;
 
 		do {
 			$hash = Crypto::random(8);
-			$stmt = $this->link->prepare('SELECT hash FROM sd_shares WHERE hash = ?');
+			$stmt = $this->link->prepare(
+				'SELECT hash
+				FROM sd_shares
+				WHERE hash = ?'
+			);
 			$stmt->bind_param('s', $hash);
 			$stmt->execute();
 		} while ($stmt->num_rows > 0);
@@ -668,22 +730,33 @@ class Database {
 	 * @param owner
 	 * @param userto username to share with (optional)
 	 * @param key password (optional)
-	 * @param public whether or not share should be accessible via link
 	 * @param write whether or not to allow changes and downloads for share
 	 * @return boolean true if successful
 	 */
 
-	public function share($id, $userto, $pass, $public, $access) {
-		$hash = ($public) ? $this->share_get_unique_hash() : "";
-		$stmt = $this->link->prepare('INSERT INTO sd_shares (id, hash, userto, pass, public, access) VALUES (?, ?, ?, ?, ?, ?)');
-		$stmt->bind_param('ssisii', $id, $hash, $userto, $pass, $public, $access);
+	public function share($id, $userto, $pass, $access) {
+		$hash = ($userto == 0) ? $this->share_get_unique_hash() : "";
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_shares (file, hash, userto, pass, access)
+			VALUES (?, ?, ?, ?, ?)'
+		);
+		$stmt->bind_param('ssisi', $id, $hash, $userto, $pass, $access);
 		$stmt->execute();
 
-		if ($stmt->affected_rows == 1) {
-			return $hash;
-		}
+		return ($stmt->affected_rows == 1) ? $hash : null;
+	}
 
-		return null;
+	public function share_unlock($token, $hash) {
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_unlocked (token, hash)
+			VALUES (?, ?)'
+		);
+		$stmt->bind_param('ss', $token, $hash);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->fetch();
+
+		return ($stmt->affected_rows != 0) ? $token : null;
 	}
 
 	/**
@@ -693,18 +766,21 @@ class Database {
 	 */
 
 	public function share_get_by_id($id) {
-		$stmt = $this->link->prepare('SELECT id, userto, pass, public, access, hash FROM sd_shares WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'SELECT file, userto, pass, access, hash
+			FROM sd_shares
+			WHERE file = ?'
+		);
 		$stmt->bind_param('s', $id);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $userto, $pass, $public, $access, $hash);
+		$stmt->bind_result($id, $userto, $pass, $access, $hash);
 
 		if ($stmt->fetch()) {
 			return array(
 				'id'		=> $id,
 				'userto'	=> $userto,
 				'pass'		=> $pass,
-				'public'	=> $public,
 				'access'	=> $access,
 				'hash'		=> $hash
 			);
@@ -719,18 +795,21 @@ class Database {
 	 */
 
 	public function share_get_by_hash($hash) {
-		$stmt = $this->link->prepare('SELECT id, userto, pass, public, access, hash FROM sd_shares WHERE hash = ?');
+		$stmt = $this->link->prepare(
+			'SELECT file, userto, pass, access, hash
+			FROM sd_shares
+			WHERE hash = ?'
+		);
 		$stmt->bind_param('s', $hash);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $userto, $pass, $public, $access, $hash);
+		$stmt->bind_result($id, $userto, $pass, $access, $hash);
 
 		if ($stmt->fetch()) {
 			return array(
 				'id'		=> $id,
 				'userto'	=> $userto,
 				'pass'		=> $pass,
-				'public'	=> $public,
 				'access'	=> $access,
 				'hash'		=> $hash
 			);
@@ -745,7 +824,14 @@ class Database {
 	 */
 
 	public function share_get_from($uid, $access_request) {
-		$stmt = $this->link->prepare('SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.id FROM sd_shares LEFT JOIN sd_cache on sd_shares.id = sd_cache.id LEFT JOIN sd_users ON sd_cache.owner = sd_users.id WHERE sd_cache.owner = ?');
+		$stmt = $this->link->prepare(
+			'SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.file
+			FROM sd_shares
+			LEFT JOIN sd_cache ON sd_shares.file = sd_cache.id
+			LEFT JOIN sd_users ON sd_cache.owner = sd_users.id
+			WHERE sd_cache.owner = ?
+			GROUP BY sd_cache.id'
+		);
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
@@ -775,7 +861,14 @@ class Database {
 	 */
 
 	public function share_get_with($uid, $access_request) {
-		$stmt = $this->link->prepare('SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.id FROM sd_cache LEFT JOIN sd_shares ON sd_shares.id = sd_cache.id LEFT JOIN sd_users ON sd_cache.owner = sd_users.id WHERE userto = ?');
+		$stmt = $this->link->prepare(
+			'SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.file
+			FROM sd_cache
+			LEFT JOIN sd_shares ON sd_shares.file = sd_cache.id
+			LEFT JOIN sd_users ON sd_cache.owner = sd_users.id
+			WHERE userto = ?
+			GROUP BY sd_cache.id'
+		);
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
@@ -808,42 +901,57 @@ class Database {
 	 */
 
 	public function share_remove($id) {
-		$stmt = $this->link->prepare('DELETE FROM sd_shares WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'DELETE sh, u
+			FROM sd_shares sh
+			LEFT JOIN sd_unlocked u ON sh.hash = u.hash
+			WHERE sh.file = ?'
+		);
 		$stmt->bind_param('s', $id);
 
 		return ($stmt->execute());
 	}
 
 	public function share_remove_all($username) {
-		$stmt = $this->link->prepare('DELETE s FROM sd_shares s LEFT JOIN sd_cache f ON s.id = f.id WHERE f.owner = ?');
+		$stmt = $this->link->prepare(
+			'DELETE sh, u
+			FROM sd_shares sh
+			LEFT JOIN sd_cache f ON sh.file = f.id
+			LEFT JOIN sd_unlocked u ON sh.hash = u.hash
+			WHERE f.owner = ?'
+		);
 		$stmt->bind_param('s', $username);
 
 		return ($stmt->execute());
 	}
 
 	public function share_get_base($id, $uid) {
-		$share_base = "0";
-
 		do {
-			$stmt = $this->link->prepare('SELECT sd_cache.id, sd_cache.parent, sd_shares.access, sd_shares.userto, sd_shares.public from sd_cache LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id WHERE sd_cache.id = ?');
+			$stmt = $this->link->prepare(
+				'SELECT sd_cache.id, sd_cache.parent, sd_cache.owner, sd_shares.access, sd_shares.userto
+				FROM sd_cache
+				LEFT JOIN sd_shares ON sd_cache.id = sd_shares.file
+				WHERE sd_cache.id = ?'
+			);
 			$stmt->bind_param('s', $id);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($id, $parent, $access, $userto, $public);
-			$stmt->fetch();
-			if ($access && ($userto == $uid || $public)) {
-				$share_base = $id;
-				break;
+			$stmt->bind_result($id, $parent, $owner, $access, $userto);
+
+			while ($stmt->fetch()) {
+				if ($owner == $uid || $userto === $uid) {
+					return $id;
+				}
 			}
 			$id = $parent;
-		} while ($stmt->num_rows > 0 && $access == null);
+		} while ($stmt->num_rows > 0);
 
-		return $share_base;
+		return "0";
 	}
 
 	/**
 	 * Write log entry
-	 * @param user
+	 * @param uid
 	 * @param type e.g. ERROR, INFO, etc.
 	 * @param source where did the error occurr?
 	 * @param msg actual error message
@@ -851,23 +959,35 @@ class Database {
 
 	public function log_write($uid, $type, $source, $msg) {
 		$date = date('d.m.Y-H:i:s');
-		$stmt = $this->link->prepare('INSERT into sd_log (user, type, source, msg, date) VALUES (?, ?, ?, ?, ?)');
+		$stmt = $this->link->prepare(
+			'INSERT into sd_log (user, type, source, msg, date)
+			VALUES (?, ?, ?, ?, ?)'
+		);
 		$stmt->bind_param('iisss', $uid, $type, $source, $msg, $date);
 		$stmt->execute();
 	}
 
 	/**
 	 * Get log
-	 * @param from start with nth entry
-	 * @param size how many to return
+	 * @param integer from start with nth entry
+	 * @param integer size how many to return
 	 * @return array containing log size and log entries
 	 */
 
 	public function log_get($from, $size) {
-		$stmt0 = $this->link->query('SELECT COUNT(*) FROM sd_log');
+		$stmt0 = $this->link->query(
+			'SELECT COUNT(*)
+			FROM sd_log'
+		);
 		$count = ceil($stmt0->fetch_row()[0] / 10);
 
-		$stmt = $this->link->prepare('SELECT sd_users.user, type, source, msg, date FROM sd_log LEFT JOIN sd_users ON sd_users.id = sd_log.user ORDER BY sd_log.id DESC LIMIT ?, ?');
+		$stmt = $this->link->prepare(
+			'SELECT sd_users.user, type, source, msg, date
+			FROM sd_log
+			LEFT JOIN sd_users ON sd_users.id = sd_log.user
+			ORDER BY sd_log.id
+			DESC LIMIT ?, ?'
+		);
 		$stmt->bind_param('ii', $from, $size);
 		$stmt->execute();
 		$stmt->store_result();
@@ -892,7 +1012,9 @@ class Database {
 	 */
 
 	public function log_clear() {
-		$stmt = $this->link->prepare('DELETE FROM sd_log');
+		$stmt = $this->link->prepare(
+			'DELETE FROM sd_log'
+		);
 		$stmt->execute();
 		return true;
 	}
@@ -906,7 +1028,10 @@ class Database {
 	 */
 
 	public function cache_trash($id, $restorepath, $hash, $owner, $path) {
-		$stmt = $this->link->prepare('INSERT INTO sd_trash (id, restorepath, hash) VALUES (?, ?, ?)');
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_trash (id, restorepath, hash)
+			VALUES (?, ?, ?)'
+		);
 		$stmt->bind_param('sss', $id, $restorepath, $hash);
 		$stmt->execute();
 
@@ -921,7 +1046,11 @@ class Database {
 	private function cache_get_size_recursive($id, $uid, $access_request) {
 		$total = 0;
 
-		$stmt = $this->link->prepare('SELECT id, size, filename FROM sd_cache WHERE parent = ?');
+		$stmt = $this->link->prepare(
+			'SELECT id, size, filename
+			FROM sd_cache
+			WHERE parent = ?'
+		);
 		$stmt->bind_param('s', $id);
 		$stmt->execute();
 		$stmt->store_result();
@@ -947,7 +1076,11 @@ class Database {
 	 */
 
 	public function cache_update_size($id, $size) {
-		$stmt = $this->link->prepare('UPDATE sd_cache SET size = ? WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'UPDATE sd_cache
+			SET size = ?
+			WHERE id = ?'
+		);
 		$stmt->bind_param('ss', $size, $id);
 		$stmt->execute();
 	}
@@ -957,7 +1090,11 @@ class Database {
 
 		do {
 			$id = Crypto::random(32);
-			$stmt = $this->link->prepare('SELECT id FROM sd_cache WHERE id = ?');
+			$stmt = $this->link->prepare(
+				'SELECT id
+				FROM sd_cache
+				WHERE id = ?'
+			);
 			$stmt->bind_param('s', $id);
 			$stmt->execute();
 		} while ($stmt->num_rows > 0);
@@ -970,7 +1107,11 @@ class Database {
 
 		do {
 			$hash = Crypto::random(32);
-			$stmt = $this->link->prepare('SELECT hash FROM sd_trash WHERE hash = ?');
+			$stmt = $this->link->prepare(
+				'SELECT hash
+				FROM sd_trash
+				WHERE hash = ?'
+			);
 			$stmt->bind_param('s', $hash);
 			$stmt->execute();
 		} while ($stmt->num_rows > 0);
@@ -981,7 +1122,10 @@ class Database {
 	public function cache_add($filename, $parent, $type, $size, $owner, $edit, $md5, $path) {
 		$timestamp = time();
 		$id = $this->cache_get_unique_id();
-		$stmt = $this->link->prepare('INSERT INTO sd_cache (id, filename, parent, type, size, owner, edit, md5, lastscan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_cache (id, filename, parent, type, size, owner, edit, md5, lastscan)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+		);
 		$stmt->bind_param('ssssisisi', $id, $filename, $parent, $type, $size, $owner, $edit, $md5, $timestamp);
 		$stmt->execute();
 
@@ -991,7 +1135,11 @@ class Database {
 
 	public function cache_refresh($id) {
 		$timestamp = time();
-		$stmt = $this->link->prepare('UPDATE sd_cache SET lastscan = ? WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'UPDATE sd_cache
+			SET lastscan = ?
+			WHERE id = ?'
+		);
 		$stmt->bind_param('is', $timestamp, $id);
 		$stmt->execute();
 		$stmt->fetch();
@@ -1002,7 +1150,11 @@ class Database {
 		$timestamp = time();
 		// Escape all ids to prevent SQL injection
 		$escaped_ids = $this->escape_array($ids);
-		$stmt = $this->link->prepare('UPDATE sd_cache SET lastscan = ? WHERE id IN ("' . implode($escaped_ids, '","') . '")');
+		$stmt = $this->link->prepare(
+			'UPDATE sd_cache
+			SET lastscan = ?
+			WHERE id IN ("' . implode($escaped_ids, '","') . '")'
+		);
 		$stmt->bind_param('i', $timestamp);
 		return ($stmt->execute());
 	}
@@ -1016,7 +1168,11 @@ class Database {
 
 	public function cache_update($id, $type, $size, $edit, $md5, $owner, $path) {
 		$timestamp = time();
-		$stmt = $this->link->prepare('UPDATE sd_cache SET type = ?, size = ?, edit = ?, md5 = ?, lastscan = ? WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'UPDATE sd_cache
+			SET type = ?, size = ?, edit = ?, md5 = ?, lastscan = ?
+			WHERE id = ?'
+		);
 		$stmt->bind_param('siisis', $type, $size, $edit, $md5, $timestamp, $id);
 		$stmt->execute();
 		$stmt->store_result();
@@ -1028,7 +1184,13 @@ class Database {
 	}
 
 	public function cache_get_trash($uid) {
-		$stmt = $this->link->prepare('SELECT sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_users.user, sd_cache.edit, sd_cache.md5, sd_cache.id FROM sd_users RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner RIGHT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.owner = ?');
+		$stmt = $this->link->prepare(
+			'SELECT sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_users.user, sd_cache.edit, sd_cache.md5, sd_cache.id
+			FROM sd_users
+			RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner
+			RIGHT JOIN sd_trash ON sd_cache.id = sd_trash.id
+			WHERE sd_cache.owner = ?'
+		);
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
@@ -1051,19 +1213,18 @@ class Database {
 		return $files;
 	}
 
-	public function cache_get($id, $uid, $access_request, $hash) {
+	public function cache_get($id, $uid) {
 		$share_base = $this->share_get_base($id, $uid);
 
-		$stmt = $this->link->prepare('
-			SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.hash
+		$stmt = $this->link->prepare(
+			'SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.hash
 			FROM sd_users
 			RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner
-			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id
+			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.file
 			LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
-			WHERE sd_cache.id = ?
-			AND (sd_cache.owner = ? OR ((SELECT COUNT(id) FROM sd_shares WHERE id = ? AND access >= ? AND (userto = ? OR (public = 1 OR hash = ?))) = 1))
-		');
-		$stmt->bind_param('sisiis', $id, $uid, $share_base, $access_request, $uid, $hash);
+			WHERE sd_cache.id = ?'
+		);
+		$stmt->bind_param('s', $id);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($id, $filename, $parent, $type, $size, $edit, $md5, $ownerid, $owner, $trash);
@@ -1097,7 +1258,15 @@ class Database {
 		$root = ($id != "0") ? $this->cache_relative_path($id) : "";
 		$files = array();
 
-		$stmt = $this->link->prepare('SELECT f.id, f.type, f.edit, f.md5 FROM sd_cache f LEFT JOIN sd_trash t ON f.id = t.id WHERE f.owner = ? AND f.parent = ? AND t.hash IS NULL');
+		$stmt = $this->link->prepare(
+			'SELECT f.id, f.type, f.edit, f.md5
+			FROM sd_cache f
+			LEFT JOIN sd_trash t ON f.id = t.id
+			WHERE f.owner = ?
+			AND f.parent = ?
+			AND t.hash
+			IS NULL'
+		);
 		$stmt->bind_param('is', $owner, $id);
 		$stmt->execute();
 		$stmt->store_result();
@@ -1123,7 +1292,16 @@ class Database {
 
 	// Returns true if parent has a file that is not trashed
 	public function cache_has_child($owner, $parent, $filename) {
-		$stmt = $this->link->prepare('SELECT sd_cache.id FROM sd_cache LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE owner = ? AND parent = ? AND filename = ? AND sd_trash.hash IS NULL');
+		$stmt = $this->link->prepare(
+			'SELECT sd_cache.id
+			FROM sd_cache
+			LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
+			WHERE owner = ?
+			AND parent = ?
+			AND filename = ?
+			AND sd_trash.hash
+			IS NULL'
+		);
 		$stmt->bind_param('iss', $owner, $parent, $filename);
 		$stmt->execute();
 		$stmt->store_result();
@@ -1133,26 +1311,26 @@ class Database {
 		return ($stmt->affected_rows > 0) ? $id : null;
 	}
 
-	public function cache_children($id, $uid, $access_request, $hash) {
-		$uid = ($uid) ? $uid : 0;
+	public function cache_children($id, $uid, $oid) {
 		$share_base = $this->share_get_base($id, $uid);
 
 		if ($this->cache_trashed($id)) {
 			return array();
 		}
 
-		$stmt = $this->link->prepare('
-			SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.id
+		$stmt = $this->link->prepare(
+			'SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.file
 			FROM sd_users
 			RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner
-			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.id
+			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.file
 			LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
 			WHERE sd_cache.parent = ?
+			AND sd_cache.owner = ?
 			AND sd_trash.hash IS NULL
-			AND (sd_cache.owner = ? OR (SELECT COUNT(id) FROM sd_shares WHERE id = ? AND access >= ? AND (userto = ? OR (public = 1 OR hash = ?))) = 1)
+			GROUP BY sd_cache.id
 		');
 
-		$stmt->bind_param('sisiis', $id, $uid, $share_base, $access_request, $uid, $hash);
+		$stmt->bind_param('si', $id, $oid);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $id, $share_id);
@@ -1177,7 +1355,11 @@ class Database {
 	}
 
 	public function cache_get_trash_hash($id) {
-		$stmt = $this->link->prepare('SELECT hash FROM sd_trash WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'SELECT hash
+			FROM sd_trash
+			WHERE id = ?'
+		);
 		$stmt->bind_param('s', $id);
 		$stmt->execute();
 		$stmt->store_result();
@@ -1188,7 +1370,11 @@ class Database {
 	}
 
 	public function cache_get_restore_path($id) {
-		$stmt = $this->link->prepare('SELECT restorepath FROM sd_trash WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'SELECT restorepath
+			FROM sd_trash
+			WHERE id = ?'
+		);
 		$stmt->bind_param('s', $id);
 		$stmt->execute();
 		$stmt->store_result();
@@ -1213,7 +1399,15 @@ class Database {
 
 		do {
 			$filename = array_shift($path);
-			$stmt = $this->link->prepare('SELECT sd_cache.id FROM sd_cache LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id WHERE sd_cache.owner = ? AND sd_cache.parent = ? AND sd_cache.filename = ? AND sd_trash.hash IS NULL');
+			$stmt = $this->link->prepare(
+				'SELECT sd_cache.id
+				FROM sd_cache
+				LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
+				WHERE sd_cache.owner = ?
+				AND sd_cache.parent = ?
+				AND sd_cache.filename = ?
+				AND sd_trash.hash IS NULL'
+			);
 			$stmt->bind_param('iss', $uid, $id, $filename);
 			$stmt->execute();
 			$stmt->store_result();
@@ -1228,7 +1422,11 @@ class Database {
 		$path = "";
 
 		do {
-			$stmt = $this->link->prepare('SELECT parent, filename FROM sd_cache WHERE id = ?');
+			$stmt = $this->link->prepare(
+				'SELECT parent, filename
+				FROM sd_cache
+				WHERE id = ?'
+			);
 			$stmt->bind_param('s', $id);
 			$stmt->execute();
 			$stmt->store_result();
@@ -1247,7 +1445,11 @@ class Database {
 		$parents = array();
 
 		do {
-			$stmt = $this->link->prepare('SELECT parent, filename, owner FROM sd_cache WHERE id = ?');
+			$stmt = $this->link->prepare(
+				'SELECT parent, filename, owner
+				FROM sd_cache
+				WHERE id = ?'
+			);
 			$stmt->bind_param('s', $id);
 			$stmt->execute();
 			$stmt->store_result();
@@ -1269,7 +1471,10 @@ class Database {
 	}
 
 	public function cache_restore($id, $to, $owner, $path) {
-		$stmt = $this->link->prepare('DELETE FROM sd_trash WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'DELETE FROM sd_trash
+			WHERE id = ?'
+		);
 		$stmt->bind_param('s', $id);
 		$stmt->execute();
 
@@ -1277,7 +1482,11 @@ class Database {
 	}
 
 	public function cache_move($id, $dest, $oldpath, $newpath, $owner) {
-		$stmt = $this->link->prepare('UPDATE sd_cache SET parent = ? WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'UPDATE sd_cache
+			SET parent = ?
+			WHERE id = ?'
+		);
 		$stmt->bind_param('ss', $dest, $id);
 
 		if ($stmt->execute()) {
@@ -1291,7 +1500,11 @@ class Database {
 	}
 
 	public function cache_rename($id, $oldpath, $newpath, $new_filename, $owner) {
-		$stmt = $this->link->prepare('UPDATE sd_cache SET filename = ? WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'UPDATE sd_cache
+			SET filename = ?
+			WHERE id = ?'
+		);
 		$stmt->bind_param('ss', $new_filename, $id);
 
 		if ($stmt->execute()) {
@@ -1303,14 +1516,25 @@ class Database {
 	}
 
 	public function cache_remove($id) {
-		$stmt = $this->link->prepare('delete f, s from sd_cache f left join sd_shares s on f.id = s.id where f.id = ?');
+		$stmt = $this->link->prepare(
+			'DELETE f, s
+			FROM sd_cache f
+			LEFT JOIN sd_shares s
+			ON f.id = s.file
+			WHERE f.id = ?'
+		);
 		$stmt->bind_param('s', $id);
 		return ($stmt->execute());
 	}
 
 	public function cache_trashed($id) {
 		do {
-			$stmt = $this->link->prepare('SELECT sd_cache.parent, sd_trash.hash FROM sd_cache LEFT JOIN sd_trash on sd_cache.id = sd_trash.id WHERE sd_cache.id = ?');
+			$stmt = $this->link->prepare(
+				'SELECT sd_cache.parent, sd_trash.hash
+				FROM sd_cache
+				LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
+				WHERE sd_cache.id = ?'
+			);
 			$stmt->bind_param('s', $id);
 			$stmt->execute();
 			$stmt->store_result();
@@ -1326,7 +1550,12 @@ class Database {
 	}
 
 	public function cache_clean($parent, $owner, $start, $recursive = false, $force_delete = false) {
-		$stmt = $this->link->prepare('SELECT filename, id, type, lastscan FROM sd_cache WHERE parent = ? AND owner = ?');
+		$stmt = $this->link->prepare(
+			'SELECT filename, id, type, lastscan
+			FROM sd_cache
+			WHERE parent = ?
+			AND owner = ?'
+		);
 		$stmt->bind_param('ss', $parent, $owner);
 		$stmt->execute();
 		$stmt->store_result();
@@ -1348,25 +1577,40 @@ class Database {
 
 	public function cache_clean_trash($uid, $existing) {
 		$escaped_existing = $this->escape_array($existing);
-		$stmt = $this->link->prepare('DELETE t FROM sd_trash t LEFT JOIN sd_cache f ON t.id = f.id WHERE f.owner = ? AND t.hash NOT IN ("' . implode($escaped_existing, '","') . '")');
+		$stmt = $this->link->prepare(
+			'DELETE t
+			FROM sd_trash t
+			LEFT JOIN sd_cache f ON t.id = f.id
+			WHERE f.owner = ?
+			AND t.hash NOT IN ("' . implode($escaped_existing, '","') . '")'
+		);
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 	}
 
 	public function thumbnail_create($id, $path) {
-		$stmt = $this->link->prepare('INSERT INTO sd_thumbnails (id, path) VALUES (?, ?)');
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_thumbnails (id, path)
+			VALUES (?, ?)'
+		);
 		$stmt->bind_param('ss', $id, $path);
 		return ($stmt->execute());
 	}
 
 	public function thumbnail_remove($id) {
-		$stmt = $this->link->prepare('DELETE FROM sd_thumbnails WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'DELETE FROM sd_thumbnails
+			WHERE id = ?'
+		);
 		$stmt->bind_param('s', $id);
 		return ($stmt->execute());
 	}
 
 	public function thumbnail_get_path($id) {
-		$stmt = $this->link->prepare('SELECT path FROM sd_thumbnails WHERE id = ?');
+		$stmt = $this->link->prepare(
+			'SELECT path FROM sd_thumbnails
+			WHERE id = ?'
+		);
 		$stmt->bind_param('s', $id);
 		$stmt->execute();
 		$stmt->store_result();
@@ -1379,7 +1623,11 @@ class Database {
 	public function thumbnail_get_all($id) {
 		$thumb_paths = array();
 
-		$stmt = $this->link->prepare('SELECT filename, id, type FROM sd_cache WHERE parent = ?');
+		$stmt = $this->link->prepare(
+			'SELECT filename, id, type
+			FROM sd_cache
+			WHERE parent = ?'
+		);
 		$stmt->bind_param('s', $id);
 		$stmt->execute();
 		$stmt->store_result();
@@ -1401,7 +1649,16 @@ class Database {
 	public function history_for_user($owner, $timestamp, $only_deleted = false) {
 		$entries = array();
 
-		$stmt = $this->link->prepare('SELECT path, deleted, timestamp FROM sd_history h1 WHERE owner = ? AND timestamp = (SELECT MAX(timestamp) FROM sd_history h2 WHERE h1.path = h2.path AND timestamp > ?)');
+		$stmt = $this->link->prepare(
+			'SELECT path, deleted, timestamp
+			FROM sd_history h1
+			WHERE owner = ?
+			AND timestamp = (
+				SELECT MAX(timestamp)
+				FROM sd_history h2
+				WHERE h1.path = h2.path
+				AND timestamp > ?)'
+			);
 		$stmt->bind_param('si', $owner, $timestamp);
 		$stmt->execute();
 		$stmt->store_result();
@@ -1424,7 +1681,10 @@ class Database {
 	 */
 
 	public function history_add_file($path, $owner, $timestamp, $delete) {
-		$stmt = $this->link->prepare('INSERT INTO sd_history (deleted, timestamp, owner, path) VALUES (?, ?, ?, ?)');
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_history (deleted, timestamp, owner, path)
+			VALUES (?, ?, ?, ?)'
+		);
 		$stmt->bind_param('iiis', $delete, $timestamp, $owner, $path);
 		$stmt->execute();
 		return true;
@@ -1440,7 +1700,11 @@ class Database {
 		// Entry for parents
 		if (!$delete && $include_parents) {
 			do {
-				$stmt = $this->link->prepare('SELECT parent FROM sd_cache WHERE id = ?');
+				$stmt = $this->link->prepare(
+					'SELECT parent
+					FROM sd_cache
+					WHERE id = ?'
+				);
 				$stmt->bind_param('s', $id);
 				$stmt->execute();
 				$stmt->store_result();
@@ -1455,7 +1719,11 @@ class Database {
 		}
 
 		// Entry for children
-		$stmt2 = $this->link->prepare('SELECT id, filename, type FROM sd_cache WHERE parent = ?');
+		$stmt2 = $this->link->prepare(
+			'SELECT id, filename, type
+			FROM sd_cache
+			WHERE parent = ?'
+		);
 		$stmt2->bind_param('s', $id_backup);
 		$stmt2->execute();
 		$stmt2->store_result();

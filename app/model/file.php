@@ -4,7 +4,7 @@
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @link		https://simpledrive.org
  */
 
 require_once 'app/helper/ogg.class.php';
@@ -28,7 +28,7 @@ class File_Model {
 		$this->config		= json_decode(file_get_contents('config/config.json'), true);
 		$this->db			= Database::getInstance();
 		$this->user			= ($this->db) ? $this->db->user_get_by_token($token) : null;
-		$this->uid			= ($this->user) ? $this->user['id'] : null;
+		$this->uid			= ($this->user) ? $this->user['id'] : 0;
 		$this->username		= ($this->user) ? $this->user['username'] : "";
 	}
 
@@ -88,8 +88,7 @@ class File_Model {
 
 	/**
 	 * Removes all thumbnails for images (recursively in a directory)
-	 * @param string $id
-	 * @param string $path to check if is directory
+	 * @param array file
 	 */
 
 	private function remove_thumbnail($file) {
@@ -109,8 +108,9 @@ class File_Model {
 
 	/**
 	 * Recursively deletes directory
-	 * @param string $path
-	 * @param string $owner owner of the directory to delete
+	 * @param integer ownerid
+	 * @param string id
+	 * @param string path
 	 */
 
 	public function recursive_remove($ownerid, $id, $path) {
@@ -148,10 +148,9 @@ class File_Model {
 
 	/**
 	 * Creates a thumbnail from a pdf or shrinks an image so that its biggest size is smaller/equal to to biggest size of the supplied container-dimensions while keeping the ratio
-	 * @param int $width of the container
-	 * @param int $height of the container
-	 * @param string $src path of the original file
-	 * @param string|null $target destination-path (if null, function generates the path - important for image-type)
+	 * @param integer file File-ID
+	 * @param integer width of the container
+	 * @param integer height of the container
 	 * @return string destination-path
 	 */
 
@@ -272,9 +271,9 @@ class File_Model {
 
 	/**
 	 * Recursively adds a directory to a zip-archive
-	 * @param array $dir directory to add
+	 * @param string dir directory-path to add
 	 * @param ZipArchive $zipArchive
-	 * @param string $zipdir
+	 * @param string zipdir
 	 */
 
 	private function addFolderToZip($dir, $zipArchive, $zipdir) {
@@ -323,7 +322,7 @@ class File_Model {
 		}
 
 		// Scan folder if autoscan is enabled
-		if ($this->db->user_autoscan($file['ownerid'])) {
+		if ($this->db->user_get_by_id($file['ownerid'])['autoscan']) {
 			$this->scan($target);
 		}
 
@@ -344,19 +343,17 @@ class File_Model {
 			$files = $this->db->share_get_with($this->uid, self::$PERMISSION_READ);
 		}
 		else {
-			//$files = $this->db->cache_children($target, $file['ownerid'], self::$PERMISSION_READ);
-			$files = $this->db->cache_children($target, $this->uid, self::$PERMISSION_READ, $this->db->get_hash_from_token($this->token));
+			$files = $this->db->cache_children($target, $this->uid, $file['ownerid']);
 		}
 
-		//throw new Exception('WORX', '403');
 		return array('files' => $files, 'hierarchy' => $parents);
 	}
 
 	/**
 	 * Creates file/folder, if no filename is specified it iterates over "Unknown file", "Unknown file (1)", etc.
-	 * @param array $target directory the element is created in
-	 * @param string $type "folder" or "file"
-	 * @param string $orig_filename name of new element (not necessary)
+	 * @param string target ID of the directory the element is created in
+	 * @param string type "folder" or "file"
+	 * @param string orig_filename name of new element (optional)
 	 * @return string|null only return status info if something went wrong
 	 */
 
@@ -400,8 +397,8 @@ class File_Model {
 
 	/**
 	 * Renames a file/folder
-	 * @param array $file
-	 * @param string $newname new filename
+	 * @param integer File-ID
+	 * @param string newname new filename
 	 * @return string|null only return status info if something went wrong
 	 */
 
@@ -439,8 +436,7 @@ class File_Model {
 
 	/**
 	 * Delete file or move it to trash
-	 * @param array $sources files to delete
-	 * @param string $final move files to trash if "false"
+	 * @param array sources File-ID(s) to delete
 	 * @return string|null only return status if something went wrong
 	 */
 
@@ -497,36 +493,40 @@ class File_Model {
 	}
 
 	/**
-	 * Engages to create a share entry
-	 * @param array $file file to be shared
-	 * @param string $userto user the file is shared with
-	 * @param string $mail mail address to notify somebody about file sharing
-	 * @param integer $write 1 for write access, 0 otherwise
-	 * @param integer $public 1 for public access, 0 otherwise
-	 * @param string $key access password
+	 * Shares a file
+	 * @param string target File-ID to be shared
+	 * @param string userto user the file is shared with
+	 * @param string mail mail address to notify somebody about file sharing
+	 * @param integer write 1 for write access, 0 otherwise
+	 * @param integer public 1 for public access, 0 otherwise
+	 * @param string pass access password
 	 */
 
 	public function share($target, $userto, $mail, $write, $public, $pass) {
 		$file = $this->get_cached($target, self::$PERMISSION_WRITE);
-		$user = $this->db->user_get_by_name($userto);
-		$userto_uid = ($user) ? $user['id'] : null;
+		$access = ($write) ? self::$PERMISSION_WRITE : self::$PERMISSION_READ;
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		if ($userto && !$user) {
-			throw new Exception('User does not exist', '400');
+		// If a user was specified, share with him
+		if ($userto) {
+			$user = $this->db->user_get_by_name($userto);
+			if (!$user) {
+				throw new Exception('User "' . $userto . '" does not exist', '400');
+			}
+			else if ($user['id'] == $file['ownerid']) {
+				throw new Exception('You can not share a file with yourself...', '400');
+			}
+			else if ($this->db->share($target, $user['id'], Crypto::generate_password($pass), $access) === null) {
+				throw new Exception('Error sharing with "' . $user['username'] . '"', '500');
+			}
 		}
 
-		if ($userto == $file['owner']) {
-			throw new Exception('That is yourself...', '400');
-		}
-
-		$access = ($write) ? self::$PERMISSION_WRITE : self::$PERMISSION_READ;
-
-		if (($hash = $this->db->share($target, $userto_uid, Crypto::generate_password($pass), $public, $access)) !== null) {
-			if ($public == 1) {
+		// If the share is supposed to be public, do that
+		if ($public == 1) {
+			if (($hash = $this->db->share($target, 0, Crypto::generate_password($pass), $access)) !== null) {
 				$link = $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/pub/" . $hash;
 				// Regex for verifying email: '/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/'
 				/*if (isset($_POST['mail']) && $_POST['mail'] != "" && $this->config['mailuser'] != '' && $this->config['mailpass'] != '') {
@@ -536,15 +536,15 @@ class File_Model {
 				}*/
 				return $link;
 			}
-			return null;
+			throw new Exception('Error creating public share', '500');
 		}
 
-		throw new Exception('An error occurred', '500');
+		return null;
 	}
 
 	/**
-	 * Engages the removal of the share entry for file from database
-	 * @param array $file
+	 * Remove a share
+	 * @param string id
 	 */
 
 	public function unshare($id) {
@@ -563,7 +563,7 @@ class File_Model {
 
 	/**
 	 * Returns the share-link if the file was shared to public
-	 * @param array $file
+	 * @param string id
 	 * @return string
 	 */
 
@@ -575,7 +575,7 @@ class File_Model {
 		}
 
 		if ($share = $this->db->share_get_by_id($id)) {
-			if ($share['public']) {
+			if ($share['userto'] == 0) {
 				return $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/pub/" . $share['hash'];
 			}
 		}
@@ -585,8 +585,8 @@ class File_Model {
 
 	/**
 	 * Copies file(s) to specified directory
-	 * @param array $sources file(s) to copy
-	 * @param array $target target directory
+	 * @param integer target ID of target-directory
+	 * @param array sources File-ID(s) to copy
 	 * @return string|null only return status info if something went wrong
 	 */
 
@@ -629,8 +629,9 @@ class File_Model {
 
 	/**
 	 * Zips file(s)
-	 * @param array $sources list of files to zip
-	 * @param array $target directory to save zip-file in
+	 * @param integer target Directory-id to save zip-file in
+	 * @param array sources List of files to zip
+	 * @param boolean for_download If file is supposed to be downloaded
 	 * @return string path to created zip-file
 	 */
 
@@ -742,9 +743,8 @@ class File_Model {
 
 	/**
 	 * Moves file(s) to specified target
-	 * @param array $sources files to move
-	 * @param array $target target folder
-	 * @param string $trash if "true", special name-rules apply
+	 * @param integer target target-folder-id
+	 * @param array sources file-id(s) to move
 	 * @return string|null only return status info if something went wrong
 	 */
 
@@ -792,7 +792,7 @@ class File_Model {
 
 	/**
 	 * Uploads files in the $_FILES-array to the specified directory
-	 * @param array $dir directory to upload to
+	 * @param integer id of target-directory to upload to
 	 */
 
 	public function upload($target) {
@@ -807,7 +807,7 @@ class File_Model {
 			$path = $this->config['datadir'] . $file['owner'] . $file['path'];
 
 			$u = new User_Model($this->token);
-			if (!$u->check_quota($file['owner'], $_FILES[0]['size']) || $_FILES[0]['size'] > $max_upload) {
+			if (!$u->check_quota($file['ownerid'], $_FILES[0]['size']) || $_FILES[0]['size'] > $max_upload) {
 				throw new Exception('File too big', '500');
 			}
 
@@ -852,31 +852,37 @@ class File_Model {
 		throw new Exception('No files to upload', '500');
 	}
 
+	/**
+	 * Get file-info for public hash, check for access permissions and return if granted
+	 * @param string hash public share-hash
+	 * @param string pass password
+	 * @return array share-info
+	 */
+
 	public function get_public($hash, $pass) {
 		$share = $this->db->share_get_by_hash($hash);
 
 		// File not shared at all
-		if (!$share) {
+		if (!$share || !$share['userto'] == 0) {
 			throw new Exception('File not found', '500');
 		}
 
-		$file = $this->get_cached($share['id'], self::$PERMISSION_READ, $hash);
+		$file = $this->db->cache_get($share['id'], $this->uid);
 
-		// File not shared with accessing user
+		// File does not exist
 		if (!$file) {
 			throw new Exception('File not found', '500');
 		}
 
 		// Incorrect password
-		else if (!Crypto::verify_password($pass, $share['pass']) && !$this->db->share_is_unlocked($hash, $this->token)) {
+		else if (!Crypto::verify_password($pass, $share['pass']) && !$this->db->share_is_unlocked($share['id'], self::$PERMISSION_READ, $this->token)) {
 			throw new Exception('Wrong password', '403');
 		}
 		else {
-			$token = Crypto::generate_token(0, $hash);
+			$token = ($this->token) ? $this->token : Crypto::generate_token(0, $hash);
 
-			if ($token) {
-				$return = array('share' => array('id' => $file['id'], 'filename' => $file['filename'], 'type' => $file['type']), 'token' => $token);
-				return $return;
+			if ($token && $this->db->share_unlock($token, $hash)) {
+				return array('share' => array('id' => $file['id'], 'filename' => $file['filename'], 'type' => $file['type']), 'token' => $token);
 			}
 		}
 
@@ -885,10 +891,10 @@ class File_Model {
 
 	/**
 	 * Returns file to client (in 200kB chunks, so images can build up progressively)
-	 * @param array $source file to return
-	 * @param array $width screen width for shrinking to save bandwidth
-	 * @param string $height screen heightfor shrinking to save bandwidth
-	 * @returns file
+	 * @param array targets file-id(s) to return
+	 * @param integer width screen width for shrinking to save bandwidth
+	 * @param integer height screen heightfor shrinking to save bandwidth
+	 * @return file
 	 */
 
 	public function get($targets, $width = null, $height = null) {
@@ -999,7 +1005,14 @@ class File_Model {
 		throw new Exception('Error saving file', '500');
 	}
 
-	public function get_cached($id, $access, $hash = "") {
+	/**
+	 * Get file-info from DB and check if user has permission to access and return if so
+	 * @param integer id file-ID
+	 * @param integer access required access-rights
+	 * @return array file
+	 */
+
+	public function get_cached($id, $access) {
 		if (!$access) {
 			return;
 		}
@@ -1008,12 +1021,16 @@ class File_Model {
 			return array('ownerid' => $this->uid, 'owner' => $this->username, 'path' => "", 'type' => 'folder');
 		}
 
-		if (!$this->uid && $hash == "") {
-			$hash = $this->db->get_hash_from_token($this->token);
-		}
-
-		return $this->db->cache_get($id, $this->uid, $access, $hash);
+		$file = $this->db->cache_get($id, $this->uid);
+		return ($file && ($file['ownerid'] == $this->uid || $this->db->share_is_unlocked($file['id'], $access, $this->token))) ? $file : null;
 	}
+
+	/**
+	 * Get file-info from DB and check if user has permission to access and return if so
+	 * @param id folder-ID
+	 * @param update whether or not to update file-info
+	 * @param include_childs wether or not to go recursive
+	 */
 
 	public function scan($id, $update = false, $include_childs = false) {
 		$scan_lock = ($this->username) ? $this->config['datadir'] . $this->username . "/.lock/scan" : null;
@@ -1029,14 +1046,13 @@ class File_Model {
 		if (!file_exists(dirname($scan_lock))) {
 			mkdir(dirname($scan_lock));
 		}
-		file_put_contents($scan_lock . $file['owner'], '', LOCK_EX);
+		file_put_contents($scan_lock, '', LOCK_EX);
 
 		$path = $this->config['datadir'] . $file['owner'] . $file['path'] . "/";
 		$trash_path = $this->config['datadir'] . $file['owner'] . self::$TRASH;
 
 		// Start scan
 		$this->scan_trash($file['ownerid'], $file['owner'], $trash_path);
-		//$this->scan($id, $path, $file['path'] . "/", $file['ownerid']);
 
 		$start = time();
 
@@ -1047,8 +1063,8 @@ class File_Model {
 		$this->db->cache_clean($id, $file['ownerid'], $start, $update, $include_childs);
 
 		// Release lock when finished
-		if (file_exists($scan_lock . $file['owner'])) {
-			unlink($scan_lock . $file['owner']);
+		if (file_exists($scan_lock)) {
+			unlink($scan_lock);
 		}
 	}
 

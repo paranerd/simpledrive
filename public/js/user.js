@@ -2,7 +2,7 @@
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @link		https://simpledrive.org
  */
 
 var username,
@@ -42,7 +42,8 @@ var UserController = {
 		});
 
 		$("#autoscan.checkbox-box").on('click', function(e) {
-			var enable = $("#autoscan").hasClass("checkbox-checked") ? 1 : 0;
+			// This fires before checkbox-status has been changed
+			var enable = $("#autoscan").hasClass("checkbox-checked") ? 0 : 1;
 			UserModel.setAutoscan(enable);
 		});
 

@@ -13,13 +13,7 @@ $username 	= ($user) ? $user['username'] : '';
 $admin 		= ($user) ? $user['admin'] : false;
 $color 		= ($user) ? $user['color'] : 'light';
 $fileview 	= ($user) ? $user['fileview'] : 'list';
-
-if ($public) {
-	$token = (isset($_COOKIE['public_token'])) ? $_COOKIE['public_token'] : null;
-}
-else {
-	$token = (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-}
+$token = (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
 
 if (!$public && !$user) {
 	header('Location: ' . $base . 'core/login');
@@ -292,7 +286,7 @@ if (!$public && !$user) {
 	<!-- Progress circle -->
 	<div id="busy" class="hidden">busy</div>
 
-	<?php if ($section == 'pub' && strlen($id) == 8) : ?>
+	<?php if ($public && strlen($id) == 8) : ?>
 	<div id="pubfile" class="overlay dark">
 		<div class="brand" title="simpleDrive"><div>simpleDrive</div></div>
 

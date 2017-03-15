@@ -34,26 +34,19 @@ class Sync {
 	public function start($target, $clientfiles, $serverfiles, $history, $last_sync) {
 		$start = microtime(true);
 
-		file_put_contents(LOG, "clientfiles: " . print_r($clientfiles, true) . "\n", FILE_APPEND);
-		file_put_contents(LOG, "serverfiles: " . print_r($serverfiles, true) . "\n", FILE_APPEND);
 		return;
 
 		// Eliminate matches
 		$files = $this->eliminate_matches($clientfiles, $serverfiles);
 		$clientfiles = $files[0];
 		$serverfiles = $files[1];
-		file_put_contents(LOG, "matches eliminated (client): " . print_r($clientfiles, true) . "\n", FILE_APPEND);
-		file_put_contents(LOG, "matches eliminated (server): " . print_r($serverfiles, true) . "\n", FILE_APPEND);
 
 		// Eliminate deleted
 		$clientfiles = $this->process_clientfiles($clientfiles, $history);
-		file_put_contents(LOG, "deleted eliminated (client): " . print_r($clientfiles, true) . "\n", FILE_APPEND);
-		file_put_contents(LOG, "deleted eliminated (server): " . print_r($serverfiles, true) . "\n", FILE_APPEND);
 
 		// Mark the remaining serverfiles for download
 		$clientfiles = $this->process_serverfiles($clientfiles, $serverfiles, $history);
-		file_put_contents(LOG, "final: " . print_r($clientfiles, true) . "\n", FILE_APPEND);
-
+		
 		return $clientfiles;
 	}
 

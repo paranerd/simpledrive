@@ -125,11 +125,10 @@ class Crypto {
 	public function generate_token($uid, $hash = "") {
 		$config		= json_decode(file_get_contents('config/config.json'), true);
 		$db			= Database::getInstance();
-		$name		= ($hash) ? 'public_token' : 'token';
-		$expires	= ($hash) ? time() + 60 * 60 : time() + 60 * 60 * 24 * 7; // 1h for public, otherwise 1 week
+		$expires	= time() + 60 * 60 * 24 * 7;
 
-		if ($token = $db->session_start($uid, $hash, $expires)) {
-			setcookie($name, $token, $expires, "/");
+		if ($token = $db->session_start($uid, $expires)) {
+			setcookie('token', $token, $expires, "/");
 			return $token;
 		}
 

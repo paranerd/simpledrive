@@ -260,7 +260,6 @@ var Util = {
 			data: {token: token},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			console.log(data);
 			if (data.msg.recent) {
 				Util.notify("Update available! Get " + data.msg.recent + " from simpledrive.org", false, false);
 			}

@@ -156,29 +156,6 @@ class Core_Model {
 	}
 
 	/**
-	 * Generate authorization token, add session to db and set cookie
-	 * @param user
-	 * @param hash public share hash (optional)
-	 * @return string authorization token
-	 */
-
-	public function generate_token($uid, $hash = "") {
-		$db			= Database::getInstance();
-		//$token		= $db->session_get_unique_token();
-		$name		= ($hash) ? 'public_token' : 'token';
-		$expires	= ($hash) ? time() + 60 * 60 : time() + 60 * 60 * 24 * 7; // 1h for public, otherwise 1 week
-
-		if ($token &&
-			setcookie($name, $token, $expires, "/") &&
-			$db->session_start($token, $uid, $hash, $expires))
-		{
-			return $token;
-		}
-
-		return null;
-	}
-
-	/**
 	 * Innitiate token generation
 	 * After 3 login attempts add a 30s cooldown for every further attempt to slow down bruteforce attacks
 	 * @param username
