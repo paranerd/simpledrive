@@ -24,7 +24,8 @@ if (!$public && !$user) {
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
 <head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-view="<?php echo $section; ?>" data-id="<?php echo $id; ?>" data-public="<?php echo $public; ?>">
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<title>Files | simpleDrive</title>
 
 	<base href="<?php echo $base; ?>">

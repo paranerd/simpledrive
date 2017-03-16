@@ -15,7 +15,8 @@ $demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'
 <head data-base="<?php echo $base; ?>" data-demo="<?php echo $demo; ?>">
 	<title>Login | simpleDrive</title>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-	<meta name="viewport" content="width=device-width, user-scalable=no">
+	
+	<meta name="viewport" content="width=device-width,initial-scale=1">
 
 	<base href="<?php echo $base; ?>">
 

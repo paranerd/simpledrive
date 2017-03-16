@@ -934,7 +934,7 @@ class Database {
 			$stmt = $this->link->prepare(
 				'SELECT sd_cache.id, sd_cache.parent, sd_cache.owner, sd_shares.access, sd_shares.userto
 				FROM sd_cache
-				LEFT JOIN sd_shares ON sd_cache.id = sd_shares.file
+				RIGHT JOIN sd_shares ON sd_cache.id = sd_shares.file
 				WHERE sd_cache.id = ?'
 			);
 			$stmt->bind_param('s', $id);
