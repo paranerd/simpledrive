@@ -690,10 +690,9 @@ class Database {
 			RIGHT JOIN sd_unlocked u ON sh.hash = u.hash
 			WHERE sh.file = ?
 			AND sh.access >= ?
-			AND (userto = ?
-				OR (userto = 0
-					AND u.token = ?
-				)
+			AND (
+				(userto != 0 AND userto = ?)
+				OR (userto = 0 AND u.token = ?)
 			)
 		');
 		$stmt->bind_param('siis', $share_base, $access, $uid, $token);
@@ -934,7 +933,7 @@ class Database {
 			$stmt = $this->link->prepare(
 				'SELECT sd_cache.id, sd_cache.parent, sd_cache.owner, sd_shares.access, sd_shares.userto
 				FROM sd_cache
-				RIGHT JOIN sd_shares ON sd_cache.id = sd_shares.file
+				LEFT JOIN sd_shares ON sd_cache.id = sd_shares.file
 				WHERE sd_cache.id = ?'
 			);
 			$stmt->bind_param('s', $id);
@@ -943,7 +942,7 @@ class Database {
 			$stmt->bind_result($id, $parent, $owner, $access, $userto);
 
 			while ($stmt->fetch()) {
-				if ($owner == $uid || $userto === $uid) {
+				if ($access && ($owner == $uid || $userto === $uid)) {
 					return $id;
 				}
 			}
@@ -1217,6 +1216,22 @@ class Database {
 		return $files;
 	}
 
+	public function cache_get_root_id($uid) {
+		$stmt = $this->link->prepare(
+			'SELECT id
+			FROM sd_cache
+			WHERE parent IS NULL
+			AND owner = ?'
+		);
+
+		$stmt->bind_param('i', $uid);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($id);
+
+		return ($stmt->fetch()) ? $id : null;
+	}
+
 	public function cache_get($id, $uid) {
 		$share_base = $this->share_get_base($id, $uid);
 
@@ -1423,7 +1438,7 @@ class Database {
 	}
 
 	public function cache_relative_path($id) {
-		$path = "";
+		$path = array();
 
 		do {
 			$stmt = $this->link->prepare(
@@ -1437,11 +1452,11 @@ class Database {
 			$stmt->bind_result($id, $filename);
 
 			if ($stmt->fetch()) {
-				$path = "/" . $filename . $path;
+				array_unshift($path, $filename);
 			}
 		} while ($stmt->num_rows > 0);
 
-		return $path;
+		return implode('/', $path);
 	}
 
 	public function cache_parents($id, $uid) {
@@ -1457,11 +1472,11 @@ class Database {
 			$stmt->bind_param('s', $id);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($parent, $filename, $owner);
+			$stmt->bind_result($parent, $filename, $oid);
 
 			if ($stmt->fetch()) {
 				array_unshift($parents, array('id' => $id, 'filename' => $filename));
-				if ($id == $share_base && $owner != $uid) {
+				if ($id == $share_base && $oid != $uid) {
 					break;
 				}
 				$id = $parent;
@@ -1474,7 +1489,7 @@ class Database {
 		return $parents;
 	}
 
-	public function cache_restore($id, $to, $owner, $path) {
+	public function cache_restore($id, $to, $oid, $path) {
 		$stmt = $this->link->prepare(
 			'DELETE FROM sd_trash
 			WHERE id = ?'
@@ -1482,10 +1497,10 @@ class Database {
 		$stmt->bind_param('s', $id);
 		$stmt->execute();
 
-		return ($this->cache_move($id, $to, null, $path, $owner));
+		return ($this->cache_move($id, $to, null, $path, $oid));
 	}
 
-	public function cache_move($id, $dest, $oldpath, $newpath, $owner) {
+	public function cache_move($id, $dest, $oldpath, $newpath, $oid) {
 		$stmt = $this->link->prepare(
 			'UPDATE sd_cache
 			SET parent = ?
@@ -1495,15 +1510,15 @@ class Database {
 
 		if ($stmt->execute()) {
 			if ($oldpath) {
-				$this->history_add($id, $oldpath, $owner, time(), true);
+				$this->history_add($id, $oldpath, $oid, time(), true);
 			}
-			$this->history_add($id, $newpath, $owner, time(), false);
+			$this->history_add($id, $newpath, $oid, time(), false);
 		}
 
 		return true;
 	}
 
-	public function cache_rename($id, $oldpath, $newpath, $new_filename, $owner) {
+	public function cache_rename($id, $oldpath, $newpath, $new_filename, $oid) {
 		$stmt = $this->link->prepare(
 			'UPDATE sd_cache
 			SET filename = ?
@@ -1512,8 +1527,8 @@ class Database {
 		$stmt->bind_param('ss', $new_filename, $id);
 
 		if ($stmt->execute()) {
-			$this->history_add($id, $oldpath, $owner, time(), true);
-			$this->history_add($id, $newpath, $owner, time(), false);
+			$this->history_add($id, $oldpath, $oid, time(), true);
+			$this->history_add($id, $newpath, $oid, time(), false);
 		}
 
 		return true;

@@ -4,7 +4,7 @@
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @link		https://simpledrive.org
  */
 
 class Core_Model {
@@ -73,7 +73,9 @@ class Core_Model {
 
 			$this->db = Database::getInstance();
 
+			//cache_add($filename, $parent, $type, $size, $owner, $edit, $md5, $path) {
 			if ($id = $this->db->user_create($username, Crypto::generate_password($pass), 1, $mail)) {
+				$this->db->cache_add('', null, 'folder', 0, $id, 0, 0, '');
 				return Crypto::generate_token($id);
 			}
 		} catch (Exception $e) {

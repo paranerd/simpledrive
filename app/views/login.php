@@ -4,7 +4,7 @@
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @link		https://simpledrive.org
  */
 
 $demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'] == "simpledrive.org/demo");
@@ -15,7 +15,7 @@ $demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'
 <head data-base="<?php echo $base; ?>" data-demo="<?php echo $demo; ?>">
 	<title>Login | simpleDrive</title>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-	
+
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 
 	<base href="<?php echo $base; ?>">
