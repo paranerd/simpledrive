@@ -11,16 +11,6 @@ var Util = {
 
 	init: function() {
 		$(window).resize(function() {
-			$("#content, #sidebar, #fileinfo, #texteditor").height(window.innerHeight - $("#header").height());
-
-			var listFooterAdapt = ($(".content-footer").hasClass("hidden")) ? 0 : $(".content-footer").outerHeight();
-			$(".list, .grid").height($("#content").outerHeight() - $(".list-header").outerHeight() - listFooterAdapt);
-
-			var contentWidth = window.innerWidth;
-			contentWidth -= ($("#fileinfo").hasClass("hidden")) ? 0 : $("#fileinfo").outerWidth();
-			contentWidth -= ($("#sidebar").hasClass("hidden")) ? 0 : $("#sidebar").outerWidth();
-			$("#content").width(contentWidth);
-
 			// Position centered divs
 			$('.center').each(function(i, obj) {
 				$(this).css({
@@ -165,6 +155,7 @@ var Util = {
 		}
 		else {
 			$("#" + id).removeClass("hidden");
+			$(window).resize();
 		}
 	},
 

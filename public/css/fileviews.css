@@ -1,5 +1,6 @@
 .col0 {
 	width: 60px;
+	flex: 0 0 auto;
 	cursor: pointer;
 }
 
@@ -8,24 +9,29 @@
 }
 
 .col1 {
-	width: 43%;
+	flex: 1;
 }
 
 .col2 {
 	width: 15%;
+	flex: 0 0 auto;
 }
 
 .col3 {
 	width: 15%;
+	flex: 0 0 auto;
 }
 
 .col4 {
 	width: 10%;
+	flex: 0 0 auto;
 }
 
 .col5 {
 	width: 10%;
+	flex: 0 0 auto;
 	text-align: right !important;
+	padding-right: 20px;
 }
 
 .col5 span {
@@ -33,7 +39,7 @@
 }
 
 .item-elem {
-	position: relative;
+	/*position: relative;
 	height: 50px;
 	font-size: 0.9rem;
 	font-family: robotoregular, sans-serif;
@@ -42,7 +48,13 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	float: left;
+	float: left;*/
+
+	font-size: 0.9rem;
+	font-family: robotoregular, sans-serif;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .item form {
@@ -75,41 +87,41 @@
 
 /* List */
 
-.list-header {
-	position: relative;
+.content-header {
 	height: 50px;
-	width: 100%;
 	line-height: 50px;
 	font-size: 0.9rem;
 	font-family: robotoregular, sans-serif;
-	overflow: hidden;
+	flex: 0 0 auto;
+	display: flex;
 }
 
-.list-header span {
+#content-container.grid > .content-header {
+	display: none !important;
+}
+
+.content-header span {
 	position: relative;
 	cursor: pointer;
 	float: left;
 }
 
-.list-header .col5 span {
+.content-header .col5 span {
 	text-align: right;
 	float: right;
 }
 
-.list-header span:hover {
+.content-header span:hover {
 	font-weight: bold;
 }
 
 .list .item {
-	position: relative;
-	left: 0;
-	height: 50px;
-	width: 100%;
 	border-radius: 0px;
 	line-height: 50px;
 	overflow: hidden;
 	cursor: pointer;
-	float: left;
+	height: 50px;
+	display: flex;
 }
 
 .list .item.selected .thumbnail {

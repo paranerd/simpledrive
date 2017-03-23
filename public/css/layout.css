@@ -24,6 +24,9 @@ body {
 	user-select: none;
 	-webkit-user-select: none;
 	overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
 }
 
 html {
@@ -219,6 +222,18 @@ hr {
 	top: 50%;
 }
 
+.hidden, div.hidden {
+	display: none;
+}
+
+.icon {
+	font-family: icomoon;
+	text-align: center;
+	font-size: 0.8rem;
+	display: inline-block;
+	vertical-align: top;
+}
+
 #busy {
 	position: absolute;
 	right: 20px;
@@ -272,10 +287,6 @@ hr {
 	right: 30px;
 }
 
-.hidden {
-	display: none;
-}
-
 label {
 	position: relative;
 	margin-bottom: 10px;
@@ -301,6 +312,7 @@ label {
 	font-size: 2rem;
 	line-height: 300px;
 	text-align: center;
+  pointer-events: none;
 }
 
 /* General - Checkbox */
@@ -336,14 +348,6 @@ label {
 	content: "\e936";
 }
 
-.icon {
-	font-family: icomoon;
-	text-align: center;
-	font-size: 0.8rem;
-	display: inline-block;
-	vertical-align: top;
-}
-
 /* General - Menu-item */
 
 .menu {
@@ -377,11 +381,8 @@ label {
 /* Header */
 
 #header {
-	position: relative;
-	top: 0;
-	left: 0;
-	height: 80px;
-	width: 100%;
+  height: 80px;
+  flex: 0 0 auto;
 }
 
 #logo {
@@ -438,7 +439,7 @@ label {
 
 #username {
 	position: absolute;
-	right: 2%;
+	right: 20px;
 	line-height: 80px;
 	font-family: robotolight, sans-serif;
 	font-size: 1.3rem;
@@ -457,11 +458,8 @@ label {
 /* Sidebar */
 
 #sidebar {
-	position: relative;
-	left: 0;
-	width: 200px;
-	height: 100%;
-	float: left;
+  width: 200px;
+  flex: 0 0 auto;
 }
 
 #sidebar .icon {
@@ -573,24 +571,26 @@ label {
 
 /* Content */
 
+.main {
+  flex: 1;
+  display: flex;
+}
+
 .filter {
-	position: relative;
-	height: 50px;
-	width: 100%;
+  position: relative;
+  height: 50px;
+  flex: 0 0 auto;
 }
 
-.content-footer {
-	position: relative;
-	height: 50px;
-	width: 100%;
+#content-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
-#content {
-	position: relative;
-	height: 100%;
-	width: 88%;
-	overflow: hidden;
-	float: left;
+.content {
+  position: relative;
+  flex: 1;
 }
 
 .empty {
@@ -599,17 +599,19 @@ label {
 	text-align: center;
 }
 
+.content-footer {
+  position: relative;
+  height: 50px;
+  flex: 0 0 auto;
+}
+
 /* Content - Settings */
 
 #status, #plugins {
-	position: relative;
-	padding-left: 2%;
-	height: 100%;
-	width: 98%;
-	font-size: 1.2rem;
+  padding-left: 2%;
+  font-size: 1.2rem;
 	font-family: robotolight, sans-serif;
 	font-family: robotoregular;
-	overflow: hidden;
 }
 
 #status hr, #plugins hr {
@@ -718,13 +720,9 @@ label {
 /* Info panel */
 
 #fileinfo {
-	position: absolute;
-	top: 80px;
-	right: 0;
-	width: 200px;
-	height: 100%;
-	font-family: robotolight, sans-serif;
-	font-size: 1rem;
+  position: relative;
+  width: 200px;
+  flex: 0 0 auto;
 }
 
 .fileinfo-elem {

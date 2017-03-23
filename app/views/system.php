@@ -33,6 +33,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	<link rel="stylesheet" href="public/css/fileviews.css" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
+
 <body class="<?php echo $color; ?>">
 	<!-- Header -->
 	<div id="header">
@@ -44,6 +45,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<div id="username" class="popup-trigger" data-target="menu"></div>
 	</div>
 
+<div class="main">
 	<!-- Sidebar -->
 	<div id="sidebar">
 		<ul class="menu">
@@ -55,9 +57,9 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	</div>
 
 	<!-- Content -->
-	<div id="content">
+	<div id="content-container" class="list">
 		<!-- Status -->
-		<div id="status" class="hidden">
+		<div id="status" class="content hidden">
 			<h2>General</h2>
 			<div class="row">
 				<div class="cell">Users</div>
@@ -101,7 +103,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			<input id="users-filter-input" class="filter-input" placeholder="Filter..."/>
 			<span class="close">&times;</span>
 		</div>
-		<div id="users-header" class="list-header">
+		<div id="users-header" class="content-header">
 			<span class="col0">&nbsp;</span>
 			<span class="col1">Username</span>
 			<span class="col2">Admin</span>
@@ -109,10 +111,10 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			<span class="col4">Quota used</span>
 			<span class="col5">Last login</span>
 		</div>
-		<div id="users" class="list"></div>
+		<div id="users" class="content"></div>
 
 		<!-- Plugins -->
-		<div id="plugins" class="hidden">
+		<div id="plugins" class="content hidden">
 			<div class="row">
 				<h2>WebODF</h2>
 				<div class="cell multi-line">WebODF is a JavaScript library that makes it easy to add Open Document Format (ODF) support to your website and to your mobile or desktop application. It uses HTML and CSS to display ODF documents.</div>
@@ -147,7 +149,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			<input id="log-filter-input" class="filter-input" placeholder="Filter..."/>
 			<span class="close">&times;</span>
 		</div>
-		<div id="log-header" class="list-header">
+		<div id="log-header" class="content-header">
 			<span class="col0">&nbsp;</span>
 			<span class="col1">Message</span>
 			<span class="col2">Type</span>
@@ -155,7 +157,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			<span class="col4">User</span>
 			<span class="col5">Timestamp</span>
 		</div>
-		<div id="log" class="list"></div>
+		<div id="log" class="content"></div>
 
 		<!-- Log Footer -->
 		<div class="content-footer hidden">
@@ -165,6 +167,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 			</div>
 		</div>
 	</div>
+</div>
 
 	<!-- Context Menu -->
 	<div id="contextmenu" class="popup hidden">

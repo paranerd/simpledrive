@@ -415,7 +415,7 @@ body.light, body.light a {
 
 /* Light - Content - List */
 
-.light .list-header {
+.light .content-header {
 	border-bottom: 1px solid #bbb;
 }
 
@@ -603,7 +603,7 @@ body.light, body.light a {
 
 /* Dark - Content - List */
 
-.dark .list-header {
+.dark .content-header {
 	border-bottom: 1px solid #555;
 }
 

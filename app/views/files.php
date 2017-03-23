@@ -32,8 +32,8 @@ if (!$public && !$user) {
 
 	<link rel="stylesheet" href="public/css/icons.css" />
 	<link rel="stylesheet" href="public/css/colors.css" />
-	<link rel="stylesheet" href="public/css/layout.css" />
 	<link rel="stylesheet" href="public/css/fileviews.css" />
+	<link rel="stylesheet" href="public/css/layout.css" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 
@@ -50,6 +50,7 @@ if (!$public && !$user) {
 		<?php endif; ?>
 	</div>
 
+<div class="main">
 	<!-- Sidebar -->
 	<div id="sidebar">
 		<ul class="menu">
@@ -116,12 +117,12 @@ if (!$public && !$user) {
 	</div>
 
 	<!-- Files -->
-	<div id="content">
+	<div id="content-container" class="<?php echo $fileview; ?>">
 		<div id="files-filter" class="filter hidden">
 			<input class="filter-input input-indent" placeholder="Filter..."/>
 			<span class="close">&times;</span>
 		</div>
-		<div id="list-header" class="list-header <?php if ($fileview == 'grid') echo 'hidden'; ?>">
+		<div class="content-header">
 			<span class="col0 checkbox"><span id="fSelect" class="checkbox-box"></span></span>
 			<span class="col1"><span><?php echo $lang['name']; ?> </span><span id="file-name-ord" class="order-direction"></span></span>
 			<span class="col2"><span><?php echo $lang['owner']; ?></span><span id="file-owner-ord" class="order-direction"></span></span>
@@ -130,7 +131,7 @@ if (!$public && !$user) {
 			<span class="col5"><span id="file-edit-ord" class="order-direction"></span><span><?php echo $lang['edit']; ?> </span></span>
 		</div>
 
-		<div id="files" class="<?php echo $fileview; ?>"></div>
+		<div id="files" class="content"></div>
 	</div>
 
 	<!-- Upload menu -->
@@ -164,9 +165,11 @@ if (!$public && !$user) {
 
 		<div class="fileinfo-elem"><span class="icon icon-files"></span><span id="fileinfo-size"></span></div>
 		<div class="fileinfo-elem"><span class="icon icon-info"></span><span id="fileinfo-type"></span></div>
-		<div class="fileinfo-elem"><span class="icon icon-rename"></span><span id="fileinfo-edit"></span>Edit</div>
-		<div class="fileinfo-elem" id="fileinfo-link"><span class="icon icon-share"></span>Share Link</div>
+		<div class="fileinfo-elem"><span class="icon icon-rename"></span><span id="fileinfo-edit"></span></div>
+		<div class="fileinfo-elem" id="fileinfo-link"><span class="icon icon-share"></span>Show Link</div>
 	</div>
+
+</div>
 
 	<!-- Context menu -->
 	<div id="contextmenu" class="popup hidden">

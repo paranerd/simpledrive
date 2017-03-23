@@ -51,11 +51,13 @@
 		<div id="username" class="popup-trigger" data-target="menu"></div>
 	</div>
 
-	<!-- Content -->
-	<textarea id="texteditor"></textarea>
+	<div class="main">
+		<!-- Content -->
+		<textarea id="texteditor"></textarea>
+	</div>
 
 	<!-- Cursor Info -->
-	<div id="cursorinfo"></div>
+	<div id="cursorinfo" class="hidden"></div>
 
 	<!-- Shield -->
 	<div id="shield" class="overlay hidden"></div>

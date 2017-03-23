@@ -59,7 +59,7 @@ var FileController = {
 				((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 96 && e.keyCode <= 105)))
 			{
 				$("#files-filter").removeClass('hidden');
-				$(window).resize();
+				//$(window).resize();
 				$("#files-filter .filter-input").focus();
 
 				setTimeout(function() {
@@ -106,7 +106,7 @@ var FileController = {
 					AudioManager.stopAudio();
 
 					Util.closePopup();
-					FileModel.closeFilter();
+					FileModel.removeFilter();
 					FileView.closeRename();
 					$(window).resize();
 					break;
@@ -162,7 +162,7 @@ var FileController = {
 		});
 
 		$("#files-filter .close").on('click', function(e) {
-			FileModel.closeFilter();
+			FileModel.removeFilter();
 		});
 
 		$("#fileinfo .close").on('click', function(e) {
@@ -174,19 +174,19 @@ var FileController = {
 			FileModel.scan();
 		});
 
-		$("#list-header .col1").on('click', function(e) {
+		$(".content-header .col1").on('click', function(e) {
 			FileModel.sortBy('name');
 		});
 
-		$("#list-header .col3").on('click', function(e) {
+		$(".content-header .col3").on('click', function(e) {
 			FileModel.sortBy('type');
 		});
 
-		$("#list-header .col4").on('click', function(e) {
+		$(".content-header .col4").on('click', function(e) {
 			FileModel.sortBy('size');
 		});
 
-		$("#list-header .col5").on('click', function(e) {
+		$(".content-header .col5").on('click', function(e) {
 			FileModel.sortBy('edit');
 		});
 
@@ -217,7 +217,7 @@ var FileController = {
 		/**
 		 * Prepare contextmenu
 		 */
-		$(document).on('contextmenu', '#content', function(e) {
+		$(document).on('contextmenu', '#content-container', function(e) {
 			e.preventDefault();
 			var target = (typeof e.target.value != "undefined") ? FileModel.getElementAt(e.target.value) : ((typeof e.target.parentNode.value != "undefined") ? FileModel.getElementAt(e.target.parentNode.value) : null);
 			var multi = (FileModel.getSelectedCount() > 1);
@@ -374,7 +374,7 @@ var FileController = {
 			}
 		});
 
-		$(document).on('mousedown', '#content', function(e) {
+		$(document).on('mousedown', '#content-container', function(e) {
 			Util.closePopup();
 		});
 
@@ -526,25 +526,18 @@ var FileView = {
 	},
 
 	openGallery: function() {
-		$("#sidebar, .list-header").addClass("hidden");
-		FileView.originalFileview = ($("#files").hasClass("list")) ? 'list' : 'grid';
-		$("#files").removeClass('list').addClass("grid");
+		$('#sidebar').addClass('hidden');
+		FileView.originalFileview = ($('#content-container').hasClass('list')) ? 'list' : 'grid';
+		$('#content-container').removeClass('list').addClass('grid');
 		FileModel.filterForType('image');
 		FileView.galleryMode = true;
-		$(window).resize();
 	},
 
 	closeGallery: function() {
 		FileView.galleryMode = false;
-		FileModel.filter('');
+		FileModel.removeFilter();
 		$("#sidebar").removeClass("hidden");
-		$("#files").removeClass('list grid').addClass(FileView.originalFileview);
-
-		if (FileView.originalFileview == 'list') {
-			$(".list-header").removeClass("hidden");
-		}
-
-		$(window).resize();
+		$('#content-container').removeClass('list grid').addClass(FileView.originalFileview);
 	},
 
 	/**
@@ -844,7 +837,7 @@ var FileModel = {
 		}
 	},
 
-	closeFilter: function() {
+	removeFilter: function() {
 		$("#files-filter").addClass("hidden");
 		FileModel.filter('');
 	},
@@ -998,7 +991,7 @@ var FileModel = {
 			data: {token: token, target: FileModel.id, mode: FileView.view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			FileModel.closeFilter();
+			FileModel.removeFilter();
 			Util.busy(false);
 			FileModel.all = data.msg.files;
 			FileModel.filtered = FileModel.all;

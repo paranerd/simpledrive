@@ -46,79 +46,81 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<div id="username" class="popup-trigger" data-target="menu"></div>
 	</div>
 
-	<!-- Sidebar -->
-	<div id="sidebar">
-		<ul class="menu">
-			<li id="sidebar-general" class="sidebar-navigation focus" title="Status info" data-action="general"><span class="icon icon-info"></span> Status</li>
-		</ul>
-	</div>
+	<div class="main">
+		<!-- Sidebar -->
+		<div id="sidebar">
+			<ul class="menu">
+				<li id="sidebar-general" class="sidebar-navigation focus" title="Status info" data-action="general"><span class="icon icon-info"></span> Status</li>
+			</ul>
+		</div>
 
-	<!-- Content -->
-	<div id="content">
-		<div id="status">
-			<h2>Quota</h2>
-			<div class="row">
-				<div class="cell">Total</div>
-				<div class="cell" id="mem-total">Loading...</div>
-			</div>
-			<div class="row">
-				<div class="cell">Used</div>
-				<div class="cell" id="mem-used">Loading...</div>
-			</div>
-			<hr>
-			<h2>Security</h2>
-			<div class="row">
-				<div class="cell">Password</div>
-				<div class="cell"><button class="btn popup-trigger" data-target="change-password">Change</button></div>
-			</div>
-			<div class="row">
-				<div class="cell">Active token (<span id="active-token">0</span>)</div>
-				<div class="cell"><button id="invalidate-token" class="btn">Invalidate</button></div>
-			</div>
-			<hr>
-			<h2>Backup</h2>
-			<div class="row">
-				<div class="cell">Cloud Backup</div>
-				<div class="cell">
-					<button id="backup-toggle-button" class="btn hidden">Start</button>
-					<button id="backup-enable-button" class="btn">loading...</button>
+		<!-- Content -->
+		<div id="content-container" class="list">
+			<div id="status" class="content">
+				<h2>Quota</h2>
+				<div class="row">
+					<div class="cell">Total</div>
+					<div class="cell" id="mem-total">Loading...</div>
 				</div>
-			</div>
-			<hr>
-			<h2>Appearance</h2>
-			<div class="row">
-				<div class="cell">Color theme</div>
-				<div class="cell">
-					<div class="selector">
-						<select id="color">
-							<option value="light">Light</option>
-							<option value="dark">Dark</option>
-						</select>
+				<div class="row">
+					<div class="cell">Used</div>
+					<div class="cell" id="mem-used">Loading...</div>
+				</div>
+				<hr>
+				<h2>Security</h2>
+				<div class="row">
+					<div class="cell">Password</div>
+					<div class="cell"><button class="btn popup-trigger" data-target="change-password">Change</button></div>
+				</div>
+				<div class="row">
+					<div class="cell">Active token (<span id="active-token">0</span>)</div>
+					<div class="cell"><button id="invalidate-token" class="btn">Invalidate</button></div>
+				</div>
+				<hr>
+				<h2>Backup</h2>
+				<div class="row">
+					<div class="cell">Cloud Backup</div>
+					<div class="cell">
+						<button id="backup-toggle-button" class="btn hidden">Start</button>
+						<button id="backup-enable-button" class="btn">loading...</button>
 					</div>
 				</div>
-			</div>
-			<div class="row">
-				<div class="cell">Fileview</div>
-				<div class="cell">
-					<div class="selector">
-						<select id="fileview">
-							<option value="list">List</option>
-							<option value="grid">Grid</option>
-						</select>
+				<hr>
+				<h2>Appearance</h2>
+				<div class="row">
+					<div class="cell">Color theme</div>
+					<div class="cell">
+						<div class="selector">
+							<select id="color">
+								<option value="light">Light</option>
+								<option value="dark">Dark</option>
+							</select>
+						</div>
 					</div>
 				</div>
+				<div class="row">
+					<div class="cell">Fileview</div>
+					<div class="cell">
+						<div class="selector">
+							<select id="fileview">
+								<option value="list">List</option>
+								<option value="grid">Grid</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<hr>
+				<h2>Misc</h2>
+				<div class="row">
+					<div class="cell multi-line">Auto-Scan<br><span class="settings-info">Scan directories to cache before listing. Disable if you only insert data through simpleDrive-Interface.</span></div>
+					<div class="cell"><span class="checkbox"><span id="autoscan" class="checkbox-box"></span></span></div>
+				</div>
+				<div class="row">
+					<div class="cell">Temp Folder</div>
+					<div class="cell"><button id="clear-temp-button" class="btn">Clear</button></div>
+				</div>
+				<hr>
 			</div>
-			<hr>
-			<h2>Misc</h2>
-			<div class="row">
-				<div class="cell multi-line">Auto-Scan<br><span class="settings-info">Scan directories to cache before listing. Disable if you only insert data through simpleDrive-Interface.</span></div>
-				<div class="cell"><span class="checkbox"><span id="autoscan" class="checkbox-box"></span></span></div>
-			</div>
-			<div class="row">
-				<div class="cell">Temp Folder</div>
-				<div class="cell"><button id="clear-temp-button" class="btn">Clear</button></div>
-			</div>
-			<hr>
 		</div>
 	</div>
 

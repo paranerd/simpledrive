@@ -40,7 +40,7 @@ var simpleScroll = {
 			document.onmousemove = function(e) {
 				var id = self.scrolling;
 				var container = self.getSSC(self.scrolling);
-				if(container != null) {
+				if (container != null) {
 					// Calculate the scroll amount by dividing the top pixel of the scrollbar by all the pixels it could move (container height minus scrollbar height)
 					container.scrollpercent = (e.pageY - self.offset(container.elem).top + container.diff) / ($("#" + container.id).height() - $("#scrollbar" + id).height());
 					container.elem.scrollTop = (container.elem.scrollHeight - $("#" + container.id).height()) * container.scrollpercent;
@@ -52,7 +52,7 @@ var simpleScroll = {
 
 		var container = document.getElementById(id);
 
-		if(container == null) {
+		if (container == null) {
 			return;
 		}
 
@@ -96,7 +96,7 @@ var simpleScroll = {
 		}
 
 		innerNode.onscroll = function() {
-			if(self.scrolling == null) {
+			if (self.scrolling == null) {
 				self.update();
 			}
 		}
@@ -137,13 +137,13 @@ var simpleScroll = {
 
 			// Put scrollbar where it belongs
 			$("#scrollbar" + i).height(($("#" + container.id).height() / container.elem.scrollHeight) * $("#" + container.id).height() + "px");
-			if(self.autoScrollBottom) {
+			if (self.autoScrollBottom) {
 				container.elem.scrollTop = container.elem.scrollHeight - $("#" + container.id).height();
 			}
 
 			$("#scrollbar" + i).css('top', ($("#" + container.id).height() - $("#scrollbar" + i).height()) * (container.elem.scrollTop / (container.elem.scrollHeight - $("#" + container.id).height())) + "px");
 
-			if($("#scrollbar" + i).height() == container.elem.scrollHeight) {
+			if ($("#scrollbar" + i).height() == container.elem.scrollHeight) {
 				scrollbar.style.display = "none";
 				container.elem.style.width = ($("#" + container.id).width()) + "px";
 			}
@@ -157,7 +157,7 @@ var simpleScroll = {
 	empty: function(id) {
 		var container = self.getContainer(id);
 
-		if(container == null) {
+		if (container == null) {
 			return;
 		}
 
@@ -166,7 +166,7 @@ var simpleScroll = {
 
 	getContainer: function(id) {
 		for (var i = 0; i < self.containers.length; i++) {
-			if(self.containers[i].id == id) {
+			if (self.containers[i].id == id) {
 				return self.containers[i];
 			}
 		}
@@ -176,7 +176,7 @@ var simpleScroll = {
 
 	getSSC: function(id) {
 		for (var i = 0; i < self.containers.length; i++) {
-			if(self.containers[i].elem.id == "simpleScrollContainer" + id) {
+			if (self.containers[i].elem.id == "simpleScrollContainer" + id) {
 				return self.containers[i];
 			}
 		}

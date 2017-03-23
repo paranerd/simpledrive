@@ -231,7 +231,7 @@ var SystemView = {
 		simpleScroll.empty("users");
 		simpleScroll.empty("log");
 		$("#log-pages").empty();
-		$("#status, #users, #log, #plugins, .list-header, .content-footer").addClass("hidden");
+		$("#status, #users, #log, #plugins, .content-header, .content-footer, #plugins button").addClass("hidden");
 
 		// Set right view
 		Util.sidebarFocus(view);
@@ -250,10 +250,10 @@ var SystemView = {
 			case 'plugins':
 				$(".path-element").text("Plugins");
 				$("#plugins").removeClass("hidden");
-				$("#plugins button").addClass("hidden");
 				break;
 
 			case 'status':
+				$(".path-element").text("Status");
 				$("#status").removeClass("hidden");
 				break;
 		}
