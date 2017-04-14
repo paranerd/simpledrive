@@ -8,7 +8,8 @@
  */
 
 class Database {
-	private static $instance = null;
+	private static $instance				= null;
+	private static $PUBLIC_USER_ID	= 1;
 
 	private function __construct() {
 		if (!function_exists('mysqli_connect')) {
@@ -81,8 +82,9 @@ class Database {
 		}
 
 		$link->query(
-			'DROP TABLE IF EXISTS sd_users, sd_log, sd_shares, sd_cache, sd_session, sd_trash, sd_history'
+			'DROP TABLE IF EXISTS sd_unlocked, sd_shares, sd_cache, sd_users, sd_log, sd_session, sd_trash, sd_history'
 		);
+
 		$createuser = $link->query(
 			"CREATE USER '$username'@'$db_server'
 			IDENTIFIED BY '$pass'"
@@ -100,7 +102,7 @@ class Database {
 			'CREATE TABLE IF NOT EXISTS sd_users (
 				id int(11) AUTO_INCREMENT,
 				PRIMARY KEY (id),
-				user varchar(32),
+				user varchar(32) NOT NULL UNIQUE,
 				pass varchar(64),
 				admin tinyint(1),
 				max_storage varchar(30) default "0",
@@ -127,18 +129,6 @@ class Database {
 		);
 
 		$link->query(
-			'CREATE TABLE IF NOT EXISTS sd_shares (
-				id int(11) AUTO_INCREMENT,
-				PRIMARY KEY (id),
-				file varchar(32),
-				userto int(11),
-				pass varchar(64),
-				access int(11),
-				hash varchar(8)
-			)'
-		);
-
-		$link->query(
 			'CREATE TABLE IF NOT EXISTS sd_cache (
 				id varchar(32),
 				PRIMARY KEY (id),
@@ -147,9 +137,29 @@ class Database {
 				type varchar(10),
 				size int(11),
 				owner int(11),
+				FOREIGN KEY (owner)
+				REFERENCES sd_users (id)
+				ON DELETE CASCADE,
 				edit int(11),
 				md5 varchar(32),
 				lastscan int(11)
+			)'
+		);
+
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_shares (
+				id varchar(8),
+				PRIMARY KEY (id),
+				file varchar(32),
+				FOREIGN KEY (file)
+				REFERENCES sd_cache (id)
+				ON DELETE CASCADE,
+				userto int(11),
+				FOREIGN KEY (userto)
+				REFERENCES sd_users (id)
+				ON DELETE CASCADE,
+				pass varchar(64),
+				access int(11)
 			)'
 		);
 
@@ -173,9 +183,8 @@ class Database {
 
 		$link->query(
 			'CREATE TABLE IF NOT EXISTS sd_session (
-				id int(11) AUTO_INCREMENT,
-				PRIMARY KEY (id),
 				token varchar(32),
+				PRIMARY KEY (token),
 				user int(11),
 				fingerprint varchar(64),
 				expires int(11)
@@ -184,10 +193,14 @@ class Database {
 
 		$link->query(
 			'CREATE TABLE IF NOT EXISTS sd_unlocked (
-				id int(11) AUTO_INCREMENT,
-				PRIMARY KEY (id),
 				token varchar(32),
-				hash varchar(8)
+				FOREIGN KEY (token)
+				REFERENCES sd_session (token)
+				ON DELETE CASCADE,
+				share_id varchar(8),
+				FOREIGN KEY (share_id)
+				REFERENCES sd_shares (id)
+				ON DELETE CASCADE
 			)'
 		);
 
@@ -206,6 +219,11 @@ class Database {
 				pass varchar(100),
 				encrypt_filename tinyint(1)
 			)'
+		);
+
+		$link->query(
+			'INSERT INTO sd_users (user)
+			VALUES ("public")'
 		);
 
 		return array('user' => $db_user, 'pass' => $db_pass);
@@ -312,14 +330,14 @@ class Database {
 
 	/**
 	 * Get info about user
-	 * @param user user to search for
-	 * @return array containing user info
+	 * @return array containing info for all users
 	 */
 
 	public function user_get_all() {
 		$stmt = $this->link->prepare(
 			'SELECT id, user, admin, color, fileview, last_login
-			FROM sd_users'
+			FROM sd_users
+			WHERE id > 1'
 		);
 		$stmt->execute();
 		$stmt->store_result();
@@ -393,6 +411,8 @@ class Database {
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();
+
+		$this->cache_add('', null, 'folder', 0, $this->link->insert_id, 0, 0, '');
 
 		return ($stmt->affected_rows != 0) ? $stmt->insert_id : null;
 	}
@@ -588,7 +608,7 @@ class Database {
 
 	public function session_validate_token($token) {
 		$stmt = $this->link->prepare(
-			'SELECT id
+			'SELECT COUNT(token)
 			FROM sd_session
 			WHERE token = ?
 			AND fingerprint = ?'
@@ -596,9 +616,10 @@ class Database {
 		$stmt->bind_param('ss', $token, $this->fingerprint);
 		$stmt->execute();
 		$stmt->store_result();
+		$stmt->bind_result($count);
 		$stmt->fetch();
 
-		return ($stmt->num_rows == 1);
+		return ($count == 1);
 	}
 
 	public function session_active_token($uid) {
@@ -622,7 +643,8 @@ class Database {
 
 	public function session_invalidate($uid, $token) {
 		$stmt = $this->link->prepare(
-			'DELETE FROM sd_session
+			'DELETE
+			FROM sd_session
 			WHERE user = ?
 			AND token != ?'
 		);
@@ -636,11 +658,10 @@ class Database {
 
 	public function session_invalidate_client($uid, $token) {
 		$stmt = $this->link->prepare(
-			'DELETE s, u
-			FROM sd_session s
-			LEFT JOIN sd_unlocked u ON s.token = u.token
+			'DELETE
+			FROM sd_session
 			WHERE user = ?
-			AND s.token != ?
+			AND token != ?
 			AND fingerprint = ?'
 		);
 		$stmt->bind_param('iss', $uid, $token, $this->fingerprint);
@@ -659,10 +680,9 @@ class Database {
 
 	public function session_end($token) {
 		$stmt = $this->link->prepare(
-			'DELETE s, u
-			FROM sd_session s
-			LEFT JOIN sd_unlocked u ON s.token = u.token
-			WHERE s.token = ?'
+			'DELETE
+			FROM sd_session
+			WHERE token = ?'
 		);
 		$stmt->bind_param('s', $token);
 
@@ -677,9 +697,9 @@ class Database {
 	 * @return boolean true if unlocked
 	 */
 
-	public function share_is_unlocked($id, $access, $token) {
-		$uid = $this->user_get_id_by_token($token) | 0;
-		$share_base = $this->share_get_base($id, $uid);
+	public function share_is_unlocked($fid, $access, $token) {
+		$uid = $this->user_get_id_by_token($token) | self::$PUBLIC_USER_ID;
+		$share_base = $this->share_get_base($fid, $uid);
 
 		// Check if the share-base is shared with the user
 		// or is public and has been unlocked by the given token
@@ -687,15 +707,15 @@ class Database {
 		$stmt = $this->link->prepare(
 			'SELECT COUNT(*) as total
 			FROM sd_shares sh
-			RIGHT JOIN sd_unlocked u ON sh.hash = u.hash
+			RIGHT JOIN sd_unlocked u ON sh.id = u.share_id
 			WHERE sh.file = ?
 			AND sh.access >= ?
 			AND (
-				(userto != 0 AND userto = ?)
-				OR (userto = 0 AND u.token = ?)
+				(userto != ? AND userto = ?)
+				OR (userto = ? AND u.token = ?)
 			)
 		');
-		$stmt->bind_param('siis', $share_base, $access, $uid, $token);
+		$stmt->bind_param('siiiis', $share_base, $access, self::$PUBLIC_USER_ID, $uid, self::$PUBLIC_USER_ID, $token);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($total);
@@ -705,56 +725,54 @@ class Database {
 	}
 
 	/**
-	 * Generates a unique 8-hex hash that is used in public share-links
-	 * @return string share-hash
+	 * Generates a unique 8-hex id that is used in public share-links
+	 * @return string share-id
 	 */
 
-	private function share_get_unique_hash() {
-		$hash;
+	private function share_get_unique_id() {
+		$id;
 
 		do {
-			$hash = Crypto::random(8);
+			$id = Crypto::random(8);
 			$stmt = $this->link->prepare(
-				'SELECT hash
+				'SELECT id
 				FROM sd_shares
-				WHERE hash = ?'
+				WHERE id = ?'
 			);
-			$stmt->bind_param('s', $hash);
+			$stmt->bind_param('s', $id);
 			$stmt->execute();
 		} while ($stmt->num_rows > 0);
 
-		return $hash;
+		return $id;
 	}
 
 	/**
 	 * Add new share
-	 * @param fullpath path relative to simpledrive installation
-	 * @param hash share-hash
-	 * @param owner
+	 * @param fid file-id
 	 * @param userto username to share with (optional)
 	 * @param key password (optional)
 	 * @param write whether or not to allow changes and downloads for share
 	 * @return boolean true if successful
 	 */
 
-	public function share($id, $userto, $pass, $access) {
-		$hash = ($userto == 0) ? $this->share_get_unique_hash() : "";
+	public function share($fid, $userto, $pass, $access) {
+		$sid = $this->share_get_unique_id();
 		$stmt = $this->link->prepare(
-			'INSERT INTO sd_shares (file, hash, userto, pass, access)
+			'INSERT INTO sd_shares (id, file, userto, pass, access)
 			VALUES (?, ?, ?, ?, ?)'
 		);
-		$stmt->bind_param('ssisi', $id, $hash, $userto, $pass, $access);
+		$stmt->bind_param('ssisi', $sid, $fid, $userto, $pass, $access);
 		$stmt->execute();
 
-		return ($stmt->affected_rows == 1) ? $hash : null;
+		return ($stmt->affected_rows == 1) ? $sid : null;
 	}
 
-	public function share_unlock($token, $hash) {
+	public function share_unlock($token, $sid) {
 		$stmt = $this->link->prepare(
-			'INSERT INTO sd_unlocked (token, hash)
+			'INSERT INTO sd_unlocked (token, share_id)
 			VALUES (?, ?)'
 		);
-		$stmt->bind_param('ss', $token, $hash);
+		$stmt->bind_param('ss', $token, $sid);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();
@@ -768,24 +786,51 @@ class Database {
 	 * @return array share info
 	 */
 
-	public function share_get_by_id($id) {
+	public function share_get_by_file_id($fid) {
 		$stmt = $this->link->prepare(
-			'SELECT file, userto, pass, access, hash
+			'SELECT id, userto, pass, access
 			FROM sd_shares
 			WHERE file = ?'
+		);
+		$stmt->bind_param('s', $fid);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($id, $userto, $pass, $access);
+
+		if ($stmt->fetch()) {
+			return array(
+				'id'			=> $id,
+				'userto'	=> $userto,
+				'pass'		=> $pass,
+				'access'	=> $access
+			);
+		}
+		return null;
+	}
+
+	/**
+	 * Get share info
+	 * @param id share-id
+	 * @return array share info
+	 */
+
+	public function share_get($id) {
+		$stmt = $this->link->prepare(
+			'SELECT file, userto, pass, access
+			FROM sd_shares
+			WHERE id = ?'
 		);
 		$stmt->bind_param('s', $id);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $userto, $pass, $access, $hash);
+		$stmt->bind_result($file, $userto, $pass, $access);
 
 		if ($stmt->fetch()) {
 			return array(
-				'id'		=> $id,
+				'file'		=> $file,
 				'userto'	=> $userto,
 				'pass'		=> $pass,
-				'access'	=> $access,
-				'hash'		=> $hash
+				'access'	=> $access
 			);
 		}
 		return null;
@@ -793,36 +838,8 @@ class Database {
 
 	/**
 	 * Get share info
-	 * @param hash
-	 * @return array share info
-	 */
-
-	public function share_get_by_hash($hash) {
-		$stmt = $this->link->prepare(
-			'SELECT file, userto, pass, access, hash
-			FROM sd_shares
-			WHERE hash = ?'
-		);
-		$stmt->bind_param('s', $hash);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($id, $userto, $pass, $access, $hash);
-
-		if ($stmt->fetch()) {
-			return array(
-				'id'		=> $id,
-				'userto'	=> $userto,
-				'pass'		=> $pass,
-				'access'	=> $access,
-				'hash'		=> $hash
-			);
-		}
-		return null;
-	}
-
-	/**
-	 * Get share info
-	 * @param hash
+	 * @param uid
+	 * @param access_request
 	 * @return array share info
 	 */
 
@@ -859,7 +876,8 @@ class Database {
 
 	/**
 	 * Get share info
-	 * @param hash
+	 * @param uid
+	 * @param access_request
 	 * @return array share info
 	 */
 
@@ -896,34 +914,26 @@ class Database {
 
 	/**
 	 * Delete share
-	 * @param hash share hash
+	 * @param id file-id
 	 * @param owner
 	 * @param userto
 	 * @param path relative to simpledrive installation
-	 * @return string share hash
+	 * @return boolean
 	 */
 
-	public function share_remove($id) {
-		$stmt = $this->link->prepare(
+	public function share_remove($fid) {
+		/*$stmt = $this->link->prepare(
 			'DELETE sh, u
 			FROM sd_shares sh
 			LEFT JOIN sd_unlocked u ON sh.hash = u.hash
 			WHERE sh.file = ?'
-		);
-		$stmt->bind_param('s', $id);
-
-		return ($stmt->execute());
-	}
-
-	public function share_remove_all($username) {
+		);*/
 		$stmt = $this->link->prepare(
-			'DELETE sh, u
-			FROM sd_shares sh
-			LEFT JOIN sd_cache f ON sh.file = f.id
-			LEFT JOIN sd_unlocked u ON sh.hash = u.hash
-			WHERE f.owner = ?'
+			'DELETE
+			FROM sd_shares
+			WHERE file = ?'
 		);
-		$stmt->bind_param('s', $username);
+		$stmt->bind_param('s', $fid);
 
 		return ($stmt->execute());
 	}
@@ -1295,7 +1305,6 @@ class Database {
 			array_push($files, array(
 				'id'	=> $id,
 				'type'	=> $type,
-				//'path'	=> $this->cache_relative_path($id),
 				'path'	=> substr($this->cache_relative_path($id), strlen($root)),
 				'edit'	=> $edit,
 				'md5'	=> $md5)
@@ -1536,11 +1545,9 @@ class Database {
 
 	public function cache_remove($id) {
 		$stmt = $this->link->prepare(
-			'DELETE f, s
-			FROM sd_cache f
-			LEFT JOIN sd_shares s
-			ON f.id = s.file
-			WHERE f.id = ?'
+			'DELETE
+			FROM sd_cache
+			WHERE id = ?'
 		);
 		$stmt->bind_param('s', $id);
 		return ($stmt->execute());
@@ -1608,6 +1615,7 @@ class Database {
 	}
 
 	public function thumbnail_create($id, $path) {
+		file_put_contents(LOG, "INSERT INTO sd_thumbnails (id, path) VALUES ($id, $path);\n", FILE_APPEND);
 		$stmt = $this->link->prepare(
 			'INSERT INTO sd_thumbnails (id, path)
 			VALUES (?, ?)'

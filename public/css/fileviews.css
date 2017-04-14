@@ -39,17 +39,7 @@
 }
 
 .item-elem {
-	/*position: relative;
-	height: 50px;
-	font-size: 0.9rem;
-	font-family: robotoregular, sans-serif;
-	text-align: left;
-	line-height: 50px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	float: left;*/
-
+	position: relative;
 	font-size: 0.9rem;
 	font-family: robotoregular, sans-serif;
 	overflow: hidden;

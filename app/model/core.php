@@ -75,7 +75,6 @@ class Core_Model {
 
 			//cache_add($filename, $parent, $type, $size, $owner, $edit, $md5, $path) {
 			if ($id = $this->db->user_create($username, Crypto::generate_password($pass), 1, $mail)) {
-				$this->db->cache_add('', null, 'folder', 0, $id, 0, 0, '');
 				return Crypto::generate_token($id);
 			}
 		} catch (Exception $e) {

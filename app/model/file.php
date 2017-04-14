@@ -17,6 +17,7 @@ class File_Model {
 	static $PERMISSION_WRITE	= 2;
 	static $TRASH							= "/.trash/";
 	static $TEMP							= "/.tmp/";
+	static $PUBLIC_USER_ID		= 1;
 
 	/**
 	 * Constructor, links db-connection, sets current user and config array
@@ -27,7 +28,7 @@ class File_Model {
 		$this->config		= json_decode(file_get_contents('config/config.json'), true);
 		$this->db			= Database::getInstance();
 		$this->user			= ($this->db) ? $this->db->user_get_by_token($token) : null;
-		$this->uid			= ($this->user) ? $this->user['id'] : 0;
+		$this->uid			= ($this->user) ? $this->user['id'] : self::$PUBLIC_USER_ID;
 		$this->username		= ($this->user) ? $this->user['username'] : "";
 	}
 
@@ -232,6 +233,8 @@ class File_Model {
 						return $temp . $thumb_name;
 					}
 				}
+
+				file_put_contents(LOG, "does not exist\n", FILE_APPEND);
 
 				$img = ImageCreateFromJPEG($src);
 				imageCopyResampled($thumb, $img, 0, 0, 0, 0, $target_width, $target_height, $img_width, $img_height);
@@ -524,8 +527,8 @@ class File_Model {
 
 		// If the share is supposed to be public, do that
 		if ($public == 1) {
-			if (($hash = $this->db->share($file['id'], 0, Crypto::generate_password($pass), $access)) !== null) {
-				$link = $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/pub/" . $hash;
+			if (($share_id = $this->db->share($file['id'], self::$PUBLIC_USER_ID, Crypto::generate_password($pass), $access)) !== null) {
+				$link = $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/pub/" . $share_id;
 				// Regex for verifying email: '/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/'
 				/*if (isset($_POST['mail']) && $_POST['mail'] != "" && $this->config['mailuser'] != '' && $this->config['mailpass'] != '') {
 					$subject = $this->username . " wants to share a file";
@@ -572,9 +575,9 @@ class File_Model {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		if ($share = $this->db->share_get_by_id($file['id'])) {
-			if ($share['userto'] == 0) {
-				return $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/pub/" . $share['hash'];
+		if ($share = $this->db->share_get_by_file_id($file['id'])) {
+			if ($share['userto'] == self::$PUBLIC_USER_ID) {
+				return $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/pub/" . $share['id'];
 			}
 		}
 
@@ -863,21 +866,21 @@ class File_Model {
 	}
 
 	/**
-	 * Get file-info for public hash, check for access permissions and return if granted
-	 * @param string hash public share-hash
+	 * Get file-info for public share-id, check for access permissions and return if granted
+	 * @param string id public share-id
 	 * @param string pass password
 	 * @return array share-info
 	 */
 
-	public function get_public($hash, $pass) {
-		$share = $this->db->share_get_by_hash($hash);
+	public function get_public($id, $pass) {
+		$share = $this->db->share_get($id);
 
 		// File not shared at all
-		if (!$share || !$share['userto'] == 0) {
+		if (!$share || !$share['userto'] == self::$PUBLIC_USER_ID) {
 			throw new Exception('File not found', '500');
 		}
 
-		$file = $this->db->cache_get($share['id'], $this->uid);
+		$file = $this->db->cache_get($share['file'], $this->uid);
 
 		// File does not exist
 		if (!$file) {
@@ -885,13 +888,13 @@ class File_Model {
 		}
 
 		// Incorrect password
-		else if (!Crypto::verify_password($pass, $share['pass']) && !$this->db->share_is_unlocked($share['id'], self::$PERMISSION_READ, $this->token)) {
+		else if (!Crypto::verify_password($pass, $share['pass']) && !$this->db->share_is_unlocked($share['file'], self::$PERMISSION_READ, $this->token)) {
 			throw new Exception('Wrong password', '403');
 		}
 		else {
-			$token = ($this->token) ? $this->token : Crypto::generate_token(0, $hash);
+			$token = ($this->token) ? $this->token : Crypto::generate_token(0, $id);
 
-			if ($token && $this->db->share_unlock($token, $hash)) {
+			if ($token && $this->db->share_unlock($token, $id)) {
 				return array('share' => array('id' => $file['id'], 'filename' => $file['filename'], 'type' => $file['type']), 'token' => $token);
 			}
 		}

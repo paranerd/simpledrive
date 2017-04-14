@@ -96,7 +96,7 @@ var SystemController = {
 		/**
 		 * Prepare contextmenu
 		 */
-		$(document).on('contextmenu', '#content', function(e) {
+		$(document).on('contextmenu', '#content-container', function(e) {
 			e.preventDefault();
 			$('[id^="context-"]').addClass("hidden");
 
@@ -367,6 +367,7 @@ var SystemView = {
 
 		for(var i in users) {
 			var item = users[i];
+			console.log(item);
 
 			var listItem = document.createElement("div");
 			listItem.id = "item" + i;

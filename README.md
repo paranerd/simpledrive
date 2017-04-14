@@ -1,25 +1,36 @@
-# Requirements
+# simpleDrive
+simpleDrive is a private cloud software to be run on your own server.
 
-- apache2
-- mysql-server
-- php5
-- php5-gd
-- php5-mysql
+It puts you in charge of your data - the way it's meant to be.
 
-# Setup
+## Table of Contents
+1. [Requirements](#requirements)
+2. [Installation](#installation)
+3. [Setup](#setup)
+4. [API Usage](#api-usage)
+5. [Contribute](#contribute)
+6. [License](#license)
 
-Just fork this git or download as zip to your server directory.
+## Requirements
 
-Enable htaccess by setting AllowOverride All in your apache2.conf
+The following packages are required to run simpleDrive (for Debian-based machines):
+
+	$ sudo apt install apache2 php7.0 php7.0 php7.0-gd php7.0-mysql mysql-server
+
+Note: simpleDrive also runs on nginx. Simply replace "apache2" with "nginx"
+
+## Installation
+
+Just fork this git or download as zip to your server directory
+
+### Apache
+Enable htaccess by setting AllowOverride All in your /etc/apache2/apache2.conf
 
 Enable mod_rewrite by executing:
-$ sudo a2enmod rewrite
-$ sudo a2enmod headers
-$ sudo service apache2 restart
 
-Then, in your browser, navigate to the simpledrive/setup, fill out the required fields and you are good to go.
-
-simpleDrive is made to be highly intuitive, so if you ever used any file manager, you should be comfortable right away.
+	$ sudo a2enmod rewrite
+	$ sudo a2enmod headers
+	$ sudo service apache2 restart
 
 ### Nginx
 
@@ -62,13 +73,18 @@ In case you run on an nginx-server, please add the following to your nginx.conf 
 		}
 	}
 
-# API Usage
+## Setup
+
+Then, in your browser, navigate to the simpledrive/setup, fill out the required fields and you are good to go.
+simpleDrive is made to be highly intuitive, so if you ever used any file manager, you should be comfortable right away.
+
+## API Usage
 
 Call structure: [server]/api/[endpoint]/[action]
 
 All values are returned as JSON-Array ('msg' => $msg)
 
-## Core
+### Core
 
 #### login
 	params:		username
@@ -89,7 +105,7 @@ All values are returned as JSON-Array ('msg' => $msg)
 	returns:	null
 
 
-## Files
+### Files
 #### children
 	desc:		returns directory content or shares from database
 
@@ -254,7 +270,7 @@ All values are returned as JSON-Array ('msg' => $msg)
 
 	returns:	list of files to upload | download | delete
 
-### scan
+#### scan
 	desc:		scans the filesystem and synchronizes cache-db
 
 	params:		token
@@ -262,7 +278,7 @@ All values are returned as JSON-Array ('msg' => $msg)
 
 	returns:	null
 
-## System
+### System
 All settings regarding the entire server;
 
 #### clearlog
@@ -315,7 +331,7 @@ All settings regarding the entire server;
 	returns:	Client version
 				Most recent version (if internet available)
 
-### uploadlimit
+#### uploadlimit
 	desc:		Sets max upload limit
 
 	param:		Auth token
@@ -323,7 +339,7 @@ All settings regarding the entire server;
 
 	returns:	null
 
-### usessl
+#### usessl
 	desc:		Enables/disables Force-SSL
 
 	param:		Auth token
@@ -331,7 +347,7 @@ All settings regarding the entire server;
 
 	returns:	null
 
-### domain
+#### domain
 	desc:		Sets server domain (used for public-share-link)
 
 	param:		Auth token
@@ -339,7 +355,7 @@ All settings regarding the entire server;
 
 	returns:	null
 
-## Backup
+### Backup
 Uploads (encrypted) files to Google Drive
 
 #### status
@@ -387,7 +403,7 @@ Uploads (encrypted) files to Google Drive
 
 	returns:	null
 
-## Users
+### Users
 All settings regarding one ore more user(s)
 
 #### get
@@ -426,7 +442,7 @@ All settings regarding one ore more user(s)
 
 	returns:	null or error
 
-### quota
+#### quota
 	desc:		Returns max, used and free quota
 
 	params:		Auth token
@@ -500,3 +516,9 @@ All settings regarding one ore more user(s)
 	params:		auth token
 
 	returns:	null
+
+## Contribute
+If you want to help to improve simpleDrive, [contact me](mailto:paranerd.development@gmail.com)!
+
+## License
+simpleDrive is released under the [Affero General Public License](http://www.gnu.org/licenses/agpl)

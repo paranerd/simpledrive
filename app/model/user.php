@@ -160,7 +160,6 @@ class User_Model {
 		}
 
 		if ($username != $this->username) {
-			$this->db->share_remove_all($username);
 			$this->db->user_remove($user['id']);
 
 			Util::delete_dir($this->config['datadir'] . $username);
