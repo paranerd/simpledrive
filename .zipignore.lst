@@ -1,0 +1,7 @@
+./.git*
+./config/googledrive/access-token*
+./logs/error.log
+./logs/status.log
+./docs*
+./plugins*
+./config/config.json
