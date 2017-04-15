@@ -624,7 +624,7 @@ class Database {
 
 	public function session_active_token($uid) {
 		$stmt = $this->link->prepare(
-			'SELECT COUNT(id)
+			'SELECT COUNT(token)
 			FROM sd_session
 			WHERE user = ?'
 		);

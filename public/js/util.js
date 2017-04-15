@@ -146,6 +146,33 @@ var Util = {
 		return {score: score, text: Util.strengths[score]};
 	},
 
+	filter: function(list, needle, keys) {
+		var filtered = [];
+		if (list.length > 0) {
+			for (var i in list) {
+				// Check values for given keys
+				if (keys) {
+					for (var k in keys) {
+						if (list[i][keys[k]].toString().toLowerCase().indexOf(needle.toString().toLowerCase()) != -1) {
+							filtered.push(list[i]);
+						}
+					}
+				}
+				// Check values for all the keys
+				else {
+					for (var key in list[i]) {
+						if (list[i][key].toString().toLowerCase().indexOf(needle.toString().toLowerCase()) != -1) {
+							filtered.push(list[i]);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		return filtered;
+	},
+
 	showPopup: function(id) {
 		Util.closePopup(null, true);
 

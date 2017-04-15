@@ -39,7 +39,7 @@
 }
 
 .item-elem {
-	position: relative;
+	/*position: relative;*/
 	font-size: 0.9rem;
 	font-family: robotoregular, sans-serif;
 	overflow: hidden;

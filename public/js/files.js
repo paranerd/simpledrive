@@ -71,7 +71,7 @@ var FileController = {
 
 			switch(e.keyCode) {
 				case 13: // Return
-					if (FileModel.getSelectedCount() == 1 && (!$(e.target).is('input') || e.target.className == 'filter-input')) {
+					if (FileModel.getSelectedCount() == 1 && (!$(e.target).is('input') || e.target.className.indexOf('filter-input') != -1)) {
 						FileModel.open();
 					}
 					break;
@@ -529,7 +529,7 @@ var FileView = {
 		$('#sidebar').addClass('hidden');
 		FileView.originalFileview = ($('#content-container').hasClass('list')) ? 'list' : 'grid';
 		$('#content-container').removeClass('list').addClass('grid');
-		FileModel.filterForType('image');
+		FileModel.filter('image', ['type']);
 		FileView.galleryMode = true;
 	},
 
@@ -839,6 +839,7 @@ var FileModel = {
 
 	removeFilter: function() {
 		$("#files-filter").addClass("hidden");
+		$(".filter-input").val('');
 		FileModel.filter('');
 	},
 
@@ -1012,38 +1013,12 @@ var FileModel = {
 		});
 	},
 
-	filter: function(needle) {
-		if (FileModel.all.length > 0) {
-			FileModel.filtered = [];
+	filter: function(needle, col = ['filename']) {
+		FileModel.filtered = Util.filter(FileModel.all, needle, col);
 
-			for (var i in FileModel.all) {
-				if (FileModel.all[i].filename.toLowerCase().indexOf(needle) != -1) {
-					FileModel.filtered.push(FileModel.all[i]);
-				}
-			}
-			FileView.displayFiles(FileModel.filtered);
-			FileModel.unselectAll();
-			if (FileModel.filtered.length > 0) {
-				FileModel.select(0);
-			}
-		}
-	},
-
-	filterForType: function(needle) {
-		if (FileModel.all.length > 0) {
-			FileModel.filtered = [];
-
-			for (var i in FileModel.all) {
-				if (FileModel.all[i].type.toLowerCase().indexOf(needle) != -1) {
-					FileModel.filtered.push(FileModel.all[i]);
-				}
-			}
-			FileView.displayFiles(FileModel.filtered);
-			FileModel.unselectAll();
-			if (FileModel.filtered.length > 0) {
-				FileModel.select(0);
-			}
-		}
+		FileView.displayFiles(FileModel.filtered);
+		FileModel.unselectAll();
+		FileModel.select(0);
 	},
 
 	finishUpload: function(abort) {
@@ -1362,9 +1337,11 @@ var FileModel = {
 	},
 
 	select: function(id) {
-		FileModel.selected[id] = FileModel.filtered[id];
-		FileModel.currentSelected = id;
-		FileView.updateSelStatus();
+		if (FileModel.filtered.length > id) {
+			FileModel.selected[id] = FileModel.filtered[id];
+			FileModel.currentSelected = id;
+			FileView.updateSelStatus();
+		}
 	},
 
 	selectAll: function(checkboxClicked) {

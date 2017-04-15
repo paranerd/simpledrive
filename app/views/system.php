@@ -100,7 +100,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 
 		<!-- Users -->
 		<div id="users-filter" class="filter hidden">
-			<input id="users-filter-input" class="filter-input" placeholder="Filter..."/>
+			<input id="users-filter-input" class="filter-input input-indent" placeholder="Filter..."/>
 			<span class="close">&times;</span>
 		</div>
 		<div id="users-header" class="content-header">
@@ -145,8 +145,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		</div>
 
 		<!-- Log -->
-		<div class="filter hidden">
-			<input id="log-filter-input" class="filter-input" placeholder="Filter..."/>
+		<div id="log-filter" class="filter hidden">
+			<input id="log-filter-input" class="filter-input input-indent" placeholder="Filter..."/>
 			<span class="close">&times;</span>
 		</div>
 		<div id="log-header" class="content-header">

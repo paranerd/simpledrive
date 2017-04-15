@@ -119,7 +119,7 @@ if (!$public && !$user) {
 	<!-- Files -->
 	<div id="content-container" class="<?php echo $fileview; ?>">
 		<div id="files-filter" class="filter hidden">
-			<input class="filter-input input-indent" placeholder="Filter..."/>
+			<input class="filter-input input-indent" placeholder="Filter..." value=""/>
 			<span class="close">&times;</span>
 		</div>
 		<div class="content-header">

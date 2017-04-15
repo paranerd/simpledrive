@@ -545,19 +545,8 @@ var LogModel = {
 	},
 
 	filter: function(needle) {
-		if (LogModel.log.length > 0) {
-			LogModel.filtered = [];
-
-			for (var i in LogModel.log) {
-				if (LogModel.log[i].msg.toLowerCase().indexOf(needle) != -1 ||
-					LogModel.log[i].source.toLowerCase().indexOf(needle) != -1 ||
-					LogModel.log[i].user.toLowerCase().indexOf(needle) != -1)
-				{
-					LogModel.filtered.push(LogModel.log[i]);
-				}
-			}
-			SystemView.displayLog(LogModel.filtered);
-		}
+		LogModel.filtered = Util.filter(LogModel.log, needle, ['msg', 'source', 'user']);
+		SystemView.displayLog(LogModel.filtered);
 	},
 
 	closeFilter: function() {
@@ -692,16 +681,8 @@ var UsersModel = {
 	},
 
 	filter: function(needle) {
-		if (UsersModel.all.length > 0) {
-			UsersModel.filtered = [];
-
-			for (var i in UsersModel.all) {
-				if (UsersModel.all[i].username.toLowerCase().indexOf(needle) != -1) {
-					UsersModel.filtered.push(UsersModel.all[i]);
-				}
-			}
-			SystemView.displayUsers(UsersModel.filtered);
-		}
+		UsersModel.filtered = Util.filter(UsersModel.all, needle, ['username']);
+		SystemView.displayUsers(UsersModel.filtered);
 	},
 
 	getQuota: function(username, id) {
