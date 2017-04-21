@@ -234,8 +234,6 @@ class File_Model {
 					}
 				}
 
-				file_put_contents(LOG, "does not exist\n", FILE_APPEND);
-
 				$img = ImageCreateFromJPEG($src);
 				imageCopyResampled($thumb, $img, 0, 0, 0, 0, $target_width, $target_height, $img_width, $img_height);
 				ImageJPEG($thumb, $temp . $thumb_name);
@@ -1030,9 +1028,11 @@ class File_Model {
 			return;
 		}
 
+		// Get proper ID
 		$id = ($id && $id != "0") ? $id : $this->db->cache_get_root_id($this->uid);
-
+		// Get file from database
 		$file = $this->db->cache_get($id, $this->uid);
+		// Only return the file if owned or shared
 		return ($file && ($file['ownerid'] == $this->uid || $this->db->share_is_unlocked($file['id'], $access, $this->token))) ? $file : null;
 	}
 

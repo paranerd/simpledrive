@@ -24,8 +24,6 @@ $(document).ready(function() {
 
 var FileController = {
 	init: function() {
-		simpleScroll.init('files');
-
 		if (username) {
 			Util.getVersion();
 		}
@@ -511,6 +509,7 @@ var FileController = {
 }
 
 var FileView = {
+	self: this,
 	startDrag: false,
 	dragging: false,
 	mouseStart: {x: 0, y: 0},
@@ -518,10 +517,24 @@ var FileView = {
 	view: null,
 	galleryMode: false,
 	originalFileview: '',
+	scrollTimeout: null,
 
 	init: function(view) {
+		simpleScroll.init('files');
 		FileView.view = (view) ? view : "files";
 		$("#username").html(Util.escape(username) + " &#x25BE");
+
+		// Enable lazyloading of thumbnail images
+		var ssc = document.getElementById('simpleScrollContainer0');
+		ssc.addEventListener('scroll', function() {
+			if (FileView.scrollTimeout) clearTimeout(FileView.scrollTimeout);
+
+			FileView.scrollTimeout = setTimeout(function() {
+				FileModel.requestID = new Date().getTime();
+				FileView.setImgthumbnail(0, FileModel.requestID);
+			}, 500);
+		});
+
 		$(window).resize();
 	},
 
@@ -625,13 +638,54 @@ var FileView = {
 		}
 
 		if (FileView.view != "trash") {
-			FileModel.setImgthumbnail(0, FileModel.requestID);
+			FileView.setImgthumbnail(0, FileModel.requestID);
 		}
 
 		$(window).resize();
 
 		var elem = (files.length == 1) ? " element" : " elements";
 		$("#foldersize").text(FileModel.filtered.length + elem);
+	},
+
+	/**
+	 * Checks if element is currently in the viewport
+	 */
+	isVisible: function(elem, parent) {
+		if (elem) {
+			var scrollTop = parent.scrollTop;
+			var height = $(parent).height();
+			var offset = elem.offsetTop - scrollTop;
+
+			return offset + $(elem).height() > 0 && offset < height;
+		}
+	},
+
+	/**
+	 * Retrieves and adds a thumbnail for images and pdfs
+	 */
+	setImgthumbnail: function(index, id) {
+		var item = FileModel.getElementAt(index);
+
+		if (item != null && id == FileModel.requestID) {
+			var thumbnail = document.getElementById("thumbnail" + index);
+			var parent = document.getElementById('simpleScrollContainer0');
+			var visible = FileView.isVisible(thumbnail, parent);
+
+			if (thumbnail.style.backgroundImage == '' && visible && (item.type == 'image' || item.type == 'pdf')) {
+				var img = new Image();
+				img.src = "api/files/get?target=" + JSON.stringify([item.id]) + "&width=40&height=40&token=" + token;
+				img.onload = function() {
+					if (id == FileModel.requestID) {
+						$(thumbnail).removeClass("icon-" + item.type);
+						thumbnail.style.backgroundImage = "url(" + this.src + ")";
+						FileView.setImgthumbnail(index + 1, id);
+					}
+				}
+			}
+			else {
+				FileView.setImgthumbnail(index + 1, id);
+			}
+		}
 	},
 
 	/**
@@ -1361,30 +1415,6 @@ var FileModel = {
 		FileModel.unselectAll();
 		FileModel.currentSelected = (FileModel.currentSelected > 0) ? FileModel.currentSelected - 1 : 0;
 		FileModel.select(FileModel.currentSelected);
-	},
-
-	/**
-	 * Retrieves and adds a thumbnail for images and pdfs
-	 */
-	setImgthumbnail: function(index, id) {
-		var item = FileModel.getElementAt(index);
-
-		if (item != null && (item.type == 'image' || item.type == 'pdf')) {
-			var img = new Image();
-			img.src = "api/files/get?target=" + JSON.stringify([item.id]) + "&width=40&height=40&token=" + token;
-			img.onload = function() {
-				if (id == FileModel.requestID) {
-					var thumbnail = document.getElementById("thumbnail" + index);
-					$(thumbnail).removeClass("icon-" + item.type);
-					thumbnail.style.backgroundImage = "url(" + this.src + ")";
-
-					FileModel.setImgthumbnail(index + 1, id);
-				}
-			}
-		}
-		else if (item != null && id == FileModel.requestID) {
-			FileModel.setImgthumbnail(index + 1, id);
-		}
 	},
 
 	share: function() {

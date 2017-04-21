@@ -1181,6 +1181,7 @@ class Database {
 
 	public function cache_update($id, $type, $size, $edit, $md5, $owner, $path) {
 		$timestamp = time();
+
 		$stmt = $this->link->prepare(
 			'UPDATE sd_cache
 			SET type = ?, size = ?, edit = ?, md5 = ?, lastscan = ?
@@ -1419,7 +1420,7 @@ class Database {
 	public function cache_id_for_path($uid, $path) {
 		$path = explode("/", $path);
 		array_shift($path);
-		$id = "0";
+		$id = $this->cache_get_root_id($uid);
 
 		if (!$path[0]) {
 			return $id;
@@ -1615,7 +1616,6 @@ class Database {
 	}
 
 	public function thumbnail_create($id, $path) {
-		file_put_contents(LOG, "INSERT INTO sd_thumbnails (id, path) VALUES ($id, $path);\n", FILE_APPEND);
 		$stmt = $this->link->prepare(
 			'INSERT INTO sd_thumbnails (id, path)
 			VALUES (?, ?)'
