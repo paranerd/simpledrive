@@ -658,6 +658,7 @@ var FileView = {
 
 			return offset + $(elem).height() > 0 && offset < height;
 		}
+		return false;
 	},
 
 	/**
@@ -673,7 +674,7 @@ var FileView = {
 
 			if (thumbnail.style.backgroundImage == '' && visible && (item.type == 'image' || item.type == 'pdf')) {
 				var img = new Image();
-				img.src = "api/files/get?target=" + JSON.stringify([item.id]) + "&width=40&height=40&token=" + token;
+				img.src = "api/files/get?target=" + JSON.stringify([item.id]) + "&width=" + $(".thumbnail").width() + "&height=" + $(".thumbnail").height() + "&token=" + token;
 				img.onload = function() {
 					if (id == FileModel.requestID) {
 						$(thumbnail).removeClass("icon-" + item.type);
@@ -1067,7 +1068,8 @@ var FileModel = {
 		});
 	},
 
-	filter: function(needle, col = ['filename']) {
+	filter: function(needle, col) {
+		col = (col) ? col : ['filename'];
 		FileModel.filtered = Util.filter(FileModel.all, needle, col);
 
 		FileView.displayFiles(FileModel.filtered);
