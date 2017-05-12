@@ -101,8 +101,8 @@ class Files_Controller {
 	public function get() {
 		$width = (isset($_REQUEST['width'])) ? $_REQUEST['width'] : null;
 		$height = (isset($_REQUEST['height'])) ? $_REQUEST['height'] : null;
-		//exit($this->model->get(json_decode($_REQUEST['target'], true), $width, $height));
-		return $this->model->get(json_decode($_REQUEST['target'], true), $width, $height);
+		$thumb = (isset($_REQUEST['thumbnail'])) ? $_REQUEST['thumbnail'] : null;
+		return $this->model->get(json_decode($_REQUEST['target'], true), $width, $height, $thumb);
 	}
 
 	public function upload() {

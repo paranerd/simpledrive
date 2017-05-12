@@ -15,8 +15,11 @@ class File_Model {
 	static $PERMISSION_NONE		= 0;
 	static $PERMISSION_READ		= 1;
 	static $PERMISSION_WRITE	= 2;
-	static $TRASH							= "/.trash/";
-	static $TEMP							= "/.tmp/";
+	static $FILES							= "/files";
+	static $TRASH							= "/trash/";
+	static $TEMP							= "/tmp/";
+	static $THUMB							= "/thumbnails/";
+	static $LOCK							= "/lock/";
 	static $PUBLIC_USER_ID		= 1;
 
 	/**
@@ -87,21 +90,25 @@ class File_Model {
 	}
 
 	/**
-	 * Removes all thumbnails for images (recursively in a directory)
+	 * Removes all image-thumbnails (recursively if $file is a directory)
 	 * @param array file
 	 */
 
 	private function remove_thumbnail($file) {
-		$thumbnails = (is_dir($this->config['datadir'] . $file['owner'] . $file['path'])) ? $this->db->thumbnail_get_all($file['id']) : array(array('id' => $file['id'], 'path' => $this->db->thumbnail_get_path($file['id'])));
-		$temp = $this->get_temp_dir($file);
+		$temp = $this->get_thumbnail_dir($file);
 
-		if (!file_exists($temp)) {
-			return;
+		if ($file['type'] == 'folder') {
+			$children = $this->db->cache_children_rec($file['id'], $this->uid, $file['ownerid']);
+
+			foreach ($children as $child) {
+				if ($child['type'] == 'image') {
+					unlink($temp . $child['id']);
+				}
+			}
 		}
-
-		foreach ($thumbnails as $thumbnail) {
-			if (strlen($thumbnail['path']) > 0 && unlink($temp . $thumbnail['path'])) {
-				$this->db->thumbnail_remove($thumbnail['id']);
+		else {
+			if ($file['type'] == 'image') {
+				unlink($temp . $file['id']);
 			}
 		}
 	}
@@ -146,23 +153,33 @@ class File_Model {
 		return $temp;
 	}
 
+	private function get_thumbnail_dir($file) {
+		$temp = $this->config['datadir'] . $file['owner'] . self::$THUMB;
+
+		if ($file['owner'] != "" && !file_exists($temp)) {
+			mkdir($temp);
+		}
+
+		return $temp;
+	}
+
 	/**
-	 * Creates a thumbnail from a pdf or shrinks an image so that its biggest size is smaller/equal to to biggest size of the supplied container-dimensions while keeping the ratio
-	 * @param integer file File-ID
-	 * @param integer width of the container
-	 * @param integer height of the container
-	 * @return string destination-path
+	 * Creates a thumbnail from a pdf or scales an image so that its biggest size is smaller/equal to the biggest size of the target-dimensions while keeping the ratio
+	 * @param array file
+	 * @param integer Width of the container
+	 * @param integer Height of the container
+	 * @param boolean Used to differentiate where to store the scaled image
+	 * @return string Path of the scaled image
 	 */
 
-	private function shrink_image($file, $width, $height) {
-		$src = $this->config['datadir'] . $file['owner'] . $file['path'];
-		$temp = $this->get_temp_dir($file);
+	private function scale_image($file, $target_width, $target_height, $is_thumb) {
+		$src = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
+		$temp = ($is_thumb) ? $this->get_thumbnail_dir($file) : $this->get_temp_dir($file);
+		$destination = $temp . $file['id'];
 
 		if (!file_exists($temp)) {
 			return null;
 		}
-
-		$thumb_name = $this->db->thumbnail_get_path($file['id']);
 
 		// PDF
 		if (mime_content_type($src) == "application/pdf") {
@@ -170,99 +187,71 @@ class File_Model {
 				return null;
 			}
 
-			$thumb_name = ($thumb_name) ? $thumb_name : md5($src) . ".jpg";
-			if (!file_exists($temp . $thumb_name)) {
+			if (!file_exists($destination)) {
 				$location   = "/usr/bin/convert";
-				$command = $location . " -thumbnail " . $width . "x" . $height . " \"" . $src . "[0]\"" . " \"" . $temp . $thumb_name . "\"";
+				$command = $location . " -thumbnail " . $target_width . "x" . $target_height . " \"" . $src . "[0]\"" . " \"" . $destination . "\"";
 				exec ($command);
-				$this->db->thumbnail_create($file['id'], md5($src) . ".jpg");
 			}
-			return $temp . $thumb_name;
+			return $destination;
 		}
 		// IMAGE
 		else {
-			$info = getimagesize($src);
-			$img_width = $info[0];
-			$img_height = $info[1];
+			// Scale image to fit target dimensions
+			$src_info = getimagesize($src);
+			$src_width = $src_info[0];
+			$src_height = $src_info[1];
 
-			$bigger_size = max($width, $height);
-			$smaller_size = min($width, $height);
+			$target_big = max($target_width, $target_height);
+			$target_small = min($target_width, $target_height);
 
-			$shrink_to = 1;
+			$src_big = max($src_width, $src_height);
+			$src_small = min($src_width, $src_height);
 
-			if ($img_height > $img_width) {
-				$shrink_to = ($img_height > $bigger_size || $img_width > $smaller_size) ? min($bigger_size / $img_height, $smaller_size / $img_width) : 1;
+			$scale_to = min($target_big / $src_big, $target_small / $src_small);
+			$scale_to = ($scale_to > 1) ? 1 : $scale_to;
+
+			$scaled_width = intval($src_width * $scale_to);
+			$scaled_height = intval($src_height * $scale_to);
+
+			$scaled = imagecreatetruecolor($scaled_width, $scaled_height);
+
+			// If there's already a scaled image with greater dimensions, use that
+			if (file_exists($destination)) {
+				$dest_info = getimagesize($destination);
+
+				if ($dest_info[0] >= $target_width || $dest_info[1] >= $target_height) {
+					return $destination;
+				}
 			}
-			else {
-				$shrink_to = ($img_width > $bigger_size || $img_height > $smaller_size) ? min($smaller_size / $img_height, $bigger_size / $img_width) : 1;
-			}
-
-			$target_width = intval($img_width * $shrink_to);
-			$target_height = intval($img_height * $shrink_to);
-
-			$thumb = imagecreatetruecolor($target_width, $target_height);
 
 			// GIF
-			if ($info[2] == 1) {
-				$thumb_name = ($thumb_name) ? $thumb_name : md5($src) . ".gif";
-
-				if (file_exists($temp . $thumb_name)) {
-					$info2 = getimagesize($temp . $thumb_name);
-
-					if ($info2[0] >= $width || $info2[1] >= $height) {
-						return $temp . $thumb_name;
-					}
-				}
-
-				$this->db->thumbnail_create($file['id'], $thumb_name);
+			if ($src_info[2] == 1) {
 				return $src;
 
 				$img = ImageCreateFromGIF($src);
-				imageCopyResampled($thumb, $img, 0, 0, 0, 0, $target_width, $target_height, $img_width, $img_height);
-				ImageGIF($thumb, $temp . $thumb_name);
-				return $temp . $thumb_name;
+				imageCopyResampled($scaled, $img, 0, 0, 0, 0, $scaled_width, $scaled_height, $src_width, $src_height);
+				ImageGIF($scaled, $destination);
+				return $destination;
 			}
 			// JPEG
-			else if ($info[2] == 2) {
-				$thumb_name = ($thumb_name) ? $thumb_name : md5($src) . ".jpg";
-
-				if (file_exists($temp . $thumb_name)) {
-					$info2 = getimagesize($temp . $thumb_name);
-
-					if ($info2[0] >= $width || $info2[1] >= $height) {
-						return $temp . $thumb_name;
-					}
-				}
-
+			else if ($src_info[2] == 2) {
 				$img = ImageCreateFromJPEG($src);
-				imageCopyResampled($thumb, $img, 0, 0, 0, 0, $target_width, $target_height, $img_width, $img_height);
-				ImageJPEG($thumb, $temp . $thumb_name);
+				imageCopyResampled($scaled, $img, 0, 0, 0, 0, $scaled_width, $scaled_height, $src_width, $src_height);
+				ImageJPEG($scaled, $destination);
 
-				$this->db->thumbnail_create($file['id'], $thumb_name);
-				return $temp . $thumb_name;
+				return $destination;
 			}
 			// PNG
-			else if ($info[2] == 3) {
-				$thumb_name = ($thumb_name) ? $thumb_name : md5($src) . ".png";
-
-				if (file_exists($temp . $thumb_name)) {
-					$info2 = getimagesize($temp . $thumb_name);
-
-					if ($info2[0] >= $width || $info2[1] >= $height) {
-						return $temp . $thumb_name;
-					}
-				}
-
-				imagealphablending($thumb, false);
-				imagesavealpha($thumb, true);
+			else if ($src_info[2] == 3) {
+				imagealphablending($scaled, false);
+				imagesavealpha($scaled, true);
 
 				$img = ImageCreateFromPNG($src);
 				imagealphablending($img, true);
-				imageCopyResampled($thumb, $img, 0, 0, 0, 0, $target_width, $target_height, $img_width, $img_height);
-				ImagePNG($thumb, $temp . $thumb_name);
+				imageCopyResampled($scaled, $img, 0, 0, 0, 0, $scaled_width, $scaled_height, $src_width, $src_height);
+				ImagePNG($scaled, $destination);
 
-				$this->db->thumbnail_create($file['id'], $thumb_name);
-				return $temp . $thumb_name;
+				return $destination;
 			}
 		}
 
@@ -368,7 +357,7 @@ class File_Model {
 			throw new Exception('Permission denied', '403');
 		}
 
-		$path = $this->config['datadir'] . $parent['owner'] . $parent['path'];
+		$path = $this->config['datadir'] . $parent['owner'] . self::$FILES . $parent['path'];
 		$filename = ($orig_filename != "") ? $orig_filename : "Unknown " . $type;
 
 		if ($orig_filename == "" && file_exists($path . "/" . $filename)) {
@@ -385,7 +374,7 @@ class File_Model {
 
 		// Create file/folder
 		if (($type == 'file' && touch($path . "/" . $filename)) ||
-			mkdir($path . "/" . $filename, 0777, true))
+				($type == 'folder' && mkdir($path . "/" . $filename, 0777, true)))
 		{
 			$md5 = (is_dir($path . "/" . $filename)) ? "0" : md5_file($path . "/" . $filename);
 			return $this->db->cache_add($filename, $parent['id'], self::type($path . "/" . $filename), self::info($path . "/" . $filename), $parent['ownerid'], filemtime($path . "/" . $filename), $md5, $parent['path'] . "/" . $filename);
@@ -412,7 +401,7 @@ class File_Model {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		$oldpath = $this->config['datadir'] . $file['owner'] . $file['path'];
+		$oldpath = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
 		$newpath = dirname($oldpath) . "/" . $newname;
 
 		if (is_file($oldpath) && !strrpos($newpath, '.') && strrpos($oldpath, '.')) {
@@ -461,23 +450,21 @@ class File_Model {
 
 			// Fully delete
 			if ($file['trash']) {
-				$trash_path = $trashdir . $file['filename'] . $file['trash'];
+				$this->remove_thumbnail($file);
+				$trash_path = $trashdir . $file['id'];
 
 				if (is_dir($trash_path) && $this->recursive_remove($file['ownerid'], $file['id'], $trash_path) ||
 					(file_exists($trash_path) && unlink($trash_path) && $this->db->cache_remove($file['id'])))
 				{
-					$this->remove_thumbnail($file);
 					continue;
 				}
 			}
 
 			// Move to trash
 			else {
-				$trash_hash = $this->db->cache_get_unique_trashhash();
-
-				if (rename($this->config['datadir'] . $file['owner'] . $file['path'], $trashdir . $file['filename'] . $trash_hash)) {
+				if (rename($this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'], $trashdir . $file['id'])) {
 					$restorepath = (dirname($file['path']) == 1) ? "/" : dirname($file['path']);
-					$this->db->cache_trash($file['id'], $restorepath, $trash_hash, $file['ownerid'], $file['path']);
+					$this->db->cache_trash($file['id'], $file['ownerid'], $file['path'], $restorepath);
 					$this->db->share_remove($file['id']);
 					continue;
 				}
@@ -596,7 +583,7 @@ class File_Model {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		$targetpath = $this->config['datadir'] . $targetfile['owner'] . $targetfile['path'] . "/";
+		$targetpath = $this->config['datadir'] . $targetfile['owner'] . self::$FILES . $targetfile['path'] . "/";
 
 		$errors = 0;
 		foreach ($sources as $source) {
@@ -607,7 +594,7 @@ class File_Model {
 				continue;
 			}
 
-			$sourcepath = $this->config['datadir'] . $sourcefile['owner'] . $sourcefile['path'];
+			$sourcepath = $this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'];
 
 			if (file_exists($targetpath . $sourcefile['filename']) ||
 				(is_dir($sourcepath) && !Util::copy_dir($sourcepath, $targetpath . $sourcefile['filename'])) ||
@@ -655,7 +642,7 @@ class File_Model {
 		}
 
 		$destination = "";
-		$destination_parent = ($for_download) ? $temp : $this->config['datadir'] . $targetfile['owner'] . $targetfile['path'] . "/";
+		$destination_parent = ($for_download) ? $temp : $this->config['datadir'] . $targetfile['owner'] . self::$FILES . $targetfile['path'] . "/";
 		$datestamp = date("o-m-d-His") . '.' . explode('.', microtime(true))[1];
 
 		if (count($sources) > 1) {
@@ -684,11 +671,11 @@ class File_Model {
 				continue;
 			}
 
-			if (is_dir($this->config['datadir'] . $sourcefile['owner'] . $sourcefile['path'])) {
-				$this->addFolderToZip($this->config['datadir'] . $sourcefile['owner'] . $sourcefile['path'] . "/", $zip, $sourcefile['filename'] . "/");
+			if (is_dir($this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'])) {
+				$this->addFolderToZip($this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'] . "/", $zip, $sourcefile['filename'] . "/");
 			}
 			else {
-				$zip->addFile($this->config['datadir'] . $sourcefile['owner'] . $sourcefile['path'], $sourcefile['filename']);
+				$zip->addFile($this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'], $sourcefile['filename']);
 			}
 		}
 
@@ -712,17 +699,17 @@ class File_Model {
 				continue;
 			}
 
-			$path = $this->config['datadir'] . $file['owner'] . $file['path'];
-			$home_path = $this->config['datadir'] . $file['owner'] . "/" . $file['filename'];
-			$trash_path = $this->config['datadir'] . $file['owner'] . self::$TRASH . $file['filename'] . $file['trash'];
+			$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
+			$home_path = $this->config['datadir'] . $file['owner'] . self::$FILES . "/" . $file['filename'];
+			$trash_path = $this->config['datadir'] . $file['owner'] . self::$TRASH . $file['id'];
 
 			$restore_path = $this->db->cache_get_restore_path($file['id']);
 			$restore_id = $this->db->cache_id_for_path($file['ownerid'], $restore_path);
 
 			// Restore to original location
-			if ($restore_id && file_exists($this->config['datadir'] . $file['owner'] . $restore_path . "/") &&
-					!file_exists($this->config['datadir'] . $file['owner'] . $restore_path . "/" . $file['filename']) &&
-					rename($trash_path, $this->config['datadir'] . $file['owner'] . $restore_path . "/" . $file['filename']))
+			if ($restore_id && file_exists($this->config['datadir'] . $file['owner'] . self::$FILES . $restore_path . "/") &&
+					!file_exists($this->config['datadir'] . $file['owner'] . self::$FILES . $restore_path . "/" . $file['filename']) &&
+					rename($trash_path, $this->config['datadir'] . $file['owner'] . self::$FILES . $restore_path . "/" . $file['filename']))
 			{
 				$this->db->cache_restore($file['id'], $restore_id, $file['ownerid'], $restore_path . "/" . $file['filename']);
 				continue;
@@ -757,7 +744,7 @@ class File_Model {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		$targetpath = $this->config['datadir'] . $targetfile['owner'] . $targetfile['path'];
+		$targetpath = $this->config['datadir'] . $targetfile['owner'] . self::$FILES . $targetfile['path'];
 
 		$errors = 0;
 		foreach ($sources as $source) {
@@ -768,7 +755,7 @@ class File_Model {
 				continue;
 			}
 
-			$sourcepath = $this->config['datadir'] . $sourcefile['owner'] . $sourcefile['path'];
+			$sourcepath = $this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'];
 
 			if ($sourcefile['owner'] != $targetfile['owner']) {
 				$this->db->share_remove($sourcefile['id']);
@@ -811,7 +798,7 @@ class File_Model {
 				throw new Exception('File too big', '500');
 			}
 
-			$userdir = $this->config['datadir'] . $parent['owner'];
+			$userdir = $this->config['datadir'] . $parent['owner'] . self::$FILES;
 			$rel_path = $parent['path'];
 
 			$parent_id = $parent['id'];
@@ -908,10 +895,11 @@ class File_Model {
 	 * @return file
 	 */
 
-	public function get($targets, $width = null, $height = null) {
+	public function get($targets, $width = null, $height = null, $thumb = 0) {
 		$path = null;
 		$delete_flag = false;
 
+		// Check each file for access permission
 		foreach ($targets as $target) {
 			$file = $this->get_cached($target, self::$PERMISSION_READ);
 
@@ -920,14 +908,14 @@ class File_Model {
 			}
 		}
 
-		$path = $this->config['datadir'] . $file['owner'] . $file['path'];
+		$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
 
 		if (count($targets) > 1 || is_dir($path)) {
 			$delete_flag = true;
 			$destination = $this->zip(null, $targets, true);
 		}
 		else if ($width && $height) {
-			$destination = $this->shrink_image($file, $width, $height);
+			$destination = $this->scale_image($file, $width, $height, $thumb);
 		}
 		else {
 			$destination = $path;
@@ -979,7 +967,7 @@ class File_Model {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		if (file_put_contents($this->config['datadir'] . $file['owner'] . $file['path'], base64_decode($data))) {
+		if (file_put_contents($this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'], base64_decode($data))) {
 			return null;
 		}
 
@@ -993,8 +981,8 @@ class File_Model {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		if (is_readable($this->config['datadir'] . $file['owner'] . $file['path'])) {
-			return array('filename' => $file['filename'], 'content' => file_get_contents($this->config['datadir'] . $file['owner'] . $file['path']));
+		if (is_readable($this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'])) {
+			return array('filename' => $file['filename'], 'content' => file_get_contents($this->config['datadir'] . $file['owner'] . self::$FILES . $file['path']));
 		}
 
 		throw new Exception('Error accessing file', '403');
@@ -1007,7 +995,7 @@ class File_Model {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		$path = $this->config['datadir'] . $file['owner'] . $file['path'];
+		$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
 		if (file_put_contents($path, $msg)) {
 			$this->db->cache_update($file['id'], self::type($path), self::info($path), filemtime($path), md5_file($path), $file['owner'], $file['path']);
 			return null;
@@ -1044,7 +1032,7 @@ class File_Model {
 	 */
 
 	public function scan($id, $update = false, $include_childs = false) {
-		$scan_lock = ($this->username) ? $this->config['datadir'] . $this->username . "/.lock/scan" : null;
+		$scan_lock = ($this->username) ? $this->config['datadir'] . $this->username . self::$LOCK . "scan" : null;
 		set_time_limit(0);
 
 		$file = $this->get_cached($id, self::$PERMISSION_READ);
@@ -1059,7 +1047,7 @@ class File_Model {
 		}
 		file_put_contents($scan_lock, '', LOCK_EX);
 
-		$path = $this->config['datadir'] . $file['owner'] . $file['path'] . "/";
+		$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'] . "/";
 		$trash_path = $this->config['datadir'] . $file['owner'] . self::$TRASH;
 
 		// Start scan
@@ -1150,7 +1138,7 @@ class File_Model {
 		foreach ($files as $file) {
 			if (is_readable($path . $file) && substr($file, 0, 1) != ".") {
 				// Add trash-hash to list of existing files
-				array_push($existing, substr($file, -32));
+				array_push($existing, $file);
 			}
 		}
 

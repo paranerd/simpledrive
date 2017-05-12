@@ -34,7 +34,8 @@ Enable mod_rewrite by executing:
 
 ### Nginx
 
-In case you run on an nginx-server, please add the following to your nginx.conf (change server_name and root to match your setup)
+In case you run on an nginx-server, please add the following to the html-section of your nginx.conf
+Remember to change server_name and root to match your setup and to use the version of php*-fpm that is installed on your system (uncomment accordingly inside "location ~ \.php$ {")
 
 	server {
 		listen 80;
@@ -53,8 +54,8 @@ In case you run on an nginx-server, please add the following to your nginx.conf 
 			add_header X-Frame-Options "SAMEORIGIN";
 			add_header X-XSS-Protection "1; mode=block";
 			add_header X-Robots-Tag none;
-			add_header X-Content-Security-Policy "default-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'; font-src 'self';"
-			add_header Content-Security-Policy "default-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'; font-src 'self';"
+			add_header X-Content-Security-Policy "default-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'";
+			add_header Content-Security-Policy "default-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'";
 		}
 
 		location / {

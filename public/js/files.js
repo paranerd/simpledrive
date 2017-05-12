@@ -674,7 +674,7 @@ var FileView = {
 
 			if (thumbnail.style.backgroundImage == '' && visible && (item.type == 'image' || item.type == 'pdf')) {
 				var img = new Image();
-				img.src = "api/files/get?target=" + JSON.stringify([item.id]) + "&width=" + $(".thumbnail").width() + "&height=" + $(".thumbnail").height() + "&token=" + token;
+				img.src = "api/files/get?target=" + JSON.stringify([item.id]) + "&width=" + $(".thumbnail").width() + "&height=" + $(".thumbnail").height() + "&thumbnail=1&token=" + token;
 				img.onload = function() {
 					if (id == FileModel.requestID) {
 						$(thumbnail).removeClass("icon-" + item.type);

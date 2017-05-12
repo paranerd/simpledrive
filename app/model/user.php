@@ -9,6 +9,8 @@
 
 class User_Model {
 
+	static $TEMP	= '/tmp/';
+
 	public function __construct($token) {
 		$this->config	= json_decode(file_get_contents('config/config.json'), true);
 		$this->token	= $token;
@@ -220,7 +222,7 @@ class User_Model {
 			throw new Exception('Permission denied', '403');
 		}
 
-		if (Util::delete_dir($this->config['datadir'] . $this->username . '/.tmp/')) {
+		if (Util::delete_dir($this->config['datadir'] . $this->username . self::$TEMP)) {
 			return null;
 		}
 

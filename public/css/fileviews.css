@@ -39,7 +39,6 @@
 }
 
 .item-elem {
-	/*position: relative;*/
 	font-size: 0.9rem;
 	font-family: robotoregular, sans-serif;
 	overflow: hidden;
@@ -112,6 +111,10 @@
 	cursor: pointer;
 	height: 50px;
 	display: flex;
+}
+
+.list .item-elem {
+	position: relative;
 }
 
 .list .item.selected .thumbnail {

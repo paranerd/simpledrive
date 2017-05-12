@@ -27,8 +27,8 @@ class Backup_Model {
 
 		$this->credentials		= ($this->user) ? $_SERVER['DOCUMENT_ROOT'] . $this->config['installdir'] . 'config/googledrive/client_secret.json' : "";
 		$this->token			= ($this->user) ? $_SERVER['DOCUMENT_ROOT'] . $this->config['installdir'] . 'config/googledrive/access-token_' . $this->username . '.json' : "";
-		$this->temp				= ($this->user) ? $this->config['datadir'] . $this->username . "/.tmp/" : "";
-		$this->lock				= ($this->user) ? $this->config['datadir'] . $this->username . "/.lock/backup" : "";
+		$this->temp				= ($this->user) ? $this->config['datadir'] . $this->username . "/tmp/" : "";
+		$this->lock				= ($this->user) ? $this->config['datadir'] . $this->username . "/lock/backup" : "";
 
 		$this->counter			= 0;
 		$this->key				= null;

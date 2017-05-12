@@ -167,8 +167,7 @@ class Database {
 			'CREATE TABLE IF NOT EXISTS sd_trash (
 				id varchar(32),
 				PRIMARY KEY (id),
-				restorepath varchar(200),
-				hash varchar(32)
+				restorepath varchar(200)
 			)'
 		);
 
@@ -1040,12 +1039,12 @@ class Database {
 	 * @return boolean true
 	 */
 
-	public function cache_trash($id, $restorepath, $hash, $owner, $path) {
+	public function cache_trash($id, $owner, $path, $restorepath) {
 		$stmt = $this->link->prepare(
-			'INSERT INTO sd_trash (id, restorepath, hash)
-			VALUES (?, ?, ?)'
+			'INSERT INTO sd_trash (id, restorepath)
+			VALUES (?, ?)'
 		);
-		$stmt->bind_param('sss', $id, $restorepath, $hash);
+		$stmt->bind_param('ss', $id, $restorepath);
 		$stmt->execute();
 
 		$this->history_add($id, $path, $owner, time(), true);
@@ -1113,23 +1112,6 @@ class Database {
 		} while ($stmt->num_rows > 0);
 
 		return $id;
-	}
-
-	public function cache_get_unique_trashhash() {
-		$hash;
-
-		do {
-			$hash = Crypto::random(32);
-			$stmt = $this->link->prepare(
-				'SELECT hash
-				FROM sd_trash
-				WHERE hash = ?'
-			);
-			$stmt->bind_param('s', $hash);
-			$stmt->execute();
-		} while ($stmt->num_rows > 0);
-
-		return $hash;
 	}
 
 	public function cache_add($filename, $parent, $type, $size, $owner, $edit, $md5, $path) {
@@ -1247,7 +1229,7 @@ class Database {
 		$share_base = $this->share_get_base($id, $uid);
 
 		$stmt = $this->link->prepare(
-			'SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.hash
+			'SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.id
 			FROM sd_users
 			RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner
 			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.file
@@ -1294,8 +1276,7 @@ class Database {
 			LEFT JOIN sd_trash t ON f.id = t.id
 			WHERE f.owner = ?
 			AND f.parent = ?
-			AND t.hash
-			IS NULL'
+			AND t.id IS NULL'
 		);
 		$stmt->bind_param('is', $owner, $id);
 		$stmt->execute();
@@ -1328,8 +1309,7 @@ class Database {
 			WHERE owner = ?
 			AND parent = ?
 			AND filename = ?
-			AND sd_trash.hash
-			IS NULL'
+			AND sd_trash.id IS NULL'
 		);
 		$stmt->bind_param('iss', $owner, $parent, $filename);
 		$stmt->execute();
@@ -1340,10 +1320,10 @@ class Database {
 		return ($stmt->affected_rows > 0) ? $id : null;
 	}
 
-	public function cache_children($id, $uid, $oid) {
+	public function cache_children($id, $uid, $oid, $allow_trashed = false) {
 		$share_base = $this->share_get_base($id, $uid);
 
-		if ($this->cache_trashed($id)) {
+		if ($this->cache_trashed($id) && !$allow_trashed) {
 			return array();
 		}
 
@@ -1355,7 +1335,7 @@ class Database {
 			LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
 			WHERE sd_cache.parent = ?
 			AND sd_cache.owner = ?
-			AND sd_trash.hash IS NULL
+			AND sd_trash.id IS NULL
 			GROUP BY sd_cache.id
 		');
 
@@ -1383,19 +1363,16 @@ class Database {
 		return $files;
 	}
 
-	public function cache_get_trash_hash($id) {
-		$stmt = $this->link->prepare(
-			'SELECT hash
-			FROM sd_trash
-			WHERE id = ?'
-		);
-		$stmt->bind_param('s', $id);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($hash);
-		$stmt->fetch();
+	public function cache_children_rec($id, $uid, $oid) {
+		$children = $this->cache_children($id, $uid, $oid, true);
 
-		return ($stmt->affected_rows == 1) ? $hash : null;
+		foreach ($children as $child) {
+			if ($child['type'] == 'folder') {
+				$children = array_merge($children, $this->cache_children_rec($child['id'], $uid, $oid));
+			}
+		}
+
+		return $children;
 	}
 
 	public function cache_get_restore_path($id) {
@@ -1435,7 +1412,7 @@ class Database {
 				WHERE sd_cache.owner = ?
 				AND sd_cache.parent = ?
 				AND sd_cache.filename = ?
-				AND sd_trash.hash IS NULL'
+				AND sd_trash.id IS NULL'
 			);
 			$stmt->bind_param('iss', $uid, $id, $filename);
 			$stmt->execute();
@@ -1557,7 +1534,7 @@ class Database {
 	public function cache_trashed($id) {
 		do {
 			$stmt = $this->link->prepare(
-				'SELECT sd_cache.parent, sd_trash.hash
+				'SELECT sd_cache.parent, sd_trash.id
 				FROM sd_cache
 				LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
 				WHERE sd_cache.id = ?'
@@ -1565,10 +1542,10 @@ class Database {
 			$stmt->bind_param('s', $id);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($id, $hash);
+			$stmt->bind_result($id, $trash_id);
 			$stmt->fetch();
 
-			if ($hash) {
+			if ($trash_id) {
 				return true;
 			}
 		} while ($stmt->num_rows > 0);
@@ -1609,7 +1586,7 @@ class Database {
 			FROM sd_trash t
 			LEFT JOIN sd_cache f ON t.id = f.id
 			WHERE f.owner = ?
-			AND t.hash NOT IN ("' . implode($escaped_existing, '","') . '")'
+			AND t.id NOT IN ("' . implode($escaped_existing, '","') . '")'
 		);
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
