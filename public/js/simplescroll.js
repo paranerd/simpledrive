@@ -28,7 +28,7 @@ var simpleScroll = {
 	},
 
 	init: function(id) {
-		if(!this.hasBeenInitialized) {
+		if (!this.hasBeenInitialized) {
 			self = this;
 			self.scrollbarWidth = self.getScrollBarWidth();
 
@@ -62,6 +62,7 @@ var simpleScroll = {
 		var innerNode = document.createElement("div");
 		innerNode.id = "simpleScrollContainer" + self.containers.length;
 		innerNode.style.width = ($("#" + id).width() + self.scrollbarWidth) + "px";
+		//innerNode.style.width = '5px';
 		innerNode.style.height = $("#" + id).height() + "px";
 		innerNode.style.overflow = "auto";
 		innerNode.innerHTML = content;
@@ -197,9 +198,9 @@ var simpleScroll = {
 	  outer.style.width = "50px";
 	  outer.style.height = "100px";
 	  outer.style.overflow = "hidden";
-	  outer.appendChild (inner);
+	  outer.appendChild(inner);
 
-	  document.body.appendChild (outer);
+	  document.body.appendChild(outer);
 	  var w1 = inner.offsetWidth;
 	  outer.style.overflow = 'scroll';
 	  var w2 = inner.offsetWidth;

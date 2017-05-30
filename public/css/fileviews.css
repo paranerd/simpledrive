@@ -105,11 +105,11 @@
 }
 
 .list .item {
-	border-radius: 0px;
-	line-height: 50px;
+	border-radius: 2px;
+	line-height: 55px;
 	overflow: hidden;
 	cursor: pointer;
-	height: 50px;
+	height: 55px;
 	display: flex;
 }
 
@@ -131,7 +131,7 @@
 
 .list .thumbnail {
 	position: relative;
-	top: 8px;
+	top: 10px;
 	left: 15px;
 	height: 30px;
 	width: 30px;
@@ -142,6 +142,7 @@
 	background-position: center;
 	cursor: default;
 	float: left;
+	font-size: 1.2rem;
 }
 
 .list .shared {
@@ -166,6 +167,7 @@
 	padding: 0;
 	height: 150px;
 	width: 150px;
+	border-radius: 5px;
 	text-align: center;
 	font-size: 2rem;
 	line-height: 150px;
@@ -182,6 +184,10 @@
 	-o-transform: scale(1.05);
 	-ms-transform: scale(1.05);
 	z-index: 2;
+}
+
+.grid .item-elem {
+	font-size: 1rem;
 }
 
 .grid .col0 {
@@ -226,5 +232,5 @@
 }
 
 .grid .item .thumbnail {
-	border-radius: 0px;
+	border-radius: 5px;
 }

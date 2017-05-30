@@ -381,16 +381,18 @@ label {
 /* Header */
 
 #header {
-  height: 80px;
+  /*height: 80px;*/
+	height: 100px;
   flex: 0 0 auto;
 }
 
 #logo {
-	width: 200px;
-	height: 80px;
+	width: 230px;
+	height: 100%;
 	font-size: 1.7rem;
 	cursor: pointer;
-	line-height: 80px;
+	/*line-height: 80px;*/
+	line-height: 100px;
 	float: left;
 }
 
@@ -402,7 +404,7 @@ label {
 
 #logo a {
 	margin-left: 0;
-	font-family: robotolight, sans-serif;
+	font-family: robotoregular, sans-serif;
 	font-size: 1.7rem;
 	display: block;
 	overflow: hidden;
@@ -411,11 +413,11 @@ label {
 }
 
 #logo a:not(.back) {
-	margin-left: 20px;
+	/*margin-left: 20px;*/
 }
 
 #logo a:not(.back) .icon {
-	display: none;
+	/*display: none;*/
 }
 
 #path {
@@ -426,12 +428,16 @@ label {
 .path-element {
 	font-size: 1.7rem;
 	font-family: robotolight, sans-serif;
-	line-height: 80px;
+	line-height: 100px;
 	cursor: pointer;
 	float: left;
 }
 
-.path-seperator {
+.path-current {
+	font-family: robotoregular, sans-serif;
+}
+
+.path-separator {
 	margin-left: 5px;
 	margin-right: 5px;
 	font-size: 1rem;
@@ -440,7 +446,7 @@ label {
 #username {
 	position: absolute;
 	right: 20px;
-	line-height: 80px;
+	line-height: 100px;
 	font-family: robotolight, sans-serif;
 	font-size: 1.3rem;
 	cursor: pointer;
@@ -459,7 +465,7 @@ label {
 
 #sidebar {
 	position: relative;
-  width: 200px;
+  width: 230px;
   flex: 0 0 auto;
 }
 
@@ -581,9 +587,12 @@ label {
   position: relative;
   height: 50px;
   flex: 0 0 auto;
+	border-radius: 2px;
 }
 
 #content-container {
+	margin-left: 20px;
+	margin-right: 20px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -722,7 +731,7 @@ label {
 
 #fileinfo {
   position: relative;
-  width: 200px;
+  width: 230px;
   flex: 0 0 auto;
 }
 

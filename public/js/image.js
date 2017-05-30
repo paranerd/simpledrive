@@ -68,7 +68,7 @@ var ImageManager = {
 			return;
 		}
 
-		var files = FileModel.getAll();
+		var files = FileModel.getFiles();
 		for (var i = parseInt(ImageManager.active) + 1; i < parseInt(ImageManager.active) + files.length + 1; i++) {
 			if (files[i % files.length].type == 'image') {
 				ImageManager.open(i % files.length);
@@ -101,6 +101,7 @@ var ImageManager = {
 		var date = new Date();
 		var start = date.getTime();
 		var interval = setInterval(function() {
+			console.log("here");
 			if (date.getTime() - start > 5000) {
 				clearTimeout(interval);
 				Util.notify("Error displaying image", true, true);
@@ -113,9 +114,11 @@ var ImageManager = {
 				var imgWidth = ImageManager.image.naturalWidth || ImageManager.image.width;
 
 				var shrinkTo = (imgHeight > window.innerHeight || imgWidth > window.innerWidth) ? Math.min(window.innerHeight / imgHeight, window.innerWidth / imgWidth) : 1;
+				var coverArea = 0.9;
 
-				var targetWidth = (imgWidth * shrinkTo);
-				var targetHeight = (imgHeight * shrinkTo);
+				var targetWidth = (imgWidth * shrinkTo) * coverArea;
+				var targetHeight = (imgHeight * shrinkTo) * coverArea;
+				console.log("targetHeight");
 
 				ImageManager.image.style.position = "absolute";
 				ImageManager.image.style.height = targetHeight + "px";
@@ -141,7 +144,7 @@ var ImageManager = {
 	},
 
 	prev: function() {
-		var files = FileModel.getAll();
+		var files = FileModel.getFiles();
 		for (var i = parseInt(ImageManager.active) - 1; i > parseInt(ImageManager.active) - files.length; i--) {
 			var index = (i % files.length + files.length) % files.length;
 			if (files[index].type == 'image') {

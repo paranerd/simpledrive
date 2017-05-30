@@ -5,10 +5,6 @@
  * @link		https://simpledrive.org
  */
 
-/* TO-DO
- * Only load displayed thumbnails
- */
-
 var	username,
 	token;
 
@@ -57,7 +53,6 @@ var FileController = {
 				((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 96 && e.keyCode <= 105)))
 			{
 				$("#files-filter").removeClass('hidden');
-				//$(window).resize();
 				$("#files-filter .filter-input").focus();
 
 				setTimeout(function() {
@@ -104,9 +99,8 @@ var FileController = {
 					AudioManager.stopAudio();
 
 					Util.closePopup();
-					FileModel.removeFilter();
+					FileModel.filterRemove();
 					FileView.closeRename();
-					$(window).resize();
 					break;
 
 				case 32: // Space
@@ -148,7 +142,7 @@ var FileController = {
 		});
 
 		$("#upload .close").on('click', function(e) {
-			FileModel.finishUpload(true);
+			FileModel.uploadFinish(true);
 		});
 
 		$("#audioplayer .close").on('click', function(e) {
@@ -156,36 +150,25 @@ var FileController = {
 		});
 
 		$("#clipboard .close").on('click', function(e) {
-			FileModel.emptyClipboard();
+			FileModel.clipboardClear();
 		});
 
 		$("#files-filter .close").on('click', function(e) {
-			FileModel.removeFilter();
+			FileModel.filterRemove();
 		});
 
 		$("#fileinfo .close").on('click', function(e) {
-			$("#fileinfo").addClass("hidden");
-			$(window).resize();
+			FileView.hideFileinfo();
 		});
 
 		$("#scan").on('click', function(e) {
 			FileModel.scan();
 		});
 
-		$(".content-header .col1").on('click', function(e) {
-			FileModel.sortBy('name');
-		});
-
-		$(".content-header .col3").on('click', function(e) {
-			FileModel.sortBy('type');
-		});
-
-		$(".content-header .col4").on('click', function(e) {
-			FileModel.sortBy('size');
-		});
-
-		$(".content-header .col5").on('click', function(e) {
-			FileModel.sortBy('edit');
+		$(".content-header > span").on('click', function(e) {
+			if ($(this).data('sortby')) {
+				FileModel.sortBy($(this).data('sortby'));
+			}
 		});
 
 		$("#create-file").on('click', function(e) {
@@ -224,7 +207,7 @@ var FileController = {
 			$("#contextmenu hr").addClass("hidden");
 
 			// Paste
-			if (FileModel.isClipboardFilled()) {
+			if (FileModel.isClipboardEmpty()) {
 				$("#context-paste").removeClass("hidden");
 			}
 
@@ -274,7 +257,9 @@ var FileController = {
 				}
 			}
 
-			Util.showContextmenu(e);
+			if (!FileModel.isClipboardEmpty() || target) {
+				Util.showContextmenu(e);
+			}
 		});
 
 		/**
@@ -342,7 +327,7 @@ var FileController = {
 		});
 
 		$(".upload-input").on('change', function(e) {
-			FileModel.addUpload(this);
+			FileModel.uploadAdd(this);
 		});
 
 		$(".upload-input").on('click', function(e) {
@@ -353,9 +338,9 @@ var FileController = {
 			$("#upload-folder").addClass("hidden");
 		}
 
-		$("#fSelect").on('click', function(e) {
+		$(document).on('click', '#checker', function(e) {
 			FileModel.toggleSelection();
-		});
+		})
 
 		$("#audio-seekbar").on('mousedown', function(e) {
 			FileView.seekPos = (e.pageX - $(this).offset().left) / $(this).width();
@@ -391,7 +376,7 @@ var FileController = {
 			FileModel.select(this.value);
 			FileView.startDrag = true;
 
-			FileView.updateSelStatus();
+			FileView.updateSelections();
 		});
 
 		$(document).on('mouseup', '.item', function(e) {
@@ -424,12 +409,10 @@ var FileController = {
 			// Un-select
 			if (typeof FileModel.getSelectedAt(this.value) !== "undefined") {
 				FileModel.unselect(this.value);
-				FileView.toggleFileInfo(null);
 			}
 			// Select
 			else {
 				FileModel.select(this.value);
-				FileView.toggleFileInfo(FileModel.getElementAt(this.value));
 			}
 		});
 
@@ -497,7 +480,7 @@ var FileController = {
 			$("#dropzone").addClass("hidden");
 			e.stopPropagation();
 			e.preventDefault();
-			FileModel.addUpload(e.dataTransfer);
+			FileModel.uploadAdd(e.dataTransfer);
 		});
 
 		window.onpopstate = function(e) {
@@ -522,7 +505,7 @@ var FileView = {
 	init: function(view) {
 		simpleScroll.init('files');
 		FileView.view = (view) ? view : "files";
-		$("#username").html(Util.escape(username) + " &#x25BE");
+		$("#username").html(Util.escape(username) + " &#x25BF");
 
 		// Enable lazyloading of thumbnail images
 		var ssc = document.getElementById('simpleScrollContainer0');
@@ -548,7 +531,7 @@ var FileView = {
 
 	closeGallery: function() {
 		FileView.galleryMode = false;
-		FileModel.removeFilter();
+		FileModel.filterRemove();
 		$("#sidebar").removeClass("hidden");
 		$('#content-container').removeClass('list grid').addClass(FileView.originalFileview);
 	},
@@ -639,9 +622,11 @@ var FileView = {
 
 		if (FileView.view != "trash") {
 			FileView.setImgthumbnail(0, FileModel.requestID);
+			FileView.showFileInfo(null);
 		}
-
-		$(window).resize();
+		else {
+			FileView.hideFileinfo();
+		}
 
 		var elem = (files.length == 1) ? " element" : " elements";
 		$("#foldersize").text(FileModel.filtered.length + elem);
@@ -679,6 +664,10 @@ var FileView = {
 					if (id == FileModel.requestID) {
 						$(thumbnail).removeClass("icon-" + item.type);
 						thumbnail.style.backgroundImage = "url(" + this.src + ")";
+						// Remove filename from image in grid-view
+						if ($('#content-container').hasClass('grid')) {
+							$("#item" + index).find('.col1').text("");
+						}
 						FileView.setImgthumbnail(index + 1, id);
 					}
 				}
@@ -690,31 +679,35 @@ var FileView = {
 	},
 
 	/**
-	 * Shows/hides the fileinfo-panel
+	 * Displays the fileinfo-panel
 	 */
-	toggleFileInfo: function(elem) {
-		$("#fileinfo-link").addClass("hidden").unbind('click');
+	showFileInfo: function(elem) {
+		elem = (elem) ? elem : FileModel.getCurrentFolder();
 
-		if (elem) {
-			$("#fileinfo-icon").removeClass().addClass('icon icon-' + elem.type);
-			$("#fileinfo-name").text(elem.filename);
-			$("#fileinfo-size").text(Util.byteToString(elem.size));
-			$("#fileinfo-type").text(elem.type);
-			$("#fileinfo-edit").text(Util.timestampToDate(elem.edit));
+		var size = (elem.type == 'folder' && !elem.current) ? elem.size + " File(s)" : Util.byteToString(elem.size);
+		$("#fileinfo-icon").removeClass().addClass('icon icon-' + elem.type);
+		$("#fileinfo-name").text(elem.filename);
+		$("#fileinfo-size").text(size);
+		$("#fileinfo-type").text(elem.type);
+		$("#fileinfo-edit").text(Util.timestampToDate(elem.edit));
 
-			if (elem.selfshared) {
-				$("#fileinfo-link").on('click', function() {
-					FileModel.getLink(elem);
-				}).removeClass("hidden");
-			}
-			else {
-				$("#fileinfo-link").addClass("hidden");
-			}
-			$("#fileinfo").removeClass("hidden");
+		if (elem.selfshared) {
+			$("#fileinfo-link").on('click', function() {
+				FileModel.getLink(elem);
+			}).removeClass("hidden");
 		}
 		else {
-			$("#fileinfo").addClass("hidden");
+			$("#fileinfo-link").addClass("hidden");
 		}
+		$("#fileinfo").removeClass("hidden");
+	},
+
+	/**
+	 * Hides the fileinfo-panel
+	 */
+
+	hideFileinfo: function() {
+		$("#fileinfo").addClass("hidden");
 		$(window).resize();
 	},
 
@@ -750,27 +743,23 @@ var FileView = {
 		$('#renameform').remove();
 	},
 
-	updateClipboard: function() {
-		var count = Object.keys(FileModel.clipboard).length;
-		var content = (count == 1) ? count + " element" : count + " elements";
+	clipboardUpdate: function() {
 		$("#clipboard").removeClass("hidden");
-		$("#clipboard-content").text(content);
+		$("#clipboard-content").text('Contains: ' + Object.keys(FileModel.clipboard).length);
 		$("#clipboard-count").text(count);
 	},
 
 	/**
 	 * Highlights all selected elements in the fileview
 	 */
-	updateSelStatus: function(checkboxClicked) {
+	updateSelections: function(checkboxClicked) {
 		var count = FileModel.getSelectedCount();
 		$(".item").removeClass("selected");
 
 		if (count == 0) {
-			var filecount = FileModel.getAll().length;
-			var elem = (filecount == 1) ? " element" : " elements";
-			if (elem.type != "folder") {
-				$("#foldersize").text(filecount + elem);
-			}
+			var filecount = FileModel.getFiles().length;
+			var files = (filecount == 1) ? " file" : " files";
+			$("#foldersize").text(filecount + files);
 		}
 		else {
 			var size = 0;
@@ -786,13 +775,12 @@ var FileView = {
 			$("#foldersize").text(count + " " + files + postfix);
 		}
 
-		if (!checkboxClicked) {
-			if (count > 0 && count == FileModel.getAll().length) {
-				$("#fSelect").addClass("checkbox-checked");
-			}
-			else {
-				$("#fSelect").removeClass("checkbox-checked");
-			}
+		// Update selection-checkbox
+		if (count > 0 && count == FileModel.getFiles().length) {
+			$("#checker").addClass("checkbox-checked");
+		}
+		else {
+			$("#checker").removeClass("checkbox-checked");
 		}
 	},
 
@@ -807,8 +795,8 @@ var FileView = {
 
 			if (s > 0) {
 				var pathSep = document.createElement("span");
-				pathSep.className = "path-element path-seperator";
-				pathSep.innerHTML = "&#x25B8";
+				pathSep.className = "path-element path-separator";
+				pathSep.innerHTML = "&#x25B9";
 				$("#path").append(pathSep);
 			}
 
@@ -852,13 +840,17 @@ var FileModel = {
 	id: '0',
 	public: false,
 
-	currentSelected: -1,
+	hierarchy: [],
 	all: [],
 	filtered: [],
+	currentSelected: -1,
 	selected: {},
 	clipboard: {},
-	hierarchy: [],
+
+	filterNeedle: '',
+	filterKey: null,
 	sortOrder: 1, // 1: asc, -1: desc
+
 	downloadPub: false,
 	publicLoginAttempt: 0,
 	deleteAfterCopy: false,
@@ -869,34 +861,6 @@ var FileModel = {
 	uploadTotal: 0,
 	uploadQueue: [],
 	uploadRunning: false,
-
-	addUpload: function(elem) {
-		var files = elem.files;
-
-		for (var i = 0; i < files.length; i++) {
-			FileModel.uploadBytesTotal += files[i].size;
-			FileModel.uploadQueue.push({file: files[i], target: FileModel.id});
-			FileModel.uploadTotal++;
-		}
-
-		$(elem).val(''); // Remove files from DOM
-
-		$("#upload-menu").addClass("hidden");
-
-		if (!FileModel.uploadRunning) {
-			$("#upload-percent, #upload-filename, #upload-title").text('');
-			$("#upload").removeClass("hidden");
-			FileModel.uploadRunning = true;
-			window.onbeforeunload = Util.refreshWarning();
-			FileModel.upload();
-		}
-	},
-
-	removeFilter: function() {
-		$("#files-filter").addClass("hidden");
-		$(".filter-input").val('');
-		FileModel.filter('');
-	},
 
 	clearHierarchy: function() {
 		FileModel.id = 0;
@@ -943,7 +907,7 @@ var FileModel = {
 		}
 
 		FileModel.deleteAfterCopy = false;
-		FileView.updateClipboard();
+		FileView.clipboardUpdate();
 	},
 
 	create: function() {
@@ -976,7 +940,7 @@ var FileModel = {
 		}
 
 		FileModel.deleteAfterCopy = true;
-		FileView.updateClipboard();
+		FileView.clipboardUpdate();
 	},
 
 	dirUp: function() {
@@ -1027,7 +991,7 @@ var FileModel = {
 		FileModel.download();
 	},
 
-	emptyClipboard: function() {
+	clipboardClear: function() {
 		FileModel.clipboard = {};
 		Util.closeWidget('clipboard');
 	},
@@ -1047,11 +1011,11 @@ var FileModel = {
 			data: {token: token, target: FileModel.id, mode: FileView.view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			FileModel.removeFilter();
 			Util.busy(false);
 			FileModel.all = data.msg.files;
 			FileModel.filtered = FileModel.all;
 			FileModel.hierarchy = data.msg.hierarchy;
+			FileModel.filterRemove();
 			FileModel.sortBy('name', 1);
 
 			if (!back) {
@@ -1068,32 +1032,25 @@ var FileModel = {
 		});
 	},
 
-	filter: function(needle, col) {
-		col = (col) ? col : ['filename'];
-		FileModel.filtered = Util.filter(FileModel.all, needle, col);
+	filter: function(needle, key) {
+		FileModel.filterNeedle = needle;
+		FileModel.filterKey = (key) ? key : ['filename'];
+		FileModel.filtered = Util.filter(FileModel.all, needle, FileModel.filterKey);
 
 		FileView.displayFiles(FileModel.filtered);
 		FileModel.unselectAll();
-		FileModel.select(0);
-	},
-
-	finishUpload: function(abort) {
-		if (FileModel.abort) {
-			Util.notify("Upload aborted", true, false);
+		if (needle) {
+			FileModel.select(0);
 		}
-		FileModel.uploadRunning = false;
-		FileModel.uploadQueue = [];
-		FileModel.uploadBytesLoaded = 0;
-		FileModel.uploadBytesTotal = 0;
-		FileModel.uploadCurrent = 0;
-		FileModel.uploadTotal = 0;
-		FileModel.fetch();
-
-		window.onbeforeunload = null;
-		setTimeout(function() { Util.closeWidget('upload'); }, 5000);
 	},
 
-	getAll: function() {
+	filterRemove: function() {
+		$("#files-filter").addClass("hidden");
+		$(".filter-input").val('');
+		FileModel.filter('');
+	},
+
+	getFiles: function() {
 		return FileModel.filtered;
 	},
 
@@ -1108,6 +1065,20 @@ var FileModel = {
 
 	getAllSelected: function() {
 		return FileModel.selected;
+	},
+
+	getCurrentFolder: function() {
+		var filename = (FileModel.hierarchy.length == 1) ? 'Homefolder' : FileModel.hierarchy[FileModel.hierarchy.length -1].filename;
+		var size = 0;
+		var edit = 0;
+
+		for (var f in FileModel.all) {
+			var file = FileModel.all[f];
+			edit = (file.edit > edit) ? file.edit : edit;
+			size = (file.type != 'folder') ? size + file.size : size;
+		}
+
+		return {filename: filename, type: 'folder', size: size, edit: edit, current: true};
 	},
 
 	getElementAt: function(id) {
@@ -1135,7 +1106,7 @@ var FileModel = {
 		});
 	},
 
-	getSelectedAt : function(id) {
+	getSelectedAt: function(id) {
 		return FileModel.selected[id];
 	},
 
@@ -1156,7 +1127,7 @@ var FileModel = {
 		}
 	},
 
-	isClipboardFilled: function() {
+	isClipboardEmpty: function() {
 		return Object.keys(FileModel.clipboard).length > 0;
 	},
 
@@ -1306,12 +1277,12 @@ var FileModel = {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.busy(false);
-			FileModel.emptyClipboard();
+			FileModel.clipboardClear();
 			FileModel.fetch();
 		}).fail(function(xhr, statusText, error) {
 			Util.busy(false);
 			Util.notify(Util.getError(xhr), true, true);
-			FileModel.emptyClipboard();
+			FileModel.clipboardClear();
 			FileModel.fetch();
 		});
 	},
@@ -1396,7 +1367,8 @@ var FileModel = {
 		if (FileModel.filtered.length > id) {
 			FileModel.selected[id] = FileModel.filtered[id];
 			FileModel.currentSelected = id;
-			FileView.updateSelStatus();
+			FileView.showFileInfo(FileModel.getElementAt(id));
+			FileView.updateSelections();
 		}
 	},
 
@@ -1404,7 +1376,7 @@ var FileModel = {
 		for (var i = 0; i < Object.keys(FileModel.filtered).length; i++) {
 			FileModel.selected[i] = FileModel.filtered[i];
 		}
-		FileView.updateSelStatus(checkboxClicked);
+		FileView.updateSelections(checkboxClicked);
 	},
 
 	selectNext: function() {
@@ -1455,31 +1427,31 @@ var FileModel = {
 		}
 	},
 
-	sortBy: function(colName, order) {
+	sortBy: function(key, order) {
 		FileModel.sortOrder = (order) ? order : FileModel.sortOrder *= -1;
 
-		switch (colName) {
+		switch (key) {
 			case 'name':
-				FileModel.filtered = FileModel.filtered.sort(FileModel.compareName);
+				FileModel.all = FileModel.all.sort(FileModel.compareName);
 				break;
 
 			case 'edit':
-				FileModel.filtered = FileModel.filtered.sort(FileModel.compareEdit);
+				FileModel.all = FileModel.all.sort(FileModel.compareEdit);
 				break;
 
 			case 'type':
-				FileModel.filtered = FileModel.filtered.sort(FileModel.compareType);
+				FileModel.all = FileModel.all.sort(FileModel.compareType);
 				break;
 
 			case 'size':
-				FileModel.filtered = FileModel.filtered.sort(FileModel.compareSize);
+				FileModel.all = FileModel.all.sort(FileModel.compareSize);
 				break;
 		}
 
 		var text = (FileModel.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
 		$(".order-direction").text('');
-		$("#file-" + colName + "-ord").html(text);
-		FileView.displayFiles(FileModel.filtered);
+		$("#file-" + key + "-ord").html(text);
+		FileModel.filter(FileModel.filterNeedle, FileModel.filterKey);
 	},
 
 	toggleSelection: function() {
@@ -1509,12 +1481,35 @@ var FileModel = {
 
 	unselect: function(id) {
 		delete FileModel.selected[id];
-		FileView.updateSelStatus();
+		FileView.showFileInfo(FileModel.getFirstSelected().item);
+		FileView.updateSelections();
 	},
 
 	unselectAll: function(checkboxClicked) {
 		FileModel.selected = {};
-		FileView.updateSelStatus(checkboxClicked);
+		FileView.updateSelections(checkboxClicked);
+	},
+
+	uploadAdd: function(elem) {
+		var files = elem.files;
+
+		for (var i = 0; i < files.length; i++) {
+			FileModel.uploadBytesTotal += files[i].size;
+			FileModel.uploadQueue.push({file: files[i], target: FileModel.id});
+			FileModel.uploadTotal++;
+		}
+
+		$(elem).val(''); // Remove files from DOM
+
+		$("#upload-menu").addClass("hidden");
+
+		if (!FileModel.uploadRunning) {
+			$("#upload-percent, #upload-filename, #upload-title").text('');
+			$("#upload").removeClass("hidden");
+			FileModel.uploadRunning = true;
+			window.onbeforeunload = Util.refreshWarning();
+			FileModel.upload();
+		}
 	},
 
 	upload: function() {
@@ -1561,7 +1556,7 @@ var FileModel = {
 				}, 1000);
 			}
 			else {
-				FileModel.finishUpload();
+				FileModel.uploadFinish();
 			}
 		}
 
@@ -1573,6 +1568,22 @@ var FileModel = {
 		fd.append('token', token);
 		fd.append(0, file);
 		xhr.send(fd);
+	},
+
+	uploadFinish: function(abort) {
+		if (abort) {
+			Util.notify("Upload aborted", true, false);
+		}
+		FileModel.uploadRunning = false;
+		FileModel.uploadQueue = [];
+		FileModel.uploadBytesLoaded = 0;
+		FileModel.uploadBytesTotal = 0;
+		FileModel.uploadCurrent = 0;
+		FileModel.uploadTotal = 0;
+		FileModel.fetch();
+
+		window.onbeforeunload = null;
+		setTimeout(function() { Util.closeWidget('upload'); }, 5000);
 	},
 
 	zip: function() {

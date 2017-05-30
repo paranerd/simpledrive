@@ -182,7 +182,6 @@ var Util = {
 		}
 		else {
 			$("#" + id).removeClass("hidden");
-			$(window).resize();
 		}
 	},
 
@@ -301,7 +300,6 @@ var Util = {
 		if (autohide) {
 			setTimeout(function() { Util.closePopup('notification'); }, 3000);
 		}
-		$(window).resize();
 	},
 
 	refreshWarning: function() {

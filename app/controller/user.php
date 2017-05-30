@@ -17,7 +17,7 @@ class User_Controller {
 
 	public $required = array(
 		'get'			=> array('user'),
-		'create'		=> array('user'),
+		'create'		=> array('user', 'pass', 'admin'),
 		'delete'		=> array('user'),
 		'quota'			=> array('user'),
 		'changepw'		=> array('currpass', 'newpass'),

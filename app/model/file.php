@@ -335,6 +335,8 @@ class File_Model {
 			$files = $this->db->cache_children($file['id'], $this->uid, $file['ownerid']);
 		}
 
+		file_put_contents(LOG, print_r($files, true) . "\n", FILE_APPEND);
+
 		return array('files' => $files, 'hierarchy' => $parents);
 	}
 

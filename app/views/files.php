@@ -123,12 +123,12 @@ if (!$public && !$user) {
 			<span class="close">&times;</span>
 		</div>
 		<div class="content-header">
-			<span class="col0 checkbox"><span id="fSelect" class="checkbox-box"></span></span>
-			<span class="col1"><span><?php echo $lang['name']; ?> </span><span id="file-name-ord" class="order-direction"></span></span>
-			<span class="col2"><span><?php echo $lang['owner']; ?></span><span id="file-owner-ord" class="order-direction"></span></span>
-			<span class="col3"><span><?php echo $lang['type']; ?> </span><span id="file-type-ord" class="order-direction"></span></span>
-			<span class="col4"><span><?php echo $lang['size']; ?> </span><span id="file-size-ord" class="order-direction"></span></span>
-			<span class="col5"><span id="file-edit-ord" class="order-direction"></span><span><?php echo $lang['edit']; ?> </span></span>
+			<span class="col0 checkbox"><span id="checker" class="checkbox-box"></span></span>
+			<span class="col1" data-sortby="name"><span><?php echo $lang['name']; ?> </span><span id="file-name-ord" class="order-direction"></span></span>
+			<span class="col2" data-sortby="owner"><span><?php echo $lang['owner']; ?></span><span id="file-owner-ord" class="order-direction"></span></span>
+			<span class="col3" data-sortby="type"><span><?php echo $lang['type']; ?> </span><span id="file-type-ord" class="order-direction"></span></span>
+			<span class="col4" data-sortby="size"><span><?php echo $lang['size']; ?> </span><span id="file-size-ord" class="order-direction"></span></span>
+			<span class="col5" data-sortby="edit"><span id="file-edit-ord" class="order-direction"></span><span><?php echo $lang['edit']; ?> </span></span>
 		</div>
 
 		<div id="files" class="content"></div>

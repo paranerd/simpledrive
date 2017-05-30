@@ -98,6 +98,7 @@ h2 {
 
 .popup .menu li:hover {
 	border-left: 4px solid #2e8b5e;
+	background-color: #eee;
 }
 
 .notification-info {
@@ -258,10 +259,6 @@ h2 {
 
 /* General - Content - Grid */
 
-.grid .col1 {
-	background-color: rgba(0,0,0,0.3);
-}
-
 .grid .selected .thumbnail {
 	color: white;
 	background-color: #2e8b5e !important;
@@ -283,7 +280,9 @@ body.light, body.light a {
 }
 
 .light .menu li:hover, .light li a:hover {
-	background-color: #eee;
+	/*background-color: #eee;*/
+	color: #2e8b5e;
+	font-family: robotoregular, Arial;
 }
 
 .light select {
@@ -327,16 +326,17 @@ body.light, body.light a {
 
 /* Light - Header */
 
-.light #header {
-	background-color: #2e8b5e;
+.light #header, .light #header a {
+	color: #333;
 }
 
-.light #header, .light #header a {
-	color: white;
+.light #logo a {
+	color: #2e8b5e !important;
 }
 
 .light #logo {
-	border-right: 1px solid #ccc;
+	/*border-right: 1px solid #ccc;*/
+	background: #f9f9f9;
 }
 
 .light #logo .back:hover {
@@ -344,27 +344,24 @@ body.light, body.light a {
 	color: #555 !important;
 }
 
-.light .path-element, .light .path-seperator {
-	color: rgba(255,255,255,0.6);
+.light .path-element, .light .path-separator {
+	color: #999;
 }
 
-.light .path-current {
-	color: white;
-}
-
-.light .path-element:not(.path-seperator):hover {
-	color: white;
+.light .path-current, .light .path-element:not(.path-separator):hover {
+	color: #333;
 }
 
 /* Light - Sidebar */
 
 .light #sidebar {
-	border-right: 1px solid #ccc;
+	background: #f9f9f9;
+	/*border-right: 1px solid #ccc;*/
 }
 
 .light .focus, .light .focus a {
 	color: #2e8b5e !important;
-	background-color: #eee;
+	/*background-color: #eee;*/
 }
 
 .light .widget {
@@ -394,12 +391,13 @@ body.light, body.light a {
 
 .light .item {
 	border: 0px solid transparent;
-	border-bottom: 1px solid #e0e0e0;
+	/*border-bottom: 1px solid #e0e0e0;*/
+	border-bottom: 1px solid #e6e8eb;
 	background-color: rgba(0,0,0,0);
 }
 
 .light .thumbnail {
-	color: #8c8c8c;
+	color: #555;
 	border: 2px solid white;
 }
 
@@ -416,7 +414,8 @@ body.light, body.light a {
 /* Light - Content - List */
 
 .light .content-header {
-	border-bottom: 1px solid #bbb;
+	/*border-bottom: 1px solid #bbb;*/
+	border-bottom: 1px solid #e6e8eb;
 }
 
 .light .filter {
@@ -444,7 +443,7 @@ body.light, body.light a {
 /* Light - Content - Grid */
 
 .light .grid .item {
-	color: white;
+	color: #555;
 }
 
 .light .grid .thumbnail {
@@ -532,15 +531,11 @@ body.light, body.light a {
 	background-color: #555;
 }
 
-.dark .path-element, .dark .path-seperator {
+.dark .path-element, .dark .path-separator {
 	color: #555;
 }
 
-.dark .path-element:not(.path-seperator):hover {
-	color: #b3b3b3;
-}
-
-.dark .path-current {
+.dark .path-current, .dark .path-element:not(.path-separator):hover {
 	color: #b3b3b3;
 }
 
