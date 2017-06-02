@@ -506,7 +506,12 @@ var FileView = {
 		simpleScroll.init('files');
 		FileView.view = (view) ? view : "files";
 		$("#username").html(Util.escape(username) + " &#x25BF");
+		FileView.enableLazyLoad();
 
+		$(window).resize();
+	},
+
+	enableLazyLoad: function() {
 		// Enable lazyloading of thumbnail images
 		var ssc = document.getElementById('simpleScrollContainer0');
 		ssc.addEventListener('scroll', function() {
@@ -517,8 +522,6 @@ var FileView = {
 				FileView.setImgthumbnail(0, FileModel.requestID);
 			}, 500);
 		});
-
-		$(window).resize();
 	},
 
 	openGallery: function() {
@@ -589,16 +592,18 @@ var FileView = {
 				thumbnail.appendChild(shareIcon);
 			}
 
-			// Filename
+			$("#item" + i).append('<span class="item-elem col1">' + Util.escape(item.filename) + '</span>');
+
+			/*// Filename
 			var filename = document.createElement("span");
 			filename.className = "item-elem col1";
 			listItem.appendChild(filename);
-			filename.innerHTML = Util.escape(item.filename);
+			filename.innerHTML = Util.escape(item.filename);*/
 
 			// Owner
 			var owner = document.createElement("span");
 			owner.className = "item-elem col2";
-			owner.innerHTML = (item.owner != username) ? Util.escape(item.owner) : username;
+			owner.innerHTML = item.owner;
 			listItem.appendChild(owner);
 
 			// Type
@@ -752,9 +757,11 @@ var FileView = {
 	/**
 	 * Highlights all selected elements in the fileview
 	 */
-	updateSelections: function(checkboxClicked) {
-		var count = FileModel.getSelectedCount();
+	updateSelections: function() {
+		// Reset all selected status
 		$(".item").removeClass("selected");
+
+		var count = FileModel.getSelectedCount();
 
 		if (count == 0) {
 			var filecount = FileModel.getFiles().length;
@@ -763,16 +770,16 @@ var FileView = {
 		}
 		else {
 			var size = 0;
-			var allSel = FileModel.getAllSelected();
-			for (var i in allSel) {
-				if (allSel[i].type != "folder") {
-					size += allSel[i].size;
+			var selected = FileModel.getAllSelected();
+			for (var i in selected) {
+				if (selected[i].type != "folder") {
+					size += selected[i].size;
 				}
 				$("#item" + i).addClass("selected");
 			}
-			var files = (count > 1) ? "files" : "file";
-			var postfix = (size > 0) ? " (" + Util.byteToString(size) + ")" : "";
-			$("#foldersize").text(count + " " + files + postfix);
+			var fileString = (count > 1) ? "files" : "file";
+			var sizeString = (size > 0) ? " (" + Util.byteToString(size) + ")" : "";
+			$("#foldersize").text(count + " " + fileString + sizeString);
 		}
 
 		// Update selection-checkbox
@@ -919,12 +926,12 @@ var FileModel = {
 			data: {token: token, target: FileModel.id, type: $("#create-type").val(), filename: $("#create-input").val()},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.busy(false);
 			FileModel.fetch();
 			Util.closePopup('create');
 		}).fail(function(xhr, statusText, error) {
-			Util.busy(false);
 			Util.showFormError('create', Util.getError(xhr));
+		}).always(function() {
+			Util.busy(false);
 		});
 	},
 
@@ -973,14 +980,13 @@ var FileModel = {
 			type: 'post',
 			data: {token: token, target: JSON.stringify(FileModel.getAllSelectedIDs())}
 		}).done(function(data, statusText, xhr) {
-			Util.busy(false);
 			$('<form id="download-form" class="hidden" action="api/files/get" method="post"><input name="token"></input><input name="target"></input></form>').appendTo('body');
 			$('[name="token"]').val(token);
 			$('[name="target"]').val(JSON.stringify(FileModel.getAllSelectedIDs()));
 			$('#download-form').submit();
-			FileModel.unselectAll();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
 			Util.busy(false);
 			FileModel.unselectAll();
 		});
@@ -1011,7 +1017,6 @@ var FileModel = {
 			data: {token: token, target: FileModel.id, mode: FileView.view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.busy(false);
 			FileModel.all = data.msg.files;
 			FileModel.filtered = FileModel.all;
 			FileModel.hierarchy = data.msg.hierarchy;
@@ -1028,6 +1033,7 @@ var FileModel = {
 			}
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
 			Util.busy(false);
 		});
 	},
@@ -1068,7 +1074,7 @@ var FileModel = {
 	},
 
 	getCurrentFolder: function() {
-		var filename = (FileModel.hierarchy.length == 1) ? 'Homefolder' : FileModel.hierarchy[FileModel.hierarchy.length -1].filename;
+		var filename = (FileModel.hierarchy.length <= 1) ? 'Homefolder' : FileModel.hierarchy[FileModel.hierarchy.length -1].filename;
 		var size = 0;
 		var edit = 0;
 
@@ -1098,11 +1104,11 @@ var FileModel = {
 			data: {token: token, target: elem.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.busy(false);
 			Util.notify(data.msg, false, false);
 		}).fail(function(xhr, statusText, error) {
-			Util.busy(false);
 			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
+			Util.busy(false);
 		});
 	},
 
@@ -1189,11 +1195,10 @@ var FileModel = {
 			data: {token: token, source: JSON.stringify(FileModel.getAllSelectedIDs()), target: target, trash: 'false'},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.busy(false);
 			Util.notify(data.msg, true);
-			FileModel.fetch();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), false, true);
+		}).always(function() {
 			Util.busy(false);
 			FileModel.fetch();
 		});
@@ -1276,12 +1281,11 @@ var FileModel = {
 			data: {token: token, source: JSON.stringify(FileModel.clipboard), target: FileModel.id, trash: 'false'},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.busy(false);
-			FileModel.clipboardClear();
-			FileModel.fetch();
+			// Something
 		}).fail(function(xhr, statusText, error) {
-			Util.busy(false);
 			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
+			Util.busy(false);
 			FileModel.clipboardClear();
 			FileModel.fetch();
 		});
@@ -1299,12 +1303,12 @@ var FileModel = {
 				data: {token: token, newFilename: newFilename, target: FileModel.getFirstSelected().item.id},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
-				Util.busy(false);
 				FileView.closeRename();
 				FileModel.fetch();
 			}).fail(function(xhr, statusText, error) {
-				Util.busy(false);
 				Util.notify(Util.getError(xhr), true, true);
+			}).always(function() {
+				Util.busy(false);
 			});
 		}
 		$("#renameinput").val("");
@@ -1320,11 +1324,11 @@ var FileModel = {
 			data: {token: token, target: FileModel.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.busy(false);
 			FileModel.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.busy(false);
 			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
+			Util.busy(false);
 		});
 	},
 
@@ -1336,12 +1340,12 @@ var FileModel = {
 			data: {token: token, target: JSON.stringify(FileModel.getAllSelectedIDs())},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.busy(false);
-			FileModel.fetch();
+			Util.notify("Successfully removed", true, false);
 		}).fail(function(xhr, statusText, error) {
+			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
 			Util.busy(false);
 			FileModel.fetch();
-			Util.notify(Util.getError(xhr), true, true);
 		});
 	},
 
@@ -1354,12 +1358,12 @@ var FileModel = {
 			data: {token: token, target: JSON.stringify(FileModel.getAllSelectedIDs())},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.busy(false);
 			Util.notify(data.msg, true);
 			FileModel.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.busy(false);
 			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
+			Util.busy(false);
 		});
 	},
 
@@ -1372,11 +1376,22 @@ var FileModel = {
 		}
 	},
 
-	selectAll: function(checkboxClicked) {
+	unselect: function(id) {
+		delete FileModel.selected[id];
+		FileView.showFileInfo(FileModel.getFirstSelected().item);
+		FileView.updateSelections();
+	},
+
+	selectAll: function() {
 		for (var i = 0; i < Object.keys(FileModel.filtered).length; i++) {
 			FileModel.selected[i] = FileModel.filtered[i];
 		}
-		FileView.updateSelections(checkboxClicked);
+		FileView.updateSelections();
+	},
+
+	unselectAll: function() {
+		FileModel.selected = {};
+		FileView.updateSelections();
 	},
 
 	selectNext: function() {
@@ -1410,21 +1425,32 @@ var FileModel = {
 				data: {token: token, target: target.id, mail: mail, key: key, userto: user, pubAcc: pubAcc, write: write},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
-				Util.busy(false);
+				var msg = (pubAcc) ? data.msg : target.filename + " shared with " + user;
+				Util.notify(msg, !pubAcc);
 				Util.closePopup('share');
-
-				if (pubAcc) {
-					Util.notify(data.msg, false);
-				}
-				else {
-					Util.notify(target.filename + " shared with " + user, true);
-				}
 				FileModel.fetch();
 			}).fail(function(xhr, statusText, error) {
-				Util.busy(false);
 				Util.showFormError('share', Util.getError(xhr));
+			}).always(function() {
+				Util.busy(false);
 			});
 		}
+	},
+
+	unshare: function() {
+		Util.busy(true);
+		$.ajax({
+			url: 'api/files/unshare',
+			type: 'post',
+			data: {token: token, target: FileModel.getFirstSelected().item.id},
+			dataType: "json"
+		}).done(function(data, statusText, xhr) {
+			FileModel.fetch();
+		}).fail(function(xhr, statusText, error) {
+			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
+			Util.busy(false);
+		});
 	},
 
 	sortBy: function(key, order) {
@@ -1456,38 +1482,11 @@ var FileModel = {
 
 	toggleSelection: function() {
 		if (Object.keys(FileModel.selected).length > 0) {
-			FileModel.unselectAll(true);
+			FileModel.unselectAll();
 		}
 		else {
-			FileModel.selectAll(true);
+			FileModel.selectAll();
 		}
-	},
-
-	unshare: function() {
-		Util.busy(true);
-		$.ajax({
-			url: 'api/files/unshare',
-			type: 'post',
-			data: {token: token, target: FileModel.getFirstSelected().item.id},
-			dataType: "json"
-		}).done(function(data, statusText, xhr) {
-			Util.busy(false);
-			FileModel.fetch();
-		}).fail(function(xhr, statusText, error) {
-			Util.busy(false);
-			Util.notify(Util.getError(xhr), true, true);
-		});
-	},
-
-	unselect: function(id) {
-		delete FileModel.selected[id];
-		FileView.showFileInfo(FileModel.getFirstSelected().item);
-		FileView.updateSelections();
-	},
-
-	unselectAll: function(checkboxClicked) {
-		FileModel.selected = {};
-		FileView.updateSelections(checkboxClicked);
 	},
 
 	uploadAdd: function(elem) {
@@ -1594,11 +1593,11 @@ var FileModel = {
 			data: {token: token, target: FileModel.id, source: JSON.stringify(FileModel.getAllSelectedIDs())},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.busy(false);
 			FileModel.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.busy(false);
 			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
+			Util.busy(false);
 		});
 	}
 }

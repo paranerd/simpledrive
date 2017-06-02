@@ -373,7 +373,7 @@ var Util = {
 		date = date.split(".");
 		var newDate = date[1] + "," + date[0] + "," + date[2];
 		return (new Date(newDate).getTime()) / 1000;
-	}
+	},
 }
 
 Util.init();

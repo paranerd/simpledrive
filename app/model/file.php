@@ -303,6 +303,9 @@ class File_Model {
 	}
 
 	public function children($target, $mode, $recursive = false, $need_md5 = false) {
+		/*for ($i = 0; $i < 3; $i++) {
+			$this->db->log_write($this->uid, 1, "children", "This is a msg");
+		}*/
 		$start = microtime(true);
 		$file = $this->get_cached($target, self::$PERMISSION_READ);
 

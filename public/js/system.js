@@ -546,7 +546,9 @@ var LogModel = {
 
 	filter: function(needle) {
 		LogModel.filtered = Util.filter(LogModel.log, needle, ['msg', 'source', 'user']);
-		SystemView.displayLog(LogModel.filtered);
+		if (SystemView.view == "log") {
+			SystemView.displayLog(LogModel.filtered);
+		}
 	},
 
 	closeFilter: function() {
@@ -682,7 +684,9 @@ var UsersModel = {
 
 	filter: function(needle) {
 		UsersModel.filtered = Util.filter(UsersModel.all, needle, ['username']);
-		SystemView.displayUsers(UsersModel.filtered);
+		if (SystemView.view == "users") {
+			SystemView.displayUsers(UsersModel.filtered);
+		}
 	},
 
 	getQuota: function(username, id) {
