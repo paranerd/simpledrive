@@ -35,7 +35,7 @@
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 
-<body class="<?php echo $color; ?>">
+<body class="dark">
 	<!-- Header -->
 	<div id="header">
 		<!-- Title -->
