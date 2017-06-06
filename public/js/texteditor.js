@@ -43,11 +43,7 @@ var EditorController = {
 				case 9: // Tab
 					e.preventDefault();
 
-					var pos = $("#texteditor").prop('selectionStart');
-					var v = $("#texteditor").val();
-					$("#texteditor").val(v.substring(0, pos) + '    ' + v.substring(pos, v.length));
-					EditorModel.changed = true;
-					$("#doc-savestatus").text("*");
+					EditorModel.insertTab();
 					break;
 			}
 		});
@@ -90,6 +86,16 @@ var EditorModel = {
 	init: function(file) {
 		EditorModel.file = file;
 		EditorModel.load();
+	},
+
+	insertTab: function() {
+		var pos = $("#texteditor").prop('selectionStart');
+		var v = $("#texteditor").val();
+		$("#texteditor").focus();
+		$("#texteditor").val(v.substring(0, pos) + '    ' + v.substring(pos, v.length));
+		EditorModel.changed = true;
+		$("#doc-savestatus").text("*");
+		Util.setSelectionRange($("#texteditor"), pos + 4, pos + 4);
 	},
 
 	autosave: function() {

@@ -374,6 +374,26 @@ var Util = {
 		var newDate = date[1] + "," + date[0] + "," + date[2];
 		return (new Date(newDate).getTime()) / 1000;
 	},
+
+	setSelectionRange: function(input, start, end) {
+		$(input).each(function() {
+			if('selectionStart' in this) {
+				console.log("first");
+				this.selectionStart = start;
+				this.selectionEnd = end;
+			} else if(input.setSelectionRange) {
+				console.log("second");
+				this.setSelectionRange(start, end);
+			} else if(input.createTextRange) {
+				console.log("third");
+				var range = this.createTextRange();
+				range.collapse(true);
+				range.moveEnd('character', end);
+				range.moveStart('character', start);
+				range.select();
+			}
+		});
+	},
 }
 
 Util.init();
