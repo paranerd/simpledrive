@@ -99,7 +99,7 @@ var UserController = {
 
 var UserView = {
 	init: function() {
-		$("#username").html(Util.escape(username) + " &#x25BE");
+		$("#username").html(Util.escape(username) + " &#x25BF");
 		$(window).resize();
 	}
 }

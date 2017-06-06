@@ -219,7 +219,7 @@ var SystemView = {
 	init: function(view) {
 		SystemView.view = view;
 
-		$("#username").html(Util.escape(username) + " &#x25BE");
+		$("#username").html(Util.escape(username) + " &#x25BF");
 
 		$(window).resize();
 	},

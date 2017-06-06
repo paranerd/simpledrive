@@ -97,8 +97,9 @@ h2 {
 }
 
 .popup .menu li:hover {
+	color: white;
 	border-left: 4px solid #2e8b5e;
-	background-color: #eee;
+	background: rgba(0,0,0,0.1);
 }
 
 .notification-info {
@@ -318,6 +319,7 @@ body.light, body.light a {
 
 .light hr {
 	background-color: #bbb;
+	background: #666;
 }
 
 .light #busy {
@@ -335,13 +337,12 @@ body.light, body.light a {
 }
 
 .light #logo {
-	/*border-right: 1px solid #ccc;*/
-	background: #f9f9f9;
+	background: #303030;
 }
 
 .light #logo .back:hover {
-	background-color: #eee;
-	color: #555 !important;
+	background-color: #202020;
+	color: #2e8b5e !important;
 }
 
 .light .path-element, .light .path-separator {
@@ -355,23 +356,18 @@ body.light, body.light a {
 /* Light - Sidebar */
 
 .light #sidebar {
-	background: #f9f9f9;
-	/*border-right: 1px solid #ccc;*/
+	background: #303030;
+	color: #999;
 }
 
 .light .focus, .light .focus a {
 	color: #2e8b5e !important;
-	/*background-color: #eee;*/
 }
 
 .light .widget {
-	background-color: #eee;
-	border-top: 1px solid #bbb;
-	border-bottom: 1px solid #bbb;
-}
-
-.light #sidebar-footer {
-	border-top: 1px solid lightgrey;
+	background: rgba(0,0,0,0.2);
+	border-top: 1px solid #666;
+	border-bottom: 1px solid #666;
 }
 
 .light .trashact:hover {
@@ -488,9 +484,14 @@ body.light, body.light a {
 	box-shadow: 0 3px 9px rgba(0,0,0,.5);
 }
 
-.dark .menu li:hover, .dark li a:hover {
+.dark .popup .menu li:hover, .dark .popup .menu li a:hover {
 	color: white;
 	background-color: #555;
+}
+
+.dark .menu li:hover, .dark li a:hover {
+	color: #2e8b5e;
+	font-family: robotoregular, Arial;
 }
 
 .dark .close:hover {
@@ -520,7 +521,7 @@ body.light, body.light a {
 }
 
 .dark #logo {
-	border-right: 1px solid #555;
+	background: #252525;
 }
 
 .dark #logo, .dark #logo a {
@@ -528,7 +529,7 @@ body.light, body.light a {
 }
 
 .dark #logo .back:hover {
-	background-color: #555;
+	background-color: #202020;
 }
 
 .dark .path-element, .dark .path-separator {
@@ -542,8 +543,8 @@ body.light, body.light a {
 /* Dark - Sidebar */
 
 .dark #sidebar {
-	background-color: #303030;
-	border-right: 1px solid #555;
+	background-color: #252525;
+	/*border-right: 1px solid #555;*/
 }
 
 .dark .trashact:hover {
@@ -552,13 +553,14 @@ body.light, body.light a {
 
 .dark .focus, .dark .focus a {
 	color: #2e8b5e !important;
-	background-color: #404040;
+	/*background-color: #404040;*/
 }
 
 .dark .widget {
 	border-top: 1px solid #555;
 	border-bottom: 1px solid #555;
-	background-color: #393939;
+	/*background-color: #393939;*/
+	background: rgba(0,0,0,0.1);
 }
 
 /* Dark - Content */

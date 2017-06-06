@@ -10,10 +10,10 @@
 $id			= (sizeof($args) > 0) ? array_shift($args) : "0";
 $public		= ($section == 'pub');
 $username 	= ($user) ? $user['username'] : '';
-$admin 		= ($user) ? $user['admin'] : false;
-$color 		= ($user) ? $user['color'] : 'light';
+$admin		= ($user) ? $user['admin'] : false;
+$color		= ($user) ? $user['color'] : 'light';
 $fileview 	= ($user) ? $user['fileview'] : 'list';
-$token = (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
+$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
 
 if (!$public && !$user) {
 	header('Location: ' . $base . 'core/login');

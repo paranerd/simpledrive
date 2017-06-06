@@ -269,8 +269,8 @@ hr {
 
 .close {
 	position: absolute;
-	top: 10px;
-	right: 10px;
+	top: 5px;
+	right: 5px;
 	font-family: sans-serif;
 	font-size: 1.5rem;
 	cursor: pointer;
@@ -381,9 +381,8 @@ label {
 /* Header */
 
 #header {
-  /*height: 80px;*/
 	height: 100px;
-  flex: 0 0 auto;
+	flex: 0 0 auto;
 }
 
 #logo {
@@ -391,7 +390,6 @@ label {
 	height: 100%;
 	font-size: 1.7rem;
 	cursor: pointer;
-	/*line-height: 80px;*/
 	line-height: 100px;
 	float: left;
 }
@@ -412,17 +410,9 @@ label {
 	white-space: nowrap;
 }
 
-#logo a:not(.back) {
-	/*margin-left: 20px;*/
-}
-
-#logo a:not(.back) .icon {
-	/*display: none;*/
-}
-
 #path {
 	position: relative;
-	left: 20px;
+	left: 40px;
 }
 
 .path-element {
@@ -471,7 +461,7 @@ label {
 
 #sidebar .icon {
 	width: 54px;
-	font-size: 0.7rem;
+	font-size: 0.8rem;
 }
 
 #sidebar .menu li {
@@ -932,14 +922,6 @@ form.popup, #confirm {
 @media screen and (max-width: 1000px) {
 	#logo, #sidebar, #sidebar .menu li {
 		width: 54px !important;
-	}
-
-	#logo a {
-		margin-left: 0 !important;
-	}
-
-	#logo .icon {
-		display: inline-block !important;
 	}
 
 	#foldersize, .widget * {
