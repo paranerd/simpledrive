@@ -16,9 +16,8 @@ class Vault_Controller {
 	protected $valid_sections	= array('status');
 
 	public $required = array(
-		'get'		=> array('id'),
-		'create'		=> array('title', 'type'),
-		'delete'		=> array('id'),
+		'sync'			=> array('vault'),
+		'changepw'		=> array('currpass', 'newpass'),
 	);
 
 	public function __construct($token) {
@@ -37,18 +36,14 @@ class Vault_Controller {
 	}
 
 	public function get() {
-		return $this->model->get($_REQUEST['id']);
+		return $this->model->get();
 	}
 
-	public function getall() {
-		return $this->model->get_all();
+	public function sync() {
+		return $this->model->sync($_REQUEST['vault']);
 	}
 
-	public function create() {
-		return $this->model->create($_REQUEST['title'], $_REQUEST['type']);
-	}
-
-	public function delete() {
-		return $this->model->delete($_REQUEST['id']);
+	public function changepw() {
+		return $this->model->change_password($_REQUEST['currpass'], $_REQUEST['newpass']);
 	}
 }

@@ -71,6 +71,7 @@
 			<?php if ($admin) : ?>
 			<li><a href="system"><span class="icon icon-admin"></span>System</a></li>
 			<?php endif; ?>
+			<li><a href="vault"><span class="icon icon-key"></span>Vault</a></li>
 			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><?php echo $lang['info']; ?></li>
 			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><?php echo $lang['logout']; ?></a></li>
 		</ul>
@@ -105,8 +106,9 @@
 		<div id="info-footer">paranerd 2013-2017 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 	</div>
 
-	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
-	<script type="text/javascript" src="public/js/util.js"></script>
-	<script type="text/javascript" src="public/js/texteditor.js"></script>
+	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript" src="public/js/util/util.js"></script>
+
+	<script type="text/javascript" src="public/js/core/texteditor.js"></script>
 </body>
 </HTML>

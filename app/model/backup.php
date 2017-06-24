@@ -29,9 +29,10 @@ class Backup_Model {
 		$this->token			= ($this->user) ? $_SERVER['DOCUMENT_ROOT'] . $this->config['installdir'] . 'config/googledrive/access-token_' . $this->username . '.json' : "";
 		$this->temp				= ($this->user) ? $this->config['datadir'] . $this->username . "/tmp/" : "";
 		$this->lock				= ($this->user) ? $this->config['datadir'] . $this->username . "/lock/backup" : "";
+		$this->userdir			= ($this->user) ? $this->config['datadir'] . $this->username . "/files/" : "";
 
 		$this->counter			= 0;
-		$this->key				= null;
+		$this->secret				= null;
 		$this->enc_filename		= true;
 	}
 
@@ -82,7 +83,7 @@ class Backup_Model {
 			"Content-Type: application/json; charset=UTF-8"
 		);
 
-		$url = "https://www.googleapis.com/drive/v3/files?q=name+contains+'" . $title . "'+and+'" . $parent_id . "'+in+parents&fields=files(description%2Cid)";
+		$url = "https://www.googleapis.com/drive/v3/files?q=name+contains+'" . $title . "'+and+'" . $parent_id . "'+in+parents&fields=files(description%2Cid%2Cname)";
 
 		$response = $this->execute_request($url, $header, null, 'GET');
 
@@ -93,6 +94,10 @@ class Backup_Model {
 		}
 
 		if ($response['body'] && array_key_exists('files', $response['body']) && !empty($response['body']['files'])) {
+			if (strpos($response['body']['files'][0]['name'], $title) !== 0) {
+				return false;
+			}
+
 			$file = array(
 				'id'			=> $response['body']['files'][0]['id'],
 				'description'	=> (array_key_exists('description', $response['body']['files'][0])) ? $response['body']['files'][0]['description'] : ""
@@ -106,8 +111,6 @@ class Backup_Model {
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
 		}
-
-		$path = $this->config['datadir'] . $this->username . "/";
 
 		// Check if backup is already running
 		if (file_exists($this->lock)) {
@@ -134,8 +137,8 @@ class Backup_Model {
 			throw new Exception('An error occurred', '500');
 		}
 
-		$this->key = $backup_info['pass'];
-		$this->enc_filename = $backup_info['enc_filename'];
+		$this->secret = $backup_info['pass'];
+		$this->enc_filename = true;// $backup_info['enc_filename'];
 
 		// Prevent backup process to be started twice
 		if (!file_exists($this->config['datadir'] . $this->username . "/.lock")) {
@@ -145,7 +148,7 @@ class Backup_Model {
 
 		// Start backup
 		set_time_limit(0);
-		$this->traverse($path, $folder_id);
+		$this->traverse($this->userdir, $folder_id);
 
 		// Release lock when finished
 		if (file_exists($this->lock)) {
@@ -165,7 +168,7 @@ class Backup_Model {
 			}
 
 			if (is_readable($path . $file) && substr($file, 0, 1) !== '.') {
-				$online_filename = ($this->enc_filename) ? hash('sha256', $file) . Crypto::encrypt($file, $this->key) : $file;
+				$online_filename = ($this->enc_filename) ? hash('sha256', $file) . Crypto::encrypt($file, $this->secret) : hash('sha256', $file) . $file;
 
 				if (!$online_filename) {
 					continue;
@@ -184,11 +187,11 @@ class Backup_Model {
 					}
 				}
 				else {
-					$enc_path = Crypto::encrypt($path . $file, $this->key, true, $this->temp, true);
+					$enc_path = Crypto::encrypt_file($path . $file, $this->secret, true, $this->enc_filename, $this->temp);
 
 					// Upload if file is not online or different from online version
 					if ($enc_path && (!$existing_file || ($existing_file && $existing_file['description'] != hash_file('sha256', $path . $file)))) {
-						$this->upload($enc_path, $parent_id, hash_file('sha256', $path . $file));
+						$this->upload($enc_path, $online_filename, $parent_id, hash_file('sha256', $path . $file));
 					}
 
 					// Delete online file if different from local one
@@ -360,7 +363,7 @@ class Backup_Model {
 		return null;
 	}
 
-	private function create_google_file($path, $parent_id, $description) {
+	private function create_google_file($path, $filename, $parent_id, $description) {
 		$access_token = $this->read_access_token();
 
 		if($access_token == null || !array_key_exists('refresh_token', $access_token)) {
@@ -370,10 +373,10 @@ class Backup_Model {
 		$mime_type = mime_content_type($path);
 
 		$params = array(
-			'title'		=> basename($path),
-			'mimeType'	=> $mime_type,
-			'parents'	=> array(array('kind' => 'drive#parentReference', 'id' => $parent_id)),
-			'description' => $description
+			'title'			=> $filename,
+			'mimeType'		=> $mime_type,
+			'parents'		=> array(array('kind' => 'drive#parentReference', 'id' => $parent_id)),
+			'description'	=> $description
 		);
 
 		$header = array(
@@ -389,7 +392,7 @@ class Backup_Model {
 		// Access token expired, let's get a new one and try again
 		if ($response['code'] == "401" && $this->counter < 1) {
 			$this->refresh_token();
-			return $this->create_google_file($path, $parent_id, $description);
+			return $this->create_google_file($path, $filename, $parent_id, $description);
 		}
 
 		// Error checking
@@ -404,8 +407,8 @@ class Backup_Model {
 		return $response['headers']['location'];
 	}
 
-	private function upload($path, $parent_id = "root", $description = "") {
-		$location				= $this->create_google_file($path, $parent_id, $description);
+	private function upload($path, $filename, $parent_id = "root", $description = "") {
+		$location				= $this->create_google_file($path, $filename, $parent_id, $description);
 		$file_size				= filesize($path) ;
 		$mime_type				= mime_content_type($path);
 		$access_token			= $this->read_access_token();

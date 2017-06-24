@@ -144,13 +144,7 @@ var SystemController = {
 		});
 
 		$(document).on('mousedown', '#users .item', function(e) {
-			UsersModel.select(this.value);
-		});
-
-		$("#content").on('mouseup', function(e) {
-			if (e.which != 3) {
-				$("#contextmenu").addClass("hidden");
-			}
+			UsersModel.list.select(this.value);
 		});
 
 		$("#log-pages").on('change', function() {
@@ -198,17 +192,13 @@ var SystemController = {
 				case 27: // Esc
 					$("#user-quota-total-change-form").remove();
 					Util.closePopup();
-					UsersModel.unselect();
+					UsersModel.list.unselect();
 					LogModel.closeFilter();
 					UsersModel.closeFilter();
 					break;
 			}
 
 			$(".item").removeClass("selected");
-		});
-
-		$(document).on('mousedown', '#content', function(e) {
-			Util.closePopup();
 		});
 	}
 }
@@ -272,6 +262,7 @@ var SystemView = {
 
 	displayLog: function(log) {
 		SystemView.update('log');
+		LogModel.list.setData(log);
 
 		if (LogModel.pageTotal > 0) {
 			$(".content-footer").removeClass("hidden");
@@ -284,13 +275,12 @@ var SystemView = {
 			}
 			$("#log-pages").val(LogModel.pageCurrent);
 		}
-
-		if (log.length == 0) {
-			LogModel.setEmptyView("No entries...");
+		else {
 			$(".content-footer").addClass("hidden");
 		}
-		else {
-			$(".content-footer").removeClass("hidden");
+
+		if (log.length == 0) {
+			LogModel.list.setEmptyView("log", "No entries...");
 		}
 
 		for (var i in log) {
@@ -364,10 +354,10 @@ var SystemView = {
 
 	displayUsers: function(users) {
 		SystemView.update('users');
+		UsersModel.list.setData(users);
 
 		for(var i in users) {
 			var item = users[i];
-			console.log(item);
 
 			var listItem = document.createElement("div");
 			listItem.id = "item" + i;
@@ -382,8 +372,6 @@ var SystemView = {
 
 			var thumbnail = document.createElement('span');
 			var type = (item.admin == "1") ? "admin" : "user";
-			thumbnail.id = "thumbnail" + i;
-			thumbnail.value = i;
 			thumbnail.className = "thumbnail icon-" + type;
 			thumbnailWrapper.appendChild(thumbnail);
 
@@ -404,7 +392,7 @@ var SystemView = {
 			checkbox.value = i;
 			checkbox.className = (item.admin == "1") ? "checkbox-box checkbox-checked" : "checkbox-box";
 			checkbox.addEventListener('click', function() {
-				UsersModel.select(this.value);
+				UsersModel.list.select(this.value);
 				setTimeout(function() {
 					UsersModel.setAdmin();
 				}, 10);
@@ -420,7 +408,7 @@ var SystemView = {
 
 			quotaMax.onclick = function(e) {
 				var id = e.target.id.replace(/[^0-9]/g,'');
-				UsersModel.select(id);
+				UsersModel.list.select(id);
 				UsersModel.showChangeQuota(id);
 			};
 
@@ -518,6 +506,7 @@ var Status = {
 }
 
 var LogModel = {
+	list: new List(),
 	log: [],
 	filtered: [],
 	pageCurrent: 0,
@@ -570,15 +559,6 @@ var LogModel = {
 			});
 		});
 	},
-
-	setEmptyView: function(text) {
-		var empty = document.createElement("div");
-		empty.style.lineHeight = $("#log").height() + "px";
-		empty.className = "empty";
-		empty.innerHTML = text;
-		simpleScroll.append("log", empty);
-		simpleScroll.update();
-	}
 }
 
 var PluginsModel = {
@@ -633,9 +613,9 @@ var PluginsModel = {
 }
 
 var UsersModel = {
+	list: new List(),
 	all: [],
 	filtered: [],
-	selected: {},
 
 	closeFilter: function() {
 		$("#users-filter").addClass("hidden");
@@ -713,7 +693,7 @@ var UsersModel = {
 			$.ajax({
 				url: 'api/user/delete',
 				type: 'post',
-				data: {token: token, user: UsersModel.all[UsersModel.selected]['username']},
+				data: {token: token, user: UsersModel.list.getFirstSelected().item.username},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				UsersModel.fetch();
@@ -723,22 +703,14 @@ var UsersModel = {
 		});
 	},
 
-	select: function(id) {
-		UsersModel.selected = id;
-	},
-
-	unselect: function() {
-		UsersModel.selected = null;
-	},
-
 	setAdmin: function() {
-		var admin = ($("#user-admin" + UsersModel.selected).hasClass('checkbox-checked')) ? 1 : 0;
-		var elem = document.getElementById("user-admin" + UsersModel.selected);
+		var admin = ($("#user-admin" + UsersModel.list.getFirstSelected().id).hasClass('checkbox-checked')) ? 1 : 0;
+		var elem = document.getElementById("user-admin" + UsersModel.list.getFirstSelected().id);
 
 		$.ajax({
 			url: 'api/user/setadmin',
 			type: 'post',
-			data: {token: token, user: UsersModel.all[UsersModel.selected]['username'], enable: admin},
+			data: {token: token, user: UsersModel.list.getFirstSelected().item.username, enable: admin},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true, false);
@@ -748,11 +720,11 @@ var UsersModel = {
 			UsersModel.fetch();
 		});
 
-		UsersModel.unselect();
+		UsersModel.list.unselect();
 	},
 
 	setQuotaMax: function() {
-		var size = ($("#user-quota-total-change").val()) ? $("#user-quota-total-change").val() : $("#user-quota-total" + UsersModel.selected).text();
+		var size = ($("#user-quota-total-change").val()) ? $("#user-quota-total-change").val() : $("#user-quota-total" + UsersModel.list.getFirstSelected().id).text();
 		$("#user-quota-total-change-form").remove();
 
 		if (size != 0 && size != "Unlimited" && !Util.stringToByte(size)) {
@@ -765,7 +737,7 @@ var UsersModel = {
 		$.ajax({
 			url: 'api/user/setquota',
 			type: 'post',
-			data: {token: token, user: UsersModel.all[UsersModel.selected]['username'], value: size},
+			data: {token: token, user: UsersModel.list.getFirstSelected().item.username, value: size},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true, false);
@@ -775,7 +747,7 @@ var UsersModel = {
 			UsersModel.fetch();
 		});
 
-		UsersModel.unselect();
+		UsersModel.list.unselect();
 	},
 
 	create: function() {

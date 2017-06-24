@@ -234,26 +234,6 @@ hr {
 	vertical-align: top;
 }
 
-#busy {
-	position: absolute;
-	right: 20px;
-	bottom: 20px;
-	width: 50px;
-	height: 50px;
-	border-radius: 30px;
-	text-align: center;
-	line-height: 50px;
-	font-family: robotoregular, sans-serif;
-	font-size: 0.9rem;
-	z-index: 103;
-
-	animation-name: flip-animation;
-	animation-duration: 2000ms;
-	transform-origin: 50% 50%;
-	animation-iteration-count: infinite;
-	animation-timing-function: linear;
-}
-
 .error {
 	margin-bottom: 20px;
 	width: 100%;
@@ -291,7 +271,7 @@ label {
 	position: relative;
 	margin-bottom: 10px;
 	font-family: robotolight, sans-serif;
-	font-size: 1.1rem;
+	font-size: 1rem;
 }
 
 #cursorinfo {
@@ -313,6 +293,27 @@ label {
 	line-height: 300px;
 	text-align: center;
   pointer-events: none;
+}
+
+#busy {
+	position: absolute;
+	right: 20px;
+	bottom: 20px;
+	width: 100px;
+	height: 100px;
+	border-radius: 999px;
+	text-align: center;
+	line-height: 100px;
+	z-index: 1003;
+}
+#busy .busy-indicator {
+	position:absolute;
+	width: 100px;
+	height: 100px;
+	animation: rotate 1s infinite linear;
+	top: -4px;
+	left: -4px;
+	border-radius: 999px;
 }
 
 /* General - Checkbox */
@@ -345,7 +346,7 @@ label {
 }
 
 .checkbox-checked:before {
-	content: "\e936";
+	content: "\ea10";
 }
 
 /* General - Menu-item */
@@ -678,7 +679,6 @@ label {
 	padding-left: 1%;
 	padding-right: 1%;
 	width: 98%;
-	padding: none;
 	outline: 0px solid transparent;
 	font-family: monospace;
 	border: none;
@@ -852,7 +852,8 @@ label {
 }
 
 form.popup, #confirm {
-	width: 268px;
+	/*width: 268px;*/
+	width: 350px;
 	padding: 30px;
 }
 
@@ -902,19 +903,9 @@ form.popup, #confirm {
 
 /* Animations */
 
-@keyframes flip-animation {
-	0% { transform: scale(1); }
-	25% { transform: rotateY(-180deg); }
-	75% { transform: rotateY(180deg); }
-	100% { transform: scale(1); }
-}
-
-@keyframes fade-animation {
-	0% { opacity: 0.2; transform: scale(1); }
-	25% { opacity: 0.5; transform: scale(1.1); }
-	50% { opacity: 1; transform: scale(1.2); }
-	75% { opacity: 0.5; transform: scale(1.1); }
-	100% { opacity: 0.2; transform: scale(1); }
+@keyframes rotate {
+	0% {transform: rotate(0deg);}
+	100% {transform: rotate(360deg);}
 }
 
 /* Responsive */

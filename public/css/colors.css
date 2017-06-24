@@ -24,6 +24,10 @@ h2 {
 	outline: 0px solid transparent;
 }
 
+.btn a {
+	color: white !important;
+}
+
 .btn:hover a {
 	color: white;
 }
@@ -183,8 +187,12 @@ h2 {
 }
 
 #busy {
-	border: 2px solid #2e8b5e;
-	color: #2e8b5e;
+	border: 4px solid rgba(200, 200, 200, .25);
+}
+
+#busy .busy-indicator {
+	border: 4px solid transparent;
+	border-top: 4px solid #2e8b5e;
 }
 
 /* General - Sidebar */
@@ -289,6 +297,7 @@ body.light, body.light a {
 .light select {
 	color: #555;
 	border: 1px solid #2e8b5e;
+	background-color: rgba(0,0,0,0);
 }
 
 .light input {

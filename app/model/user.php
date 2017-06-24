@@ -162,10 +162,10 @@ class User_Model {
 		}
 
 		if ($username != $this->username) {
-			$this->db->user_remove($user['id']);
-
-			Util::delete_dir($this->config['datadir'] . $username);
-			return null;
+			if ($this->db->user_remove($user['id'])) {
+				Util::delete_dir($this->config['datadir'] . $username);
+				return null;
+			}
 		}
 
 		throw new Exception('Error deleting user', '500');

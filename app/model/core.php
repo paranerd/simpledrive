@@ -102,7 +102,7 @@ class Core_Model {
 
 	private function create_config($datadir, $db_server, $db_name, $db_user, $db_pass, $mail, $mail_pass) {
 		$config = array(
-			'salt'			=> Crypto::random(64),
+			'salt'			=> Crypto::random_string(64),
 			'installdir'	=> dirname($_SERVER['PHP_SELF']) . "/",
 			'datadir'		=> $datadir,
 			'dbserver'		=> $db_server,

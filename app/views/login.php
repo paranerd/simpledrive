@@ -42,8 +42,9 @@ $demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'
 
 	<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
 
-	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
-	<script type="text/javascript" src="public/js/util.js"></script>
-	<script type="text/javascript" src="public/js/login.js"></script>
+	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript" src="public/js/util/util.js"></script>
+	
+	<script type="text/javascript" src="public/js/core/login.js"></script>
 </body>
 </html>

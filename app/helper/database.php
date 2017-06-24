@@ -427,7 +427,13 @@ class Database {
 			WHERE id = ?'
 		);
 		$stmt->bind_param('i', $uid);
+		//$stmt->execute();
+
 		$stmt->execute();
+		$stmt->store_result();
+		$stmt->fetch();
+
+		return ($stmt->affected_rows != 0);
 	}
 
 	/**
@@ -588,7 +594,7 @@ class Database {
 		$token;
 
 		do {
-			$token = Crypto::random(32);
+			$token = Crypto::random_string(32);
 			$stmt = $this->link->prepare(
 				'SELECT token
 				FROM sd_session
@@ -732,7 +738,7 @@ class Database {
 		$id;
 
 		do {
-			$id = Crypto::random(8);
+			$id = Crypto::random_string(8);
 			$stmt = $this->link->prepare(
 				'SELECT id
 				FROM sd_shares
@@ -1101,7 +1107,7 @@ class Database {
 		$id;
 
 		do {
-			$id = Crypto::random(32);
+			$id = Crypto::random_string(32);
 			$stmt = $this->link->prepare(
 				'SELECT id
 				FROM sd_cache

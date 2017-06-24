@@ -5,7 +5,9 @@
  * @link		http://simpledrive.org
  */
 
-$(window).resize();
+$(document).ready(function() {
+	$(window).resize();
+});
 
 $("#setup").on('submit', function(e) {
 	e.preventDefault();
@@ -36,7 +38,6 @@ function setup() {
 		}).done(function(data, statusText, xhr) {
 			$("#submit").prop('disabled', false);
 			window.location.replace("files");
-			//window.location.href = "files";
 		}).fail(function(xhr, statusText, error) {
 			$("#submit").prop('disabled', false);
 			Util.showFormError('setup', Util.getError(xhr));

@@ -33,6 +33,27 @@ class File_Model {
 		$this->user			= ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid			= ($this->user) ? $this->user['id'] : self::$PUBLIC_USER_ID;
 		$this->username		= ($this->user) ? $this->user['username'] : "";
+
+		$this->init();
+	}
+
+	private function init() {
+		if ($this->username) {
+			$base = $this->config['datadir'] . $this->username;
+			$dirs = array(
+				self::$FILES,
+				self::$TRASH,
+				self::$TEMP,
+				self::$THUMB,
+				self::$LOCK
+			);
+
+			foreach ($dirs as $dir) {
+				if (!file_exists($base . $dir)) {
+					mkdir($base . $dir, 0777, true);
+				}
+			}
+		}
 	}
 
 	/**
@@ -303,9 +324,11 @@ class File_Model {
 	}
 
 	public function children($target, $mode, $recursive = false, $need_md5 = false) {
-		/*for ($i = 0; $i < 3; $i++) {
-			$this->db->log_write($this->uid, 1, "children", "This is a msg");
-		}*/
+		//$enc = Crypto::encrypt("WorkeZz", "secret", true);
+		//file_put_contents(LOG, "enc: " . $enc . "\n", FILE_APPEND);
+		//$dec = Crypto::decrypt($enc, "secret");
+		//file_put_contents(LOG, "dec: " . $dec . "\n", FILE_APPEND);
+
 		$start = microtime(true);
 		$file = $this->get_cached($target, self::$PERMISSION_READ);
 
@@ -337,8 +360,6 @@ class File_Model {
 		else {
 			$files = $this->db->cache_children($file['id'], $this->uid, $file['ownerid']);
 		}
-
-		file_put_contents(LOG, print_r($files, true) . "\n", FILE_APPEND);
 
 		return array('files' => $files, 'hierarchy' => $parents);
 	}

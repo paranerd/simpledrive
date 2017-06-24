@@ -8,22 +8,33 @@
  */
 
 class Vault_Model {
-	static $TEMP				= '/tmp/';
 	static $VAULT				= '/vault/';
-	static $VAULT_FILE	= 'vault';
+	static $VAULT_FILE			= 'vault';
 
 	public function __construct($token) {
 		$this->config	= json_decode(file_get_contents('config/config.json'), true);
 		$this->token	= $token;
 		$this->db		= Database::getInstance();
 		$this->user		= $this->db->user_get_by_token($token);
-		$this->uid		= '1'; //($this->user) ? $this->user['id'] : 0;
-		$this->username	= 'paranerd'; // ($this->user) ? $this->user['username'] : "";
+		$this->uid		= ($this->user) ? $this->user['id'] : 0;
+		$this->username	= ($this->user) ? $this->user['username'] : "";
 
-		$this->create_vault();
+		//$this->create_demo_vault();
+		$this->init();
 	}
 
-	private function create_vault() {
+	private function init() {
+		if ($this->username) {
+			if (!file_exists($this->config['datadir'] . $this->username . self::$VAULT)) {
+				mkdir($this->config['datadir'] . $this->username . self::$VAULT, 0777, true);
+			}
+			if (!file_exists($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE)) {
+				touch($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE);
+			}
+		}
+	}
+
+	private function create_demo_vault() {
 		$vault = $this->config['datadir'] . $this->username . self::$VAULT;
 
 		if ($this->username != "" && !file_exists($vault)) {
@@ -32,37 +43,38 @@ class Vault_Model {
 
 		$first_entry = array(
 			array(
-				'id'				=> '0',
-				'title'			=> 'Amazon',
+				'title'		=> 'Amazon',
 				'category'	=> 'Shopping',
-				'type'			=> 'website',
-				'icon'			=> 'amazon',
-				'edit'			=> time(),
-				'user'			=> 'john',
-				'pass'			=> '12345pass',
-				'note'			=> 'This is a note',
-				'edit'			=> '1234567890'
+				'type'		=> 'website',
+				'url'		=> 'https://amazon.de',
+				'icon'		=> 'amazon',
+				'edit'		=> time(),
+				'user'		=> 'john',
+				'pass'		=> '12345pass',
+				'note'		=> 'This is a note',
+				'edit'		=> microtime(true)
 			),
 			array(
-				'id'				=> '1',
-				'title'			=> 'Hauptkonto',
+				'title'		=> 'Hauptkonto',
 				'category'	=> 'Banking',
-				'type'			=> 'account',
-				'icon'			=> 'comdirect',
-				'holder'		=> 'John Smith',
-				'iban'			=> 'DE68000111222',
-				'bic'				=> 'NOLADE681234',
-				'note'			=> 'Banking note',
-				'edit'			=> '1234567890'
+				'type'		=> 'website',
+				'url'		=> 'https://google.de',
+				'user'		=> 'testing',
+				'pass'		=> 'notherpass',
+				'icon'		=> 'comdirect',
+				'holder'	=> 'John Smith',
+				'iban'		=> 'DE68000111222',
+				'bic'		=> 'NOLADE681234',
+				'note'		=> 'Banking note',
+				'edit'		=> microtime(true)
 			)
 		);
 
-		file_put_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE, json_encode($first_entry, JSON_PRETTY_PRINT));
-
-		return $first_entry;
+		$enc = Crypto::encrypt(json_encode($first_entry), "mypassword");
+		file_put_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE, $enc);
 	}
 
-	public function get($id) {
+	public function get() {
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
 		}
@@ -70,66 +82,41 @@ class Vault_Model {
 			throw new Exception('Vault does not exist', '404');
 		}
 		else {
-			$vault	= json_decode(file_get_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE), true);
-			return $vault;
+			return file_get_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE);
 		}
 	}
 
-	public function get_all() {
+	public function sync($client_vault) {
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
 		}
-		else if (!file_exists($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE)) {
-			throw new Exception('Vault does not exist', '404');
+		file_put_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE, $client_vault);
+		return file_get_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE);
+	}
+
+	public function change_password($currpass, $newpass) {
+		if (!$this->uid) {
+			throw new Exception('Permission denied', '403');
+		}
+
+		// Load vault
+		$vault = file_get_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE);
+
+		// Try to decrypt vault
+		if ($vault_dec = Crypto::decrypt($vault, $currpass)) {
+			// Re-encrypt vault with new password
+			if ($vault_enc = Crypto::encrypt($vault_dec, $newpass)) {
+				file_put_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE, $vault_enc);
+				return null;
+			}
+			else {
+				throw new Exception('Error re-encrypting vault', '500');
+			}
 		}
 		else {
-			$vault	= json_decode(file_get_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE), true);
-			file_put_contents(LOG, print_r($vault, true) . "\n", FILE_APPEND);
-			return $vault;
-		}
-	}
-
-	public function create($title, $type) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Wrong passphrase', '403');
 		}
 
-		// Check if username contains certain special characters
-		if (preg_match('/(\/|\.|\<|\>|%)/', $username) || strlen($username) > 32) {
-			throw new Exception('Username not allowed', '400');
-		}
-
-		$username = strtolower(str_replace(' ', '', $username));
-		$username = preg_replace("/[^a-zA-Z0-9_\-]+/", "", $username);
-
-		if (!$this->db->user_get_by_name($username)) {
-			if (!$this->db->user_create($username, Crypto::generate_password($pass), $admin, $mail)) {
-				throw new Exception('Error creating user', '500');
-			}
-
-			if (!file_exists($this->config['datadir'] . $username) && !mkdir($this->config['datadir'] . $username, 0755)) {
-				throw new Exception('Error creating user directory', '403');
-			}
-
-			if ($mail != '' && filter_var($mail, FILTER_VALIDATE_EMAIL)) {
-				$message = "Thank you " . $username . ",<BR> you successfully created a new user account!";
-				Util::send_mail("New user account", $mail, $message);
-			}
-			return true;
-		}
-
-		throw new Exception('User exists', '403');
-	}
-
-	public function delete($id) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
-		/*if (delete okay) {
-			return true;
-		}*/
-
-		throw new Exception('Error deleting entry', '500');
+		return null;
 	}
 }

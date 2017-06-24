@@ -41,8 +41,9 @@
 		<span class="close">&times;</span>
 	</div>
 
-	<script type="text/javascript" src="public/js/jquery-1.11.3.min.js"></script>
-	<script type="text/javascript" src="public/js/util.js"></script>
+	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript" src="public/js/util/util.js"></script>
+	
 	<script type="text/javascript" src="plugins/webodf/wodotexteditor.js" type="text/javascript" charset="utf-8"></script>
 	<script type="text/javascript" src="plugins/webodf/FileSaver.js" type="text/javascript" charset="utf-8"></script>
 	<script type="text/javascript" src="plugins/webodf/localfileeditor.js" type="text/javascript" charset="utf-8"></script>

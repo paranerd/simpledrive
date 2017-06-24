@@ -48,7 +48,7 @@ var UserController = {
 		});
 
 		$(".sidebar-navigation").on('click', function(e) {
-			switch ($(this).find('input').val()) {
+			switch ($(this).data('action')) {
 				case 'general':
 					UserModel.load();
 					break;
@@ -78,13 +78,14 @@ var UserController = {
 			UserModel.changePassword();
 		});
 
+		$("#vault-password").on('submit', function(e) {
+			e.preventDefault();
+			UserModel.changeVaultPassword();
+		});
+
 		$("#setupbackup").on('submit', function(e) {
 			e.preventDefault();
 			Backup.enable();
-		});
-
-		$(document).on('mousedown', '#content', function(e) {
-			Util.closePopup();
 		});
 
 		$(document).on('keyup', function(e) {
@@ -381,6 +382,36 @@ var UserModel = {
 			Util.closePopup('change-password');
 		}).fail(function(xhr, statusText, error) {
 			Util.showFormError('change-password', Util.getError(xhr));
+		});
+	},
+
+	changeVaultPassword: function() {
+		var currpass = $("#vault-password-pass0").val();
+		var newpass1 = $("#vault-password-pass1").val();
+		var newpass2 = $("#vault-password-pass2").val();
+
+		if (currpass.length == 0 || newpass1.length == 0 || newpass2.length == 0) {
+			Util.showFormError('vault-password', "Fields cannot be empty");
+			return;
+		}
+
+		if (newpass1 != newpass2) {
+			Util.showFormError('vault-password', "New passwords do not match");
+			return;
+		}
+
+		$.ajax({
+			url: 'api/vault/changepw',
+			type: 'post',
+			data: {token: token, currpass: currpass, newpass: newpass1},
+			dataType: 'json'
+		}).done(function(data, statusText, xhr) {
+			token = data.msg;
+			Util.notify("Password changed", true);
+			//$("#change-password-pass0, #change-password-pass1, #change-password-pass2").val('');
+			Util.closePopup('vault-password');
+		}).fail(function(xhr, statusText, error) {
+			Util.showFormError('vault-password', Util.getError(xhr));
 		});
 	}
 }

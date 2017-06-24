@@ -7,7 +7,7 @@
 
 var Util = {
 	busyCount: 0,
-	strengths: ["Very weak", "Weak", "Ok", "Better", "Strong", "Very strong"],
+	strengths: ["Very weak", "Weak", "Ok", "Good", "Strong", "Very strong"],
 
 	init: function() {
 		$(window).resize(function() {
@@ -30,6 +30,10 @@ var Util = {
 					simpleScroll.update();
 				}, 200);
 			}
+		});
+
+		$(document).on('mousedown', '#content-container, #shield', function(e) {
+			Util.closePopup();
 		});
 
 		$(document).on('click', '.checkbox-box', function(e) {
@@ -78,21 +82,21 @@ var Util = {
 		$(".popup .menu li").on('click', function() {
 			$(this).closest('.popup').addClass("hidden");
 		});
-
-		$("#shield").click(function(e) {
-			Util.closePopup();
-		});
 	},
 
-	busy: function(start) {
+	busy: function(start, msg) {
 		Util.busyCount = (start) ? ++Util.busyCount : --Util.busyCount;
 		Util.busyCount = (Util.busyCount < 0) ? 0 : Util.busyCount;
 
 		if (Util.busyCount > 0) {
 			$("#busy").removeClass("hidden");
+			if (start && msg) {
+				$("#busy .busy-title").text(msg);
+			}
 		}
 		else {
 			$("#busy").addClass("hidden");
+			$("#busy .busy-title").text("Busy...");
 		}
 	},
 
@@ -176,19 +180,23 @@ var Util = {
 	showPopup: function(id) {
 		Util.closePopup(null, true);
 
-		if ($("#" + id).is('form') || id == 'info') {
-			$("#" + id + ", #shield").removeClass("hidden");
+		if ($("#" + id).find('ul.menu').length == 0) {
+			$("#shield").removeClass("hidden");
 			$("#" + id).find('*').filter(':input:visible:first').focus();
 		}
-		else {
-			$("#" + id).removeClass("hidden");
-		}
+
+		$("#" + id).removeClass("hidden");
 	},
 
 	closePopup: function(id, beforeShow) {
 		var target = (id) ? '#' + id : '.popup';
 
-		$(target + ", .overlay, .form-hidden").addClass("hidden");
+		// Only hide overlay when closing all popups or specifically a form
+		if (!id || (id && $(target).is('form'))) {
+			$(".overlay, .form-hidden").addClass("hidden");
+		}
+
+		$(target).addClass("hidden");
 		$(target + " .checkbox-box").removeClass("checkbox-checked");
 		$(target + " .password-strength, .error").addClass("hidden").text('');
 
@@ -378,14 +386,11 @@ var Util = {
 	setSelectionRange: function(input, start, end) {
 		$(input).each(function() {
 			if('selectionStart' in this) {
-				console.log("first");
 				this.selectionStart = start;
 				this.selectionEnd = end;
 			} else if(input.setSelectionRange) {
-				console.log("second");
 				this.setSelectionRange(start, end);
 			} else if(input.createTextRange) {
-				console.log("third");
 				var range = this.createTextRange();
 				range.collapse(true);
 				range.moveEnd('character', end);
@@ -393,6 +398,26 @@ var Util = {
 				range.select();
 			}
 		});
+	},
+
+	/**
+	 * Calculates if an element currently in the viewport
+	 * Important not to use jQuery's offset().top (relative to document)!
+	 */
+	isVisible: function(elem) {
+		if (elem.length > 0) {
+			var scrollTop = elem.parent().scrollTop();
+			var height = elem.parent().height();
+			var offset = elem.get(0).offsetTop - scrollTop;
+
+			return offset + elem.height() > 0 && offset < height;
+		}
+
+		return false;
+	},
+
+	generateFullURL: function(url) {
+		return (url.startsWith("http://") || url.startsWith("https://")) ? url : "http://" + url;
 	},
 }
 

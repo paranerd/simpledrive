@@ -12,7 +12,7 @@ $(document).ready(function() {
 
 	$(window).resize();
 	if ($('head').data('demo')) {
-		demoLogin();
+		enterDemoCredentials('demo', 'demo');
 	}
 });
 
@@ -21,21 +21,19 @@ $("#login").on('submit', function(e) {
 	login();
 });
 
-function demoLogin() {
-	var username = ['d', 'e', 'm', 'o'];
-	var password = ['d', 'e', 'm', 'o'];
+function enterDemoCredentials(username, password) {
 	var i = 0;
-	var userInterval = setInterval(function() {
-		$("#user").val($("#user").val() + username[i]);
+	var enterUser = setInterval(function() {
+		$("#user").val($("#user").val() + username.charAt(i));
 		i++;
 		if (i == username.length) {
-			clearTimeout(userInterval);
+			clearTimeout(enterUser);
 			i = 0;
-			var passInterval = setInterval(function() {
-				$("#pass").val($("#pass").val() + password[i]);
+			var enterPass = setInterval(function() {
+				$("#pass").val($("#pass").val() + password.charAt(i));
 				i++;
 				if (i == password.length) {
-					clearTimeout(passInterval);
+					clearTimeout(enterPass);
 					$("#login").submit();
 				}
 			}, 100);
