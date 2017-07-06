@@ -45,9 +45,17 @@ var VaultController = {
 		$(document).on('keyup', function(e) {
 			switch(e.keyCode) {
 				case 27: // Esc
-					Util.closePopup();
+					Util.copyToClipboard("");
 					break;
 			}
+		});
+
+		$(document).on('click', '.popup .close', function(e) {
+			Util.copyToClipboard("");
+		});
+
+		$(document).on('mousedown', '#shield', function(e) {
+			Util.copyToClipboard("");
 		});
 
 		$("#entries").on('mousedown', function(e) {
@@ -89,6 +97,11 @@ var VaultController = {
 		$("#unlock").on('submit', function(e) {
 			e.preventDefault();
 			VaultModel.unlock($("#unlock-passphrase").val());
+		});
+
+		$("#passphrase").on('submit', function(e) {
+			e.preventDefault();
+			VaultModel.setPassphrase($("#passphrase-passphrase").val());
 		});
 
 		$("#create-menu li").on('click', function(e) {
@@ -154,14 +167,18 @@ var VaultView = {
 	},
 
 	showUnlock: function() {
-		Util.showPopup("unlock");
+		Util.showPopup("unlock", true);
+	},
+
+	showSetPassphrase: function() {
+		Util.showPopup("passphrase", true);
 	},
 
 	showEntry: function() {
 		var selection = VaultModel.list.getFirstSelected();
 		var item = selection.item;
 
-		Util.showPopup('entry');
+		Util.showPopup("entry");
 
 		$("#entry-title").val(item.title);
 		$("#entry-category").val(item.category);
@@ -291,6 +308,7 @@ var VaultModel = {
 		item.title = $("#entry-title").val();
 		item.category = $("#entry-category").val();
 		item.type = $("#entry-type").val();
+		item.icon = "default";
 		item.url = Util.generateFullURL($("#entry-url").val());
 		item.user = $("#entry-user").val();
 		item.pass = $("#entry-pass").val();
@@ -310,23 +328,27 @@ var VaultModel = {
 		}
 
 		$("#entry .btn").prop('disabled', false);
-		Util.closePopup('entry');
+		Util.closePopup('entry', true);
 
 		VaultModel.sync();
 	},
 
 	sync: function() {
+		if (VaultModel.passphrase == '') {
+			VaultView.showSetPassphrase();
+			return;
+		}
 		Util.busy(true, "Syncing...");
 
 		setTimeout(function() {
 			try {
 				var vaultString = JSON.stringify(VaultModel.all);
-				var encryptedVault = Crypto.encrypt(vaultString, VaultModel.passphrase);
+				var encryptedVault = Crypto.encrypt(vaultString, VaultModel.passphrase.toString());
 
 				$.ajax({
 					url: 'api/vault/sync',
 					type: 'post',
-					data: {token: token, vault: encryptedVault},
+					data: {token: token, vault: encryptedVault, lastedit: Date.now()},
 					dataType: "json"
 				}).done(function(data, statusText, xhr) {
 					var dec = Crypto.decrypt(data.msg, VaultModel.passphrase);
@@ -374,9 +396,11 @@ var VaultModel = {
 			if (data.msg) {
 				VaultModel.encrypted = data.msg;
 				VaultView.showUnlock();
+				//VaultModel.unlock(VaultModel.passphrase);
 			}
 			else {
-				VaultView.display();
+				//VaultView.display();
+				VaultView.showSetPassphrase();
 			}
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
@@ -395,7 +419,7 @@ var VaultModel = {
 				VaultModel.all = JSON.parse(dec);
 				VaultModel.filtered = JSON.parse(dec);
 
-				Util.closePopup("unlock");
+				Util.closePopup("unlock", false, true);
 				Util.busy(false);
 				VaultView.display(VaultModel.filtered);
 			} catch(e) {
@@ -405,4 +429,15 @@ var VaultModel = {
 			}
 		}, 100);
 	},
+
+	setPassphrase: function(passphrase) {
+		if (passphrase) {
+			VaultModel.passphrase = passphrase;
+			Util.closePopup("passphrase", false, true);
+			VaultView.display();
+		}
+		else {
+			Util.showFormError('passphrase', 'Please enter a passphrase');
+		}
+	}
 }

@@ -12,30 +12,31 @@ class Vault_Model {
 	static $VAULT_FILE			= 'vault';
 
 	public function __construct($token) {
-		$this->config	= json_decode(file_get_contents('config/config.json'), true);
-		$this->token	= $token;
-		$this->db		= Database::getInstance();
-		$this->user		= $this->db->user_get_by_token($token);
-		$this->uid		= ($this->user) ? $this->user['id'] : 0;
-		$this->username	= ($this->user) ? $this->user['username'] : "";
+		$this->config		= json_decode(file_get_contents('config/config.json'), true);
+		$this->token		= $token;
+		$this->db			= Database::getInstance();
+		$this->user			= $this->db->user_get_by_token($token);
+		$this->uid			= ($this->user) ? $this->user['id'] : 0;
+		$this->username		= ($this->user) ? $this->user['username'] : "";
+		$this->vault_path	= $this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE;
 
-		//$this->create_demo_vault();
 		$this->init();
+		//$this->create_demo_vault();
 	}
 
 	private function init() {
 		if ($this->username) {
-			if (!file_exists($this->config['datadir'] . $this->username . self::$VAULT)) {
-				mkdir($this->config['datadir'] . $this->username . self::$VAULT, 0777, true);
+			if (!file_exists(dirname($this->vault_path))) {
+				mkdir(dirname($this->vault_path), 0777, true);
 			}
-			if (!file_exists($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE)) {
-				touch($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE);
+			if (!file_exists($this->vault_path)) {
+				touch($this->vault_path);
 			}
 		}
 	}
 
 	private function create_demo_vault() {
-		$vault = $this->config['datadir'] . $this->username . self::$VAULT;
+		$vault = dirname($this->vault_path);
 
 		if ($this->username != "" && !file_exists($vault)) {
 			mkdir($vault);
@@ -71,27 +72,41 @@ class Vault_Model {
 		);
 
 		$enc = Crypto::encrypt(json_encode($first_entry), "mypassword");
-		file_put_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE, $enc);
+		file_put_contents($this->vault_path, $enc);
 	}
 
 	public function get() {
+		/*file_put_contents(LOG, "--- get-ENC ---\n", FILE_APPEND);
+		$dec = Crypto::decrypt("Um5mV2JHdkE3d295elo5YU9pUVplUzB0dGNoZU8zS2RaTEU5K0Q4NGVOMm1WYlhDeDQ3RFkrNGUwUEVsaENWVjhpRm1NTWdsT0lxVExiZ09HZmNSNStwbTRKU1ZzU2p3OEY2REJ4RzFFS2xuaDFHVVd1UUcrY0YwZ1cyK1k0YU80MzFSWFVLQktPb2JvS1crNnh4U1pDbHdFRUtpc1BzQTJITG9UWDM0blVjY2d1WkphWDdYWE01RVRLRUJRODJQM3hIclBHMnFTRlJPR0pLNDEzQ1JqSDhvNS8vdzl6NE94d0IyM0xUbDVMTjFjTEFFUnhyYUF3eEN1dHlkOFZ1MFc1MVdNL0I1aVVQM3VNMnh4VTJicWROOXZvbjM5ZmZpQTNJWU90SStlNEJQaVNJSGxvbHU4YU5RVWVsTlh2dWFLQWFyQmp4R084K3pVWnQwS0ttV0UwekRoenVsaDVtYUFIT2V5VUsvM3BHcThMb1R5L3FPQzU3Szl0TllHVTlnMjlTTVg0cEhhYnZRWDA4RGd3TWZSK1JWSmlOQkJ6bFZxVHVERnRiaFYzdStER1dHdEhhajZXSkFLSUdsaGtzanRyV2NZV3VsdGFXRjhOYUs1VGtrbkJxYjVxVzEvNWwyVXQxcHZhTjBsdnMzZC93ODBZZUQ2ZlViTHQzMnY2UUdlY2tOOXBHdWo5NmUyc2NQSkxrTjI5eGRzZHdmWVRTb3BiR0dFSytBM3Z4VWZ2MHYvRDlyNFVUUHFJSW5BZDQ3ZGxNZTNvNk8ySzhvaEJ3REM5YWFzdz09OlpUSTRNVEJpWkdFME1UWTRabVJpT0E9PTozMmMyNzQwMmFkY2IyZjFl", "mypassword");
+		file_put_contents(LOG, "dec1: " . $dec . "\n", FILE_APPEND);
+
+		file_put_contents(LOG, "--- get-ENC ---\n", FILE_APPEND);
+		$dec = Crypto::decrypt("dURqRFRFdzY3RHBKYTVwRVFTOUtHQT09CjpUR0pwYTNCaVFURmtVSEY0T0RBMVZ3PT0KOmdQR3JrdFVoMFVHVFJJQkE=", "testing");
+		file_put_contents(LOG, "dec2: " . $dec . "\n", FILE_APPEND);*/
+
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
 		}
-		else if (!file_exists($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE)) {
+		else if (!file_exists($this->vault_path)) {
 			throw new Exception('Vault does not exist', '404');
 		}
 		else {
-			return file_get_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE);
+			$vault = file_get_contents($this->vault_path);
+			$dec = Crypto::decrypt($vault, "mypassword");
+			return file_get_contents($this->vault_path);
 		}
 	}
 
-	public function sync($client_vault) {
+	public function sync($client_vault, $last_edit) {
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
 		}
-		file_put_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE, $client_vault);
-		return file_get_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE);
+
+		if ($last_edit > filemtime($this->vault_path)) {
+			file_put_contents($this->vault_path, $client_vault);
+		}
+
+		return file_get_contents($this->vault_path);
 	}
 
 	public function change_password($currpass, $newpass) {

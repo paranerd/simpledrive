@@ -32,6 +32,14 @@ var Util = {
 			}
 		});
 
+		$(document).on('keyup', function(e) {
+			switch(e.keyCode) {
+				case 27: // Esc
+					Util.closePopup();
+					break;
+			}
+		});
+
 		$(document).on('mousedown', '#content-container, #shield', function(e) {
 			Util.closePopup();
 		});
@@ -177,18 +185,26 @@ var Util = {
 		return filtered;
 	},
 
-	showPopup: function(id) {
-		Util.closePopup(null, true);
+	showPopup: function(id, lock) {
+		if (Util.closePopup(null, true)) {
+			if ($("#" + id).find('ul.menu').length == 0) {
+				$("#shield").removeClass("hidden");
+				$("#" + id).find('*').filter(':input:visible:first').focus();
+			}
 
-		if ($("#" + id).find('ul.menu').length == 0) {
-			$("#shield").removeClass("hidden");
-			$("#" + id).find('*').filter(':input:visible:first').focus();
+			if (lock) {
+				$("#" + id).addClass("locked");
+			}
+			$("#" + id).removeClass("hidden");
 		}
-
-		$("#" + id).removeClass("hidden");
 	},
 
-	closePopup: function(id, beforeShow) {
+	closePopup: function(id, keepHidden, unlock) {
+		// Do not close a locked popup
+		if ($(document).find(".popup.locked").length > 0 && !unlock) {
+			return false;
+		}
+
 		var target = (id) ? '#' + id : '.popup';
 
 		// Only hide overlay when closing all popups or specifically a form
@@ -196,17 +212,19 @@ var Util = {
 			$(".overlay, .form-hidden").addClass("hidden");
 		}
 
-		$(target).addClass("hidden");
+		$(target).addClass("hidden").removeClass("locked");
 		$(target + " .checkbox-box").removeClass("checkbox-checked");
 		$(target + " .password-strength, .error").addClass("hidden").text('');
 
-		if (beforeShow) {
-			// Don't clear hidden form-inputs before showing popup
+		if (keepHidden) {
+			// Don't clear hidden form-inputs
 			$(target + " input[type!='hidden']").val('');
 		}
 		else {
 			$(target + " input").val('');
 		}
+
+		return true;
 	},
 
 	showFormError: function(id, msg) {

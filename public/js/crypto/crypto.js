@@ -4,7 +4,7 @@
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		http://simpledrive.org
  */
- 
+
 var Crypto = {
 	encrypt: function(msg, secret) {
 		// Generate salt
@@ -40,9 +40,8 @@ var Crypto = {
 		// Extract payload
 		var crypttext = rawPieces[0];
 
-		// Extract IV
+		// Extract IV (base64 to WordArray) - on error try Base64.parse(atob())
 		var iv = CryptoJS.enc.Base64.parse(rawPieces[1]);
-		//var iv = CryptoJS.enc.Utf8.parse("1234567890123456");
 
 		// Extract salt
 		var salt = rawPieces[2];

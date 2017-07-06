@@ -25,8 +25,8 @@ class Crypto {
 			return "";
 		}
 
-		// Generate IV
-		$iv = self::random_bytes(self::$iv_size, false);
+		// Generate IV - on error try random_tring(self::$iv_size)
+		$iv = self::random_bytes(self::$iv_size);
 
 		// Generate Salt
 		$salt = self::random_string(self::$salt_size);

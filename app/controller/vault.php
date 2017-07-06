@@ -16,7 +16,7 @@ class Vault_Controller {
 	protected $valid_sections	= array('status');
 
 	public $required = array(
-		'sync'			=> array('vault'),
+		'sync'			=> array('vault', 'lastedit'),
 		'changepw'		=> array('currpass', 'newpass'),
 	);
 
@@ -40,7 +40,7 @@ class Vault_Controller {
 	}
 
 	public function sync() {
-		return $this->model->sync($_REQUEST['vault']);
+		return $this->model->sync($_REQUEST['vault'], $_REQUEST['lastedit']);
 	}
 
 	public function changepw() {

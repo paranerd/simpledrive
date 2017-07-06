@@ -148,6 +148,18 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<button class="btn">OK</button>
 	</form>
 
+	<!-- Passphrase popup -->
+	<form id="passphrase" class="popup center hidden" action="#">
+		<span class="close">&times;</span>
+		<div class="title">Set Passphrase</div>
+
+		<label for="passphrase-passphrase">Passphrase</label>
+		<input id="passphrase-passphrase" type="password" placeholder="Passphrase" />
+
+		<div class="error hidden"></div>
+		<button class="btn">OK</button>
+	</form>
+
 	<!-- Shield -->
 	<div id="shield" class="overlay hidden"></div>
 
