@@ -435,7 +435,7 @@ var Util = {
 	},
 
 	generateFullURL: function(url) {
-		return (url.startsWith("http://") || url.startsWith("https://")) ? url : "http://" + url;
+		return (url.match("^http://") || url.match("^https://")) ? url : "http://" + url;
 	},
 }
 
