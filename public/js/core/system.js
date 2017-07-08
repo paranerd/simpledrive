@@ -228,22 +228,22 @@ var SystemView = {
 
 		switch (view) {
 			case 'users':
-				$(".path-element").text("Users");
+				$(".title-element").text("Users");
 				$("#users, #users-header").removeClass("hidden");
 				break;
 
 			case 'log':
-				$(".path-element").text("Log");
+				$(".title-element").text("Log");
 				$("#log, #log-header").removeClass("hidden");
 				break;
 
 			case 'plugins':
-				$(".path-element").text("Plugins");
+				$(".title-element").text("Plugins");
 				$("#plugins").removeClass("hidden");
 				break;
 
 			case 'status':
-				$(".path-element").text("Status");
+				$(".title-element").text("Status");
 				$("#status").removeClass("hidden");
 				break;
 		}

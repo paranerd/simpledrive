@@ -13,7 +13,7 @@ if (!file_exists('plugins/sabredav')) {
 	return null;
 }
 
-require_once 'app/helper/database.class.php';
+require_once 'app/helper/database.php';
 require_once 'app/model/core.php';
 require_once 'plugins/sabredav/vendor/autoload.php';
 

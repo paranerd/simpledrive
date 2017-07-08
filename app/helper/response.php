@@ -19,12 +19,26 @@ class Response {
 		}
 	}
 
-	static public function success($info, $render = false, $token = null, $section = '', $args = null, $need_db = true) {
+	static public function success($info, $render = false, $token = null, $section = '', $args = null, $need_user = true) {
 		if ($render) {
-			$db		= ($need_db) ? Database::getInstance() : null;
-			$user	= ($db) ? $db->user_get_by_token($token) : null;
-			$base	= self::base();
-			$lang	= self::lang();
+			$db			= ($need_user) ? Database::getInstance() : null;
+			$user		= ($db) ? $db->user_get_by_token($token) : null;
+			$username 	= ($user) ? $user['username'] : '';
+			$admin		= ($user) ? $user['admin'] : false;
+			$color		= ($user) ? $user['color'] : 'light';
+			$fileview 	= ($user) ? $user['fileview'] : 'list';
+			$demo		= (strpos($_SERVER['HTTP_HOST'], 'simpledrive.org') !== false);
+			$id			= (sizeof($args) > 0) ? array_shift($args) : "0";
+			$public		= ($section == 'pub' || isset($_REQUEST['public']));
+			$code		= (isset($_GET['code'])) ? $_GET['code'] : "";
+			$base		= self::base();
+			$lang		= self::lang();
+
+			if ($need_user && !$public && !$user) {
+				header('Location: ' . $base . 'core/login');
+				exit();
+			}
+
 			require_once 'app/views/' . $info . '.php';
 		}
 		else {

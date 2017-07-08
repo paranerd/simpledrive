@@ -26,8 +26,6 @@ $controller		= (sizeof($args) > 0) ? array_shift($args) : 'files';
 $action			= (sizeof($args) > 0) ? array_shift($args) : '';
 $name			= ucfirst($controller) . "_Controller";
 
-//file_put_contents(LOG, "controller: " . $controller . " | action: " . $action . "\n", FILE_APPEND);
-
 // Not installed - enter setup
 if (!file_exists('config/config.json') && ($controller != 'core' || $action != 'setup')) {
 	exit (Response::redirect('core/setup'));
@@ -42,6 +40,8 @@ else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/'
 		// Extract token
 		$token_source	= ($render) ? $_COOKIE : $_REQUEST;
 		$token			= (isset($token_source['token'])) ? Crypto::validate_token($token_source['token']) : '';
+
+		//file_put_contents(LOG, "controller: " . $controller . " | action: " . $action . " | token: " . $token . "\n", FILE_APPEND);
 
 		$c				= new $name($token);
 

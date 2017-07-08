@@ -21,7 +21,7 @@ function List (callback, multi) {
 			}
 
 			this.selected[id] = this.data[id];
-			this.currentSelected = id;
+			this.currentSelected = parseInt(id);
 
 			this.updateSelections();
 			if (this.callback) {

@@ -126,7 +126,7 @@ var simpleScroll = {
 	},
 
 	update: function() {
-		if (self.containers.length == 0) {
+		if (!self.containers || self.containers.length == 0) {
 			return;
 		}
 

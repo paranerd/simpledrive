@@ -24,6 +24,10 @@ h2 {
 	outline: 0px solid transparent;
 }
 
+.btn:focus {
+	box-shadow: 0px 0px 1px 1px #2e8b5e;
+}
+
 .btn a {
 	color: white !important;
 }
@@ -337,7 +341,18 @@ body.light, body.light a {
 
 /* Light - Header */
 
-.light #header, .light #header a {
+#header.light,
+.light #header,
+.light #header a {
+	color: #333;
+}
+
+.light .title-element, .light .title-separator {
+	color: #999;
+}
+
+.light .title-element-current,
+.light .title-element:not(.title-separator):hover {
 	color: #333;
 }
 
@@ -352,14 +367,6 @@ body.light, body.light a {
 .light #logo .back:hover {
 	background-color: #202020;
 	color: #2e8b5e !important;
-}
-
-.light .path-element, .light .path-separator {
-	color: #999;
-}
-
-.light .path-current, .light .path-element:not(.path-separator):hover {
-	color: #333;
 }
 
 /* Light - Sidebar */
@@ -525,6 +532,22 @@ body.light, body.light a {
 
 /* Dark - Header */
 
+#header.dark,
+.dark #header,
+.dark #header a {
+	color: #b3b3b3;
+}
+
+.dark .title-element,
+.dark .title-separator {
+	color: #555;
+}
+
+.dark .title-element-current,
+.dark .title-element:not(.title-separator):hover {
+	color: #b3b3b3;
+}
+
 .dark #header {
 	background-color: #303030;
 }
@@ -533,20 +556,13 @@ body.light, body.light a {
 	background: #252525;
 }
 
-.dark #logo, .dark #logo a {
+.dark #logo,
+.dark #logo a {
 	color: #2e8b5e;
 }
 
 .dark #logo .back:hover {
 	background-color: #202020;
-}
-
-.dark .path-element, .dark .path-separator {
-	color: #555;
-}
-
-.dark .path-current, .dark .path-element:not(.path-separator):hover {
-	color: #b3b3b3;
 }
 
 /* Dark - Sidebar */

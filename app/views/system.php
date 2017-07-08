@@ -7,16 +7,6 @@
  * @link		http://simpledrive.org
  */
 
-if (!$user) {
-	header('Location: ' . $base . 'core/login');
-	exit();
-}
-
-$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-$username 	= ($user) ? $user['username'] : '';
-$admin 		= ($user) ? $user['admin'] : false;
-$color 		= ($user) ? $user['color'] : 'light';
-$fileview 	= ($user) ? $user['fileview'] : 'list';
 ?>
 
 <!DOCTYPE html>
@@ -37,11 +27,15 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 <body class="<?php echo $color; ?>">
 	<!-- Header -->
 	<div id="header">
-		<!-- Title -->
+		<!-- Nav back -->
 		<div id="logo" title="Return to files">
 			<a href="files" class="back"><span class="icon icon-arrow-left"></span>System</a>
 		</div>
-		<div id="path"><div class="path-element path-current">Status</div></div>
+		<!-- Title -->
+		<div id="title">
+			<div class="title-element title-element-current">Status</div>
+		</div>
+		<!-- Username -->
 		<div id="username" class="popup-trigger" data-target="menu"></div>
 	</div>
 
@@ -49,10 +43,10 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<!-- Sidebar -->
 		<div id="sidebar">
 			<ul class="menu">
-				<li id="sidebar-status" class="sidebar-navigation" title="Status info" data-action="status"><span class="icon icon-info"></span> Status</li>
-				<li id="sidebar-users" class="sidebar-navigation" title="Users" data-action="users"><span class="icon icon-users"></span> Users</li>
-				<li id="sidebar-plugins" class="sidebar-navigation" title="Show Plugins" data-action="plugins"><span class="icon icon-add"></span> Plugins</li>
-				<li id="sidebar-log" class="sidebar-navigation" title="Show Log" data-action="log"><span class="icon icon-log"></span> Log</li>
+				<li id="sidebar-status" class="sidebar-navigation" title="Status info" data-action="status"><span class="icon icon-info"></span>Status</li>
+				<li id="sidebar-users" class="sidebar-navigation" title="Users" data-action="users"><span class="icon icon-users"></span>Users</li>
+				<li id="sidebar-plugins" class="sidebar-navigation" title="Show Plugins" data-action="plugins"><span class="icon icon-add"></span>Plugins</li>
+				<li id="sidebar-log" class="sidebar-navigation" title="Show Log" data-action="log"><span class="icon icon-log"></span>Log</li>
 			</ul>
 		</div>
 
@@ -243,6 +237,12 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<button id="confirm-no" class="btn btn-inverted">Cancel</button>
 		<button id="confirm-yes" class="btn">OK</button>
 		<span class="close">&times;</span>
+	</div>
+
+	<!-- Progress circle -->
+	<div id="busy" class="hidden">
+		<span class="busy-title">Loading...</span>
+		<span class="busy-indicator"></span>
 	</div>
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>

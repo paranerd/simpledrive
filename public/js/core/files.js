@@ -29,9 +29,9 @@ var FileController = {
 			Util.getVersion();
 		}
 
-		$(document).on('mousedown', '.path-element', function(e) {
+		$(document).on('mousedown', '.title-element', function(e) {
 			FileModel.list.unselectAll();
-		}).on('mouseup', '.path-element', function(e) {
+		}).on('mouseup', '.title-element', function(e) {
 			var pos = parseInt(this.value);
 
 			if (FileModel.list.getSelectedCount() > 0) {
@@ -68,19 +68,22 @@ var FileController = {
 
 			switch(e.keyCode) {
 				case 13: // Return
-					if (FileModel.list.getSelectedCount() == 1 && (!$(e.target).is('input') || e.target.className.indexOf('filter-input') != -1)) {
+					// Open file if item is selected and nothing or filter has focus
+					if (FileModel.list.getSelectedCount() == 1 &&
+						($(":focus").length == 0 || $(":focus").hasClass("filter-input")))
+					{
 						FileModel.open();
 					}
 					break;
 
 				case 38: // Up
-					if (!e.shiftKey) {
+					if (!e.shiftKey && $(":focus").length == 0) {
 						FileModel.list.selectPrev();
 					}
 					break;
 
 				case 40: // Down
-					if (!e.shiftKey) {
+					if (!e.shiftKey && $(":focus").length == 0) {
 						FileModel.list.selectNext();
 					}
 					break;
@@ -101,7 +104,6 @@ var FileController = {
 					VideoManager.stopVideo();
 					AudioManager.stopAudio();
 
-					Util.closePopup();
 					FileModel.filterRemove();
 					FileView.closeRename();
 					break;
@@ -339,7 +341,7 @@ var FileController = {
 
 		$(document).on('click', '#checker', function(e) {
 			FileModel.list.toggleAllSelection();
-		})
+		});
 
 		$("#audio-seekbar").on('mousedown', function(e) {
 			FileView.seekPos = (e.pageX - $(this).offset().left) / $(this).width();
@@ -530,7 +532,7 @@ var FileView = {
 	 */
 	displayFiles: function(files) {
 		simpleScroll.empty("files");
-		FileView.updatePath();
+		FileView.updateTitle();
 
 		if (files.length == 0) {
 			FileModel.list.setEmptyView("files");
@@ -738,47 +740,47 @@ var FileView = {
 	},
 
 	/**
-	 * Displays the current path with independently clickable elements
+	 * Displays the current title with independently clickable elements
 	 */
-	updatePath: function() {
-		$("#path").empty();
+	updateTitle: function() {
+		$("#title").empty();
 		var h = FileModel.hierarchy;
 		for (var s = 0; s < h.length; s++) {
 			var filename = h[s].filename;
 
 			if (s > 0) {
-				var pathSep = document.createElement("span");
-				pathSep.className = "path-element path-separator";
-				pathSep.innerHTML = "&#x25B9";
-				$("#path").append(pathSep);
+				var titleSep = document.createElement("span");
+				titleSep.className = "title-element title-separator";
+				titleSep.innerHTML = "&#x25B9";
+				$("#title").append(titleSep);
 			}
 
-			var pathItem = document.createElement("span");
-			pathItem.value = parseInt(s);
-			pathItem.className = (s == h.length - 1) ? 'path-element path-current' : 'path-element';
+			var titleItem = document.createElement("span");
+			titleItem.value = parseInt(s);
+			titleItem.className = (s == h.length - 1) ? 'title-element title-element-current' : 'title-element';
 
 			if (filename) {
-				pathItem.innerHTML = Util.escape(filename);
+				titleItem.innerHTML = Util.escape(filename);
 			}
 			else if (s == 0 && FileView.view == "trash") {
-				pathItem.innerHTML = "Trash";
+				titleItem.innerHTML = "Trash";
 			}
 			else if (s == 0 && FileView.view == "shareout") {
-				pathItem.innerHTML = "My Shares";
+				titleItem.innerHTML = "My Shares";
 			}
 			else if (s == 0 && FileView.view == "sharein") {
-				pathItem.innerHTML = "Shared";
+				titleItem.innerHTML = "Shared";
 			}
 			else if (s == 0 && !filename) {
-				pathItem.innerHTML = "Homefolder";
+				titleItem.innerHTML = "Homefolder";
 			}
 			else {
-				pathItem.innerHTML = Util.escape(filename);
+				titleItem.innerHTML = Util.escape(filename);
 			}
 
-			document.title = pathItem.innerHTML + " | simpleDrive";
+			document.title = titleItem.innerHTML + " | simpleDrive";
 
-			$("#path").append(pathItem);
+			$("#title").append(titleItem);
 		}
 	},
 }
@@ -1001,11 +1003,11 @@ var FileModel = {
 		});
 	},
 
-	init: function(id, public) {
-		FileModel.public = public;
+	init: function(id, pub) {
+		FileModel.public = pub;
 		var isHash = (id.toString().length == 8);
 
-		if (FileView.view == 'pub' && (isHash)) {
+		if (isHash) {
 			FileModel.loadPublic(id);
 		}
 		else {
@@ -1128,6 +1130,7 @@ var FileModel = {
 	},
 
 	openODT: function(id) {
+		$("#odt-form").remove();
 		$('<form id="odt-form" class="hidden" action="files/odfeditor/' + id + '" target="_blank" method="post"><input name="token"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
 		$('[name="public"]').val(FileModel.public);
@@ -1139,6 +1142,7 @@ var FileModel = {
 	},
 
 	openText: function(id) {
+		$("#text-form").remove();
 		$('<form id="text-form" class="hidden" action="files/texteditor/' + id + '" target="_blank" method="post"><input name="token"/><input name="public"/></form>').appendTo('body');
 		$('[name="token"]').val(token);
 		$('[name="public"]').val(FileModel.public);
@@ -1166,11 +1170,11 @@ var FileModel = {
 	},
 
 	rename: function(id) {
-		Util.busy(true);
 		newFilename = $("#renameinput").val();
 		var oldFilename = FileModel.list.getFirstSelected().item.filename;
 
 		if (newFilename != "" && newFilename != oldFilename) {
+			Util.busy(true);
 			$.ajax({
 				url: 'api/files/rename',
 				type: 'post',
@@ -1185,7 +1189,7 @@ var FileModel = {
 				Util.busy(false);
 			});
 		}
-		$("#renameinput").val("");
+		FileView.closeRename();
 	},
 
 	scan: function() {
@@ -1207,19 +1211,21 @@ var FileModel = {
 	},
 
 	remove: function() {
-		Util.busy(true);
-		$.ajax({
-			url: 'api/files/delete',
-			type: 'post',
-			data: {token: token, target: JSON.stringify(FileModel.list.getAllSelectedIDs())},
-			dataType: "json"
-		}).done(function(data, statusText, xhr) {
-			Util.notify("Successfully removed", true, false);
-		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
-		}).always(function() {
-			Util.busy(false);
-			FileModel.fetch();
+		Util.showConfirm('Delete?', function() {
+			Util.busy(true);
+			$.ajax({
+				url: 'api/files/delete',
+				type: 'post',
+				data: {token: token, target: JSON.stringify(FileModel.list.getAllSelectedIDs())},
+				dataType: "json"
+			}).done(function(data, statusText, xhr) {
+				Util.notify("Successfully removed", true, false);
+			}).fail(function(xhr, statusText, error) {
+				Util.notify(Util.getError(xhr), true, true);
+			}).always(function() {
+				Util.busy(false);
+				FileModel.fetch();
+			});
 		});
 	},
 

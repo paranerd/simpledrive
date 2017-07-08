@@ -411,12 +411,12 @@ label {
 	white-space: nowrap;
 }
 
-#path {
+#title {
 	position: relative;
 	left: 40px;
 }
 
-.path-element {
+.title-element {
 	font-size: 1.7rem;
 	font-family: robotolight, sans-serif;
 	line-height: 100px;
@@ -424,11 +424,11 @@ label {
 	float: left;
 }
 
-.path-current {
+.title-element-current {
 	font-family: robotoregular, sans-serif;
 }
 
-.path-separator {
+.title-separator {
 	margin-left: 5px;
 	margin-right: 5px;
 	font-size: 1rem;
@@ -667,11 +667,6 @@ label {
 }
 
 /* Content - Editor */
-
-#doc-savestatus {
-	font-size: 1rem;
-	margin-left: 5px;
-}
 
 #texteditor {
 	position: relative;

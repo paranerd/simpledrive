@@ -42,12 +42,43 @@ var VaultController = {
 			VaultModel.list.unselectAll();
 		});
 
-		$(document).on('keyup', function(e) {
+		$(document).on('keydown', function(e) {
 			switch(e.keyCode) {
 				case 27: // Esc
 					Util.copyToClipboard("");
 					break;
+
+				case 13: // Return
+					// Open file if item is selected and nothing or filter has focus
+					if (VaultModel.list.getSelectedCount() == 1 &&
+						($(":focus").length == 0 || $(":focus").hasClass("filter-input")))
+					{
+						VaultView.showEntry();
+					}
+					break;
+
+				case 46: // Del
+					if (!$(e.target).is('input')) {
+						VaultModel.remove();
+					}
+					break;
+
+				case 38: // Up
+					if (!e.shiftKey) {
+						VaultModel.list.selectPrev();
+					}
+					break;
+
+				case 40: // Down
+					if (!e.shiftKey) {
+						VaultModel.list.selectNext();
+					}
+					break;
 			}
+		});
+
+		$(document).on('click', '#checker', function(e) {
+			VaultModel.list.toggleAllSelection();
 		});
 
 		$(document).on('click', '.popup .close', function(e) {
@@ -105,7 +136,7 @@ var VaultController = {
 		});
 
 		$("#create-menu li").on('click', function(e) {
-			$("#create-type").val($(this).data('type'))
+			$("#entry-type").val($(this).data('type'))
 		});
 
 		$("#entry").off('submit').on('submit', function(e) {
@@ -151,7 +182,7 @@ var VaultController = {
 					break;
 
 				case 'delete':
-					VaultModel.delete();
+					VaultModel.remove();
 					break;
 			}
 
@@ -162,6 +193,8 @@ var VaultController = {
 
 var VaultView = {
 	init: function() {
+		document.title = "Vault | simpleDrive";
+		$(".title-element").text("Entries");
 		$("#username").html(Util.escape(username) + " &#x25BF");
 		$(window).resize();
 	},
@@ -181,6 +214,7 @@ var VaultView = {
 		Util.showPopup("entry");
 
 		$("#entry-title").val(item.title);
+		$("#entry-type").val(item.type);
 		$("#entry-category").val(item.category);
 		$("#entry-url").val(item.url);
 		$("#entry-user").val(item.user);
@@ -224,7 +258,7 @@ var VaultView = {
 			thumbnail.className = "thumbnail icon-key";
 			thumbnailWrapper.appendChild(thumbnail);
 
-			// Filename
+			// Title
 			var title = document.createElement("span");
 			title.className = "item-elem col1";
 			title.innerHTML = Util.escape(item.title);
@@ -254,37 +288,14 @@ var VaultView = {
 			edit.innerHTML = Util.timestampToDate(item.edit);
 			listItem.appendChild(edit);
 		}
-	},
-
-	/**
-	 * Highlights all selected elements in the fileview
-	 */
-	updateSelections: function() {
-		// Reset all selected status
-		$(".item").removeClass("selected");
-
-		var count = VaultModel.list.getSelectedCount();
-
-		var selected = VaultModel.list.getAllSelected();
-		for (var i in selected) {
-			$("#item" + i).addClass("selected");
-		}
-
-		// Update selection-checkbox
-		if (count > 0 && count == VaultModel.list.getAllCount()) {
-			$("#checker").addClass("checkbox-checked");
-		}
-		else {
-			$("#checker").removeClass("checkbox-checked");
-		}
-	},
+	}
 }
 
 var VaultModel = {
 	passphrase: "",
 	encrypted: "",
 
-	list: new List(VaultView.updateSelections),
+	list: new List(null, false),
 	all: [],
 	filtered: [],
 	clipboard: {},
@@ -370,17 +381,19 @@ var VaultModel = {
 		}, 100);
 	},
 
-	delete: function() {
-		var selected = VaultModel.list.getAllSelected();
-		for (var s in selected) {
-			for (var i in VaultModel.all) {
-				if (VaultModel.all[i].title == selected[s].title) {
-					VaultModel.all.splice(i, 1);
+	remove: function() {
+		Util.showConfirm('Delete entry?', function() {
+			var selected = VaultModel.list.getAllSelected();
+			for (var s in selected) {
+				for (var i in VaultModel.all) {
+					if (VaultModel.all[i].title == selected[s].title) {
+						VaultModel.all.splice(i, 1);
+					}
 				}
 			}
-		}
 
-		VaultModel.sync();
+			VaultModel.sync();
+		});
 	},
 
 	fetch: function() {
@@ -396,10 +409,8 @@ var VaultModel = {
 			if (data.msg) {
 				VaultModel.encrypted = data.msg;
 				VaultView.showUnlock();
-				//VaultModel.unlock(VaultModel.passphrase);
 			}
 			else {
-				//VaultView.display();
 				VaultView.showSetPassphrase();
 			}
 		}).fail(function(xhr, statusText, error) {
@@ -423,7 +434,6 @@ var VaultModel = {
 				Util.busy(false);
 				VaultView.display(VaultModel.filtered);
 			} catch(e) {
-				console.log(e);
 				Util.showFormError("unlock", "Wrong passphrase");
 				Util.busy(false);
 			}

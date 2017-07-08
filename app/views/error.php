@@ -30,6 +30,5 @@
 		Return to <a href="<?php echo $base; ?>core/login">Login</a>
 	</div>
 	<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
-	<div class="title title-x-large center">404</div>
 </body>
 </html>

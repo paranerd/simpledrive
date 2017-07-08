@@ -7,16 +7,6 @@
  * @link		http://simpledrive.org
  */
 
-if (!$user) {
-	header('Location: ' . $base . 'core/login');
-	exit();
-}
-
-$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-$username 	= ($user) ? $user['username'] : '';
-$admin 		= ($user) ? $user['admin'] : false;
-$color 		= ($user) ? $user['color'] : 'light';
-$fileview 	= ($user) ? $user['fileview'] : 'list';
 ?>
 
 <!DOCTYPE html>
@@ -37,11 +27,15 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 <body class="<?php echo $color; ?>">
 	<!-- Header -->
 	<div id="header">
-		<!-- Title -->
+		<!-- Nav back -->
 		<div id="logo" title="Return to files">
 			<a href="files" class="back"><span class="icon icon-arrow-left"></span>Vault</a>
 		</div>
-		<div id="path"><div class="path-element path-current">Entries</div></div>
+		<!-- Title -->
+		<div id="title">
+			<div class="title-element title-element-current">Entries</div>
+		</div>
+		<!-- Username -->
 		<div id="username" class="popup-trigger" data-target="menu"></div>
 	</div>
 
@@ -49,8 +43,8 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<!-- Sidebar -->
 		<div id="sidebar">
 			<ul class="menu">
-				<li id="sidebar-create" class="popup-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span> <?php echo $lang['new']; ?></li>
-				<li id="sidebar-general" class="sidebar-navigation focus" title="Entries" data-action="entries"><span class="icon icon-info"></span> Entries</li>
+				<li id="sidebar-create" class="popup-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span><?php echo $lang['new']; ?></li>
+				<li id="sidebar-general" class="sidebar-navigation focus" title="Entries" data-action="entries"><span class="icon icon-info"></span>Entries</li>
 			</ul>
 		</div>
 
@@ -61,7 +55,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 				<span class="close">&times;</span>
 			</div>
 			<div class="content-header">
-				<span class="col0 checkbox"><span id="checker" class="checkbox-box"></span></span>
+				<span class="col0">&nbsp;</span>
 				<span class="col1" data-sortby="name"><span><?php echo $lang['name']; ?> </span><span id="title-ord" class="order-direction"></span></span>
 				<span class="col2" data-sortby="category"><span>Category</span><span id="category-ord" class="order-direction"></span></span>
 				<span class="col3" data-sortby="type"><span><?php echo $lang['type']; ?> </span><span id="type-ord" class="order-direction"></span></span>
@@ -124,7 +118,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<label>Password</label>
 		<input id="entry-pass" class="input-indent" type="password" placeholder="Password">
 
-		<input id="entry-type" type="hidden" name="type" value="website"/>
+		<input id="entry-type" type="hidden" name="type"/>
 
 		<div style="width: 100%; height: 50px; margin-top: 15px; margin-bottom: 15px;">
 			<div id="entry-copy-pass" class="btn">Copy Pass</div>
@@ -138,25 +132,25 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 
 	<!-- Unlock popup -->
 	<form id="unlock" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
 		<div class="title">Unlock</div>
 
 		<label for="unlock-passphrase">Passphrase</label>
 		<input id="unlock-passphrase" type="password" placeholder="Passphrase" />
 
 		<div class="error hidden"></div>
+		<a href="files" class="btn btn-inverted">Exit</a>
 		<button class="btn">OK</button>
 	</form>
 
 	<!-- Passphrase popup -->
 	<form id="passphrase" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
 		<div class="title">Set Passphrase</div>
 
 		<label for="passphrase-passphrase">Passphrase</label>
 		<input id="passphrase-passphrase" type="password" placeholder="Passphrase" />
 
 		<div class="error hidden"></div>
+		<a href="files" class="btn btn-inverted">Exit</a>
 		<button class="btn">OK</button>
 	</form>
 
@@ -171,7 +165,7 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 	</div>
 
 	<!-- Progress circle -->
-	<div id="busy">
+	<div id="busy" class="hidden">
 		<span class="busy-title">Loading...</span>
 		<span class="busy-indicator"></span>
 	</div>
@@ -184,6 +178,15 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<hr>
 		<div id="info-footer">paranerd 2013-2017 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 	</div>
+
+	<!-- Confirm -->
+	<form id="confirm" class="popup center hidden" action="#">
+		<span class="close">&times;</span>
+		<div id="confirm-title" class="title">Confirm</div>
+
+		<button id="confirm-no" class="btn btn-inverted cancel" tabindex=2>Cancel</button>
+		<button id="confirm-yes" class="btn" tabindex=1>OK</button>
+	</form>
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util/simplescroll.js"></script>

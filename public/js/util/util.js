@@ -6,6 +6,7 @@
  */
 
 var Util = {
+	confirmCallback: null,
 	busyCount: 0,
 	strengths: ["Very weak", "Weak", "Ok", "Good", "Strong", "Very strong"],
 
@@ -38,6 +39,17 @@ var Util = {
 					Util.closePopup();
 					break;
 			}
+		});
+
+		$("#confirm").on('submit', function(e) {
+			e.preventDefault();
+
+			if (Util.confirmCallback) {
+				Util.confirmCallback();
+				Util.confirmCallback = null;
+			}
+
+			Util.closePopup("confirm");
 		});
 
 		$(document).on('mousedown', '#content-container, #shield', function(e) {
@@ -78,9 +90,9 @@ var Util = {
 			}
 		});
 
-		$(".close").on('click', function(e) {
+		$(document).on('click', '.close, .cancel', function(e) {
 			if ($(this).parents('.popup').length) {
-				Util.closePopup($(this).parent().attr('id'));
+				Util.closePopup($(this).parent().attr('id'), false, true);
 			}
 			else if ($(this).parents('.widget').length) {
 				Util.closeWidget($(this).parent().attr('id'));
@@ -189,25 +201,27 @@ var Util = {
 		if (Util.closePopup(null, true)) {
 			if ($("#" + id).find('ul.menu').length == 0) {
 				$("#shield").removeClass("hidden");
-				$("#" + id).find('*').filter(':input:visible:first').focus();
 			}
 
 			if (lock) {
 				$("#" + id).addClass("locked");
 			}
 			$("#" + id).removeClass("hidden");
+			$("#" + id).find('*').filter(':input:visible:first').focus();
 		}
 	},
 
-	closePopup: function(id, keepHidden, unlock) {
+	closePopup: function(id, keepHiddenInputs, unlock) {
 		// Do not close a locked popup
 		if ($(document).find(".popup.locked").length > 0 && !unlock) {
 			return false;
 		}
 
 		var target = (id) ? '#' + id : '.popup';
+		Util.confirmCallback = null;
 
 		// Only hide overlay when closing all popups or specifically a form
+		// so closing i.e. notification doesn't close other popups
 		if (!id || (id && $(target).is('form'))) {
 			$(".overlay, .form-hidden").addClass("hidden");
 		}
@@ -216,13 +230,15 @@ var Util = {
 		$(target + " .checkbox-box").removeClass("checkbox-checked");
 		$(target + " .password-strength, .error").addClass("hidden").text('');
 
-		if (keepHidden) {
+		if (keepHiddenInputs) {
 			// Don't clear hidden form-inputs
 			$(target + " input[type!='hidden']").val('');
 		}
 		else {
 			$(target + " input").val('');
 		}
+
+		document.activeElement.blur();
 
 		return true;
 	},
@@ -240,14 +256,20 @@ var Util = {
 		}).removeClass("hidden");
 	},
 
-	showConfirm: function(title, success) {
+	showConfirm: function(title, successCallback) {
 		$("#confirm-title").text(title);
-		$("#confirm-yes").unbind('click').on('click', success);
-		$("#confirm-yes").on('click', function() { Util.closePopup('confirm'); });
-		$("#confirm-no").unbind('click').on('click', function() {
-			Util.closePopup('confirm');
-		});
+		/*$("#confirm-yes").unbind('click').on('click', function() {
+			successCallback();
+			Util.closePopup();
+			Util.confirmCallback = null;
+		});*/
+		/*$("#confirm-no").unbind('click').on('click', function() {
+			Util.closePopup();
+		});*/
+
 		Util.showPopup('confirm');
+		Util.confirmCallback = successCallback;
+		$("#confirm-yes").focus();
 	},
 
 	closeWidget: function(id) {
@@ -435,7 +457,7 @@ var Util = {
 	},
 
 	generateFullURL: function(url) {
-		return (url.match("^http://") || url.match("^https://")) ? url : "http://" + url;
+		return (url == "" || url.match("^http://") || url.match("^https://")) ? url : "http://" + url;
 	},
 }
 

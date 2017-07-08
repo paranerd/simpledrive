@@ -7,17 +7,6 @@
  * @link		http://simpledrive.org
  */
 
-if (!$user) {
-	header('Location: ' . $base . 'core/login');
-	exit();
-}
-
-$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-$code		= (isset($_GET['code'])) ? $_GET['code'] : "";
-$username 	= ($user) ? $user['username'] : '';
-$admin 		= ($user) ? $user['admin'] : false;
-$color 		= ($user) ? $user['color'] : 'light';
-$fileview 	= ($user) ? $user['fileview'] : 'list';
 ?>
 
 <!DOCTYPE html>
@@ -38,11 +27,15 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 <body class="<?php echo $color; ?>">
 	<!-- Header -->
 	<div id="header">
-		<!-- Title -->
+		<!-- Nav back -->
 		<div id="logo" title="Return to files">
 			<a href="files" class="back"><span class="icon icon-arrow-left"></span>Settings</a>
 		</div>
-		<div id="path"><div class="path-element path-current">User Settings</div></div>
+		<!-- Title -->
+		<div id="title">
+			<div class="title-element title-element-current">User Settings</div>
+		</div>
+		<!-- Username -->
 		<div id="username" class="popup-trigger" data-target="menu"></div>
 	</div>
 
@@ -208,6 +201,12 @@ $fileview 	= ($user) ? $user['fileview'] : 'list';
 		<span id="note-icon" class="icon icon-info"></span>
 		<span id="note-msg">Error</span>
 		<span class="close">&times;</span>
+	</div>
+
+	<!-- Progress circle -->
+	<div id="busy" class="hidden">
+		<span class="busy-title">Loading...</span>
+		<span class="busy-indicator"></span>
 	</div>
 
 	<!-- Version info -->

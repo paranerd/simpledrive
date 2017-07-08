@@ -623,6 +623,7 @@ class File_Model {
 			$sourcepath = $this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'];
 
 			if (file_exists($targetpath . $sourcefile['filename']) ||
+				strpos($targetpath, $sourcepath) === 0 ||
 				(is_dir($sourcepath) && !Util::copy_dir($sourcepath, $targetpath . $sourcefile['filename'])) ||
 				(!is_dir($sourcepath) && !copy($sourcepath, $targetpath . $sourcefile['filename'])))
 			{
@@ -787,7 +788,10 @@ class File_Model {
 				$this->db->share_remove($sourcefile['id']);
 			}
 
-			if (file_exists($targetpath . "/" . $sourcefile['filename']) || !rename($sourcepath, $targetpath . "/" . $sourcefile['filename'])) {
+			if (file_exists($targetpath . "/" . $sourcefile['filename']) ||
+				strpos($targetpath, $sourcepath) === 0 ||
+				!rename($sourcepath, $targetpath . "/" . $sourcefile['filename']))
+			{
 				$this->db->log_write($this->uid, 2, "Move", "Error moving");
 				$errors++;
 				continue;
@@ -986,15 +990,17 @@ class File_Model {
 		return $file['filename'];
 	}
 
-	public function save_odf($target, $data) {
-		$file = $this->get_cached($target, self::$PERMISSION_WRITE);
+	public function save_odf($target) {
+		if (isset($_FILES['data'])) {
+			$file = $this->get_cached($target, self::$PERMISSION_WRITE);
 
-		if (!$file) {
-			throw new Exception('Error accessing file', '403');
-		}
+			if (!$file) {
+				throw new Exception('Error accessing file', '403');
+			}
 
-		if (file_put_contents($this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'], base64_decode($data))) {
-			return null;
+			if (move_uploaded_file($_FILES['data']['tmp_name'], $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'])) {
+				return null;
+			}
 		}
 
 		throw new Exception('Error saving file', '500');

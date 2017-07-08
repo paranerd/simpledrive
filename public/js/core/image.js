@@ -101,7 +101,6 @@ var ImageManager = {
 		var date = new Date();
 		var start = date.getTime();
 		var interval = setInterval(function() {
-			console.log("here");
 			if (date.getTime() - start > 5000) {
 				clearTimeout(interval);
 				Util.notify("Error displaying image", true, true);
@@ -118,7 +117,6 @@ var ImageManager = {
 
 				var targetWidth = (imgWidth * shrinkTo) * coverArea;
 				var targetHeight = (imgHeight * shrinkTo) * coverArea;
-				console.log("targetHeight");
 
 				ImageManager.image.style.position = "absolute";
 				ImageManager.image.style.height = targetHeight + "px";

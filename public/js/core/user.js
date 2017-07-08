@@ -100,6 +100,7 @@ var UserController = {
 
 var UserView = {
 	init: function() {
+		document.title = "User Settings | simpleDrive";
 		$("#username").html(Util.escape(username) + " &#x25BF");
 		$(window).resize();
 	}
@@ -269,8 +270,9 @@ var UserModel = {
 	},
 
 	load: function() {
+		Util.busy(true);
 		$("#list").empty();
-		$(".path-element").text("General");
+		$(".title-element").text("General");
 		$("#listHeader, #logHeader").addClass("hidden");
 		$("#status").removeClass("hidden");
 
@@ -285,6 +287,8 @@ var UserModel = {
 			if (data.msg.autoscan) { $("#autoscan").addClass("checkbox-checked"); }
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
+			Util.busy(false);
 		});
 	},
 

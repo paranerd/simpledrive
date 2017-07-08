@@ -7,7 +7,6 @@
  * @link		https://simpledrive.org
  */
 
-$demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'] == "simpledrive.org/demo");
 ?>
 
 <!DOCTYPE html>
@@ -44,7 +43,7 @@ $demo = ($_SERVER['HTTP_HOST'] == "demo.simpledrive.org" || $_SERVER['HTTP_HOST'
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util/util.js"></script>
-	
+
 	<script type="text/javascript" src="public/js/core/login.js"></script>
 </body>
 </html>

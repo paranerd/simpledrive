@@ -7,23 +7,11 @@
  * @link		http://simpledrive.org
  */
 
-	$id				= (sizeof($args) > 0) ? array_shift($args) : null;
-	$public		= isset($_REQUEST['public']) && $_REQUEST['public'];
-	$username = ($user) ? $user['username'] : '';
-	$admin 		= ($user) ? $user['admin'] : false;
-	$color 		= ($user) ? $user['color'] : 'light';
-	$fileview = ($user) ? $user['fileview'] : 'list';
-	$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-
-	if ((!$public && !$user) || !$id) {
-		header('Location: ' . $base . 'core/logout');
-		exit();
-	}
 ?>
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
-<head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-file="<?php echo $id; ?>">
+<head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-id="<?php echo $id; ?>">
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<title>Editor | simpleDrive</title>
 
@@ -38,15 +26,14 @@
 <body class="dark">
 	<!-- Header -->
 	<div id="header">
-		<!-- Title -->
+		<!-- Nav back -->
 		<div id="logo" title="Return to files">
-			<a href="files" class="back"><span class="icon icon-arrow-left"></span> Texteditor</a>
+			<a href="files" class="back"><span class="icon icon-arrow-left"></span>Texteditor</a>
 		</div>
-		<div id="path" title="Click to rename" class="popup-trigger" data-target="rename">
-			<div id="doc-name" class="path-element path-current"></div>
-			<span id="doc-savestatus" class="path-element path-current"></span>
+		<!-- Title -->
+		<div id="title" title="Click to rename" class="popup-trigger" data-target="rename">
+			<div class="title-element title-element-current"></div>
 		</div>
-
 		<!-- Username -->
 		<div id="username" class="popup-trigger" data-target="menu"></div>
 	</div>
@@ -95,6 +82,12 @@
 		<span id="note-icon" class="icon icon-info"></span>
 		<span id="note-msg">Error</span>
 		<span class="close">&times;</span>
+	</div>
+
+	<!-- Progress circle -->
+	<div id="busy" class="hidden">
+		<span class="busy-title">Loading...</span>
+		<span class="busy-indicator"></span>
 	</div>
 
 	<!-- Version info -->

@@ -5,8 +5,7 @@
  * @link		http://simpledrive.org
  */
 
-var username,
-	token;
+var token;
 
 $(document).ready(function() {
 	username = $('head').data('username');
@@ -17,19 +16,19 @@ $(document).ready(function() {
 	}
 
 	EditorController.init();
-	EditorView.init();
-	EditorModel.init($('head').data('file'));
+	EditorView.init(username);
+	EditorModel.init($('head').data('id'));
 });
 
 var EditorController = {
 	init: function() {
-		$("#doc-name").mouseenter(function(e) {
+		$("#title").mouseenter(function(e) {
 			if ((this.offsetWidth < this.scrollWidth || this.offsetHeight < this.scrollHeight)) {
-				Util.showCursorInfo(e, $("#doc-name").text());
+				Util.showCursorInfo(e, $(".title-element-current").text());
 			}
 		}).mousemove(function(e) {
 			if ((this.offsetWidth < this.scrollWidth || this.offsetHeight < this.scrollHeight)) {
-				Util.showCursorInfo(e, $("#doc-name").text());
+				Util.showCursorInfo(e, $(".title-element-current").text());
 			}
 		}).mouseout(function(e) {
 			Util.hideCursorInfo();
@@ -37,7 +36,7 @@ var EditorController = {
 
 		$("#texteditor").bind('input propertychange', function() {
 			EditorModel.changed = true;
-			$("#doc-savestatus").text("*");
+			$(".title-element-current").text(EditorModel.filename + "*");
 		}).keydown(function(e) {
 			switch(e.keyCode) {
 				case 9: // Tab
@@ -51,7 +50,6 @@ var EditorController = {
 		$(document).on('keydown', function(e) {
 			switch(e.keyCode) {
 				case 27: // Esc
-					Util.closePopup();
 					$("#texteditor").focus();
 					break;
 
@@ -72,19 +70,20 @@ var EditorController = {
 }
 
 var EditorView = {
-	init: function() {
+	init: function(username) {
 		$("#username").html(Util.escape(username) + " &#x25BF");
 		$(window).resize();
 	}
 }
 
 var EditorModel = {
-	file: null,
+	id: null,
+	filename: "",
 	saveLoop: null,
 	changed: false,
 
-	init: function(file) {
-		EditorModel.file = file;
+	init: function(id) {
+		EditorModel.id = id;
 		EditorModel.load();
 	},
 
@@ -94,7 +93,7 @@ var EditorModel = {
 		$("#texteditor").focus();
 		$("#texteditor").val(v.substring(0, pos) + '    ' + v.substring(pos, v.length));
 		EditorModel.changed = true;
-		$("#doc-savestatus").text("*");
+		$(".title-element-current").text(EditorModel.filename + "*");
 		Util.setSelectionRange($("#texteditor"), pos + 4, pos + 4);
 	},
 
@@ -107,17 +106,17 @@ var EditorModel = {
 	},
 
 	save: function() {
-		if (EditorModel.file) {
+		if (EditorModel.id) {
 			var content = $("#texteditor").val();
 			EditorModel.changed = false;
 
 			$.ajax({
 				url: 'api/files/savetext',
 				type: 'post',
-				data: {token: token, target: EditorModel.file, data: content},
+				data: {token: token, target: EditorModel.id, data: content},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
-				$("#doc-savestatus").text("");
+				$(".title-element-current").text(EditorModel.filename);
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 			});
@@ -125,19 +124,23 @@ var EditorModel = {
 	},
 
 	load: function() {
+		Util.busy(true);
 		$.ajax({
 			url: 'api/files/loadtext',
 			type: 'post',
-			data: {token: token, target: EditorModel.file},
+			data: {token: token, target: EditorModel.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			$("#doc-name").text(data.msg.filename);
-			document.title = Util.escape(data.msg.filename + " | simpleDrive");
+			EditorModel.filename = data.msg.filename;
+			$(".title-element-current").text(EditorModel.filename);
+			document.title = Util.escape(EditorModel.filename + " | simpleDrive");
 			$("#texteditor").text(data.msg.content).focus().scrollTop(0);
 			EditorModel.autosave();
 			window.onbeforeunload = Util.unsavedWarning();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
+			Util.busy(false);
 		});
 	},
 
@@ -146,11 +149,11 @@ var EditorModel = {
 		clearTimeout(EditorModel.saveLoop);
 		var newFilename = $("#rename-filename").val();
 
-		if (newFilename != "" && newFilename != EditorModel.file['filename']) {
+		if (newFilename != "" && newFilename != EditorModel.filename) {
 			$.ajax({
 				url: 'api/files/rename',
 				type: 'post',
-				data: {token: token, newFilename: newFilename, target: EditorModel.file},
+				data: {token: token, newFilename: newFilename, target: EditorModel.id},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				Util.closePopup('rename');

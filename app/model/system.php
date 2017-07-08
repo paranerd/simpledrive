@@ -186,7 +186,7 @@ class System_Model {
 
 		// MD5-Hashes for integrity-check
 		$plugins = array(
-			'webodf'	=> '3ea6feaff56a63e1d4924d2e143ae944',
+			'webodf'	=> '1c1b922e76c4e7e587f605a00fbddf25',
 			'sabredav'	=> '27a3b16e1ad67c23160aa1573713206d',
 			'phpmailer'	=> '080d71b0bf8f88aa04400ec3133cd91a'
 		);
@@ -197,18 +197,18 @@ class System_Model {
 
 		$plugin_path = $_SERVER['DOCUMENT_ROOT'] . $this->config['installdir'] . "plugins";
 
-		if (!is_dir($plugin_path)) {
-			mkdir($plugin_path, 0777, true);
-		}
-
 		if (is_dir($plugin_path . "/" . $name)) {
 			throw new Exception('Plugin already installed', '400');
+		}
+
+		if (!is_dir($plugin_path)) {
+			mkdir($plugin_path, 0777, true);
 		}
 
 		// Download plugin zip
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_HEADER, 1);
-		curl_setopt($ch, CURLOPT_URL, "http://simpledrive.org/public/plugins/" . $name);
+		curl_setopt($ch, CURLOPT_URL, "http://simpledrive.org/plugins/" . $name);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 		$res = curl_exec($ch);

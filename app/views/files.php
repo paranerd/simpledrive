@@ -7,18 +7,6 @@
  * @link		https://simpledrive.org
  */
 
-$id			= (sizeof($args) > 0) ? array_shift($args) : "0";
-$public		= ($section == 'pub');
-$username 	= ($user) ? $user['username'] : '';
-$admin		= ($user) ? $user['admin'] : false;
-$color		= ($user) ? $user['color'] : 'light';
-$fileview 	= ($user) ? $user['fileview'] : 'list';
-$token		= (isset($_COOKIE['token'])) ? $_COOKIE['token'] : null;
-
-if (!$public && !$user) {
-	header('Location: ' . $base . 'core/login');
-	exit();
-}
 ?>
 
 <!DOCTYPE html>
@@ -31,20 +19,22 @@ if (!$public && !$user) {
 	<base href="<?php echo $base; ?>">
 
 	<link rel="stylesheet" href="public/css/icons.css" />
+	<link rel="stylesheet" href="public/css/layout.css" />
 	<link rel="stylesheet" href="public/css/colors.css" />
 	<link rel="stylesheet" href="public/css/fileviews.css" />
-	<link rel="stylesheet" href="public/css/layout.css" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 </head>
 
 <body class="<?php echo $color; ?>">
 	<!-- Header -->
 	<div id="header">
+		<!-- Nav -->
 		<div id="logo">
 			<a href="files"><span class="icon icon-cloud"></span>Files</a>
 		</div>
-		<div id="path"></div>
-
+		<!-- Title -->
+		<div id="title"></div>
+		<!-- Username -->
 		<?php if ($section != 'pub') : ?>
 		<div id="username" class="popup-trigger" data-target="menu"></div>
 		<?php endif; ?>
@@ -54,14 +44,14 @@ if (!$public && !$user) {
 		<!-- Sidebar -->
 		<div id="sidebar">
 			<ul class="menu">
-				<li id="sidebar-create" class="popup-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span> <?php echo $lang['new']; ?></li>
-				<li id="sidebar-upload" class="popup-trigger" title="Upload file(s)" data-target="upload-menu"><span class="icon icon-upload"></span> Upload</li>
+				<li id="sidebar-create" class="popup-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span><?php echo $lang['new']; ?></li>
+				<li id="sidebar-upload" class="popup-trigger" title="Upload file(s)" data-target="upload-menu"><span class="icon icon-upload"></span>Upload</li>
 				<?php if ($section != 'pub') : ?>
 				<hr>
-				<li id="sidebar-files" class="sidebar-navigation focus" title="Show all files" data-action="files"><span class="icon icon-files"></span> <?php echo $lang['myfiles']; ?></li>
-				<li id="sidebar-shareout" class="sidebar-navigation" title="Show your shares" data-action="shareout"><span class="icon icon-users"></span> <?php echo $lang['yourshares']; ?></li>
-				<li id="sidebar-sharein" class="sidebar-navigation" title="Show files shared with you" data-action="sharein"><span class="icon icon-share"></span> <?php echo $lang['sharedwithyou']; ?></li>
-				<li id="sidebar-trash" class="sidebar-navigation" title="Show trash" data-action="trash"><span class="icon icon-trash"></span> <?php echo $lang['trash']; ?></li>
+				<li id="sidebar-files" class="sidebar-navigation focus" title="Show all files" data-action="files"><span class="icon icon-files"></span><?php echo $lang['myfiles']; ?></li>
+				<li id="sidebar-shareout" class="sidebar-navigation" title="Show your shares" data-action="shareout"><span class="icon icon-users"></span><?php echo $lang['yourshares']; ?></li>
+				<li id="sidebar-sharein" class="sidebar-navigation" title="Show files shared with you" data-action="sharein"><span class="icon icon-share"></span><?php echo $lang['sharedwithyou']; ?></li>
+				<li id="sidebar-trash" class="sidebar-navigation" title="Show trash" data-action="trash"><span class="icon icon-trash"></span><?php echo $lang['trash']; ?></li>
 				<?php endif; ?>
 			</ul>
 
@@ -289,10 +279,19 @@ if (!$public && !$user) {
 	<div id="dropzone" class="overlay hidden">Drop to upload</div>
 
 	<!-- Progress circle -->
-	<div id="busy">
+	<div id="busy" class="hidden">
 		<span class="busy-title">Loading...</span>
 		<span class="busy-indicator"></span>
 	</div>
+
+	<!-- Confirm -->
+	<form id="confirm" class="popup center hidden" action="#">
+		<span class="close">&times;</span>
+		<div id="confirm-title" class="title">Confirm</div>
+
+		<button id="confirm-no" class="btn btn-inverted cancel" tabindex=2>Cancel</button>
+		<button id="confirm-yes" class="btn" tabindex=1>OK</button>
+	</form>
 
 	<!-- Public share overlay -->
 	<?php if ($public && strlen($id) == 8) : ?>

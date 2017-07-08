@@ -31,7 +31,7 @@ class Files_Controller {
 		'upload'	=> array('target'),
 		'getpub'	=> array('hash', 'key'),
 		'audioinfo'	=> array('target'),
-		'saveodf'	=> array('target', 'data'),
+		'saveodf'	=> array('target'),
 		'savetext'	=> array('target', 'data'),
 		'loadtext'	=> array('target'),
 		'sync'		=> array('target', 'source', 'lastsync'),
@@ -114,15 +114,15 @@ class Files_Controller {
 	}
 
 	public function audioinfo() {
-		return $this->model->get_id3(json_decode($_REQUEST['target'], true));
+		return $this->model->get_id3($_REQUEST['target']);
 	}
 
 	public function saveodf() {
-		return $this->model->save_odf(json_decode($_REQUEST['target'], true), $_REQUEST['data']);
+		return $this->model->save_odf($_REQUEST['target'], $_REQUEST['data']);
 	}
 
 	public function savetext() {
-		return $this->model->save_text($_REQUEST['target'], $_REQUEST['data']);
+		return $this->model->save_text($_REQUEST['target']);
 	}
 
 	public function loadtext() {
