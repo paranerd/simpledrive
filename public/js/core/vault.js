@@ -12,6 +12,7 @@ var username,
 $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
+	Util.getVersion();
 
 	VaultModel.fetch();
 	VaultView.init();

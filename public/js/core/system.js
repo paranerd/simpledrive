@@ -11,6 +11,7 @@ var username,
 $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
+	Util.getVersion();
 
 	SystemController.init();
 	SystemView.init($('head').data('view'));

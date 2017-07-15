@@ -7,7 +7,6 @@
 
 $(document).ready(function() {
 	Util.init();
-	Util.getVersion();
 });
 
 var Util = new function() {

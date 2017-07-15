@@ -11,6 +11,7 @@ var	username,
 $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
+	Util.getVersion();
 
 	FileView.init($('head').data('view'));
 	FileModel.init($('head').data('id'), $('head').data('public'));

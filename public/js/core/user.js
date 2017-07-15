@@ -13,6 +13,7 @@ $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
 	code = $('head').data('code');
+	Util.getVersion();
 
 	if (code.length > 0) {
 		Backup.setToken(code);

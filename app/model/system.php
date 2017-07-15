@@ -13,6 +13,7 @@ class System_Model {
 		$this->config	= json_decode(file_get_contents('config/config.json'), true);
 		$this->db		= Database::getInstance();
 		$this->token	= $token;
+		$this->user		= $this->db->user_get_by_token($this->token);
 		$this->admin	= $this->db->user_is_admin($this->token);
 	}
 
@@ -189,7 +190,7 @@ class System_Model {
 
 		// MD5-Hashes for integrity-check
 		$plugins = array(
-			'webodf'	=> '12c46707418c72acf7069b06a93e1b54',
+			'webodf'	=> '5068218ac930295260f01e29d242aff7',
 			'sabredav'	=> '27a3b16e1ad67c23160aa1573713206d',
 			'phpmailer'	=> '080d71b0bf8f88aa04400ec3133cd91a'
 		);
@@ -274,6 +275,10 @@ class System_Model {
 	 */
 
 	public function get_version() {
+		if (!$this->user) {
+			throw new Exception('Permission denied', '403');
+		}
+
 		$version		= json_decode(file_get_contents('config/version.json'), true);
 		$url			= 'http://simpledrive.org/version';
 		$recent_version	= null;

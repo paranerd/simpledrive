@@ -10,6 +10,7 @@ var token;
 $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
+	Util.getVersion();
 
 	EditorController.init();
 	EditorView.init(username);
