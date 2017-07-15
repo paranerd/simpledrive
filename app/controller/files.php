@@ -35,7 +35,8 @@ class Files_Controller {
 		'savetext'	=> array('target', 'data'),
 		'loadtext'	=> array('target'),
 		'sync'		=> array('target', 'source', 'lastsync'),
-		'scan'		=> array('target')
+		'scan'		=> array('target'),
+		'search'	=> array('needle'),
 	);
 
 	public function __construct($token) {
@@ -122,7 +123,7 @@ class Files_Controller {
 	}
 
 	public function savetext() {
-		return $this->model->save_text($_REQUEST['target']);
+		return $this->model->save_text($_REQUEST['target'], $_REQUEST['data']);
 	}
 
 	public function loadtext() {
@@ -135,5 +136,9 @@ class Files_Controller {
 
 	public function scan() {
 		return $this->model->scan($_REQUEST['target']);
+	}
+
+	public function search() {
+		return $this->model->search($_REQUEST['needle']);
 	}
 }

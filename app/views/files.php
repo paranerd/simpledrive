@@ -101,8 +101,11 @@
 			<!-- Folder size -->
 			<div id="sidebar-footer">
 				<hr>
+				<span id="toggle-sidebar" class="icon icon-menu"></span>
 				<span id="scan" class="icon icon-sync"></span>
-				<span id="foldersize"></span>
+				<span id="change-fileview" class="icon icon-list"></span>
+				<span id="show-info" class="icon icon-search popup-trigger" data-target="search"></span>
+
 			</div>
 		</div>
 
@@ -110,7 +113,7 @@
 		<div id="content-container" class="<?php echo $fileview; ?>">
 			<div id="files-filter" class="filter hidden">
 				<input class="filter-input input-indent" placeholder="Filter..." value=""/>
-				<span class="close">&times;</span>
+				<span class="close center-ver">&times;</span>
 			</div>
 			<div class="content-header">
 				<span class="col0 checkbox"><span id="checker" class="checkbox-box"></span></span>
@@ -135,6 +138,11 @@
 			<div class="fileinfo-elem"><span class="icon icon-info"></span><span id="fileinfo-type"></span></div>
 			<div class="fileinfo-elem"><span class="icon icon-rename"></span><span id="fileinfo-edit"></span></div>
 			<div class="fileinfo-elem" id="fileinfo-link"><span class="icon icon-share"></span>Show Link</div>
+
+			<div id="fileinfo-footer">
+				<hr>
+				<span id="foldersize"></span>
+			</div>
 		</div>
 
 	</div>
@@ -214,6 +222,18 @@
 		<button class="btn">OK</button>
 	</form>
 
+	<!-- Search popup -->
+	<form id="search" class="popup center hidden" action="#">
+		<span class="close">&times;</span>
+		<div class="title"><?php echo $lang['search']; ?></div>
+
+		<label for="search-input"><?php echo $lang['filename']; ?></label>
+		<input id="search-input" type="text" placeholder="<?php echo $lang['filename']; ?>" />
+
+		<div class="error hidden"></div>
+		<button class="btn">OK</button>
+	</form>
+
 	<!-- Share popup -->
 	<form id="share" class="popup center hidden" action="#">
 		<span class="close">&times;</span>
@@ -262,7 +282,6 @@
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<span class="close">&times;</span>
 		<div id="info-title" class="title title-large">simpleDrive</div>
 		<div class="subtitle">Private. Secure. Simple.</div>
 		<hr>

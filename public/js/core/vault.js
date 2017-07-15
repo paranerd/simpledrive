@@ -13,17 +13,13 @@ $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
 
-	VaultController.init();
-	VaultView.init();
 	VaultModel.fetch();
-
-	Util.getVersion();
+	VaultView.init();
+	VaultController.init();
 });
 
-var VaultController = {
-	init: function() {
-		simpleScroll.init("entries");
-
+var VaultController = new function() {
+	this.init = function() {
 		$("#autoscan.checkbox-box").on('click', function(e) {
 			// This fires before checkbox-status has been changed
 			var enable = $("#autoscan").hasClass("checkbox-checked") ? 0 : 1;
@@ -107,7 +103,7 @@ var VaultController = {
 			VaultModel.list.select(this.value);
 		});
 
-		$(document).on('mouseup', '.item', function(e) {
+		$(document).on('click', '.item', function(e) {
 			// When click on thumbnail or shared-icon, only select!
 			if ($(e.target).is(".thumbnail, .shared, input")) {
 				return;
@@ -135,13 +131,9 @@ var VaultController = {
 			VaultModel.setPassphrase($("#passphrase-passphrase").val());
 		});
 
-		$("#create-menu li").on('click', function(e) {
-			$("#entry-type").val($(this).data('type'))
-		});
-
-		$("#entry").off('submit').on('submit', function(e) {
+		$("form[id^='entry']").on('submit', function(e) {
 			e.preventDefault();
-			VaultModel.save();
+			VaultModel.save($(this).data('type'));
 		});
 
 		/**
@@ -191,55 +183,52 @@ var VaultController = {
 	}
 }
 
-var VaultView = {
-	init: function() {
-		document.title = "Vault | simpleDrive";
-		$(".title-element").text("Entries");
+var VaultView = new function() {
+	this.init = function() {
 		$("#username").html(Util.escape(username) + " &#x25BF");
 		$(window).resize();
-	},
+	}
 
-	showUnlock: function() {
+	this.showUnlock = function() {
 		Util.showPopup("unlock", true);
-	},
+	}
 
-	showSetPassphrase: function() {
+	this.showSetPassphrase = function() {
 		Util.showPopup("passphrase", true);
-	},
+	}
 
-	showEntry: function() {
+	this.showEntry = function() {
 		var selection = VaultModel.list.getFirstSelected();
 		var item = selection.item;
 
-		Util.showPopup("entry");
+		Util.showPopup("entry-" + item.type);
 
-		$("#entry-title").val(item.title);
-		$("#entry-type").val(item.type);
-		$("#entry-category").val(item.category);
-		$("#entry-url").val(item.url);
-		$("#entry-user").val(item.user);
-		$("#entry-pass").val(item.pass);
-		$("#entry-open-url a").attr("href", Util.generateFullURL(item.url));
+		$("#entry-" + item.type + "-title").val(item.title);
+		$("#entry-" + item.type + "-type").val(item.type);
+		$("#entry-" + item.type + "-category").val(item.category);
 
-		$("#entry-copy-user").off('click').on('click', function() {
-			Util.copyToClipboard(item.user);
-			Util.notify("Copied username to clipboard", true, false);
-		});
+		if (item.type == 'website') {
+			$("#entry-website-url").val(item.url);
+			$("#entry-website-user").val(item.user);
+			$("#entry-website-pass").val(item.pass);
+			$("#entry-website-open-url a").attr("href", Util.generateFullURL(item.url));
 
-		$("#entry-copy-pass").off('click').on('click', function() {
-			Util.copyToClipboard(item.pass);
-			Util.notify("Copied password to clipboard", true, false);
-		});
-	},
+			$("#entry-website-copy-user").off('click').on('click', function() {
+				Util.copyToClipboard(item.user);
+				Util.notify("Copied username to clipboard", true, false);
+			});
 
-	display: function(entries) {
-		simpleScroll.empty("entries");
-		VaultModel.list.setData(entries);
-
-		if (!entries || entries.length == 0) {
-			VaultModel.list.setEmptyView("entries");
+			$("#entry-website-copy-pass").off('click').on('click', function() {
+				Util.copyToClipboard(item.pass);
+				Util.notify("Copied password to clipboard", true, false);
+			});
 		}
+		else if (item.type == 'note') {
+			$("#entry-" + item.type + "-content").val(item.content);
+		}
+	}
 
+	this.display = function(entries) {
 		for (var i in entries) {
 			var item = entries[i];
 
@@ -291,70 +280,78 @@ var VaultView = {
 	}
 }
 
-var VaultModel = {
-	passphrase: "",
-	encrypted: "",
+var VaultModel = new function() {
+	var self = this;
+	this.passphrase = "";
+	this.encrypted = "";
 
-	list: new List(null, false),
-	all: [],
-	filtered: [],
-	clipboard: {},
+	this.list = new List("entries", VaultView.display);
+	this.clipboard = {};
 
-	filterNeedle: '',
-	filterKey: null,
-	sortOrder: 1, // 1: asc, -1: desc
+	this.save = function(type) {
+		// Get item if editing - empty object if creating
+		var item = (self.list.getSelectedCount() > 0) ? self.list.getFirstSelected().item : {};
 
-	save: function() {
-		var item = (VaultModel.list.getSelectedCount() > 0) ? VaultModel.list.getFirstSelected().item : {};
-		var origTitle = (item) ? item.title : "";
-
-		if ($("#entry-title").val() == "") {
-			Util.showFormError('entry', 'No title provided');
+		// Require title
+		var origTitle = (item.title) ? item.title : $("#entry-" + type + "-title").val();
+		if ($("#entry-" + type + "-title").val() == "") {
+			Util.showFormError('entry-' + type, 'No title provided');
 			return;
 		}
 
-		$("#entry .btn").prop('disabled', true);
-		var found = false;
+		// Check if title already exists
+		var index = Util.searchArrayForKey(self.list.getAll(), 'title', origTitle);
+		if (!item.title && index != null) {
+			Util.showFormError('entry-' + type, 'Entry already exists');
+			return;
+		}
 
-		item.title = $("#entry-title").val();
-		item.category = $("#entry-category").val();
-		item.type = $("#entry-type").val();
+		// Block form submit
+		$("#entry-" + type + " .btn").prop('disabled', true);
+
+		// Set data
+		item.title = $("#entry-" + type + "-title").val();
+		item.category = $("#entry-" + type + "-category").val();
+		item.type = type;
 		item.icon = "default";
-		item.url = Util.generateFullURL($("#entry-url").val());
-		item.user = $("#entry-user").val();
-		item.pass = $("#entry-pass").val();
 		item.edit = Date.now();
 
-		for (var i in VaultModel.all) {
-			var entry = VaultModel.all[i];
-			if (entry.title == origTitle) {
-				VaultModel.all[i] = item;
-				found = true;
-				break;
-			}
+		if (item.type == 'website') {
+				item.url = Util.generateFullURL($("#entry-" + type + "-url").val());
+				item.user = $("#entry-" + type + "-user").val();
+				item.pass = $("#entry-" + type + "-pass").val();
+		}
+		else if (item.type == 'note') {
+			item.content = $("#entry-" + type + "-content").val();
 		}
 
-		if (!found) {
-			VaultModel.all.push(item);
+		// Update/create entry
+		if (index) {
+			self.list.update(index, item);
+		}
+		else {
+			self.list.add(item);
 		}
 
-		$("#entry .btn").prop('disabled', false);
-		Util.closePopup('entry', true);
+		// Unblock submit and close popup
+		$("#entry-" + type + " .btn").prop('disabled', false);
+		Util.closePopup('entry-' + type, true);
 
-		VaultModel.sync();
-	},
+		// Sync
+		self.sync();
+	}
 
-	sync: function() {
-		if (VaultModel.passphrase == '') {
+	this.sync = function() {
+		if (self.passphrase == '') {
 			VaultView.showSetPassphrase();
 			return;
 		}
-		Util.busy(true, "Syncing...");
+		var bId = Util.startBusy("Syncing...");
 
 		setTimeout(function() {
 			try {
-				var vaultString = JSON.stringify(VaultModel.all);
-				var encryptedVault = Crypto.encrypt(vaultString, VaultModel.passphrase.toString());
+				var vaultString = JSON.stringify(self.list.getAll());
+				var encryptedVault = Crypto.encrypt(vaultString, self.passphrase.toString());
 
 				$.ajax({
 					url: 'api/vault/sync',
@@ -362,43 +359,40 @@ var VaultModel = {
 					data: {token: token, vault: encryptedVault, lastedit: Date.now()},
 					dataType: "json"
 				}).done(function(data, statusText, xhr) {
-					var dec = Crypto.decrypt(data.msg, VaultModel.passphrase);
-					VaultModel.all = JSON.parse(dec);
-					VaultModel.filtered = JSON.parse(dec);
-					VaultView.display(VaultModel.filtered);
-
+					self.encrypted = data.msg;
+					self.unlock(self.passphrase);
 					Util.notify("Saved.", true, false);
 				}).fail(function(xhr, statusText, error) {
 					Util.notify(Util.getError(xhr), true, true);
 				}).always(function() {
-					Util.busy(false);
+					Util.endBusy(bId);
 				});
 			} catch(e) {
 				Util.notify("Error encrypting", true, true);
-				Util.busy(false);
+				Util.endBusy(bId);
 				return;
 			}
 		}, 100);
-	},
+	}
 
-	remove: function() {
+	this.remove = function() {
 		Util.showConfirm('Delete entry?', function() {
-			var selected = VaultModel.list.getAllSelected();
+			var all = self.list.getAll();
+			var selected = self.list.getAllSelected();
 			for (var s in selected) {
-				for (var i in VaultModel.all) {
-					if (VaultModel.all[i].title == selected[s].title) {
-						VaultModel.all.splice(i, 1);
+				for (var i in all) {
+					if (all[i].title == selected[s].title) {
+						all.splice(i, 1);
 					}
 				}
 			}
 
-			VaultModel.sync();
+			self.sync();
 		});
-	},
+	}
 
-	fetch: function() {
-		Util.busy(true, "Loading...");
-		VaultModel.list.setEmptyView("entries", "Loading...");
+	this.fetch = function() {
+		var bId = Util.startBusy("Loading...");
 
 		$.ajax({
 			url: 'api/vault/get',
@@ -407,7 +401,7 @@ var VaultModel = {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			if (data.msg) {
-				VaultModel.encrypted = data.msg;
+				self.encrypted = data.msg;
 				VaultView.showUnlock();
 			}
 			else {
@@ -416,35 +410,34 @@ var VaultModel = {
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		}).always(function() {
-			Util.busy(false);
+			Util.endBusy(bId);
 		});
-	},
+	}
 
-	unlock: function(passphrase) {
-		Util.busy(true, "Decrypting...");
+	this.unlock = function(passphrase) {
+		var bId = Util.startBusy("Decrypting...");
 
 		setTimeout(function() {
 			try {
-				var dec = Crypto.decrypt(VaultModel.encrypted, passphrase);
-				VaultModel.passphrase = passphrase;
-				VaultModel.all = JSON.parse(dec);
-				VaultModel.filtered = JSON.parse(dec);
+				var dec = Crypto.decrypt(self.encrypted, passphrase);
+				self.passphrase = passphrase;
+				if (dec) {
+					self.list.setData(JSON.parse(dec));
+				}
 
 				Util.closePopup("unlock", false, true);
-				Util.busy(false);
-				VaultView.display(VaultModel.filtered);
+				Util.endBusy(bId);
 			} catch(e) {
 				Util.showFormError("unlock", "Wrong passphrase");
-				Util.busy(false);
+				Util.endBusy(bId);
 			}
 		}, 100);
-	},
+	}
 
-	setPassphrase: function(passphrase) {
+	this.setPassphrase = function(passphrase) {
 		if (passphrase) {
-			VaultModel.passphrase = passphrase;
+			self.passphrase = passphrase;
 			Util.closePopup("passphrase", false, true);
-			VaultView.display();
 		}
 		else {
 			Util.showFormError('passphrase', 'Please enter a passphrase');

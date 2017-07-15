@@ -1,167 +1,324 @@
-function List (callback, multi) {
-	this.data = [];
-	this.filtered = [];
-	this.filterNeedle = '';
-	this.filterKey = null;
-	this.sortOrder = 1; // 1: asc, -1: desc
-	this.selected = {};
-	this.currentSelected = -1;
-	this.callback = callback;
-	this.multiselect = (multi) ? true : false;
+var List = (function() {
+	var self;
 
-	this.setData = function(data) {
-		this.data = data;
-		this.unselectAll();
-	};
+	// Constructor
+	function List(id, displayCallback, multi, updateCallback) {
+		// General
+		self = this;
+		this.id = id;
 
-	this.select = function(id) {
-		if (this.data.length > id) {
-			if (!this.multiselect) {
-				this.unselectAll();
+		// Data
+		this.data = [];
+		this.masterFiltered = [];
+		this.filtered = [];
+		this.filterNeedle = '';
+		this.filterKeys = null;
+		this.defaultFilterKeys = null;
+		this.sortOrder = 1; // 1: asc, -1: desc
+
+		// Selection
+		this.multiselect = (multi) ? true : false;
+		this.selected = {};
+		this.currentSelected = -1;
+
+		// Callbacks
+		this.updateCallback = updateCallback;
+		this.displayCallback = displayCallback;
+
+		// Initialize
+		this.init();
+	}
+
+	// Methods
+	List.prototype = {
+		init: function() {
+			$(document).on('keydown', function(e) {
+				if ($("#" + self.id).is(":visible")) {
+					// Filter
+					if (!e.shiftKey && !e.ctrlKey &&
+						$(":focus").length == 0 &&
+						$("#" + self.id + "-filter").hasClass('hidden') &&
+						String.fromCharCode(e.keyCode).toLowerCase().match(/^[\wöäüß]+$/i))
+					{
+						$("#" + self.id + "-filter").removeClass('hidden');
+						$("#" + self.id + "-filter .filter-input").focus();
+
+						setTimeout(function() {
+							// Place cursor behind text
+							$("#" + self.id + "-filter .filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
+						}, 10);
+					}
+				}
+			});
+
+			$(document).on('keyup', function(e) {
+				switch(e.keyCode) {
+					case 27: // Esc
+						self.filterRemove();
+						break;
+				}
+			});
+
+			$("#" + self.id + "-filter .close").on('click', function(e) {
+				self.filterRemove();
+			});
+
+			$("#" + this.id + "-filter .filter-input").on('input', function(e) {
+				self.filter($(this).val());
+			});
+
+			simpleScroll.init(self.id);
+		},
+
+		setData: function(data, orderBy) {
+			this.data = data;
+			this.masterFiltered = data;
+			this.filtered = data;
+			this.defaultFilterKeys = (orderBy) ? [orderBy] : [];
+			this.currentSelected = -1;
+
+			this.filterRemove();
+
+			if (orderBy) {
+				this.order(orderBy, 1);
 			}
 
-			this.selected[id] = this.data[id];
-			this.currentSelected = parseInt(id);
+			this.display();
+		},
+
+		setComparator: function(comparator) {
+			this.compare = comparator;
+		},
+
+		add: function(data) {
+			this.data.push(data);
+		},
+
+		update: function(id, data) {
+			if (this.data.length > id) {
+				this.data[id] = data;
+			}
+		},
+
+		select: function(id) {
+			if (this.filtered.length > id) {
+				if (!this.multiselect) {
+					this.unselectAll();
+				}
+
+				this.selected[id] = this.filtered[id];
+				this.currentSelected = parseInt(id);
+
+				this.updateSelections();
+				if (this.updateCallback) {
+					this.updateCallback(id);
+				}
+			}
+		},
+
+		unselect: function(id) {
+			delete this.selected[id];
 
 			this.updateSelections();
-			if (this.callback) {
-				this.callback(id);
+			if (this.updateCallback) {
+				this.updateCallback();
 			}
-		}
-	};
+		},
 
-	this.unselect = function(id) {
-		delete this.selected[id];
-
-		this.updateSelections();
-		if (this.callback) {
-			this.callback();
-		}
-	};
-
-	this.selectAll = function() {
-		if (this.multiselect) {
-			for (var i = 0; i < Object.keys(this.data).length; i++) {
-				this.selected[i] = this.data[i];
+		selectAll: function() {
+			if (this.multiselect) {
+				for (var i = 0; i < Object.keys(this.filtered).length; i++) {
+					this.selected[i] = this.filtered[i];
+				}
 			}
-		}
 
-		this.updateSelections();
-		if (this.callback) {
-			this.callback();
-		}
-	};
+			this.updateSelections();
+			if (this.updateCallback) {
+				this.updateCallback();
+			}
+		},
 
-	this.unselectAll = function() {
-		this.selected = {};
+		unselectAll: function() {
+			this.selected = {};
 
-		this.updateSelections();
-		if (this.callback) {
-			this.callback();
-		}
-	};
+			this.updateSelections();
+			if (this.updateCallback) {
+				this.updateCallback();
+			}
+		},
 
-	this.selectNext = function() {
-		this.unselectAll();
-		this.currentSelected = (this.currentSelected < this.data.length - 1) ? this.currentSelected + 1 : this.data.length -1;
-		this.select(this.currentSelected);
-	};
-
-	this.selectPrev = function() {
-		this.unselectAll();
-		this.currentSelected = (this.currentSelected > 0) ? this.currentSelected - 1 : 0;
-		this.select(this.currentSelected);
-	};
-
-	this.getAllSelectedIDs = function() {
-		var ids = [];
-		for (var i in this.selected) {
-			ids.push(this.selected[i].id);
-		}
-
-		return ids;
-	};
-
-	this.getAllSelected = function() {
-		return this.selected;
-	};
-
-	this.getFirstSelected = function() {
-		for (var first in this.selected) break;
-		return {id: first, item: this.selected[first]};
-	};
-
-	this.getSelectedAt = function(id) {
-		return this.selected[id];
-	};
-
-	this.getSelectedCount = function() {
-		return Object.keys(this.selected).length;
-	};
-
-	this.toggleSelection = function(id) {
-		// Un-select
-		if (typeof this.getSelectedAt(id) !== "undefined") {
-			this.unselect(id);
-		}
-		// Select
-		else {
-			this.select(id);
-		}
-	};
-
-	this.toggleAllSelection = function() {
-		if (Object.keys(this.selected).length > 0) {
+		selectNext: function() {
 			this.unselectAll();
-		}
-		else {
-			this.selectAll();
-		}
-	};
+			this.currentSelected = (this.currentSelected < this.filtered.length - 1) ? this.currentSelected + 1 : this.filtered.length -1;
+			this.select(this.currentSelected);
+		},
 
-	this.get = function(id) {
-		return (id >= 0 && id < this.data.length) ? this.data[id] : null;
-	};
+		selectPrev: function() {
+			this.unselectAll();
+			this.currentSelected = (this.currentSelected > 0) ? this.currentSelected - 1 : 0;
+			this.select(this.currentSelected);
+		},
 
-	this.getAll = function() {
-		return this.data;
-	};
+		getAllSelectedIDs: function() {
+			var ids = [];
+			for (var i in this.selected) {
+				ids.push(this.selected[i].id);
+			}
 
-	this.getAllCount = function() {
-		return this.data.length;
-	};
+			return ids;
+		},
 
-	/**
-	 * Adds a loading-placeholder or indicator of empty folder
-	 */
-	this.setEmptyView = function(id, msg) {
-		var empty = document.createElement("div");
-		empty.style.lineHeight = $("#" + id).height() + "px";
-		empty.className = "empty";
-		empty.innerHTML = (msg) ? msg : "Nothing to see here...";
-		simpleScroll.append(id, empty);
-		simpleScroll.update();
-	};
+		getAllSelected:function() {
+			return this.selected;
+		},
 
-	/**
-	 * Handles selection hightlighting
-	 */
-	this.updateSelections = function(id) {
-		// Reset all selected status
-		$(".item").removeClass("selected");
+		getFirstSelected: function() {
+			for (var first in this.selected) break;
+			return {id: first, item: this.selected[first]};
+		},
 
-		for (var i in this.selected) {
-			$("#item" + i).addClass("selected");
-		}
+		getSelectedAt: function(id) {
+			return this.selected[id];
+		},
 
-		var count = this.getSelectedCount();
+		getSelectedCount: function() {
+			return Object.keys(this.selected).length;
+		},
 
-		// Update selection-checkbox
-		if (count > 0 && count == this.getAll().length) {
-			$("#checker").addClass("checkbox-checked");
-		}
-		else {
-			$("#checker").removeClass("checkbox-checked");
-		}
-	};
-}
+		toggleSelection: function(id) {
+			// Un-select
+			if (typeof this.getSelectedAt(id) !== "undefined") {
+				this.unselect(id);
+			}
+			// Select
+			else {
+				this.select(id);
+			}
+		},
+
+		toggleAllSelection: function() {
+			if (Object.keys(this.selected).length > 0) {
+				this.unselectAll();
+			}
+			else {
+				this.selectAll();
+			}
+		},
+
+		get: function(id) {
+			return (id >= 0 && id < this.filtered.length) ? this.filtered[id] : null;
+		},
+
+		getAllFiltered: function() {
+			return this.filtered;
+		},
+
+		getAll: function() {
+			return this.data;
+		},
+
+		/**
+		 * Adds a loading-placeholder or indicator of empty folder
+		 */
+		setEmptyView: function(msg) {
+			simpleScroll.empty(self.id);
+			var empty = document.createElement("div");
+			empty.style.lineHeight = $("#" + self.id).height() + "px";
+			empty.className = "empty";
+			empty.innerHTML = (msg) ? msg : "Nothing to see here...";
+			simpleScroll.append(self.id, empty);
+			simpleScroll.update();
+		},
+
+		/**
+		 * Handles selection hightlighting
+		 */
+		updateSelections: function(id) {
+			// Reset all selected status
+			$(".item").removeClass("selected");
+
+			for (var i in this.selected) {
+				$("#item" + i).addClass("selected");
+			}
+
+			var count = this.getSelectedCount();
+
+			// Update selection-checkbox
+			if (count > 0 && count == this.getAll().length) {
+				$("#checker").addClass("checkbox-checked");
+			}
+			else {
+				$("#checker").removeClass("checkbox-checked");
+			}
+		},
+
+		/*
+		 * A filter before the filter
+		 * e.g. for filtering in gallery mode
+		 */
+		masterFilter: function(needle, keys) {
+			this.masterFiltered = this.filter(needle, keys);
+		},
+
+		display: function() {
+			if (!this.filtered || this.filtered.length == 0) {
+				this.setEmptyView();
+			}
+			else if (this.displayCallback) {
+				simpleScroll.empty(self.id);
+				this.displayCallback(this.filtered);
+				simpleScroll.update(self.id);
+			}
+		},
+
+		filter: function(needle, keys) {
+			this.filterNeedle = needle;
+			this.filterKeys = (keys) ? keys : this.defaultFilterKeys;
+			this.filtered = Util.filter(this.masterFiltered, needle, this.filterKeys);
+
+			this.display();
+
+			if (needle) {
+				this.select(0);
+			}
+			else {
+				this.unselectAll();
+				$("#" + this.id + "-filter").addClass("hidden");
+				document.activeElement.blur();
+			}
+
+			return this.filtered;
+		},
+
+		masterFilterRemove: function() {
+			this.masterFiltered = this.data;
+			this.filterRemove();
+		},
+
+		filterRemove: function() {
+			$("#" + this.id + "-filter").addClass("hidden");
+			$(".filter-input").val('');
+			return this.filter('');
+		},
+
+		order: function(key, order) {
+			this.sortOrder = (order) ? order : this.sortOrder *= -1;
+			this.data = this.data.sort(this.compare(key, this.sortOrder));
+
+			var text = (this.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
+			$(".order-direction").text('');
+			$("#" + key + "-ord").html(text);
+			this.filter(this.filterNeedle, this.filterKeys);
+		},
+
+		compare: function(key, order) {
+			return function(a, b) {
+				if (a[key].toString().toLowerCase() > b[key].toString().toLowerCase()) return order * 1;
+				if (a[key].toString().toLowerCase() < b[key].toString().toLowerCase()) return order * -1;
+				return 0;
+			}
+		},
+	}
+
+	return List;
+})();

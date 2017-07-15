@@ -5,12 +5,18 @@
  * @link		http://simpledrive.org
  */
 
-var Util = {
-	confirmCallback: null,
-	busyCount: 0,
-	strengths: ["Very weak", "Weak", "Ok", "Good", "Strong", "Very strong"],
+$(document).ready(function() {
+	Util.init();
+	Util.getVersion();
+});
 
-	init: function() {
+var Util = new function() {
+	var self = this;
+	this.confirmCallback = null;
+	this.busyMessages = [];
+	this.strengths = ["Very weak", "Weak", "Ok", "Good", "Strong", "Very strong"];
+
+	this.init = function() {
 		$(window).resize(function() {
 			// Position centered divs
 			$('.center').each(function(i, obj) {
@@ -26,6 +32,12 @@ var Util = {
 				});
 			});
 
+			$('.center-ver').each(function(i, obj) {
+				$(this).css({
+					top : ($(this).parent().height() - $(this).outerHeight()) / 2
+				});
+			});
+
 			if (typeof simpleScroll !== 'undefined') {
 				setTimeout(function() {
 					simpleScroll.update();
@@ -36,7 +48,7 @@ var Util = {
 		$(document).on('keyup', function(e) {
 			switch(e.keyCode) {
 				case 27: // Esc
-					Util.closePopup();
+					self.closePopup();
 					break;
 			}
 		});
@@ -44,16 +56,16 @@ var Util = {
 		$("#confirm").on('submit', function(e) {
 			e.preventDefault();
 
-			if (Util.confirmCallback) {
-				Util.confirmCallback();
-				Util.confirmCallback = null;
+			if (self.confirmCallback) {
+				self.confirmCallback();
+				self.confirmCallback = null;
 			}
 
-			Util.closePopup("confirm");
+			self.closePopup("confirm");
 		});
 
 		$(document).on('mousedown', '#content-container, #shield', function(e) {
-			Util.closePopup();
+			self.closePopup();
 		});
 
 		$(document).on('click', '.checkbox-box', function(e) {
@@ -62,10 +74,10 @@ var Util = {
 
 		$(document).on('click', '.popup-trigger', function(e) {
 			if ($("#" + $(this).data('target')).hasClass('hidden')) {
-				Util.showPopup($(this).data('target'));
+				self.showPopup($(this).data('target'));
 			}
 			else {
-				Util.closePopup($(this).data('target'));
+				self.closePopup($(this).data('target'));
 			}
 		});
 
@@ -80,7 +92,7 @@ var Util = {
 
 			if ($(this).val()) {
 				$("#" + id).removeClass("hidden");
-				var strength = Util.checkPasswordStrength($(this).val());
+				var strength = self.checkPasswordStrength($(this).val());
 				var cls = (strength.score > 1) ? 'password-ok' : 'password-bad';
 				$("#" + id).removeClass().addClass('password-strength ' + cls).text(strength.text);
 			}
@@ -92,35 +104,50 @@ var Util = {
 
 		$(document).on('click', '.close, .cancel', function(e) {
 			if ($(this).parents('.popup').length) {
-				Util.closePopup($(this).parent().attr('id'), false, true);
+				self.closePopup($(this).parent().attr('id'), false, true);
 			}
 			else if ($(this).parents('.widget').length) {
-				Util.closeWidget($(this).parent().attr('id'));
+				self.closeWidget($(this).parent().attr('id'));
 			}
 		});
 
 		$(".popup .menu li").on('click', function() {
 			$(this).closest('.popup').addClass("hidden");
 		});
-	},
 
-	busy: function(start, msg) {
-		Util.busyCount = (start) ? ++Util.busyCount : --Util.busyCount;
-		Util.busyCount = (Util.busyCount < 0) ? 0 : Util.busyCount;
+		$(document).on('click', '#toggle-sidebar', function() {
+			$("#sidebar, #logo").toggleClass("sidebar-slim");
+		});
+	}
 
-		if (Util.busyCount > 0) {
-			$("#busy").removeClass("hidden");
-			if (start && msg) {
-				$("#busy .busy-title").text(msg);
-			}
+	this.startBusy = function(msg) {
+		$("#busy").removeClass("hidden");
+
+		var id = Date.now();
+		msg = (msg) ? msg : "Busy...";
+		$("#busy .busy-title").text(msg);
+
+		self.busyMessages.push({id: id, msg: msg});
+
+		return id;
+	}
+
+	this.endBusy = function(busyId) {
+		var id = self.searchArrayForKey(self.busyMessages, 'id', busyId);
+
+		if (id) {
+			self.busyMessages.splice(id, 1);
+		}
+
+		if (self.busyMessages.length > 0) {
+			$("#busy .busy-title").text(self.busyMessages[self.busyMessages.length - 1]['msg']);
 		}
 		else {
 			$("#busy").addClass("hidden");
-			$("#busy .busy-title").text("Busy...");
 		}
-	},
+	}
 
-	copyToClipboard: function(text) {
+	this.copyToClipboard = function(text) {
 		var textArea = document.createElement('textarea');
 		textArea.style.opacity = 0;
 		textArea.value = text;
@@ -128,9 +155,9 @@ var Util = {
 		textArea.select();
 		document.execCommand('copy');
 		document.body.removeChild(textArea);
-	},
+	}
 
-	byteToString: function(size) {
+	this.byteToString = function(size) {
 		size = parseInt(size);
 		if (size > (1024 * 1024 * 1024)) {
 			return parseInt((size / (1024 * 1024 * 1024)) * 100) / 100 + " GB";
@@ -144,9 +171,9 @@ var Util = {
 		else {
 			return size + " Byte";
 		}
-	},
+	}
 
-	checkPasswordStrength: function(password) {
+	this.checkPasswordStrength = function(password) {
 		var score = 0;
 
 		// Longer than 6 chars
@@ -167,17 +194,17 @@ var Util = {
 		// Password with 6 or less characters is always a bad idea
 		score = (password.length <= 6) ? (Math.min(score, 1)) : score;
 
-		return {score: score, text: Util.strengths[score]};
-	},
+		return {score: score, text: self.strengths[score]};
+	}
 
-	filter: function(list, needle, keys) {
+	this.filter = function(list, needle, keys) {
 		var filtered = [];
-		if (list.length > 0) {
+		if (list && list.length > 0) {
 			for (var i in list) {
 				// Check values for given keys
-				if (keys) {
+				if (keys && keys.length > 0) {
 					for (var k in keys) {
-						if (list[i][keys[k]].toString().toLowerCase().indexOf(needle.toString().toLowerCase()) != -1) {
+						if (list[i][keys[k]] && list[i][keys[k]].toString().toLowerCase().indexOf(needle.toString().toLowerCase()) != -1) {
 							filtered.push(list[i]);
 						}
 					}
@@ -185,7 +212,8 @@ var Util = {
 				// Check values for all the keys
 				else {
 					for (var key in list[i]) {
-						if (list[i][key].toString().toLowerCase().indexOf(needle.toString().toLowerCase()) != -1) {
+						if (list[i][key] && list[i][key].toString().toLowerCase().indexOf(needle.toString().toLowerCase()) != -1)
+						{
 							filtered.push(list[i]);
 							break;
 						}
@@ -195,10 +223,10 @@ var Util = {
 		}
 
 		return filtered;
-	},
+	}
 
-	showPopup: function(id, lock) {
-		if (Util.closePopup(null, true)) {
+	this.showPopup = function(id, lock) {
+		if (id && self.closePopup(null, true)) {
 			if ($("#" + id).find('ul.menu').length == 0) {
 				$("#shield").removeClass("hidden");
 			}
@@ -209,21 +237,23 @@ var Util = {
 			$("#" + id).removeClass("hidden");
 			$("#" + id).find('*').filter(':input:visible:first').focus();
 		}
-	},
+	}
 
-	closePopup: function(id, keepHiddenInputs, unlock) {
+	this.closePopup = function(id, keepHiddenInputs, unlock) {
 		// Do not close a locked popup
 		if ($(document).find(".popup.locked").length > 0 && !unlock) {
 			return false;
 		}
 
 		var target = (id) ? '#' + id : '.popup';
-		Util.confirmCallback = null;
+		self.confirmCallback = null;
 
 		// Only hide overlay when closing all popups or specifically a form
 		// so closing i.e. notification doesn't close other popups
+		// Also empty clipboard (important for vault)
 		if (!id || (id && $(target).is('form'))) {
 			$(".overlay, .form-hidden").addClass("hidden");
+			self.copyToClipboard('');
 		}
 
 		$(target).addClass("hidden").removeClass("locked");
@@ -241,71 +271,63 @@ var Util = {
 		document.activeElement.blur();
 
 		return true;
-	},
+	}
 
-	showFormError: function(id, msg) {
+	this.showFormError = function(id, msg) {
 		$("#" + id + " .error").removeClass("hidden").text(msg);
-	},
+	}
 
-	showContextmenu: function(e) {
+	this.showContextmenu = function(e) {
 		// Position context menu at mouse
 		var top = (e.clientY + $("#contextmenu").height() < window.innerHeight) ? e.clientY : e.clientY - $("#contextmenu").height();
 		$("#contextmenu").css({
 			'left' : (e.clientX + 5),
 			'top' : (top + 5)
 		}).removeClass("hidden");
-	},
+	}
 
-	showConfirm: function(title, successCallback) {
+	this.showConfirm = function(title, successCallback) {
 		$("#confirm-title").text(title);
-		/*$("#confirm-yes").unbind('click').on('click', function() {
-			successCallback();
-			Util.closePopup();
-			Util.confirmCallback = null;
-		});*/
-		/*$("#confirm-no").unbind('click').on('click', function() {
-			Util.closePopup();
-		});*/
 
-		Util.showPopup('confirm');
-		Util.confirmCallback = successCallback;
+		self.showPopup('confirm');
+		self.confirmCallback = successCallback;
 		$("#confirm-yes").focus();
-	},
+	}
 
-	closeWidget: function(id) {
+	this.closeWidget = function(id) {
 		if (id) {
 			$("#" + id).addClass("hidden");
 		}
-	},
+	}
 
 	/**
 	 * Sets the selection status for the current section
 	 */
-	sidebarFocus: function(id) {
+	this.sidebarFocus = function(id) {
 		$(".focus").removeClass("focus");
 		$("#sidebar-" + id).addClass("focus");
-	},
+	}
 
-	showCursorInfo: function(e, text) {
+	this.showCursorInfo = function(e, text) {
 		$("#cursorinfo").css({
 			'top' : e.pageY + 10,
 			'left' : e.pageX + 10
 		}).removeClass("hidden").text(text);
-	},
+	}
 
-	hideCursorInfo: function() {
+	this.hideCursorInfo = function() {
 		$("#cursorinfo").addClass("hidden");
-	},
+	}
 
-	escape: function(text) {
+	this.escape = function(text) {
 		return $("<div>").text(text).html();
-	},
+	}
 
-	getError: function(xhr) {
+	this.getError = function(xhr) {
 		return (xhr.responseText && JSON.parse(xhr.responseText).msg) ? JSON.parse(xhr.responseText).msg : "Unknown error";
-	},
+	}
 
-	getUrlParameter: function(searchKey) {
+	this.getUrlParameter = function(searchKey) {
 		var paramRaw = window.location.search.replace("?", "");
 		var params = paramRaw.split("&");
 
@@ -316,9 +338,9 @@ var Util = {
 			}
 		}
 		return null;
-	},
+	}
 
-	getVersion: function() {
+	this.getVersion = function() {
 		$.ajax({
 			url: 'api/system/version',
 			type: 'post',
@@ -326,39 +348,39 @@ var Util = {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			if (data.msg.recent) {
-				Util.notify("Update available! Get " + data.msg.recent + " from simpledrive.org", false, false);
+				self.notify("Update available! Get " + data.msg.recent + " from simpledrive.org", false, false);
 			}
 			$("#info-title").append(" " + data.msg.current);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			self.notify(self.getError(xhr), true, true);
 		});
-	},
+	}
 
-	isDirectorySupported: function() {
+	this.isDirectorySupported = function() {
 		var tmpInput = document.createElement('input');
 		return ('webkitdirectory' in tmpInput || 'mozdirectory' in tmpInput || 'odirectory' in tmpInput || 'msdirectory' in tmpInput || 'directory' in tmpInput);
-	},
+	}
 
-	notify: function(msg, autohide, error) {
+	this.notify = function(msg, autohide, error) {
 		var type = (error) ? "warning" : "info";
 		$("#note-icon").removeClass().addClass("icon icon-" + type);
 		$("#note-msg").text(msg);
 		$("#notification").removeClass().addClass("popup center-hor notification-" + type);
 
 		if (autohide) {
-			setTimeout(function() { Util.closePopup('notification'); }, 3000);
+			setTimeout(function() { self.closePopup('notification'); }, 3000);
 		}
-	},
+	}
 
-	refreshWarning: function() {
+	this.refreshWarning = function() {
 		return "There are uploads running! If you refresh, those will be aborted.";
-	},
+	}
 
-	unsavedWarning: function() {
+	this.unsavedWarning = function() {
 		return "There is unsaved content! Do you want to continue?";
-	},
+	}
 
-	selectRange: function(id, start, end) {
+	this.selectRange = function(id, start, end) {
 		var elem = document.getElementById(id);
 
 		if ('selectionStart' in elem) {
@@ -375,14 +397,14 @@ var Util = {
 			range.moveEnd('character', end);
 			range.select();
 		}
-	},
+	}
 
-	confirm: function(title) {
+	this.confirm = function(title) {
 		$("#confirm-title").text(title);
 		$("#confirm").removeClass("hidden");
-	},
+	}
 
-	stringToByte: function(size) {
+	this.stringToByte = function(size) {
 		if (!isNaN(parseInt(size))) {
 			var dim = "" + size.substr(-2).toLowerCase();
 			size = parseInt(size);
@@ -399,31 +421,31 @@ var Util = {
 			}
 		}
 		return false;
-	},
+	}
 
-	timestampToDate: function(timestamp) {
+	this.timestampToDate = function(timestamp) {
 		var date = new Date(timestamp * 1000);
 		var day = (date.getDate() < 10) ? "0" + date.getDate() : date.getDate();
 		var month = (date.getMonth() < 10) ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
 		var year = date.getFullYear();
 		return day + "." + month + "." + year;
-	},
+	}
 
-	timestampToString: function(timestamp) {
+	this.timestampToString = function(timestamp) {
 		var duration = parseInt(timestamp);
 		var hours = parseInt(duration / 3600) % 24;
 		var minutes = parseInt(duration / 60) % 60;
 		var seconds = duration % 60;
 		return (hours > 0 ?(hours < 10 ? "0" + hours + ":" : hours + ":") : "") + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
-	},
+	}
 
-	dateToTimestamp: function(date) {
+	this.dateToTimestamp = function(date) {
 		date = date.split(".");
 		var newDate = date[1] + "," + date[0] + "," + date[2];
 		return (new Date(newDate).getTime()) / 1000;
-	},
+	}
 
-	setSelectionRange: function(input, start, end) {
+	this.setSelectionRange = function(input, start, end) {
 		$(input).each(function() {
 			if('selectionStart' in this) {
 				this.selectionStart = start;
@@ -438,13 +460,13 @@ var Util = {
 				range.select();
 			}
 		});
-	},
+	}
 
 	/**
 	 * Calculates if an element currently in the viewport
 	 * Important not to use jQuery's offset().top (relative to document)!
 	 */
-	isVisible: function(elem) {
+	this.isVisible = function(elem) {
 		if (elem.length > 0) {
 			var scrollTop = elem.parent().scrollTop();
 			var height = elem.parent().height();
@@ -454,11 +476,23 @@ var Util = {
 		}
 
 		return false;
-	},
+	}
 
-	generateFullURL: function(url) {
+	this.generateFullURL = function(url) {
 		return (url == "" || url.match("^http://") || url.match("^https://")) ? url : "http://" + url;
-	},
-}
+	}
 
-Util.init();
+	/**
+	 * Searches an array for a value to a specific key
+	 * @return int|null
+	 */
+	this.searchArrayForKey = function(arr, key, value) {
+		for (var i in arr) {
+			if (arr[i][key] == value) {
+				return i;
+			}
+		}
+
+		return null;
+	}
+}

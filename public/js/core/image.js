@@ -5,29 +5,30 @@
  * @link		http://simpledrive.org
  */
 
-var ImageManager = {
-	loading: false,
-	active: null,
-	slide: null,
-	slideshowStarted: false,
-	image: null,
+var ImageManager = new function() {
+	var self = this;
+	this.loading = false;
+	this.active = null;
+	this.slide = null;
+	this.slideshowStarted = false;
+	this.image = null;
+	this.bId = null;
 
-	abort: function() {
-		ImageManager.loading = false;
-		Util.busy(false);
+	this.abort = function() {
+		self.loading = false;
+		Util.endBusy(self.bId);
 		window.stop();
-	},
+	}
 
-	close: function() {
-		ImageManager.slideshow(true);
-		$("#img-viewer").css('background', '').addClass("hidden");
+	this.close = function() {
+		self.slideshow(true);
 
-		if (ImageManager.loading) {
-			ImageManager.abort();
+		if (self.loading) {
+			self.abort();
 		}
-	},
+	}
 
-	getBackgroundSize: function(img) {
+	this.getBackgroundSize = function(img) {
 		var imgHeight = img.naturalHeight || img.height;
 		var imgWidth = img.naturalWidth || img.width;
 
@@ -35,82 +36,77 @@ var ImageManager = {
 			return "contain"
 		}
 		return "auto";
+	}
 
-	},
-
-	init: function() {
-		ImageManager.active = null;
-
+	this.init = function() {
 		$("#img-close").on('click', function(e) {
-			ImageManager.close();
+			self.close();
 		});
 
 		$("#img-delete").on('click', function(e) {
-			ImageManager.remove();
+			self.remove();
 		});
 
 		$("#img-slideshow").on('click', function(e) {
-			ImageManager.slideshow(false);
+			self.slideshow(false);
 		});
 
 		$("#img-prev").on('click', function(e) {
-			ImageManager.prev();
+			self.prev();
 		});
 
 		$("#img-next").on('click', function(e) {
-			ImageManager.next();
+			self.next();
 		});
+	}
 
-	},
-
-	next: function(slideshow) {
-		if (slideshow && !ImageManager.slideshowStarted) {
+	this.next = function(slideshow) {
+		if (!self.active || (slideshow && !self.slideshowStarted)) {
 			return;
 		}
 
-		var files = FileModel.getFiles();
-		for (var i = parseInt(ImageManager.active) + 1; i < parseInt(ImageManager.active) + files.length + 1; i++) {
+		var files = FileModel.list.getAllFiltered();
+		for (var i = parseInt(self.active) + 1; i < parseInt(self.active) + files.length + 1; i++) {
 			if (files[i % files.length].type == 'image') {
-				ImageManager.open(i % files.length);
+				self.open(i % files.length);
 				return (i % files.length);
 			}
 		}
-	},
+	}
 
-	open: function(id) {
-		ImageManager.active = id;
+	this.open = function(id) {
+		self.active = id;
 
-		if (!ImageManager.loading) {
-			ImageManager.loading = true;
-			Util.busy(true);
+		if (!self.loading) {
+			self.loading = true;
+			self.bId = Util.startBusy();
 		}
 		else {
-			ImageManager.abort();
+			self.abort();
 		}
 
-		var elem = FileModel.getElementAt(id);
+		var elem = FileModel.list.get(id);
 
 		// Reset image
 		$("#img-viewer").find("img").remove();
-		ImageManager.image = new Image();
+		self.image = new Image();
 		$("#img-viewer").removeClass("hidden");
 
-		ImageManager.image.src = 'api/files/get?target=' + JSON.stringify([elem.id]) + '&width=' + window.innerWidth + '&height=' + window.innerHeight + '&token=' + token;
+		self.image.src = 'api/files/get?target=' + JSON.stringify([elem.id]) + '&width=' + window.innerWidth + '&height=' + window.innerHeight + '&token=' + token;
 
-		// Wait for dimension-meta-data to load
-		var date = new Date();
-		var start = date.getTime();
+		// Wait up to 5s for dimension-meta-data to load
+		var start = Date.now();
 		var interval = setInterval(function() {
-			if (date.getTime() - start > 5000) {
+			if (Date.now() - start > 5000) {
 				clearTimeout(interval);
 				Util.notify("Error displaying image", true, true);
-				ImageManager.loading = false;
-				Util.busy(false);
+				self.loading = false;
+				Util.endBusy(self.bId);
 			}
-			if (ImageManager.image.naturalHeight || ImageManager.image.height) {
+			if (self.image.naturalHeight || self.image.height) {
 				clearTimeout(interval);
-				var imgHeight = ImageManager.image.naturalHeight || ImageManager.image.height;
-				var imgWidth = ImageManager.image.naturalWidth || ImageManager.image.width;
+				var imgHeight = self.image.naturalHeight || self.image.height;
+				var imgWidth = self.image.naturalWidth || self.image.width;
 
 				var shrinkTo = (imgHeight > window.innerHeight || imgWidth > window.innerWidth) ? Math.min(window.innerHeight / imgHeight, window.innerWidth / imgWidth) : 1;
 				var coverArea = 0.9;
@@ -118,61 +114,75 @@ var ImageManager = {
 				var targetWidth = (imgWidth * shrinkTo) * coverArea;
 				var targetHeight = (imgHeight * shrinkTo) * coverArea;
 
-				ImageManager.image.style.position = "absolute";
-				ImageManager.image.style.height = targetHeight + "px";
-				ImageManager.image.style.width = targetWidth + "px";
-				ImageManager.image.style.left = ((window.innerWidth - targetWidth) / 2) + "px";
-				ImageManager.image.style.top = ((window.innerHeight - targetHeight) / 2) + "px";
+				self.image.style.position = "absolute";
+				self.image.style.height = targetHeight + "px";
+				self.image.style.width = targetWidth + "px";
+				self.image.style.left = ((window.innerWidth - targetWidth) / 2) + "px";
+				self.image.style.top = ((window.innerHeight - targetHeight) / 2) + "px";
 
-				$("#img-viewer").append(ImageManager.image)
+				$("#img-viewer").append(self.image)
 				$("#img-title").text(elem.filename);
 			}
 		}, 10);
 
-		ImageManager.image.onload = function() {
-			loading = false;
-			Util.busy(false);
+		self.image.onload = function() {
+			self.loading = false;
+			Util.endBusy(self.bId);
 		}
 
-		ImageManager.image.onerror = function() {
+		self.image.onerror = function() {
 			Util.notify("Error displaying image", true, true);
-			ImageManager.loading = false;
-			Util.busy(false);
+			self.loading = false;
+			Util.endBusy(self.bId);
 		}
-	},
+	}
 
-	prev: function() {
-		var files = FileModel.getFiles();
-		for (var i = parseInt(ImageManager.active) - 1; i > parseInt(ImageManager.active) - files.length; i--) {
+	this.prev = function() {
+		if (!self.active) {
+			return;
+		}
+
+		var files = FileModel.list.getAllFiltered();
+		for (var i = parseInt(self.active) - 1; i > parseInt(self.active) - files.length; i--) {
 			var index = (i % files.length + files.length) % files.length;
 			if (files[index].type == 'image') {
-				ImageManager.open(index);
+				self.open(index);
 				return index;
 			}
 		}
-	},
+	}
 
-	remove: function() {
-		FileModel.select(ImageManager.active);
+	this.remove = function() {
+		if (!self.active) {
+			return;
+		}
+
+		FileModel.list.select(self.active);
 		FileModel.remove();
 
-		if (ImageManager.prev() == null) {
-			ImageManager.close();
+		if (self.prev() == null) {
+			self.close();
 		}
-	},
+	}
 
-	slideshow: function(forceClose) {
-		if (!ImageManager.slideshowStarted && !forceClose) {
+	this.slideshow = function(forceClose) {
+		if (!self.active) {
+			return;
+		}
+
+		if (!self.slideshowStarted && !forceClose) {
 			$("#img-slideshow .icon").removeClass('icon-play').addClass('icon-pause');
-			ImageManager.slide = setInterval(function () {
-				ImageManager.next(true);
+			self.slide = setInterval(function () {
+				self.next(true);
 			}, 2000);
-			ImageManager.slideshowStarted = true;
+			self.slideshowStarted = true;
 		}
 		else {
 			$("#img-slideshow .icon").removeClass('icon-pause').addClass('icon-play');
-			ImageManager.slideshowStarted = false;
-			clearTimeout(ImageManager.slide);
+			self.slideshowStarted = false;
+			clearTimeout(self.slide);
 		}
 	}
 }
+
+ImageManager.init();

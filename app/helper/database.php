@@ -8,7 +8,7 @@
  */
 
 class Database {
-	private static $instance				= null;
+	private static $instance		= null;
 	private static $PUBLIC_USER_ID	= 1;
 
 	private function __construct() {
@@ -981,7 +981,7 @@ class Database {
 			'INSERT into sd_log (user, type, source, msg, date)
 			VALUES (?, ?, ?, ?, ?)'
 		);
-		$stmt->bind_param('iisss', $uid, $type, $source, $msg, $date);
+		$stmt->bind_param('issss', $uid, $type, $source, $msg, $date);
 		$stmt->execute();
 	}
 
@@ -1229,6 +1229,26 @@ class Database {
 		$stmt->bind_result($id);
 
 		return ($stmt->fetch()) ? $id : null;
+	}
+
+	public function cache_search($uid, $needle) {
+		$stmt = $this->link->prepare(
+				'SELECT id
+				FROM sd_cache
+				WHERE owner = ?
+				AND filename LIKE CONCAT("%",?,"%")
+		');
+
+		$stmt->bind_param('is', $uid, $needle);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($id);
+
+		$files = array();
+		while($stmt->fetch()) {
+			array_push($files, $this->cache_get($id, $uid));
+		}
+		return $files;
 	}
 
 	public function cache_get($id, $uid) {

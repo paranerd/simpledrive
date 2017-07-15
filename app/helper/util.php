@@ -160,6 +160,10 @@ class Util {
 		}
 	}
 
+	public function array_remove_keys($arr, $bad_keys) {
+		return array_diff_key($arr, array_flip($bad_keys));
+	}
+
 	public function dir_size($path) {
 		$size = 0;
 		foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)) as $file) {

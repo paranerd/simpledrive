@@ -70,8 +70,8 @@
 	<!-- Create menu -->
 	<div id="create-menu" class="popup hidden">
 		<ul class="menu">
-			<li class="popup-trigger" data-target="entry" data-type="website"><span class="icon icon-key"></span><?php echo $lang['new'] . " website"; ?></li>
-			<li class="popup-trigger" data-target="entry" data-type="note"><span class="icon icon-key"></span><?php echo $lang['new'] . " note"; ?></li>
+			<li class="popup-trigger" data-target="entry-website" data-type="website"><span class="icon icon-key"></span><?php echo $lang['new'] . " website"; ?></li>
+			<li class="popup-trigger" data-target="entry-note" data-type="note"><span class="icon icon-key"></span><?php echo $lang['new'] . " note"; ?></li>
 		</ul>
 	</div>
 
@@ -98,33 +98,49 @@
 		</ul>
 	</div>
 
-	<!-- Entry popup -->
-	<form id="entry" class="popup center hidden" action="#">
+	<!-- Website-Entry popup -->
+	<form id="entry-website" class="popup center hidden" action="#" data-type="website">
 		<span class="close">&times;</span>
-		<div class="title">Entry</div>
+		<div class="title">New Login-Info</div>
 
 		<label>Title</label>
-		<input id="entry-title" class="input-indent" type="text" placeholder="Title">
+		<input id="entry-website-title" class="input-indent" type="text" placeholder="Title">
 
 		<label>Category</label>
-		<input id="entry-category" class="input-indent" type="text" placeholder="Category">
+		<input id="entry-website-category" class="input-indent" type="text" placeholder="Category">
 
 		<label>URL</label>
-		<input id="entry-url" class="input-indent" type="text" placeholder="URL">
+		<input id="entry-website-url" class="input-indent" type="text" placeholder="URL">
 
 		<label>Username</label>
-		<input id="entry-user" class="input-indent" type="text" placeholder="Username">
+		<input id="entry-website-user" class="input-indent" type="text" placeholder="Username">
 
 		<label>Password</label>
-		<input id="entry-pass" class="input-indent" type="password" placeholder="Password">
-
-		<input id="entry-type" type="hidden" name="type"/>
+		<input id="entry-website-pass" class="input-indent" type="password" placeholder="Password">
 
 		<div style="width: 100%; height: 50px; margin-top: 15px; margin-bottom: 15px;">
-			<div id="entry-copy-pass" class="btn">Copy Pass</div>
-			<div id="entry-copy-user" class="btn">Copy User</div>
-			<div id="entry-open-url" class="btn"><a target="_blank" href="#">Go to URL</a></div>
+			<div id="entry-website-copy-pass" class="btn">Copy Pass</div>
+			<div id="entry-website-copy-user" class="btn">Copy User</div>
+			<div id="entry-website-open-url" class="btn"><a target="_blank" href="#">Go to URL</a></div>
 		</div>
+
+		<div class="error hidden"></div>
+		<button class="btn">Save</button>
+	</form>
+
+	<!-- Note-Entry popup -->
+	<form id="entry-note" class="popup center hidden" action="#" data-type="note">
+		<span class="close">&times;</span>
+		<div class="title">New Note</div>
+
+		<label>Title</label>
+		<input id="entry-note-title" class="input-indent" type="text" placeholder="Title">
+
+		<label>Category</label>
+		<input id="entry-note-category" class="input-indent" type="text" placeholder="Category">
+
+		<label>Content</label>
+		<textarea id="entry-note-content"placeholder="Content"></textarea>
 
 		<div class="error hidden"></div>
 		<button class="btn">Save</button>
@@ -172,7 +188,6 @@
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<span class="close">&times;</span>
 		<div id="info-title" class="title title-large">simpleDrive</div>
 		<div class="subtitle">Private. Secure. Simple.</div>
 		<hr>

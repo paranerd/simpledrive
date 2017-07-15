@@ -71,7 +71,6 @@
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<span class="close">&times;</span>
 		<div id="info-title" class="title title-large">simpleDrive</div>
 		<div class="subtitle">Private. Secure. Simple.</div>
 		<hr>

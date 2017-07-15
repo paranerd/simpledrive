@@ -21,16 +21,12 @@ $(document).ready(function() {
 
 	UserController.init();
 	UserView.init();
-	UserModel.load();
-	UserModel.getQuota();
-	UserModel.activeToken();
-
-	Util.getVersion();
+	UserModel.init();
 	Backup.getStatus();
 });
 
-var UserController = {
-	init: function() {
+var UserController = new function() {
+	this.init = function() {
 		simpleScroll.init("status");
 
 		$("#fileview").on('change', function(e) {
@@ -98,37 +94,37 @@ var UserController = {
 	}
 }
 
-var UserView = {
-	init: function() {
-		document.title = "User Settings | simpleDrive";
+var UserView = new function() {
+	this.init = function() {
 		$("#username").html(Util.escape(username) + " &#x25BF");
 		$(window).resize();
 	}
 }
 
-var Backup = {
-	running: false,
-	enabled: false,
+var Backup = new function() {
+	var self = this;
+	this.running = false;
+	this.enabled = false;
 
-	toggleStart: function(code) {
-		if (Backup.running) {
-			Backup.cancel();
+	this.toggleStart = function(code) {
+		if (self.running) {
+			self.cancel();
 		}
-		else if (Backup.enabled) {
-			Backup.start(code);
+		else if (self.enabled) {
+			self.start(code);
 		}
-	},
+	}
 
-	toggleEnable: function() {
-		if (Backup.enabled) {
-			Backup.disable();
+	this.toggleEnable = function() {
+		if (self.enabled) {
+			self.disable();
 		}
 		else {
 			Util.showPopup('setupbackup');
 		}
-	},
+	}
 
-	setToken: function(code) {
+	this.setToken = function(code) {
 		Util.notify("Setting auth token", true, false);
 
 		$.ajax({
@@ -141,14 +137,14 @@ var Backup = {
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
-	},
+	}
 
 	/**
 	 * Get access to cloud-account
 	 * Redirect to google's auth-server
 	 */
 
-	enable: function() {
+	this.enable = function() {
 		var pass = $("#setupbackup-pass1").val();
 		var passConfirm = $("#setupbackup-pass2").val();
 		var enc = ($("#setupbackup-encrypt").hasClass("checkbox-checked")) ? 1 : 0;
@@ -170,9 +166,9 @@ var Backup = {
 				Util.notify(Util.getError(xhr), true, true);
 			});
 		}
-	},
+	}
 
-	start: function() {
+	this.start = function() {
 		$("#backup-toggle-button").prop('disabled', true).text("starting...");
 
 		$.ajax({
@@ -186,24 +182,24 @@ var Backup = {
 			Util.notify(Util.getError(xhr), true, true);
 		});
 
-		setTimeout(function() { Backup.getStatus(); }, 3000);
-	},
+		setTimeout(function() { self.getStatus(); }, 3000);
+	}
 
-	cancel: function() {
+	this.cancel = function() {
 		$.ajax({
 			url: 'api/backup/cancel',
 			type: 'post',
 			data: {token: token},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Backup.running = false;
+			self.running = false;
 			$("#backup-toggle-button").text("Start");
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
-	},
+	}
 
-	disable: function() {
+	this.disable = function() {
 		$.ajax({
 			url: 'api/backup/disable',
 			type: 'post',
@@ -214,17 +210,17 @@ var Backup = {
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
-	},
+	}
 
-	getStatus: function() {
+	this.getStatus = function() {
 		$.ajax({
 			url: 'api/backup/status',
 			type: 'post',
 			data: {token: token},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Backup.enabled = data.msg.enabled;
-			Backup.running = data.msg.running;
+			self.enabled = data.msg.enabled;
+			self.running = data.msg.running;
 
 			if (data.msg.enabled) {
 				$("#backup-enable-button").text("Disable");
@@ -238,11 +234,19 @@ var Backup = {
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
-	},
+	}
 }
 
-var UserModel = {
-	invalidateToken: function() {
+var UserModel = new function() {
+	var self = this;
+
+	this.init = function() {
+		self.load();
+		self.getQuota();
+		self.activeToken();
+	}
+
+	this.invalidateToken = function() {
 		$.ajax({
 			url: 'api/user/invalidatetoken',
 			type: 'post',
@@ -250,13 +254,13 @@ var UserModel = {
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Tokens invalidated", true, false);
-			UserModel.activeToken();
+			self.activeToken();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
-	},
+	}
 
-	activeToken: function() {
+	this.activeToken = function() {
 		$.ajax({
 			url: 'api/user/activetoken',
 			type: 'post',
@@ -267,10 +271,10 @@ var UserModel = {
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
-	},
+	}
 
-	load: function() {
-		Util.busy(true);
+	this.load = function() {
+		var bId = Util.startBusy();
 		$("#list").empty();
 		$(".title-element").text("General");
 		$("#listHeader, #logHeader").addClass("hidden");
@@ -288,11 +292,11 @@ var UserModel = {
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		}).always(function() {
-			Util.busy(false);
+			Util.endBusy(bId);
 		});
-	},
+	}
 
-	setFileview: function(view) {
+	this.setFileview = function(view) {
 		$.ajax({
 			url: 'api/user/setfileview',
 			type: 'post',
@@ -303,9 +307,9 @@ var UserModel = {
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
-	},
+	}
 
-	setColor: function(color) {
+	this.setColor = function(color) {
 		$.ajax({
 			url: 'api/user/setcolor',
 			type: 'post',
@@ -316,9 +320,9 @@ var UserModel = {
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
-	},
+	}
 
-	setAutoscan: function(enable) {
+	this.setAutoscan = function(enable) {
 		$.ajax({
 			url: 'api/user/setautoscan',
 			type: 'post',
@@ -329,9 +333,9 @@ var UserModel = {
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
-	},
+	}
 
-	getQuota: function() {
+	this.getQuota = function() {
 		$.ajax({
 			url: 'api/user/quota',
 			type: 'post',
@@ -346,7 +350,7 @@ var UserModel = {
 		});
 	},
 
-	clearTemp: function() {
+	this.clearTemp = function() {
 		$.ajax({
 			url: 'api/user/cleartemp',
 			type: 'post',
@@ -359,7 +363,7 @@ var UserModel = {
 		});
 	},
 
-	changePassword: function() {
+	this.changePassword = function() {
 		var currpass = $("#change-password-pass0").val();
 		var newpass1 = $("#change-password-pass1").val();
 		var newpass2 = $("#change-password-pass2").val();
@@ -387,9 +391,9 @@ var UserModel = {
 		}).fail(function(xhr, statusText, error) {
 			Util.showFormError('change-password', Util.getError(xhr));
 		});
-	},
+	}
 
-	changeVaultPassword: function() {
+	this.changeVaultPassword = function() {
 		var currpass = $("#vault-password-pass0").val();
 		var newpass1 = $("#vault-password-pass1").val();
 		var newpass2 = $("#vault-password-pass2").val();
@@ -412,7 +416,6 @@ var UserModel = {
 		}).done(function(data, statusText, xhr) {
 			token = data.msg;
 			Util.notify("Password changed", true);
-			//$("#change-password-pass0, #change-password-pass1, #change-password-pass2").val('');
 			Util.closePopup('vault-password');
 		}).fail(function(xhr, statusText, error) {
 			Util.showFormError('vault-password', Util.getError(xhr));

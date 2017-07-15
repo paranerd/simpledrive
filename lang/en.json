@@ -31,5 +31,6 @@
     "password": "Password",
     "write": "Write",
     "public": "Public",
-    "info": "Info"
+    "info": "Info",
+	"search": "Search"
 }

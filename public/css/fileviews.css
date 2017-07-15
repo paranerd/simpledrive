@@ -10,6 +10,7 @@
 
 .col1 {
 	flex: 1;
+	z-index: 1;
 }
 
 .col2 {
@@ -63,7 +64,8 @@
 	font-size: 1rem;
 }
 
-.list, .grid {
+.list,
+.grid {
 	position: relative;
 	top: 0;
 	width: 100%;
@@ -183,7 +185,7 @@
 	-moz-transform: scale(1.05);
 	-o-transform: scale(1.05);
 	-ms-transform: scale(1.05);
-	z-index: 2;
+	/*z-index: 2;*/
 }
 
 .grid .item-elem {
@@ -199,16 +201,19 @@
 
 .grid .col1 {
 	position: absolute;
-	bottom: 0;
-	left: 0;
+	bottom: 2px;
+	left: 2px;
 	height: 30px;
-	width: 100%;
+	width: 146px;
 	line-height: 30px;
 	text-align: center;
 	cursor: pointer;
 }
 
-.grid .col2, .grid .col3, .grid .col4, .grid .col5 {
+.grid .col2,
+.grid .col3,
+.grid .col4,
+.grid .col5 {
 	display: none;
 }
 
@@ -229,6 +234,15 @@
 	font-size: 2rem;
 	cursor: default;
 	float: left;
+
+	z-index: 2;
+}
+
+.grid .item:hover .col1,
+.grid .item.selected .col1 {
+	background: rgba(0,0,0,0.3);
+	color: white !important;
+	z-index: 3;
 }
 
 .grid .item .thumbnail {

@@ -1,6 +1,6 @@
 @font-face {
 	font-family: 'icomoon';
-	src: url('../font/icomoon.woff?k2gwrr') format('woff');
+	src: url('../font/icomoon.woff?6l0v11') format('woff');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -197,4 +197,16 @@
 
 .icon-pdf:before {
   content: "\eadf";
+}
+
+.icon-list:before {
+	content: "\e9ba";
+}
+
+.icon-grid:before {
+	content: "\ea71";
+}
+
+.icon-menu:before {
+	content: "\e9bd";
 }

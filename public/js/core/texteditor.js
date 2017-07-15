@@ -11,17 +11,13 @@ $(document).ready(function() {
 	username = $('head').data('username');
 	token = $('head').data('token');
 
-	if (username) {
-		Util.getVersion();
-	}
-
 	EditorController.init();
 	EditorView.init(username);
 	EditorModel.init($('head').data('id'));
 });
 
-var EditorController = {
-	init: function() {
+var EditorController = new function() {
+	this.init = function() {
 		$("#title").mouseenter(function(e) {
 			if ((this.offsetWidth < this.scrollWidth || this.offsetHeight < this.scrollHeight)) {
 				Util.showCursorInfo(e, $(".title-element-current").text());
@@ -69,95 +65,96 @@ var EditorController = {
 	}
 }
 
-var EditorView = {
-	init: function(username) {
+var EditorView = new function() {
+	this.init = function(username) {
 		$("#username").html(Util.escape(username) + " &#x25BF");
 		$(window).resize();
 	}
 }
 
-var EditorModel = {
-	id: null,
-	filename: "",
-	saveLoop: null,
-	changed: false,
+var EditorModel = new function() {
+	var self = this;
+	this.id = null;
+	this.filename = "";
+	this.saveLoop = null;
+	this.changed = false;
 
-	init: function(id) {
-		EditorModel.id = id;
-		EditorModel.load();
-	},
+	this.init = function(id) {
+		self.id = id;
+		self.load();
+	}
 
-	insertTab: function() {
+	this.insertTab = function() {
 		var pos = $("#texteditor").prop('selectionStart');
 		var v = $("#texteditor").val();
 		$("#texteditor").focus();
 		$("#texteditor").val(v.substring(0, pos) + '    ' + v.substring(pos, v.length));
-		EditorModel.changed = true;
-		$(".title-element-current").text(EditorModel.filename + "*");
+		self.changed = true;
+		$(".title-element-current").text(self.filename + "*");
 		Util.setSelectionRange($("#texteditor"), pos + 4, pos + 4);
-	},
+	}
 
-	autosave: function() {
-		EditorModel.saveLoop = setInterval(function() {
-			if (EditorModel.changed) {
-				EditorModel.save();
+	this.autosave = function() {
+		self.saveLoop = setInterval(function() {
+			if (self.changed) {
+				self.save();
 			}
 		}, 5000);
-	},
+	}
 
-	save: function() {
-		if (EditorModel.id) {
+	this.save = function() {
+		if (self.id) {
 			var content = $("#texteditor").val();
-			EditorModel.changed = false;
+			self.changed = false;
 
 			$.ajax({
 				url: 'api/files/savetext',
 				type: 'post',
-				data: {token: token, target: EditorModel.id, data: content},
+				data: {token: token, target: self.id, data: content},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
-				$(".title-element-current").text(EditorModel.filename);
+				$(".title-element-current").text(self.filename);
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(Util.getError(xhr), true, true);
 			});
 		}
-	},
+	}
 
-	load: function() {
-		Util.busy(true);
+	this.load = function() {
+		var bId = Util.startBusy();
 		$.ajax({
 			url: 'api/files/loadtext',
 			type: 'post',
-			data: {token: token, target: EditorModel.id},
+			data: {token: token, target: self.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			EditorModel.filename = data.msg.filename;
-			$(".title-element-current").text(EditorModel.filename);
-			document.title = Util.escape(EditorModel.filename + " | simpleDrive");
+			self.filename = data.msg.filename;
+			document.title = Util.escape(self.filename + " | simpleDrive");
+			$(".title-element-current").text(self.filename);
 			$("#texteditor").text(data.msg.content).focus().scrollTop(0);
-			EditorModel.autosave();
+			self.autosave();
 			window.onbeforeunload = Util.unsavedWarning();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		}).always(function() {
-			Util.busy(false);
+			Util.endBusy(bId);
 		});
-	},
+	}
 
-	rename: function() {
-		EditorModel.save();
-		clearTimeout(EditorModel.saveLoop);
+	this.rename = function() {
+		self.save();
+		clearTimeout(self.saveLoop);
 		var newFilename = $("#rename-filename").val();
 
-		if (newFilename != "" && newFilename != EditorModel.filename) {
+		if (newFilename != "" && newFilename != self.filename) {
 			$.ajax({
 				url: 'api/files/rename',
 				type: 'post',
-				data: {token: token, newFilename: newFilename, target: EditorModel.id},
+				data: {token: token, newFilename: newFilename, target: self.id},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				Util.closePopup('rename');
-				EditorModel.load();
+				self.load();
 			}).fail(function(xhr, statusText, error) {
 				Util.showFormError('rename', Util.getError(xhr));
 			});

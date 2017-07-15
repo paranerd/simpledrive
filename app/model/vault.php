@@ -42,6 +42,7 @@ class Vault_Model {
 			throw new Exception('Vault does not exist', '404');
 		}
 		else {
+			$vault = file_get_contents($this->vault_path);
 			return file_get_contents($this->vault_path);
 		}
 	}

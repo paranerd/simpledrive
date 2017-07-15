@@ -95,6 +95,7 @@ hr {
 .btn {
 	position: relative;
 	margin: 0;
+	padding: 0;
 	height: 40px;
 	width: 100px;
 	line-height: 40px;
@@ -117,7 +118,8 @@ hr {
 	font-size: 1rem;
 }
 
-.btn:disabled, .btn:disabled:hover {
+.btn:disabled,
+.btn:disabled:hover {
 	cursor: default;
 }
 
@@ -131,6 +133,7 @@ hr {
 .btn-circle {
 	height: 50px;
 	width: 50px;
+	border: none;
 	border-radius: 25px;
 	font-size: 28px;
 	line-height: 50px;
@@ -141,6 +144,16 @@ hr {
 
 .btn-circle .icon {
 	font-size: 1.5rem !important;
+}
+
+.btn-circle-small {
+	background: transparent !important;
+	border: none !important;
+}
+
+.btn-circle-small .icon {
+	color: #999;
+	font-size: 0.8rem !important;
 }
 
 .title {
@@ -222,7 +235,8 @@ hr {
 	top: 50%;
 }
 
-.hidden, div.hidden {
+.hidden,
+div.hidden {
 	display: none;
 }
 
@@ -251,6 +265,9 @@ hr {
 	position: absolute;
 	top: 5px;
 	right: 5px;
+	height: 30px;
+	width: 30px;
+	text-align: center;
 	font-family: sans-serif;
 	font-size: 1.5rem;
 	cursor: pointer;
@@ -414,6 +431,7 @@ label {
 #title {
 	position: relative;
 	left: 40px;
+	float: left;
 }
 
 .title-element {
@@ -454,10 +472,14 @@ label {
 
 /* Sidebar */
 
+.sidebar-slim {
+	width: 54px !important;
+}
+
 #sidebar {
 	position: relative;
-  width: 230px;
-  flex: 0 0 auto;
+	width: 230px;
+	flex: 0 0 auto;
 }
 
 #sidebar .icon {
@@ -479,9 +501,24 @@ label {
 	font-family: robotolight, sans-serif;
 }
 
-#scan:hover {
+#sidebar-footer .icon:hover {
 	font-weight: bold;
 	cursor: pointer;
+	color: #2e8b5e;
+}
+
+#fileinfo-footer {
+	position: absolute;
+	bottom: 0px;
+	height: 50px;
+	width: 100%;
+	line-height: 50px;
+	font-size: 1rem;
+	font-family: robotolight, sans-serif;
+}
+
+#fileinfo-footer span {
+	padding-left: 20px;
 }
 
 #create-menu {
@@ -494,7 +531,8 @@ label {
 	left: 54px;
 }
 
-.focus, .focus a {
+.focus,
+.focus a {
 	font-family: robotoregular, sans-serif !important;
 }
 
@@ -608,14 +646,16 @@ label {
 
 /* Content - Settings */
 
-#status, #plugins {
+#status,
+#plugins {
   padding-left: 2%;
   font-size: 1.2rem;
 	font-family: robotolight, sans-serif;
 	font-family: robotoregular;
 }
 
-#status hr, #plugins hr {
+#status hr,
+#plugins hr {
 	margin-top: 10px;
 	margin-bottom: 10px;
 	width: 98%;
@@ -846,10 +886,22 @@ label {
 	float: right;
 }
 
-form.popup, #confirm {
+form.popup {
 	/*width: 268px;*/
 	width: 350px;
 	padding: 30px;
+}
+
+form.popup textarea {
+	width: 99% !important;
+	height: 100px;
+	padding-top: 10px;
+	padding-left: 1% !important;
+	margin-top: 10px;
+	margin-bottom: 20px;
+	font-size: 1rem;
+	font-family: robotolight, sans-serif;
+	border: 1px dotted black;
 }
 
 /* Scrollbar */
@@ -906,11 +958,14 @@ form.popup, #confirm {
 /* Responsive */
 
 @media screen and (max-width: 1000px) {
-	#logo, #sidebar, #sidebar .menu li {
+	#logo,
+	#sidebar,
+	#sidebar .menu li {
 		width: 54px !important;
 	}
 
-	#foldersize, .widget * {
+	#foldersize,
+	.widget * {
 		display: none;
 	}
 

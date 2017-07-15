@@ -5,157 +5,168 @@
  * @link		http://simpledrive.org
  */
 
-var AudioManager = {
-	sound: null,
-	currMode: 0,
-	modes: ["loop", "single", "shuffle"],
-	active: null,
-	aborted: false,
+var AudioManager = new function() {
+	var self = this;
+	this.sound = null;
+	this.currMode = 0;
+	this.modes = ["loop", "single", "shuffle"];
+	this.active = null;
+	this.aborted = false;
 
-	abort: function() {
+	this.abort = function() {
 		window.stop();
-		AudioManager.aborted = true;
-	},
+		self.aborted = true;
+	}
 
-	init: function() {
+	this.init = function() {
 		try {
-			AudioManager.sound = null;
-			AudioManager.sound = new Audio();
-			AudioManager.aborted = false;
+			self.sound = null;
+			self.sound = new Audio();
+			self.aborted = false;
 		}
 		catch (e) {
 			Util.notify("Your browser does not support audio", true, true);
 			return;
 		}
 
-		$("#audio-prev").on('click', function(e) {
-			AudioManager.prev();
+		$("#audio-play, #audio-play-small").on('click', function(e) {
+			self.togglePlay();
 		});
 
-		$("#audio-play, #audio-play-small").on('click', function(e) {
-			AudioManager.togglePlay();
+		$("#audio-prev").on('click', function(e) {
+			self.prev();
 		});
 
 		$("#audio-next").on('click', function(e) {
-			AudioManager.next(false);
+			self.next(false);
 		});
 
 		$("#audioplayer .close").on('click', function(e) {
-			AudioManager.stopAudio();
+			self.stopAudio();
+		});
+	}
+
+	this.prepare = function() {
+		self.sound.preload = "auto";
+		self.sound.autobuffer = true;
+
+		self.sound.addEventListener("loadeddata", function() {
+			self.sound.play();
+			$("#audio-duration").text(Util.timestampToString(self.sound.duration));
 		});
 
-		$("#audioplayer").removeClass("hidden");
-		$(window).resize();
-
-		AudioManager.sound.preload = "auto";
-		AudioManager.sound.autobuffer = true;
-
-		AudioManager.sound.addEventListener("loadeddata", function() {
-			AudioManager.sound.play();
-			$("#audio-duration").text(Util.timestampToString(AudioManager.sound.duration));
-		});
-
-		AudioManager.sound.addEventListener('timeupdate', function() {
+		self.sound.addEventListener('timeupdate', function() {
 			$("#audio-seekbar-progress").width((this.currentTime / this.duration) * 100 + "%");
 			$("#audio-seekbar-buffer").width((this.buffered.end(0) / this.duration) * 100 + "%");
 			$("#audio-playpos").text(Util.timestampToString(this.currentTime));
 		});
 
-		AudioManager.sound.addEventListener('ended', function() {
+		self.sound.addEventListener('ended', function() {
 			$("#audio-seekbar-progress").width('0%');
-			AudioManager.next(true);
+			self.next(true);
 		});
 
-		AudioManager.sound.addEventListener('error', function(e) {
-			if (!AudioManager.aborted) {
+		self.sound.addEventListener('error', function(e) {
+			if (!self.aborted) {
 				Util.notify("Error playing audio", true, true);
 			}
 		});
 
-		AudioManager.sound.addEventListener('playing', function() {
+		self.sound.addEventListener('playing', function() {
 			$("#audio-play, #audio-play-small").removeClass('icon-play').addClass('icon-pause');
 		});
 
-		AudioManager.sound.addEventListener('pause', function() {
+		self.sound.addEventListener('pause', function() {
 			$("#audio-play, #audio-play-small").removeClass('icon-pause').addClass('icon-play');
 		});
-	},
 
-	togglePlay: function() {
-		if (AudioManager.sound && AudioManager.sound.readyState == 4 && AudioManager.sound.paused) {
-			AudioManager.sound.play();
-		}
-		else if (AudioManager.sound && AudioManager.sound.readyState == 4) {
-			AudioManager.sound.pause();
-		}
-	},
+		$("#audioplayer").removeClass("hidden");
+	}
 
-	seekTo: function(percent) {
-		var wasPlaying = !AudioManager.sound.paused;
-		AudioManager.sound.pause();
-		AudioManager.sound.currentTime = parseInt(AudioManager.sound.duration) * percent;
+	this.togglePlay = function() {
+		if (self.sound && self.sound.readyState == 4 && self.sound.paused) {
+			self.sound.play();
+		}
+		else if (self.sound && self.sound.readyState == 4) {
+			self.sound.pause();
+		}
+	}
+
+	this.seekTo = function(percent) {
+		var wasPlaying = !self.sound.paused;
+		self.sound.pause();
+		self.sound.currentTime = parseInt(self.sound.duration) * percent;
 		$("#audio-seekbar-progress").width($("#audio-seekbar-bg").width() * percent);
 
 		if (wasPlaying) {
-			AudioManager.sound.play();
+			self.sound.play();
 		}
-	},
+	}
 
-	play: function(elem, id) {
-		if (AudioManager.sound && AudioManager.sound.readyState == 4) {
-			AudioManager.sound.pause();
+	this.play = function(elem, id) {
+		if (self.sound && self.sound.readyState == 4) {
+			self.sound.pause();
 		}
 
-		AudioManager.init();
+		self.prepare();
 
-		if (!AudioManager.sound) {
+		if (!self.sound) {
 			return;
 		}
 
-		AudioManager.active = parseInt(id);
+		self.active = parseInt(id);
 
-		AudioManager.sound.src = 'api/files/get?target=' + encodeURIComponent(JSON.stringify([elem.id])).replace('(', '%28').replace(')', '%29') + '&token=' + token;
-		AudioManager.sound.load();
+		self.sound.src = 'api/files/get?target=' + encodeURIComponent(JSON.stringify([elem.id])).replace('(', '%28').replace(')', '%29') + '&token=' + token;
+		self.sound.load();
 		$("#audio-title").removeClass("hidden").text(elem.filename);
-	},
+	}
 
-	next: function(auto) {
-		var files = FileModel.getFiles();
-		for (var i = AudioManager.active + 1; i < AudioManager.active + files.length + 1; i++) {
-			if (auto && i >= files.length && AudioManager.modes[AudioManager.currMode] != 'loop') {
+	this.next = function(auto) {
+		if (!self.sound) {
+			return;
+		}
+
+		var files = FileModel.getAllFiltered();
+		for (var i = self.active + 1; i < self.active + files.length + 1; i++) {
+			if (auto && i >= files.length && self.modes[self.currMode] != 'loop') {
 				return;
 			}
 			else if (files[i % files.length].type == 'audio') {
-				AudioManager.play(files[i % files.length], i % files.length);
+				self.play(files[i % files.length], i % files.length);
 				return;
 			}
 		}
-	},
+	}
 
-	prev: function() {
-		var files = FileModel.getFiles();
+	this.prev = function() {
+		if (!self.sound) {
+			return;
+		}
+
+		var files = FileModel.getAllFiltered();
 		for (var i = active - 1; i > active - files.length; i--) {
 			var index = (i % files.length + files.length) % files.length;
 			if (files[index].type == 'audio') {
-				AudioManager.play(files[index], index);
+				self.play(files[index], index);
 				return;
 			}
 		}
-	},
+	}
 
-	stopAudio: function() {
-		AudioManager.active = null;
+	this.stopAudio = function() {
+		self.active = null;
 		$("#audioplayer").addClass("hidden");
-		$(window).resize();
 
-		if (AudioManager.sound && AudioManager.sound.readyState == 4) {
-			AudioManager.sound.pause();
-			AudioManager.abort();
+		if (self.sound && self.sound.readyState == 4) {
+			self.sound.pause();
+			self.abort();
 		}
-	},
+	}
 
-	changeMode: function() {
-		$("#bMode").removeClass(AudioManager.modes[AudioManager.currMode & AudioManager.modes.length]).addClass(AudioManager.modes[(AudioManager.currMode + 1) % AudioManager.modes.length]);
-		AudioManager.currMode++;
+	this.changeMode = function() {
+		$("#bMode").removeClass(self.modes[self.currMode & self.modes.length]).addClass(self.modes[(self.currMode + 1) % self.modes.length]);
+		self.currMode++;
 	}
 }
+
+AudioManager.init();

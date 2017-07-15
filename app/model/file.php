@@ -15,11 +15,11 @@ class File_Model {
 	static $PERMISSION_NONE		= 0;
 	static $PERMISSION_READ		= 1;
 	static $PERMISSION_WRITE	= 2;
-	static $FILES							= "/files";
-	static $TRASH							= "/trash/";
-	static $TEMP							= "/tmp/";
-	static $THUMB							= "/thumbnails/";
-	static $LOCK							= "/lock/";
+	static $FILES				= "/files";
+	static $TRASH				= "/trash/";
+	static $TEMP				= "/tmp/";
+	static $THUMB				= "/thumbnails/";
+	static $LOCK				= "/lock/";
 	static $PUBLIC_USER_ID		= 1;
 
 	/**
@@ -323,13 +323,20 @@ class File_Model {
 		$s->start($file['id'], $clientfiles, $serverfiles, $history, $lastsync);
 	}
 
-	public function children($target, $mode, $recursive = false, $need_md5 = false) {
-		//$enc = Crypto::encrypt("WorkeZz", "secret", true);
-		//file_put_contents(LOG, "enc: " . $enc . "\n", FILE_APPEND);
-		//$dec = Crypto::decrypt($enc, "secret");
-		//file_put_contents(LOG, "dec: " . $dec . "\n", FILE_APPEND);
+	public function search($needle) {
+		if ($this->uid == self::$PUBLIC_USER_ID) {
+			throw new Exception('Access denied', '403');
+		}
 
-		$start = microtime(true);
+		$files = $this->db->cache_search($this->uid, $needle);
+
+		return array(
+			'files'		=> $files,
+			'needle'	=> $needle
+		);
+	}
+
+	public function children($target, $mode, $recursive = false, $need_md5 = false) {
 		$file = $this->get_cached($target, self::$PERMISSION_READ);
 
 		if (!$file) {
@@ -361,7 +368,11 @@ class File_Model {
 			$files = $this->db->cache_children($file['id'], $this->uid, $file['ownerid']);
 		}
 
-		return array('files' => $files, 'hierarchy' => $parents);
+		return array(
+			'files'		=> $files,
+			'hierarchy'	=> $parents,
+			'current'	=> Util::array_remove_keys($file, array('parent', 'path'))
+		);
 	}
 
 	/**
@@ -455,7 +466,6 @@ class File_Model {
 	 */
 
 	public function delete($sources) {
-		$start = microtime(true);
 		$errors = 0;
 
 		foreach ($sources as $source) {
@@ -623,7 +633,7 @@ class File_Model {
 			$sourcepath = $this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'];
 
 			if (file_exists($targetpath . $sourcefile['filename']) ||
-				strpos($targetpath, $sourcepath) === 0 ||
+				strpos($targetpath, $sourcepath . "/") === 0 ||
 				(is_dir($sourcepath) && !Util::copy_dir($sourcepath, $targetpath . $sourcefile['filename'])) ||
 				(!is_dir($sourcepath) && !copy($sourcepath, $targetpath . $sourcefile['filename'])))
 			{
@@ -789,7 +799,7 @@ class File_Model {
 			}
 
 			if (file_exists($targetpath . "/" . $sourcefile['filename']) ||
-				strpos($targetpath, $sourcepath) === 0 ||
+				strpos($targetpath, $sourcepath . "/") === 0 ||
 				!rename($sourcepath, $targetpath . "/" . $sourcefile['filename']))
 			{
 				$this->db->log_write($this->uid, 2, "Move", "Error moving");
@@ -1020,7 +1030,7 @@ class File_Model {
 		throw new Exception('Error accessing file', '403');
 	}
 
-	public function save_text($target, $msg) {
+	public function save_text($target, $data) {
 		$file = $this->get_cached($target, self::$PERMISSION_WRITE);
 
 		if (!$file) {
@@ -1028,7 +1038,7 @@ class File_Model {
 		}
 
 		$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
-		if (file_put_contents($path, $msg)) {
+		if (file_put_contents($path, $data) !== false) {
 			$this->db->cache_update($file['id'], self::type($path), self::info($path), filemtime($path), md5_file($path), $file['owner'], $file['path']);
 			return null;
 		}

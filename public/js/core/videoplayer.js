@@ -5,21 +5,22 @@
  * @link		http://simpledrive.org
  */
 
-var VideoManager = {
-	video: document.getElementById("video"),
-	used: false,
+var VideoManager = new function() {
+	var self = this;
+	this.video = document.getElementById("video");
+	this.used = false;
 
-	init: function() {
+	this.init = function() {
 		$("#video-close").on('click', function(e) {
 			$("#videoplayer").addClass("hidden");
-			VideoManager.stopVideo();
+			self.stopVideo();
 		});
 
-		VideoManager.video.addEventListener("loadedmetadata", function (e) {
+		self.video.addEventListener("loadedmetadata", function (e) {
 			var width = this.videoWidth,
 				height = this.videoHeight;
 
-			var size = VideoManager.resize(VideoManager.video, $(window).height(), $(window).width(), 0.9);
+			var size = self.resize(self.video, $(window).height(), $(window).width(), 0.9);
 			$("#video").css({
 				'width' : size.width,
 				'height' : size.height,
@@ -28,37 +29,37 @@ var VideoManager = {
 			});
 		}, false );
 
-		VideoManager.video.addEventListener("canplaythrough", function() {
+		self.video.addEventListener("canplaythrough", function() {
 			$("#videoplayer").removeClass("hidden");
-			VideoManager.video.play();
-			VideoManager.used = true;
+			self.video.play();
+			self.used = true;
 		});
 
-		VideoManager.video.addEventListener('error', function(e) {
+		self.video.addEventListener('error', function(e) {
 			Util.notify("Error playing video", true, true);
 		});
-	},
+	}
 
-	play: function(elem, id) {
-		if (!VideoManager.used) {
-			VideoManager.init();
+	this.play = function(elem, id) {
+		if (!self.used) {
+			self.init();
 		}
 
-		VideoManager.video.src = 'api/files/get?target=' + encodeURIComponent(JSON.stringify([elem.id])).replace('(', '%28').replace(')', '%29') + '&token=' + token;
-		VideoManager.video.load();
+		self.video.src = 'api/files/get?target=' + encodeURIComponent(JSON.stringify([elem.id])).replace('(', '%28').replace(')', '%29') + '&token=' + token;
+		self.video.load();
 	},
 
-	resize: function(video, targetHeight, targetWidth, ratio) {
-		if (VideoManager.video.videoHeight > targetHeight * ratio || VideoManager.video.videoWidth > targetWidth * ratio) {
-			var shrinkTo = Math.min(targetHeight / VideoManager.video.videoHeight, targetWidth / VideoManager.video.videoWidth);
-			return {width: VideoManager.video.videoWidth * shrinkTo * ratio + "px", height: VideoManager.video.videoHeight * shrinkTo * ratio + "px"};
+	this.resize = function(video, targetHeight, targetWidth, ratio) {
+		if (self.video.videoHeight > targetHeight * ratio || self.video.videoWidth > targetWidth * ratio) {
+			var shrinkTo = Math.min(targetHeight / self.video.videoHeight, targetWidth / self.video.videoWidth);
+			return {width: self.video.videoWidth * shrinkTo * ratio + "px", height: self.video.videoHeight * shrinkTo * ratio + "px"};
 		}
 		else {
-			return {width: VideoManager.video.videoWidth + "px", height: VideoManager.video.videoHeight + "px"};
+			return {width: self.video.videoWidth + "px", height: self.video.videoHeight + "px"};
 		}
 	},
 
-	stopVideo: function() {
-		VideoManager.video.pause();
+	this.stopVideo = function() {
+		self.video.pause();
 	}
 }

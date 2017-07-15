@@ -154,6 +154,9 @@ class System_Model {
 	 */
 
 	public function get_log($page) {
+		/*for ($i = 0; $i < 7; $i++) {
+			$this->db->log_write(2, "warning", "custom", "This Message");
+		}*/
 		if (!$this->admin) {
 			throw new Exception('Permission denied', '403');
 		}
@@ -186,7 +189,7 @@ class System_Model {
 
 		// MD5-Hashes for integrity-check
 		$plugins = array(
-			'webodf'	=> '1c1b922e76c4e7e587f605a00fbddf25',
+			'webodf'	=> '12c46707418c72acf7069b06a93e1b54',
 			'sabredav'	=> '27a3b16e1ad67c23160aa1573713206d',
 			'phpmailer'	=> '080d71b0bf8f88aa04400ec3133cd91a'
 		);
