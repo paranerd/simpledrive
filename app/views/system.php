@@ -36,7 +36,7 @@
 			<div class="title-element title-element-current">Status</div>
 		</div>
 		<!-- Username -->
-		<div id="username" class="popup-trigger" data-target="menu"></div>
+		<div id="username" class="popup-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
 	</div>
 
 	<div class="main">

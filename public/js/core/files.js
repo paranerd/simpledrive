@@ -472,12 +472,11 @@ var FileView = new function() {
 	this.galleryMode = false;
 	this.originalFileview = '';
 	this.scrollTimeout = null;
+	this.blockInfopanel = false;
 
 	this.init = function(view) {
 		self.view = (view) ? view : "files";
 		self.enableLazyLoad();
-
-		$("#username").html(Util.escape(username) + " &#x25BF");
 
 		if (!Util.isDirectorySupported()) {
 			$("#upload-folder").addClass("hidden");
@@ -486,8 +485,9 @@ var FileView = new function() {
 		$(window).resize();
 	}
 
-	this.setView = function(view) {
+	this.setView = function(view, blockInfopanel) {
 		self.view = view;
+		self.blockInfopanel = (blockInfopanel || view == 'trash');
 		Util.sidebarFocus(self.view);
 	}
 
@@ -595,9 +595,7 @@ var FileView = new function() {
 			listItem.appendChild(edit);
 		}
 
-		if (self.view != "trash") {
-			self.setImgthumbnail(0, FileModel.requestID);
-		}
+		self.setImgthumbnail(0, FileModel.requestID);
 
 		var elem = (files.length == 1) ? " element" : " elements";
 		$("#foldersize").text(files.length + elem);
@@ -609,7 +607,7 @@ var FileView = new function() {
 	this.setImgthumbnail = function(index, requestID) {
 		var item = FileModel.list.get(index);
 
-		if (item != null && requestID == FileModel.requestID) {
+		if (item != null && requestID == FileModel.requestID && !self.view == 'trash') {
 			var thumbnail = document.querySelector("#item" + index + " .thumbnail");
 			var visible = Util.isVisible($(thumbnail).closest('.item'));
 
@@ -700,7 +698,7 @@ var FileView = new function() {
 	 * Displays the fileinfo-panel
 	 */
 	this.showFileInfo = function(id) {
-		if (self.view == 'trash') {
+		if (self.blockInfopanel) {
 			self.hideFileinfo();
 			return;
 		}
@@ -1397,7 +1395,7 @@ var FileModel = new function() {
 			data: {token: token, needle: needle},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			FileView.setView('files');
+			FileView.setView('files', true);
 			self.list.setData(data.msg.files);
 			FileView.hideFileinfo();
 			FileView.setTitle("Search results: \"" + needle + "\"");

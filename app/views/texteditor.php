@@ -35,7 +35,9 @@
 			<div class="title-element title-element-current"></div>
 		</div>
 		<!-- Username -->
-		<div id="username" class="popup-trigger" data-target="menu"></div>
+		<?php if ($username) : ?>
+		<div id="username" class="popup-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
+		<?php endif; ?>
 	</div>
 
 	<div class="main">

@@ -8,12 +8,11 @@
 var token;
 
 $(document).ready(function() {
-	username = $('head').data('username');
 	token = $('head').data('token');
 	Util.getVersion();
 
 	EditorController.init();
-	EditorView.init(username);
+	EditorView.init();
 	EditorModel.init($('head').data('id'));
 });
 
@@ -67,8 +66,7 @@ var EditorController = new function() {
 }
 
 var EditorView = new function() {
-	this.init = function(username) {
-		$("#username").html(Util.escape(username) + " &#x25BF");
+	this.init = function() {
 		$(window).resize();
 	}
 }

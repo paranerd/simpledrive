@@ -36,7 +36,7 @@
 		<div id="title"></div>
 		<!-- Username -->
 		<?php if ($section != 'pub') : ?>
-		<div id="username" class="popup-trigger" data-target="menu"></div>
+		<div id="username" class="popup-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
 		<?php endif; ?>
 	</div>
 

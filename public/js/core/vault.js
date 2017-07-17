@@ -5,12 +5,9 @@
  * @link		https://simpledrive.org
  */
 
-var username,
-	token,
-	code;
+var token;
 
 $(document).ready(function() {
-	username = $('head').data('username');
 	token = $('head').data('token');
 	Util.getVersion();
 
@@ -190,7 +187,6 @@ var VaultController = new function() {
 
 var VaultView = new function() {
 	this.init = function() {
-		$("#username").html(Util.escape(username) + " &#x25BF");
 		$(window).resize();
 	}
 
@@ -252,7 +248,6 @@ var VaultView = new function() {
 	this.display = function(entries) {
 		for (var i in entries) {
 			var item = entries[i];
-			console.log(item);
 
 			var listItem = document.createElement("div");
 			listItem.id = "item" + i;

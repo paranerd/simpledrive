@@ -157,8 +157,6 @@ var SystemView = new function() {
 	this.init = function(view) {
 		self.view = view;
 
-		$("#username").html(Util.escape(username) + " &#x25BF");
-
 		$(window).resize();
 	}
 
