@@ -17,6 +17,10 @@ h2 {
 	color: #2e8b5e;
 }
 
+.input-password span:hover {
+	color: #2e8b5e;
+}
+
 .btn {
 	color: white;
 	background-color: #2e8b5e;
@@ -317,8 +321,14 @@ body.light a {
 	background-color: rgba(0,0,0,0);
 }
 
-.light input {
+.light input,
+.light .input-password {
 	border-bottom: 1px dotted #555;
+}
+
+.light .input-password input {
+	border: none;
+	margin: 0;
 }
 
 .light .input-full-border {

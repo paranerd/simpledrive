@@ -72,6 +72,22 @@ input {
 	width: 99% !important;
 }
 
+.input-password {
+	margin-bottom: 10px;
+}
+
+.input-password input {
+	width: 85% !important;
+	margin: 0;
+}
+
+.input-password span {
+	height: 50px;
+	width: 12%;
+	line-height: 50px;
+	cursor: pointer;
+}
+
 select {
 	position: relative;
 	margin: 0;
@@ -267,6 +283,7 @@ div.hidden {
 	right: 5px;
 	height: 30px;
 	width: 30px;
+	line-height: 30px;
 	text-align: center;
 	font-family: sans-serif;
 	font-size: 1.5rem;
@@ -747,6 +764,7 @@ label {
 }
 
 #note-msg {
+	margin-right: 10px;
 	display: inline-block;
 	text-overflow: ellipsis;
 	white-space: nowrap;

@@ -117,6 +117,17 @@ var Util = new function() {
 		$(document).on('click', '#toggle-sidebar', function() {
 			$("#sidebar, #logo").toggleClass("sidebar-slim");
 		});
+
+		$(document).on('click', '.input-password > span', function() {
+			if ($(this).parent().find('input').attr('type') == 'text') {
+				$(this).parent().find('input').prop('type', 'password');
+				$(this).removeClass().addClass('password-toggle icon icon-visible');
+			}
+			else {
+				$(this).parent().find('input').prop('type', 'text');
+				$(this).removeClass().addClass('password-toggle icon icon-invisible');
+			}
+		});
 	}
 
 	this.startBusy = function(msg) {
@@ -366,7 +377,7 @@ var Util = new function() {
 		$("#note-msg").text(msg);
 		$("#notification").removeClass().addClass("popup center-hor notification-" + type);
 
-		if (autohide) {
+		if (autohide && false) {
 			setTimeout(function() { self.closePopup('notification'); }, 3000);
 		}
 	}
@@ -423,6 +434,7 @@ var Util = new function() {
 	}
 
 	this.timestampToDate = function(timestamp) {
+		timestamp = (timestamp.toString().length > 10) ? timestamp / 1000 : timestamp;
 		var date = new Date(timestamp * 1000);
 		var day = (date.getDate() < 10) ? "0" + date.getDate() : date.getDate();
 		var month = (date.getMonth() < 10) ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;

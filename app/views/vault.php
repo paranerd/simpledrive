@@ -56,10 +56,9 @@
 			</div>
 			<div class="content-header">
 				<span class="col0">&nbsp;</span>
-				<span class="col1" data-sortby="name"><span><?php echo $lang['name']; ?> </span><span id="title-ord" class="order-direction"></span></span>
+				<span class="col1" data-sortby="title"><span><?php echo $lang['title']; ?> </span><span id="title-ord" class="order-direction"></span></span>
 				<span class="col2" data-sortby="category"><span>Category</span><span id="category-ord" class="order-direction"></span></span>
 				<span class="col3" data-sortby="type"><span><?php echo $lang['type']; ?> </span><span id="type-ord" class="order-direction"></span></span>
-				<span class="col4" data-sortby="size"><span><?php echo $lang['size']; ?> </span><span id="size-ord" class="order-direction"></span></span>
 				<span class="col5" data-sortby="edit"><span id="edit-ord" class="order-direction"></span><span><?php echo $lang['edit']; ?> </span></span>
 			</div>
 
@@ -70,8 +69,8 @@
 	<!-- Create menu -->
 	<div id="create-menu" class="popup hidden">
 		<ul class="menu">
-			<li class="popup-trigger" data-target="entry-website" data-type="website"><span class="icon icon-key"></span><?php echo $lang['new'] . " website"; ?></li>
-			<li class="popup-trigger" data-target="entry-note" data-type="note"><span class="icon icon-key"></span><?php echo $lang['new'] . " note"; ?></li>
+			<li class="create-trigger" data-type="website"><span class="icon icon-key"></span><?php echo $lang['new website']; ?></li>
+			<li class="create-trigger" data-type="note"><span class="icon icon-key"></span><?php echo $lang['new note']; ?></li>
 		</ul>
 	</div>
 
@@ -101,7 +100,8 @@
 	<!-- Website-Entry popup -->
 	<form id="entry-website" class="popup center hidden" action="#" data-type="website">
 		<span class="close">&times;</span>
-		<div class="title">New Login-Info</div>
+		<div id="website-title-new" class="title">New Login-Info</div>
+		<div id="website-title-edit" class="title">Edit Login-Info</div>
 
 		<label>Title</label>
 		<input id="entry-website-title" class="input-indent" type="text" placeholder="Title">
@@ -116,7 +116,10 @@
 		<input id="entry-website-user" class="input-indent" type="text" placeholder="Username">
 
 		<label>Password</label>
-		<input id="entry-website-pass" class="input-indent" type="password" placeholder="Password">
+		<div class="input-password">
+			<input id="entry-website-pass" class="input-indent" type="password" placeholder="Password">
+			<span class="icon icon-visible"></span>
+		</div>
 
 		<div style="width: 100%; height: 50px; margin-top: 15px; margin-bottom: 15px;">
 			<div id="entry-website-copy-pass" class="btn">Copy Pass</div>
@@ -131,7 +134,8 @@
 	<!-- Note-Entry popup -->
 	<form id="entry-note" class="popup center hidden" action="#" data-type="note">
 		<span class="close">&times;</span>
-		<div class="title">New Note</div>
+		<div id="entry-title-new" class="title">New Note</div>
+		<div id="entry-title-edit" class="title">Edit Note</div>
 
 		<label>Title</label>
 		<input id="entry-note-title" class="input-indent" type="text" placeholder="Title">

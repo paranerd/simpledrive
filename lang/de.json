@@ -7,6 +7,7 @@
     "trash": "Papierkorb",
     "myfiles": "Meine Dateien",
     "file": "Datei",
+	"files": "Dateien",
     "folder": "Ordner",
     "name": "Name",
     "size": "Größe",
@@ -32,5 +33,8 @@
     "write": "Schreiben",
     "public": "Öffentlich",
     "info": "Info",
-	"search": "Suchen"
+	"search": "Suchen",
+	"title": "Titel",
+	"new website": "Neue Website",
+	"new note": "Neue Notiz"
 }

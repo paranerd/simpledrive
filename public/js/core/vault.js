@@ -30,13 +30,17 @@ var VaultController = new function() {
 		$(".sidebar-navigation").on('click', function(e) {
 			switch ($(this).data('action')) {
 				case 'entries':
-					VaultModel.fetch();
+					// Do nothing
 					break;
 			}
 		});
 
 		$("#sidebar-create").on('click', function() {
 			VaultModel.list.unselectAll();
+		});
+
+		$(".create-trigger").on('click', function() {
+			VaultView.showCreateEntry($(this).data('type'));
 		});
 
 		$(document).on('keydown', function(e) {
@@ -198,10 +202,19 @@ var VaultView = new function() {
 		Util.showPopup("passphrase", true);
 	}
 
+	this.showCreateEntry = function(type) {
+		$("#" + type + "-title-edit").addClass('hidden');
+		$("#" + type + "-title-new").removeClass('hidden');
+		$("#entry-website-open-url").addClass("hidden");
+		Util.showPopup("entry-" + type);
+	}
+
 	this.showEntry = function() {
 		var selection = VaultModel.list.getFirstSelected();
 		var item = selection.item;
 
+		$("#" + item.type + "-title-edit").removeClass('hidden');
+		$("#" + item.type + "-title-new").addClass('hidden');
 		Util.showPopup("entry-" + item.type);
 
 		$("#entry-" + item.type + "-title").val(item.title);
@@ -213,6 +226,13 @@ var VaultView = new function() {
 			$("#entry-website-user").val(item.user);
 			$("#entry-website-pass").val(item.pass);
 			$("#entry-website-open-url a").attr("href", Util.generateFullURL(item.url));
+
+			if (item.url) {
+				$("#entry-website-open-url").removeClass("hidden");
+			}
+			else {
+				$("#entry-website-open-url").addClass("hidden");
+			}
 
 			$("#entry-website-copy-user").off('click').on('click', function() {
 				Util.copyToClipboard(item.user);
@@ -232,6 +252,7 @@ var VaultView = new function() {
 	this.display = function(entries) {
 		for (var i in entries) {
 			var item = entries[i];
+			console.log(item);
 
 			var listItem = document.createElement("div");
 			listItem.id = "item" + i;
@@ -265,12 +286,6 @@ var VaultView = new function() {
 			type.className = "item-elem col3";
 			type.innerHTML = item.type;
 			listItem.appendChild(type);
-
-			// Size
-			var size = document.createElement("span");
-			size.className = "item-elem col4";
-			size.innerHTML = "";
-			listItem.appendChild(size);
 
 			// Edit
 			var edit = document.createElement("span");
@@ -314,7 +329,7 @@ var VaultModel = new function() {
 		item.title = $("#entry-" + type + "-title").val();
 		item.category = $("#entry-" + type + "-category").val();
 		item.type = type;
-		item.icon = "default";
+		item.logo = "";
 		item.edit = Date.now();
 
 		if (item.type == 'website') {
@@ -423,7 +438,7 @@ var VaultModel = new function() {
 				var dec = Crypto.decrypt(self.encrypted, passphrase);
 				self.passphrase = passphrase;
 				if (dec) {
-					self.list.setData(JSON.parse(dec));
+					self.list.setData(JSON.parse(dec), 'title');
 				}
 
 				Util.closePopup("unlock", false, true);

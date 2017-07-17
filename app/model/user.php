@@ -111,7 +111,7 @@ class User_Model {
 		$usedspace = Util::dir_size($this->config['datadir'] . $username);
 
 		if ($usedspace > $max_storage && $max_storage != 0) {
-			throw new Exception('Max storage < used storage', '400');
+			throw new Exception('Max storage < Used storage', '400');
 		}
 		/*else if($max_storage > $diskspace) {
 			$max_storage = $diskspace;

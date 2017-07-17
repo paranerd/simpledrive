@@ -1,6 +1,6 @@
 @font-face {
 	font-family: 'icomoon';
-	src: url('../font/icomoon.woff?6l0v11') format('woff');
+	src: url('../font/icomoon.woff?kwo43v') format('woff');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -209,4 +209,12 @@
 
 .icon-menu:before {
 	content: "\e9bd";
+}
+
+.icon-visible:before {
+  content: "\e9ce";
+}
+
+.icon-invisible:before {
+  content: "\e9d1";
 }

@@ -310,12 +310,6 @@ var FileController = new function() {
 			FileView.setFileview();
 		});
 
-		$(".content-header > span").on('click', function(e) {
-			if ($(this).data('sortby')) {
-				FileModel.list.order($(this).data('sortby'));
-			}
-		});
-
 		$("#create-menu li").on('click', function(e) {
 			$("#create-type").val($(this).data('type'))
 		});
@@ -1406,7 +1400,7 @@ var FileModel = new function() {
 			FileView.setView('files');
 			self.list.setData(data.msg.files);
 			FileView.hideFileinfo();
-			FileView.setTitle("Search results: " + needle);
+			FileView.setTitle("Search results: \"" + needle + "\"");
 			Util.closePopup('search');
 		}).fail(function(xhr, statusText, error) {
 			Util.showFormError('search', Util.getError(xhr));

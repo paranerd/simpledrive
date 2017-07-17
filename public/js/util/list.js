@@ -59,6 +59,12 @@ var List = (function() {
 				}
 			});
 
+			$(".content-header > span").on('click', function(e) {
+				if ($(this).data('sortby')) {
+					self.order($(this).data('sortby'));
+				}
+			});
+
 			$("#" + self.id + "-filter .close").on('click', function(e) {
 				self.filterRemove();
 			});
