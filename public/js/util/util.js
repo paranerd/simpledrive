@@ -377,7 +377,7 @@ var Util = new function() {
 		$("#note-msg").text(msg);
 		$("#notification").removeClass().addClass("popup center-hor notification-" + type);
 
-		if (autohide && false) {
+		if (autohide) {
 			setTimeout(function() { self.closePopup('notification'); }, 3000);
 		}
 	}

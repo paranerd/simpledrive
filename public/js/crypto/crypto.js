@@ -6,57 +6,75 @@
  */
 
 var Crypto = {
-	encrypt: function(msg, secret) {
-		// Generate salt
-		var salt = CryptoJS.lib.WordArray.random(128/8).toString().substring(0,16); // 16 Bytes
+	blockSize: 128,
+	keySize: 256,
 
-		// Generate IV
-		var iv = CryptoJS.lib.WordArray.random(128/8) // 16 Bytes
+	encrypt: function(msg, secret) {
+		// Generate IV (16 Bytes)
+		var iv = CryptoJS.lib.WordArray.random(this.blockSize / 8);
+
+		// Generate salt (16 Bytes)
+		var salt = CryptoJS.lib.WordArray.random(this.blockSize / 8);
 
 		// Generate key
-		var key = CryptoJS.PBKDF2(secret, salt, {
-			keySize: 256/32,
-			iterations: 2048,
-			hasher: CryptoJS.algo.SHA1
-		});
+		var key = this.generateKey(secret, salt);
 
 		// Encrypt
-		var encrypted = CryptoJS.AES.encrypt(msg, key, {
-			iv: iv,
-			padding: CryptoJS.pad.Pkcs7,
-			mode: CryptoJS.mode.CBC
-		});
+		var encrypted = CryptoJS.AES.encrypt(
+			msg,
+			key,
+			{
+				iv: iv,
+				padding: CryptoJS.pad.Pkcs7,
+				mode: CryptoJS.mode.CBC
+			}
+		);
 
-		// Encode
-		var encoded = btoa(encrypted.toString() + ":" + CryptoJS.enc.Base64.stringify(iv) + ":" + salt);
-		return encoded
+		// Encode (iv + salt + payload)
+		return btoa(
+			atob(CryptoJS.enc.Base64.stringify(iv)) +
+			atob(CryptoJS.enc.Base64.stringify(salt)) +
+			atob(encrypted.toString())
+		);
+	},
+
+	/* keySize is (key-length / word-length) (32bit; CryptoJS works with words) */
+	generateKey: function(secret, salt) {
+		return CryptoJS.PBKDF2(
+			secret,
+			salt,
+			{
+				keySize: this.keySize / 32,
+				iterations: 2048,
+				hasher: CryptoJS.algo.SHA1
+			}
+		);
 	},
 
 	decrypt: function(encryptedString, secret) {
 		// Decode
-		var rawData = atob(encryptedString);
-		var rawPieces = rawData.split(":");
+		var raw = CryptoJS.enc.Base64.parse(encryptedString);
 
-		// Extract payload
-		var crypttext = rawPieces[0];
+		// Extract IV
+		var iv = CryptoJS.lib.WordArray.create(raw.words.slice(0, this.blockSize / 32));
 
-		// Extract IV (base64 to WordArray) - on error try Base64.parse(atob())
-		var iv = CryptoJS.enc.Base64.parse(rawPieces[1]);
+		// Extract Salt
+		var salt = CryptoJS.lib.WordArray.create(raw.words.slice(this.blockSize / 32, this.blockSize / 32 + this.blockSize / 32));
 
-		// Extract salt
-		var salt = rawPieces[2];
+		// Extract ciphertext
+		var ciphertext = CryptoJS.lib.WordArray.create(raw.words.slice(this.blockSize / 32 + this.blockSize / 32));
 
-		// Generate key - keySize is key-length / word-length (32bit; CryptoJS works with words)
-		var key256Bits  = CryptoJS.PBKDF2(secret, salt, { keySize: 256/32, iterations: 2048, hasher: CryptoJS.algo.SHA1 });
+		// Generate key
+		var key = this.generateKey(secret, salt);
 
 		// Init cipher
-		var cipherParams = CryptoJS.lib.CipherParams.create({ciphertext: CryptoJS.enc.Base64.parse(crypttext)});
+		var cipherParams = CryptoJS.lib.CipherParams.create({ciphertext: ciphertext});
 
 		// Decrypt
 		var plaintextArray = CryptoJS.AES.decrypt(
 		  cipherParams,
-		  key256Bits,
-		  { iv: iv }
+		  key,
+		  {iv: iv}
 		);
 
 		// Encode

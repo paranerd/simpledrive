@@ -87,6 +87,14 @@ var FileController = new function() {
 					if (!multi) {
 						$("#context-rename").removeClass("hidden");
 					}
+					// Encrypt
+					if (!multi && target.type != "folder" && target.type != "encrypted") {
+						$("#context-encrypt").removeClass("hidden");
+					}
+					// Decrypt
+					if (!multi && target.type == "encrypted") {
+						$("#context-decrypt").removeClass("hidden");
+					}
 
 					// Zip
 					$("#context-zip").removeClass("hidden");
@@ -141,6 +149,14 @@ var FileController = new function() {
 
 				case 'rename':
 					FileView.showRename();
+					break;
+
+				case 'encrypt':
+					FileView.showEncrypt();
+					break;
+
+				case 'decrypt':
+					FileView.showDecrypt();
 					break;
 
 				case 'zip':
@@ -447,6 +463,16 @@ var FileController = new function() {
 			e.preventDefault();
 			FileModel.search($("#search-input").val());
 		});
+
+		$("#encrypt").on('submit', function(e) {
+			e.preventDefault();
+			FileModel.encrypt($("#encrypt-input").val());
+		});
+
+		$("#decrypt").on('submit', function(e) {
+			e.preventDefault();
+			FileModel.decrypt($("#decrypt-input").val());
+		});
 	}
 
 	this.addOtherEvents = function() {
@@ -607,7 +633,7 @@ var FileView = new function() {
 	this.setImgthumbnail = function(index, requestID) {
 		var item = FileModel.list.get(index);
 
-		if (item != null && requestID == FileModel.requestID && !self.view == 'trash') {
+		if (item != null && requestID == FileModel.requestID && self.view != 'trash') {
 			var thumbnail = document.querySelector("#item" + index + " .thumbnail");
 			var visible = Util.isVisible($(thumbnail).closest('.item'));
 
@@ -651,6 +677,14 @@ var FileView = new function() {
 			e.preventDefault();
 			FileModel.rename();
 		});
+	}
+
+	this.showEncrypt = function() {
+		Util.showPopup("encrypt");
+	}
+
+	this.showDecrypt = function() {
+		Util.showPopup("decrypt");
 	}
 
 	/**
@@ -1402,6 +1436,50 @@ var FileModel = new function() {
 			Util.closePopup('search');
 		}).fail(function(xhr, statusText, error) {
 			Util.showFormError('search', Util.getError(xhr));
+		}).always(function() {
+			Util.endBusy(bId);
+		});
+	}
+
+	this.encrypt = function(secret) {
+		if (!secret) {
+			Util.showFormError('encrypt', "Password cannot be empty!");
+			return;
+		}
+
+		var bId = Util.startBusy("Encrypting...");
+		$.ajax({
+			url: 'api/files/encrypt',
+			type: 'post',
+			data: {token: token, target: self.list.getFirstSelected().item.id, secret: secret},
+			dataType: "json"
+		}).done(function(data, statusText, xhr) {
+			Util.closePopup('encrypt');
+			self.fetch();
+		}).fail(function(xhr, statusText, error) {
+			Util.showFormError('encrypt', Util.getError(xhr));
+		}).always(function() {
+			Util.endBusy(bId);
+		});
+	}
+
+	this.decrypt = function(secret) {
+		if (!secret) {
+			Util.showFormError('encrypt', "Password cannot be empty!");
+			return;
+		}
+
+		var bId = Util.startBusy("Decrypting...");
+		$.ajax({
+			url: 'api/files/decrypt',
+			type: 'post',
+			data: {token: token, target: self.list.getFirstSelected().item.id, secret: secret},
+			dataType: "json"
+		}).done(function(data, statusText, xhr) {
+			Util.closePopup('decrypt');
+			self.fetch();
+		}).fail(function(xhr, statusText, error) {
+			Util.showFormError('decrypt', Util.getError(xhr));
 		}).always(function() {
 			Util.endBusy(bId);
 		});

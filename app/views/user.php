@@ -66,10 +66,6 @@
 					<div class="cell"><button class="btn popup-trigger" data-target="change-password">Change</button></div>
 				</div>
 				<div class="row">
-					<div class="cell">Vault Password</div>
-					<div class="cell"><button class="btn popup-trigger" data-target="vault-password">Change</button></div>
-				</div>
-				<div class="row">
 					<div class="cell">Active token (<span id="active-token">0</span>)</div>
 					<div class="cell"><button id="invalidate-token" class="btn">Invalidate</button></div>
 				</div>
@@ -172,25 +168,6 @@
 
 		<label for="change-password-pass2">New password (repeat)</label>
 		<input id="change-password-pass2" type="password" placeholder="New password (repeat)"></input>
-
-		<div class="error hidden"></div>
-		<button class="btn">OK</button>
-	</form>
-
-	<!-- Vault password popup -->
-	<form id="vault-password" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div class="title">Change password</div>
-
-		<label for="vault-password-pass0">Current password</label>
-		<input id="vault-password-pass0" type="password" placeholder="Current password"></input>
-
-		<label for="vault-password-pass1">New password</label>
-		<input id="vault-password-pass1" class="password-check" type="password" data-strength="change-strength" placeholder="New password"></input>
-		<div id="vault-strength" class="password-strength hidden"></div>
-
-		<label for="vault-password-pass2">New password (repeat)</label>
-		<input id="vault-password-pass2" type="password" placeholder="New password (repeat)"></input>
 
 		<div class="error hidden"></div>
 		<button class="btn">OK</button>

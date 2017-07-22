@@ -37,6 +37,8 @@ class Files_Controller {
 		'sync'		=> array('target', 'source', 'lastsync'),
 		'scan'		=> array('target'),
 		'search'	=> array('needle'),
+		'encrypt'	=> array('target', 'secret'),
+		'decrypt'	=> array('target', 'secret'),
 	);
 
 	public function __construct($token) {
@@ -140,5 +142,13 @@ class Files_Controller {
 
 	public function search() {
 		return $this->model->search($_REQUEST['needle']);
+	}
+
+	public function encrypt() {
+		return $this->model->encrypt($_REQUEST['target'], $_REQUEST['secret']);
+	}
+
+	public function decrypt() {
+		return $this->model->decrypt($_REQUEST['target'], $_REQUEST['secret']);
 	}
 }

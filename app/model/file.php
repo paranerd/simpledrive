@@ -72,6 +72,7 @@ class File_Model {
 
 			$supported = array(
 				'folder'	=> array('directory'),
+				'encrypted'	=> array('enc'),
 				'image'		=> array('image/png', 'image/jpeg', 'image/gif'),
 				'text'		=> array('text', 'inode/x-empty'),
 				'pdf'		=> array('application/pdf', 'pdf'),
@@ -334,6 +335,36 @@ class File_Model {
 			'files'		=> $files,
 			'needle'	=> $needle
 		);
+	}
+
+	public function encrypt($target, $secret) {
+		$file = $this->get_cached($target, self::$PERMISSION_READ);
+
+		if (!$file) {
+			throw new Exception('Error accessing file', '403');
+		}
+
+		$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
+		if (Crypto::encrypt_file($path, $secret)) {
+			return null;
+		}
+
+		throw new Exception('Error encrypting file', '403');
+	}
+
+	public function decrypt($target, $secret) {
+		$file = $this->get_cached($target, self::$PERMISSION_READ);
+
+		if (!$file) {
+			throw new Exception('Error accessing file', '403');
+		}
+
+		$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
+		if (Crypto::decrypt_file($path, $secret)) {
+			return null;
+		}
+
+		throw new Exception('Error decrypting file', '403');
 	}
 
 	public function children($target, $mode, $recursive = false, $need_md5 = false) {

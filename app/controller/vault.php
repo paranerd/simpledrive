@@ -17,7 +17,7 @@ class Vault_Controller {
 
 	public $required = array(
 		'sync'			=> array('vault', 'lastedit'),
-		'changepw'		=> array('currpass', 'newpass'),
+		'save'			=> array('vault'),
 	);
 
 	public function __construct($token) {
@@ -43,7 +43,7 @@ class Vault_Controller {
 		return $this->model->sync($_REQUEST['vault'], $_REQUEST['lastedit']);
 	}
 
-	public function changepw() {
-		return $this->model->change_password($_REQUEST['currpass'], $_REQUEST['newpass']);
+	public function save() {
+		return $this->model->save($_REQUEST['vault']);
 	}
 }

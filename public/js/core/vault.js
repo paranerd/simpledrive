@@ -133,9 +133,14 @@ var VaultController = new function() {
 			VaultModel.setPassphrase($("#passphrase-passphrase").val());
 		});
 
+		$("#change-passphrase").on('submit', function(e) {
+			e.preventDefault();
+			VaultModel.changePassphrase($("#change-passphrase-pass1").val(), $("#change-passphrase-pass2").val());
+		});
+
 		$("form[id^='entry']").on('submit', function(e) {
 			e.preventDefault();
-			VaultModel.save($(this).data('type'));
+			VaultModel.saveEntry($(this).data('type'));
 		});
 
 		/**
@@ -149,6 +154,8 @@ var VaultController = new function() {
 			$('[id^="context-"]').addClass("hidden");
 			$("#contextmenu hr").addClass("hidden");
 
+			$("#context-passphrase").removeClass("hidden");
+
 			if (target) {
 				if (!multi) {
 					// Edit
@@ -158,9 +165,9 @@ var VaultController = new function() {
 
 				// Delete
 				$("#context-delete").removeClass("hidden");
-
-				Util.showContextmenu(e);
 			}
+
+			Util.showContextmenu(e);
 		});
 
 		/**
@@ -171,6 +178,9 @@ var VaultController = new function() {
 			var action = id.substr(id.indexOf('-') + 1);
 
 			switch (action) {
+				case 'passphrase':
+					VaultView.showChangePassphrase();
+					break;
 				case 'edit':
 					VaultView.showEntry();
 					break;
@@ -196,6 +206,10 @@ var VaultView = new function() {
 
 	this.showSetPassphrase = function() {
 		Util.showPopup("passphrase", true);
+	}
+
+	this.showChangePassphrase = function() {
+		Util.showPopup("change-passphrase");
 	}
 
 	this.showCreateEntry = function(type) {
@@ -299,7 +313,7 @@ var VaultModel = new function() {
 	this.list = new List("entries", VaultView.display);
 	this.clipboard = {};
 
-	this.save = function(type) {
+	this.saveEntry = function(type) {
 		// Get item if editing - empty object if creating
 		var item = (self.list.getSelectedCount() > 0) ? self.list.getFirstSelected().item : {};
 
@@ -348,16 +362,17 @@ var VaultModel = new function() {
 		$("#entry-" + type + " .btn").prop('disabled', false);
 		Util.closePopup('entry-' + type, true);
 
-		// Sync
-		self.sync();
+		// Save
+		self.save();
 	}
 
-	this.sync = function() {
+	this.save = function() {
 		if (self.passphrase == '') {
 			VaultView.showSetPassphrase();
 			return;
 		}
-		var bId = Util.startBusy("Syncing...");
+
+		var bId = Util.startBusy("Saving...");
 
 		setTimeout(function() {
 			try {
@@ -365,13 +380,11 @@ var VaultModel = new function() {
 				var encryptedVault = Crypto.encrypt(vaultString, self.passphrase.toString());
 
 				$.ajax({
-					url: 'api/vault/sync',
+					url: 'api/vault/save',
 					type: 'post',
-					data: {token: token, vault: encryptedVault, lastedit: Date.now()},
+					data: {token: token, vault: encryptedVault},
 					dataType: "json"
 				}).done(function(data, statusText, xhr) {
-					self.encrypted = data.msg;
-					self.unlock(self.passphrase);
 					Util.notify("Saved.", true, false);
 				}).fail(function(xhr, statusText, error) {
 					Util.notify(Util.getError(xhr), true, true);
@@ -398,7 +411,7 @@ var VaultModel = new function() {
 				}
 			}
 
-			self.sync();
+			self.save();
 		});
 	}
 
@@ -453,5 +466,24 @@ var VaultModel = new function() {
 		else {
 			Util.showFormError('passphrase', 'Please enter a passphrase');
 		}
+	}
+
+	this.changePassphrase = function(pass1, pass2) {
+		if (pass1 == "" || pass2 == "") {
+			Util.showFormError('change-passphrase', 'No empty fields!');
+			return;
+		}
+
+		if (pass1 != pass2) {
+			Util.showFormError('change-passphrase', 'Passphrases do not match');
+			return;
+		}
+
+		if (pass1 != self.passphrase) {
+			self.passphrase = pass1;
+			this.save();
+		}
+
+		Util.closePopup('change-passphrase');
 	}
 }

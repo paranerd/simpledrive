@@ -8,7 +8,6 @@
  */
 
 class System_Model {
-
 	public function __construct($token) {
 		$this->config	= json_decode(file_get_contents('config/config.json'), true);
 		$this->db		= Database::getInstance();
@@ -20,7 +19,6 @@ class System_Model {
 	/**
 	 * Get server status info
 	 */
-
 	public function status() {
 		if (!$this->admin) {
 			throw new Exception('Permission denied', '403');
@@ -28,15 +26,7 @@ class System_Model {
 
 		$disktotal	= (disk_total_space(dirname(__FILE__)) != "") ? disk_total_space(dirname(__FILE__)) : disk_total_space('/');
 		$diskfree	= (disk_free_space(dirname(__FILE__)) != "") ? disk_free_space(dirname(__FILE__)) : disk_free_space('/');
-		$ssl		= true;
-		$htaccess	= file('.htaccess');
-
-		foreach ($htaccess as $line) {
-			if (strpos($line, '#RewriteCond %{HTTPS} off') !== false) {
-				$ssl = false;
-				break;
-			}
-		}
+		$ssl		= (strpos(file_get_contents('.htaccess'), '#RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [QSA,NC,L]') === false);
 
 		$plugins = array(
 			'webodf'		=> is_dir('plugins/webodf'),
@@ -153,7 +143,6 @@ class System_Model {
 	 * @param page indicates at which entry to start
 	 * @return array log entries
 	 */
-
 	public function get_log($page) {
 		/*for ($i = 0; $i < 7; $i++) {
 			$this->db->log_write(2, "warning", "custom", "This Message");
@@ -167,9 +156,8 @@ class System_Model {
 	}
 
 	/**
-	 * Deletes all log entries from database
+	 * Delete all log entries from database
 	 */
-
 	public function clear_log() {
 		if (!$this->admin) {
 			throw new Exception('Permission denied', '403');
@@ -179,10 +167,9 @@ class System_Model {
 	}
 
 	/**
-	 * Downloads and extracts a plugin
+	 * Download and extract a plugin
 	 * @param name (of the plugin)
 	 */
-
 	public function get_plugin($name) {
 		if (!$this->admin) {
 			throw new Exception('Permission denied', '403');
@@ -253,16 +240,15 @@ class System_Model {
 	}
 
 	/**
-	 * Removes plugin directory
-	 * @param name (of the plugin)
+	 * Remove plugin directory
+	 * @param plugin_name
 	 */
-
-	public function remove_plugin($name) {
+	public function remove_plugin($plugin_name) {
 		if (!$this->admin) {
 			throw new Exception('Permission denied', '403');
 		}
 
-		if (Util::delete_dir('plugins/' . $name)) {
+		if (Util::delete_dir('plugins/' . $plugin_name)) {
 			return null;
 		}
 
@@ -273,7 +259,6 @@ class System_Model {
 	 * Get current installed version and recent version (from demo server)
 	 * @return array containing current and version
 	 */
-
 	public function get_version() {
 		if (!$this->user) {
 			throw new Exception('Permission denied', '403');
@@ -283,7 +268,7 @@ class System_Model {
 		$url			= 'http://simpledrive.org/version';
 		$recent_version	= null;
 
-		// Get current version from demo server if internet is available
+		// Get current version from demo server if connection is available
 		if (@fopen($url, 'r')) {
 			$result = json_decode(file_get_contents($url, false), true);
 			$recent_version = ($result && $result['build'] > $version['build']) ? $result['version'] : null;

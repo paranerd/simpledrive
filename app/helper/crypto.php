@@ -9,43 +9,39 @@
 
 class Crypto {
 	static $encryption_method	= 'aes-256-cbc';
-	static $iv_size				= 16;
-	static $salt_size			= 16;
+	static $block_size			= 16;
+	static $key_size			= 32; // in bytes - so 256 bit for aes-256
 
 	/**
 	 * Encrypt string
-	 * @param string data to be encrypted
+	 * @param string plaintext to be encrypted
 	 * @param string secret passphrase
 	 * @param boolean sign whether or not to prepend hmac-hash for integrity
 	 * @return string encrypted string
 	 */
 
-	public function encrypt($data, $secret, $sign = false) {
-		if (!$data) {
-			return "";
-		}
-
-		// Generate IV - on error try random_tring(self::$iv_size)
-		$iv = self::random_bytes(self::$iv_size);
+	public function encrypt($plaintext, $secret, $sign = false) {
+		// Generate IV - on error try random_tring(self::$block_size)
+		$iv = self::random_bytes(self::$block_size);
 
 		// Generate Salt
-		$salt = self::random_string(self::$salt_size);
+		$salt = self::random_bytes(self::$block_size);
 
 		// Generate Key
 		$key = self::generate_key($secret, $salt);
 
-		// Encrypt (returns Base64-encoded string)
-		$encrypted = openssl_encrypt($data, self::$encryption_method, $key, 0, $iv);
+		// Encrypt
+		$ciphertext = openssl_encrypt($plaintext, self::$encryption_method, $key, OPENSSL_RAW_DATA, $iv);
 
-		// Format and add IV and Salt
-		$encrypted = $encrypted . ":" . base64_encode($iv) . ":" . $salt;
+		// Encode
+		$ciphertext64 = base64_encode($iv . $salt . $ciphertext);
 
 		// Sign
 		if ($sign) {
-			$encrypted = $encrypted . ":" . self::sign($encrypted, $key);
+			$ciphertext64 = $ciphertext64 . ":" . self::sign($ciphertext64, $key);
 		}
 
-		return base64_encode($encrypted);
+		return $ciphertext64;
 	}
 
 	/**
@@ -59,16 +55,22 @@ class Crypto {
 	 */
 
 	public function encrypt_file($path, $secret, $sign = false, $encrypt_filename = false, $destination = "") {
+		// Read plaintext from file
 		$data = file_get_contents($path);
+
+		// Encrypt
 		$encrypted = self::encrypt($data, $secret, $sign);
-		$filename = ($encrypt_filename) ? self::encrypt(basename($path), $secret) : basename($path);
+
+		// Determine destination path
+		$filename = ($encrypt_filename) ? self::encrypt(basename($path), $secret) . '.enc' : basename($path) . '.enc';
 		$encrypted_path = ($destination) ? $destination . $filename : dirname($path) . "/" . $filename;
 
-		if (file_put_contents($encrypted_path, $encrypted, LOCK_EX)) {
+		// Write ciphertext to file
+		if (file_put_contents($encrypted_path, $encrypted, LOCK_EX) !== false) {
 			return $encrypted_path;
 		}
 
-		return "";
+		return false;
 	}
 
 	/**
@@ -83,69 +85,83 @@ class Crypto {
 			return "";
 		}
 
-		// Convert data-string to array
-		$data = base64_decode($data64);
-		$separated = explode(":", $data);
-
-		// Extract cyphertext
-		$encrypted = $separated[0];
-
-		// Extract IV
-		$iv = base64_decode($separated[1]);
-
-		// Extract salt
-		$salt = $separated[2];
+		$separated = explode(":", $data64);
 
 		// Extract HMAC if signed
-		$hmac = (sizeof($separated) > 3) ? $separated[3] : "";
+		$hmac = (isset($separated[1])) ? $separated[1] : "";
+
+ 		// Convert data-string to array
+ 		$data = base64_decode($separated[0]);
+
+		// Extract IV
+		$iv = substr($data, 0, self::$block_size);
+
+		// Extract Salt
+		$salt = substr($data, self::$block_size, self::$block_size);
+
+		// Extract ciphertext
+		$ciphertext = substr($data, self::$block_size * 2);
 
 		// Generate Key
 		$key = self::generate_key($secret, $salt);
 
 		// Ensure integrity if signed
-		if ($hmac && !hash_equals(self::sign(substr($data, 0, -strlen(":" . $hmac)), $key), $hmac)) {
-			return "";
+		if ($hmac && !hash_equals(self::sign($separated[0], $key), $hmac)) {
+			return false;
 		}
 
 		// Decrypt
-		$decrypted = openssl_decrypt($encrypted, self::$encryption_method, $key, false, $iv);
-
-		return $decrypted;
+		return openssl_decrypt($ciphertext, self::$encryption_method, $key, OPENSSL_RAW_DATA, $iv);
 	}
 
 	/**
 	 * Decrypt file
 	 * @param string path absolute path to file
 	 * @param string secret passphrase
-	 * @param boolean signed whether or not the encrypted data has hmac-hash prepended
 	 * @param boolean filename_encrypted whether or not the filename is encrypted
 	 * @param string destination directory to create decrypted file in (with trailing slash!)
 	 * @return string absolute path to decrypted file
 	 */
 
-	public function decrypt_file($path, $secret, $signed = false, $filename_encrypted = false, $destination = "") {
-		// Get data to decrypt
-		$data = file_get_contents($path);
+	public function decrypt_file($path, $secret, $filename_encrypted = false, $destination = "") {
+		// Read ciphertext from file
+		$ciphertext = file_get_contents($path);
 
 		// Decrypt
-		$decrypted = self::decrypt($data, $secret, $signed);
+		$decrypted = self::decrypt($ciphertext, $secret);
+		if ($decrypted === false) {
+			return false;
+		}
 
 		// Determine destination path
-		$filename = ($filename_encrypted) ? self::decrypt(basename($path), $secret) : basename($path);
+		$filename = (substr($path, -4) === ".enc") ? substr(basename($path), 0, -4) : basename($path);
+		$filename = ($filename_encrypted) ? self::decrypt($filename, $secret) : $filename;
 		$decrypted_path = ($destination) ? $destination . $filename : dirname($path) . "/" . $filename;
 
-		if ($filename && file_put_contents($decrypted_path, $decrypted, LOCK_EX)) {
+		// Write plaintext to file
+		if ($filename && file_put_contents($decrypted_path, $decrypted, LOCK_EX) !== false) {
 			return $decrypted_path;
 		}
 
-		return "";
+		return false;
 	}
 
+	/**
+	 * Add PKCS5-Padding
+	 * @param string text plaintext
+	 * @param int blocksize
+	 * @return string padded plaintext
+	 */
 	public function pkcs5_pad($text, $blocksize) {
 		$pad = $blocksize - (strlen($text) % $blocksize);
 		return $text . str_repeat(chr($pad), $pad);
 	}
 
+	/**
+	 * Remove PKCS5-Padding
+	 * @param string text plaintext
+	 * @return string unpadded plaintext
+	 */
 	public function pkcs5_unpad($text) {
 		$pad = ord($text{strlen($text)-1});
 		if ($pad > strlen($text)) return false;
@@ -153,21 +169,43 @@ class Crypto {
 		return substr($text, 0, -1 * $pad);
 	}
 
+	/**
+	 * Generate an HMAC-Signature
+	 * @param string data string to be signed
+	 * @param string key secret passphrase
+	 * @return string hmac
+	 */
 	public function sign($data, $key) {
 		return hash_hmac('sha256', $data, $key);
 	}
 
+	/**
+	 * Generate a PBKDF2-Key
+	 * @param string secret
+	 * @param string salt
+	 * @return string
+	 */
 	private function generate_key($secret, $salt) {
-		// Key-length is in bytes!
-		return hash_pbkdf2('sha1', $secret, $salt, 2048, 32, true);
+		return hash_pbkdf2('sha1', $secret, $salt, 2048, self::$key_size, true);
 	}
 
+	/**
+	 * Generate a cryptographically secure password-hash
+	 * @param string pass
+	 * @return string password-hash
+	 */
 	public function generate_password($pass) {
 		$options = ['cost' => 11];
 
 		return password_hash($pass, PASSWORD_DEFAULT, $options);
 	}
 
+	/**
+	 * Check if a password matches a given hash
+	 * @param string pass
+	 * @param string hash
+	 * @return boolean
+	 */
 	public function verify_password($pass, $hash) {
 		return password_verify($pass, $hash);
 	}
@@ -176,9 +214,8 @@ class Crypto {
 	 * Generate authorization token, add session to db and set cookie
 	 * @param string uid
 	 * @param string hash public share hash (optional)
-	 * @return string authorization token
+	 * @return string|null authorization token
 	 */
-
 	public function generate_token($uid, $hash = "") {
 		$config		= json_decode(file_get_contents('config/config.json'), true);
 		$db			= Database::getInstance();
@@ -192,6 +229,11 @@ class Crypto {
 		return null;
 	}
 
+	/**
+	 * Validate authorization token
+	 * @param string token
+	 * @return string|null authorization token
+	 */
 	public function validate_token($token) {
 		try {
 			$db = Database::getInstance();
@@ -203,23 +245,19 @@ class Crypto {
 
 	/**
 	 * Generate a random byte-sequence
+	 * @param int length
+	 * @return string random bytes
 	 */
-
 	 public function random_bytes($length) {
 		 return openssl_random_pseudo_bytes($length);
 	 }
 
+	 /**
+	  * Generate a random string
+	  * @param int length
+	  * @return string random string
+	  */
 	 public function random_string($length) {
 		 return bin2hex(openssl_random_pseudo_bytes($length / 2));
 	 }
-
-	/**
-	 * Generate a random string of specified length
-	 */
-
-	public function random($length, $toString = true) {
-		$length = ($toString) ? $length / 2 : $length;
-		$rand = openssl_random_pseudo_bytes($length);
-		return ($toString) ? bin2hex($rand) : $rand;
-	}
 }

@@ -59,6 +59,14 @@ class Vault_Model {
 		return file_get_contents($this->vault_path);
 	}
 
+	public function save($client_vault) {
+		if (!$this->uid) {
+			throw new Exception('Permission denied', '403');
+		}
+
+		return (file_put_contents($this->vault_path, $client_vault) !== false);
+	}
+
 	public function change_password($currpass, $newpass) {
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
@@ -68,9 +76,9 @@ class Vault_Model {
 		$vault = file_get_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE);
 
 		// Try to decrypt vault
-		if ($vault_dec = Crypto::decrypt($vault, $currpass)) {
+		if (($vault_dec = Crypto::decrypt($vault, $currpass)) !== false) {
 			// Re-encrypt vault with new password
-			if ($vault_enc = Crypto::encrypt($vault_dec, $newpass)) {
+			if (($vault_enc = Crypto::encrypt($vault_dec, $newpass)) !== false) {
 				file_put_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE, $vault_enc);
 				return null;
 			}

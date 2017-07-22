@@ -41,7 +41,9 @@ var SystemController = new function() {
 		});
 
 		$("#force-ssl.checkbox-box").on('click', function(e) {
-			var enable = $("#force-ssl").hasClass("checkbox-checked") ? 1 : 0;
+			// This fires before checkbox-status has been changed
+			var enable = $("#force-ssl").hasClass("checkbox-checked") ? 0 : 1;
+			console.log("enable: " + enable);
 			Status.useSSL(enable);
 		});
 

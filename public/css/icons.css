@@ -111,6 +111,10 @@
   content: "\e98f";
 }
 
+.icon-encrypted:before {
+  content: "\e98f";
+}
+
 .icon-settings:before {
   content: "\e994";
 }

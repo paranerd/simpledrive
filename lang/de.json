@@ -36,5 +36,7 @@
 	"search": "Suchen",
 	"title": "Titel",
 	"new website": "Neue Website",
-	"new note": "Neue Notiz"
+	"new note": "Neue Notiz",
+	"encrypt": "Verschlüsseln",
+	"decrypt": "Entschlüsseln"
 }

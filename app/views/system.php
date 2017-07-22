@@ -81,7 +81,7 @@
 				</div>
 				<div class="row">
 					<div class="cell">Use SSL</div>
-					<div class="cell"><span class="checkbox"><span id="force-ssl2" class="checkbox-box"></span></span></div>
+					<div class="cell"><span class="checkbox"><span id="force-ssl" class="checkbox-box"></span></span></div>
 				</div>
 				<hr>
 				<h2>Info</h2>

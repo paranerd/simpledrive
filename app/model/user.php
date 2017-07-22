@@ -8,7 +8,6 @@
  */
 
 class User_Model {
-
 	static $TEMP	= '/tmp/';
 
 	public function __construct($token) {
@@ -236,7 +235,6 @@ class User_Model {
 	 * @param change true changes to next available one, false returns current one
 	 * @return array containing current and new view (equal on change = false)
 	 */
-
 	public function load_view() {
 		$user = $this->db->user_get_by_name($this->username);
 		return array('color' => $user['color'], 'fileview' => $user['fileview']);

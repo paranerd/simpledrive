@@ -180,6 +180,8 @@
 			<li id="context-paste" class="hidden"><span class="icon icon-paste"></span><?php echo $lang['paste']; ?></li>
 			<li id="context-share" class="hidden"><span class="icon icon-share"></span><?php echo $lang['share']; ?></li>
 			<li id="context-unshare" class="hidden"><span class="icon icon-share"></span><?php echo $lang['unshare']; ?></li>
+			<li id="context-encrypt" class="hidden"><span class="icon icon-key"></span><?php echo $lang['encrypt']; ?></li>
+			<li id="context-decrypt" class="hidden"><span class="icon icon-key"></span><?php echo $lang['decrypt']; ?></li>
 			<hr class="hidden">
 			<li id="context-rename" class="hidden"><span class="icon icon-rename"></span><?php echo $lang['rename']; ?></li>
 			<li id="context-zip" class="hidden"><span class="icon icon-archive"></span><?php echo $lang['zip']; ?></li>
@@ -229,6 +231,30 @@
 
 		<label for="search-input"><?php echo $lang['filename']; ?></label>
 		<input id="search-input" type="text" placeholder="<?php echo $lang['filename']; ?>" />
+
+		<div class="error hidden"></div>
+		<button class="btn">OK</button>
+	</form>
+
+	<!-- Encrypt popup -->
+	<form id="encrypt" class="popup center hidden" action="#">
+		<span class="close">&times;</span>
+		<div class="title"><?php echo $lang['encrypt']; ?></div>
+
+		<label for="encrypt-input"><?php echo $lang['password']; ?></label>
+		<input id="encrypt-input" type="password" placeholder="<?php echo $lang['password']; ?>" />
+
+		<div class="error hidden"></div>
+		<button class="btn">OK</button>
+	</form>
+
+	<!-- Decrypt popup -->
+	<form id="decrypt" class="popup center hidden" action="#">
+		<span class="close">&times;</span>
+		<div class="title"><?php echo $lang['decrypt']; ?></div>
+
+		<label for="decrypt-input"><?php echo $lang['password']; ?></label>
+		<input id="decrypt-input" type="password" placeholder="<?php echo $lang['decrypt']; ?>" />
 
 		<div class="error hidden"></div>
 		<button class="btn">OK</button>
@@ -336,6 +362,12 @@
 	<script type="text/javascript" src="public/js/util/simplescroll.js"></script>
 	<script type="text/javascript" src="public/js/util/util.js"></script>
 	<script type="text/javascript" src="public/js/util/list.js"></script>
+
+	<script type="text/javascript" src="public/js/crypto/crypto.js"></script>
+	<script type="text/javascript" src="public/js/crypto/aes.js"></script>
+	<script type="text/javascript" src="public/js/crypto/pbkdf2.js"></script>
+	<script type="text/javascript" src="public/js/crypto/sha256.js"></script>
+	<script type="text/javascript" src="public/js/crypto/sha1.js"></script>
 
 	<script type="text/javascript" src="public/js/core/image.js"></script>
 	<script type="text/javascript" src="public/js/core/audioplayer.js"></script>

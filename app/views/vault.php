@@ -91,8 +91,9 @@
 	<!-- Context menu -->
 	<div id="contextmenu" class="popup hidden">
 		<ul class="menu">
-			<li id="context-edit" class="hidden"><span class="icon icon-rename"></span>Edit</li>
+			<li id="context-passphrase" class="hidden"><span class="icon icon-key"></span>Change password</li>
 			<hr class="hidden">
+			<li id="context-edit" class="hidden"><span class="icon icon-rename"></span>Edit</li>
 			<li id="context-delete" class="hidden"><span class="icon icon-trash"></span><?php echo $lang['delete']; ?></li>
 		</ul>
 	</div>
@@ -171,6 +172,22 @@
 
 		<div class="error hidden"></div>
 		<a href="files" class="btn btn-inverted">Exit</a>
+		<button class="btn">OK</button>
+	</form>
+
+	<!-- Change password popup -->
+	<form id="change-passphrase" class="popup center hidden" action="#">
+		<span class="close">&times;</span>
+		<div class="title">Change passphrase</div>
+
+		<label for="change-passphrase-pass1">New password</label>
+		<input id="change-passphrase-pass1" class="password-check" type="password" data-strength="change-strength" placeholder="New passphrase"></input>
+		<div id="change-passphrase-strength" class="password-strength hidden"></div>
+
+		<label for="change-passphrase-pass2">New password (repeat)</label>
+		<input id="change-passphrase-pass2" type="password" placeholder="New passphrase (repeat)"></input>
+
+		<div class="error hidden"></div>
 		<button class="btn">OK</button>
 	</form>
 
