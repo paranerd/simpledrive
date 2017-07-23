@@ -135,8 +135,8 @@
 	<!-- Note-Entry popup -->
 	<form id="entry-note" class="popup center hidden" action="#" data-type="note">
 		<span class="close">&times;</span>
-		<div id="entry-title-new" class="title">New Note</div>
-		<div id="entry-title-edit" class="title">Edit Note</div>
+		<div id="note-title-new" class="title">New Note</div>
+		<div id="note-title-edit" class="title">Edit Note</div>
 
 		<label>Title</label>
 		<input id="entry-note-title" class="input-indent" type="text" placeholder="Title">

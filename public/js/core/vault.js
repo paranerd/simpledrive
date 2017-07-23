@@ -275,7 +275,7 @@ var VaultView = new function() {
 			listItem.appendChild(thumbnailWrapper);
 
 			var thumbnail = document.createElement('span');
-			thumbnail.className = "thumbnail icon-key";
+			thumbnail.className = "thumbnail icon-" + item.type;
 			thumbnailWrapper.appendChild(thumbnail);
 
 			// Title

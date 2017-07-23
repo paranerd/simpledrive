@@ -986,6 +986,7 @@ class File_Model {
 			$destination = $this->zip(null, $targets, true);
 		}
 		else if ($width && $height) {
+			file_put_contents(LOG, "requesting thumb for " . $file['filename']. "\n", FILE_APPEND);
 			$destination = $this->scale_image($file, $width, $height, $thumb);
 		}
 		else {

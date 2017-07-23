@@ -1,6 +1,6 @@
 @font-face {
 	font-family: 'icomoon';
-	src: url('../font/icomoon.woff?kwo43v') format('woff');
+	src: url('../font/icomoon.woff?njtu8z') format('woff');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -24,6 +24,10 @@
 /* Icons */
 
 .icon-rename:before {
+  content: "\e905";
+}
+
+.icon-note:before {
   content: "\e905";
 }
 
@@ -221,4 +225,8 @@
 
 .icon-invisible:before {
   content: "\e9d1";
+}
+
+.icon-website:before {
+  content: "\e9ca";
 }
