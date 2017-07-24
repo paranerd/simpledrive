@@ -119,6 +119,7 @@ var FileController = new function() {
 		 * Contextmenu action
 		 */
 		$("#contextmenu .menu li").on('click', function(e) {
+			return;
 			var id = $(this).attr('id')
 			var action = id.substr(id.indexOf('-') + 1);
 
@@ -180,7 +181,7 @@ var FileController = new function() {
 					break;
 			}
 
-			$("#contextmenu").addClass("hidden");
+			//Util.closePopup('contextmenu');
 		});
 
 		$(document).on('mousedown', '.item', function(e) {
@@ -205,13 +206,16 @@ var FileController = new function() {
 				return;
 			}
 
+			if (e.which == 1 && !FileView.dragging) {
+				FileModel.list.select(this.value);
+				FileModel.open();
+			}
+		});
+
+		$(document).on('mouseup', '.item', function(e) {
 			var id = this.value;
 			if (FileView.dragging && FileModel.list.get(id).type == "folder" && FileView.view != "trash" && typeof FileModel.list.getSelectedAt(id) === 'undefined') {
 				FileModel.move(FileModel.list.get(id).id);
-			}
-			else if (e.which == 1 && !FileView.dragging) {
-				FileModel.list.select(this.value);
-				FileModel.open();
 			}
 		});
 
@@ -274,7 +278,7 @@ var FileController = new function() {
 			}
 
 			if (e.which != 3) {
-				$("#contextmenu").addClass("hidden");
+				Util.closePopup('contextmenu');
 			}
 		});
 
@@ -1315,7 +1319,7 @@ var FileModel = new function() {
 
 		$(elem).val(''); // Remove files from DOM
 
-		$("#upload-menu").addClass("hidden");
+		Util.closePopup('upload-menu');
 
 		if (!self.uploadRunning) {
 			$("#upload-percent, #upload-filename, #upload-title").text('');

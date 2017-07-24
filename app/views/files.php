@@ -202,6 +202,7 @@
 			<li><a href="vault"><span class="icon icon-key"></span>Vault</a></li>
 			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><?php echo $lang['info']; ?></li>
 			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><?php echo $lang['logout']; ?></a></li>
+			<li><span class="icon icon-key"></span>Test</li>
 		</ul>
 	</div>
 

@@ -11,7 +11,7 @@ var token,
 $(document).ready(function() {
 	token = $('head').data('token');
 	base = $('head').data('base');
-	$(window).resize();
+
 	logout();
 });
 

@@ -251,9 +251,19 @@ hr {
 	top: 50%;
 }
 
-.hidden,
-div.hidden {
+.hidden:not(.popup),
+div.hidden:not(.popup) {
 	display: none;
+}
+
+.popup.hidden {
+	-moz-opacity: 0;
+	opacity: 0;
+	-moz-transform: scale(0.01);
+	-webkit-transform: scale(0.01);
+	-o-transform: scale(0.01);
+	-ms-transform: scale(0.01);
+	transform: scale(0.01);
 }
 
 .icon {
@@ -896,6 +906,12 @@ label {
 	font-family: robotoregular, sans-serif;
 	font-size: 1rem;
 	z-index: 1003;
+
+	-webkit-transition: all 100ms ease-out;
+	-moz-transition: all 100ms ease-out;
+	-ms-transition: all 100ms ease-out;
+	-o-transition: all 100ms ease-out;
+	transition: all 100ms ease-out;
 }
 
 .popup .btn {
@@ -905,7 +921,6 @@ label {
 }
 
 form.popup {
-	/*width: 268px;*/
 	width: 350px;
 	padding: 30px;
 }
@@ -920,6 +935,13 @@ form.popup textarea {
 	font-size: 1rem;
 	font-family: robotolight, sans-serif;
 	border: 1px dotted black;
+}
+
+form.popup .output {
+	height: 50px;
+	width: 100%;
+	line-height: 50px;
+	text-align: center;
 }
 
 /* Scrollbar */

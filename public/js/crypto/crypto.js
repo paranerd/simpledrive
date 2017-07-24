@@ -79,5 +79,39 @@ var Crypto = {
 
 		// Encode
 		return CryptoJS.enc.Utf8.stringify(plaintextArray);
+	},
+
+	initAlphabet: function(uppercase, lowercase, numbers, specials) {
+		var alphabet = "";
+
+		if (uppercase) {
+			alphabet += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		}
+		if (lowercase) {
+			alphabet += "abcdefghijklmnopqrstuvwxyz";
+		}
+		if (numbers) {
+			alphabet += "0123456789";
+		}
+		if (specials) {
+			alphabet += "!§$%&/()=?.-;:_";
+		}
+
+		return alphabet;
+	},
+
+	randomString: function(uppercase, lowercase, numbers, specials, length) {
+		var alphabet = this.initAlphabet(uppercase, lowercase, numbers, specials);
+		var str = "";
+
+		if (length > 0 && alphabet.length > 0) {
+			for (var i = 0; i < length; i++) {
+				var rand = Math.floor(Math.random() * (alphabet.length));
+				str += alphabet[rand];
+			}
+			return str;
+		}
+
+		return "";
 	}
 }

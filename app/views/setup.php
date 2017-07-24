@@ -8,8 +8,8 @@
  */
 
 if (file_exists('config/config.json')) {
-	//header('Location: ' . $base . 'core/login');
-	//exit();
+	header('Location: ' . $base . 'core/login');
+	exit();
 }
 
 $enabled = isset($_SERVER['HTACCESS']);
@@ -58,7 +58,7 @@ $enabled = isset($_SERVER['HTACCESS']);
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util/util.js"></script>
-	
+
 	<script type="text/javascript" src="public/js/core/setup.js"></script>
 </body>
 </html>

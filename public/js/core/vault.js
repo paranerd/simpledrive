@@ -18,32 +18,18 @@ $(document).ready(function() {
 
 var VaultController = new function() {
 	this.init = function() {
-		$("#autoscan.checkbox-box").on('click', function(e) {
-			// This fires before checkbox-status has been changed
-			var enable = $("#autoscan").hasClass("checkbox-checked") ? 0 : 1;
-			UserModel.setAutoscan(enable);
-		});
+		this.addMouseEvents();
+		this.addKeyEvents();
+		this.addFormEvents();
+	}
 
-		$(".sidebar-navigation").on('click', function(e) {
-			switch ($(this).data('action')) {
-				case 'entries':
-					// Do nothing
-					break;
-			}
-		});
-
-		$("#sidebar-create").on('click', function() {
-			VaultModel.list.unselectAll();
-		});
-
-		$(".create-trigger").on('click', function() {
-			VaultView.showCreateEntry($(this).data('type'));
-		});
-
+	this.addKeyEvents = function() {
 		$(document).on('keydown', function(e) {
 			switch(e.keyCode) {
 				case 27: // Esc
-					Util.copyToClipboard("");
+					if (!VaultModel.preventClipboardClear) {
+						Util.copyToClipboard("");
+					}
 					break;
 
 				case 13: // Return
@@ -74,17 +60,45 @@ var VaultController = new function() {
 					break;
 			}
 		});
+	}
+
+	this.addMouseEvents = function() {
+		$("#autoscan.checkbox-box").on('click', function(e) {
+			// This fires before checkbox-status has been changed
+			var enable = $("#autoscan").hasClass("checkbox-checked") ? 0 : 1;
+			UserModel.setAutoscan(enable);
+		});
+
+		$(".sidebar-navigation").on('click', function(e) {
+			switch ($(this).data('action')) {
+				case 'entries':
+					// Do nothing
+					break;
+			}
+		});
+
+		$("#sidebar-create").on('click', function() {
+			VaultModel.list.unselectAll();
+		});
+
+		$(".create-trigger").on('click', function() {
+			VaultView.showCreateEntry($(this).data('type'));
+		});
 
 		$(document).on('click', '#checker', function(e) {
 			VaultModel.list.toggleAllSelection();
 		});
 
-		$(document).on('click', '.popup .close', function(e) {
-			Util.copyToClipboard("");
+		$(document).on('click', '.popup:not(#password-generator) .close', function(e) {
+			if (!VaultModel.preventClipboardClear) {
+				Util.copyToClipboard("");
+			}
 		});
 
 		$(document).on('mousedown', '#shield', function(e) {
-			Util.copyToClipboard("");
+			if (!VaultModel.preventClipboardClear) {
+				Util.copyToClipboard("");
+			}
 		});
 
 		$("#entries").on('mousedown', function(e) {
@@ -123,24 +137,9 @@ var VaultController = new function() {
 			VaultModel.list.toggleSelection(id);
 		});
 
-		$("#unlock").on('submit', function(e) {
-			e.preventDefault();
-			VaultModel.unlock($("#unlock-passphrase").val());
-		});
-
-		$("#passphrase").on('submit', function(e) {
-			e.preventDefault();
-			VaultModel.setPassphrase($("#passphrase-passphrase").val());
-		});
-
-		$("#change-passphrase").on('submit', function(e) {
-			e.preventDefault();
-			VaultModel.changePassphrase($("#change-passphrase-pass1").val(), $("#change-passphrase-pass2").val());
-		});
-
-		$("form[id^='entry']").on('submit', function(e) {
-			e.preventDefault();
-			VaultModel.saveEntry($(this).data('type'));
+		$("#passgen-copy").on('click', function(e) {
+			VaultModel.preventClipboardClear = true;
+			Util.copyToClipboard($("#passgen-password").text());
 		});
 
 		/**
@@ -191,6 +190,41 @@ var VaultController = new function() {
 			}
 
 			$("#contextmenu").addClass("hidden");
+		});
+	}
+
+	this.addFormEvents = function() {
+		$("#unlock").on('submit', function(e) {
+			e.preventDefault();
+			VaultModel.unlock($("#unlock-passphrase").val());
+		});
+
+		$("#passphrase").on('submit', function(e) {
+			e.preventDefault();
+			VaultModel.setPassphrase($("#passphrase-passphrase").val());
+		});
+
+		$("#change-passphrase").on('submit', function(e) {
+			e.preventDefault();
+			VaultModel.changePassphrase($("#change-passphrase-pass1").val(), $("#change-passphrase-pass2").val());
+		});
+
+		$("form[id^='entry']").on('submit', function(e) {
+			e.preventDefault();
+			VaultModel.saveEntry($(this).data('type'));
+		});
+
+		$("#password-generator").on('submit', function(e) {
+			console.log("submit");
+			e.preventDefault();
+			var useUppercase = $("#passgen-upper").hasClass("checkbox-checked");
+			var useLowercase = $("#passgen-lower").hasClass("checkbox-checked");
+			var useNumbers = $("#passgen-numbers").hasClass("checkbox-checked");
+			var useSpecials = $("#passgen-specials").hasClass("checkbox-checked");
+			var length = $("#passgen-length").val();
+
+			var rand = Crypto.randomString(useUppercase, useLowercase, useNumbers, useSpecials, length);
+			$("#passgen-password").text(rand);
 		});
 	}
 }
@@ -245,11 +279,13 @@ var VaultView = new function() {
 			}
 
 			$("#entry-website-copy-user").off('click').on('click', function() {
+				VaultModel.preventClipboardClear = false;
 				Util.copyToClipboard(item.user);
 				Util.notify("Copied username to clipboard", true, false);
 			});
 
 			$("#entry-website-copy-pass").off('click').on('click', function() {
+				VaultModel.preventClipboardClear = false;
 				Util.copyToClipboard(item.pass);
 				Util.notify("Copied password to clipboard", true, false);
 			});
@@ -309,6 +345,7 @@ var VaultModel = new function() {
 	var self = this;
 	this.passphrase = "";
 	this.encrypted = "";
+	this.preventClipboardClear = false;
 
 	this.list = new List("entries", VaultView.display);
 	this.clipboard = {};

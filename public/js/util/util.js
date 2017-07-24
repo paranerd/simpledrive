@@ -16,6 +16,105 @@ var Util = new function() {
 	this.strengths = ["Very weak", "Weak", "Ok", "Good", "Strong", "Very strong"];
 
 	this.init = function() {
+		this.addMouseEvents();
+		this.addKeyEvents();
+		this.addFormEvents();
+		this.addOtherEvents();
+		self.copyToClipboard('');
+	}
+
+	this.addMouseEvents = function() {
+		$(document).on('mousedown', '#content-container, #shield', function(e) {
+			self.closePopup();
+		});
+
+		$(document).on('click', '.checkbox-box', function(e) {
+			$(this).toggleClass("checkbox-checked");
+		});
+
+		$(document).on('click', '.popup-trigger', function(e) {
+			if ($("#" + $(this).data('target')).hasClass('hidden')) {
+				self.showPopup($(this).data('target'));
+			}
+			else {
+				self.closePopup($(this).data('target'));
+			}
+		});
+
+		$(document).on('click', 'form .toggle-hidden', function(e) {
+			var form = $(this).closest('form');
+			$(form).find('.form-hidden').toggleClass("hidden");
+			$(window).resize();
+		});
+
+		$(document).on('click', '.close, .cancel', function(e) {
+			if ($(this).parents('.popup').length) {
+				self.closePopup($(this).parent().attr('id'), false, true);
+			}
+			else if ($(this).parents('.widget').length) {
+				self.closeWidget($(this).parent().attr('id'));
+			}
+		});
+
+		$(".popup .menu li").on('click', function() {
+			self.closePopup($(this).closest('.popup').attr('id'));
+		});
+
+		$(document).on('click', '#toggle-sidebar', function() {
+			$("#sidebar, #logo").toggleClass("sidebar-slim");
+		});
+
+		$(document).on('click', '.input-password > span', function() {
+			if ($(this).parent().find('input').attr('type') == 'text') {
+				$(this).parent().find('input').prop('type', 'password');
+				$(this).removeClass().addClass('password-toggle icon icon-visible');
+			}
+			else {
+				$(this).parent().find('input').prop('type', 'text');
+				$(this).removeClass().addClass('password-toggle icon icon-invisible');
+			}
+		});
+	}
+
+	this.addKeyEvents = function() {
+		$(document).on('keyup', function(e) {
+			switch(e.keyCode) {
+				case 27: // Esc
+					self.closePopup();
+					break;
+			}
+		});
+
+		$(document).on('keyup', '.password-check', function(e) {
+			var id = $(this).data('strength');
+
+			if ($(this).val()) {
+				$("#" + id).removeClass("hidden");
+				var strength = self.checkPasswordStrength($(this).val());
+				var cls = (strength.score > 1) ? 'password-ok' : 'password-bad';
+				$("#" + id).removeClass().addClass('password-strength ' + cls).text(strength.text);
+			}
+			else {
+				$("#" + id).addClass("hidden");
+				$("#" + id).text("");
+			}
+		});
+	}
+
+	this.addFormEvents = function() {
+		$("#confirm").on('submit', function(e) {
+			e.preventDefault();
+
+			if (self.confirmCallback) {
+				self.confirmCallback();
+				self.confirmCallback = null;
+			}
+
+			self.closePopup("confirm");
+		});
+	}
+
+	this.addOtherEvents = function() {
 		$(window).resize(function() {
 			// Position centered divs
 			$('.center').each(function(i, obj) {
@@ -41,91 +140,6 @@ var Util = new function() {
 				setTimeout(function() {
 					simpleScroll.update();
 				}, 200);
-			}
-		});
-
-		$(document).on('keyup', function(e) {
-			switch(e.keyCode) {
-				case 27: // Esc
-					self.closePopup();
-					break;
-			}
-		});
-
-		$("#confirm").on('submit', function(e) {
-			e.preventDefault();
-
-			if (self.confirmCallback) {
-				self.confirmCallback();
-				self.confirmCallback = null;
-			}
-
-			self.closePopup("confirm");
-		});
-
-		$(document).on('mousedown', '#content-container, #shield', function(e) {
-			self.closePopup();
-		});
-
-		$(document).on('click', '.checkbox-box', function(e) {
-			$(this).toggleClass("checkbox-checked");
-		});
-
-		$(document).on('click', '.popup-trigger', function(e) {
-			if ($("#" + $(this).data('target')).hasClass('hidden')) {
-				self.showPopup($(this).data('target'));
-			}
-			else {
-				self.closePopup($(this).data('target'));
-			}
-		});
-
-		$(document).on('click', 'form .toggle-hidden', function(e) {
-			var form = $(this).closest('form');
-			$(form).find('.form-hidden').toggleClass("hidden");
-			$(window).resize();
-		});
-
-		$(document).on('keyup', '.password-check', function(e) {
-			var id = $(this).data('strength');
-
-			if ($(this).val()) {
-				$("#" + id).removeClass("hidden");
-				var strength = self.checkPasswordStrength($(this).val());
-				var cls = (strength.score > 1) ? 'password-ok' : 'password-bad';
-				$("#" + id).removeClass().addClass('password-strength ' + cls).text(strength.text);
-			}
-			else {
-				$("#" + id).addClass("hidden");
-				$("#" + id).text("");
-			}
-		});
-
-		$(document).on('click', '.close, .cancel', function(e) {
-			if ($(this).parents('.popup').length) {
-				self.closePopup($(this).parent().attr('id'), false, true);
-			}
-			else if ($(this).parents('.widget').length) {
-				self.closeWidget($(this).parent().attr('id'));
-			}
-		});
-
-		$(".popup .menu li").on('click', function() {
-			$(this).closest('.popup').addClass("hidden");
-		});
-
-		$(document).on('click', '#toggle-sidebar', function() {
-			$("#sidebar, #logo").toggleClass("sidebar-slim");
-		});
-
-		$(document).on('click', '.input-password > span', function() {
-			if ($(this).parent().find('input').attr('type') == 'text') {
-				$(this).parent().find('input').prop('type', 'password');
-				$(this).removeClass().addClass('password-toggle icon icon-visible');
-			}
-			else {
-				$(this).parent().find('input').prop('type', 'text');
-				$(this).removeClass().addClass('password-toggle icon icon-invisible');
 			}
 		});
 	}
@@ -160,11 +174,15 @@ var Util = new function() {
 	this.copyToClipboard = function(text) {
 		var textArea = document.createElement('textarea');
 		textArea.style.opacity = 0;
-		textArea.value = text;
+		textArea.value = (text) ? text : " ";
 		document.body.appendChild(textArea);
 		textArea.select();
 		document.execCommand('copy');
 		document.body.removeChild(textArea);
+
+		if (text) {
+			self.notify("Copied to clipboard", true, false);
+		}
 	}
 
 	this.byteToString = function(size) {
@@ -244,6 +262,7 @@ var Util = new function() {
 			if (lock) {
 				$("#" + id).addClass("locked");
 			}
+
 			$("#" + id).removeClass("hidden");
 			$("#" + id).find('*').filter(':input:visible:first').focus();
 		}
@@ -263,7 +282,6 @@ var Util = new function() {
 		// Also empty clipboard (important for vault)
 		if (!id || (id && $(target).is('form'))) {
 			$(".overlay, .form-hidden").addClass("hidden");
-			self.copyToClipboard('');
 		}
 
 		$(target).addClass("hidden").removeClass("locked");
@@ -293,7 +311,9 @@ var Util = new function() {
 		$("#contextmenu").css({
 			'left' : (e.clientX + 5),
 			'top' : (top + 5)
-		}).removeClass("hidden");
+		});
+
+		self.showPopup('contextmenu');
 	}
 
 	this.showConfirm = function(title, successCallback) {

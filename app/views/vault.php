@@ -44,7 +44,8 @@
 		<div id="sidebar">
 			<ul class="menu">
 				<li id="sidebar-create" class="popup-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span><?php echo $lang['new']; ?></li>
-				<li id="sidebar-general" class="sidebar-navigation focus" title="Entries" data-action="entries"><span class="icon icon-info"></span>Entries</li>
+				<li id="sidebar-entries" class="sidebar-navigation focus" title="Entries" data-action="entries"><span class="icon icon-info"></span>Entries</li>
+				<li id="sidebar-passgen" class="popup-trigger" title="Entries" data-target="password-generator"><span class="icon icon-key"></span>Password Generator</li>
 			</ul>
 		</div>
 
@@ -149,6 +150,40 @@
 
 		<div class="error hidden"></div>
 		<button class="btn">Save</button>
+	</form>
+
+	<!-- Password Generator popup -->
+	<form id="password-generator" class="popup center hidden" action="#">
+		<span class="close">&times;</span>
+		<div class="title">Password Generator</div>
+
+		<label for="passgen-password">Password:</label>
+		<div id="passgen-password" class="output center-hor"></div>
+
+		<label for="passgen-length">Length</label>
+		<input id="passgen-length" class="input-indent" type="text" placeholder="Length">
+
+		<div class="checkbox">
+			<span id="passgen-upper" class="checkbox-box"></span>
+			<span class="checkbox-label">Uppercase</span>
+		</div>
+		<div class="checkbox">
+			<span id="passgen-lower" class="checkbox-box toggle-hidden"></span>
+			<span class="checkbox-label">Lowercase</span>
+		</div>
+		<div class="checkbox">
+			<span id="passgen-numbers" class="checkbox-box toggle-hidden"></span>
+			<span class="checkbox-label">Numbers</span>
+		</div>
+		<div class="checkbox">
+			<span id="passgen-specials" class="checkbox-box toggle-hidden"></span>
+			<span class="checkbox-label">Special characters</span>
+		</div>
+
+		<div id="passgen-copy" class="btn">Copy</div>
+
+		<div class="error hidden"></div>
+		<button class="btn">Generate</button>
 	</form>
 
 	<!-- Unlock popup -->
