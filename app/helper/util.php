@@ -23,8 +23,7 @@ class Util {
 		}
 
 		require_once 'plugins/phpmailer/PHPMailerAutoload.php';
-		$config = json_decode(file_get_contents('config/config.json'), true);
-
+		$config = CONFIG;
 		$mail = new PHPMailer;
 
 		$mail->SMTPDebug = 0;
@@ -179,5 +178,13 @@ class Util {
 				return $key;
 			}
 		}
+	}
+
+	public function connection_available() {
+		return @fopen('http://google.com', 'r');
+	}
+
+	public function log($msg) {
+		file_put_contents(LOG, print_r($msg, true) . "\n", FILE_APPEND);
 	}
 }

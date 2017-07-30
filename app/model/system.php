@@ -9,7 +9,7 @@
 
 class System_Model {
 	public function __construct($token) {
-		$this->config	= json_decode(file_get_contents('config/config.json'), true);
+		$this->config	= CONFIG; //json_decode(file_get_contents('config/config.json'), true);
 		$this->db		= Database::getInstance();
 		$this->token	= $token;
 		$this->user		= $this->db->user_get_by_token($this->token);

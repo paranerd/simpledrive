@@ -164,7 +164,7 @@
 	</div>
 
 	<!-- Context Menu -->
-	<div id="contextmenu" class="popup hidden">
+	<div id="contextmenu" class="popup popup-menu hidden">
 		<ul class="menu">
 			<li id="context-create" class="hidden"><span class="icon icon-user-plus"></span> Create User</li>
 			<li id="context-delete" class="hidden"><span class="icon icon-user-minus"></span> Delete User</li>
@@ -173,7 +173,7 @@
 	</div>
 
 	<!-- Menu -->
-	<div id="menu" class="popup hidden">
+	<div id="menu" class="popup popup-menu hidden">
 		<ul class="menu">
 			<li><a href="files"><span class="icon icon-files"></span>Files</a></li>
 			<li><a href="user"><span class="icon icon-settings"></span>Settings</a></li>

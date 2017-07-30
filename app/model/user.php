@@ -8,11 +8,9 @@
  */
 
 class User_Model {
-	static $TEMP	= '/tmp/';
-
 	public function __construct($token) {
-		$this->config	= json_decode(file_get_contents('config/config.json'), true);
 		$this->token	= $token;
+		$this->config	= CONFIG;
 		$this->db		= Database::getInstance();
 		$this->user		= $this->db->user_get_by_token($token);
 		$this->uid		= ($this->user) ? $this->user['id'] : 0;
@@ -216,16 +214,16 @@ class User_Model {
 		throw new Exception('Wrong password', '403');
 	}
 
-	public function clear_temp() {
+	public function clear_cache() {
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
 		}
 
-		if (Util::delete_dir($this->config['datadir'] . $this->username . self::$TEMP)) {
+		if (Util::delete_dir($this->config['datadir'] . $this->username . CACHE)) {
 			return null;
 		}
 
-		throw new Exception('Error clearing temp folder', '500');
+		throw new Exception('Error clearing cache', '500');
 	}
 
 	/**

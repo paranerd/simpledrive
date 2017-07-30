@@ -8,17 +8,14 @@
  */
 
 class Vault_Model {
-	static $VAULT				= '/vault/';
-	static $VAULT_FILE			= 'vault';
-
 	public function __construct($token) {
-		$this->config		= json_decode(file_get_contents('config/config.json'), true);
 		$this->token		= $token;
+		$this->config		= CONFIG;
 		$this->db			= Database::getInstance();
 		$this->user			= $this->db->user_get_by_token($token);
 		$this->uid			= ($this->user) ? $this->user['id'] : 0;
 		$this->username		= ($this->user) ? $this->user['username'] : "";
-		$this->vault_path	= ($this->user) ? $this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE : "";
+		$this->vault_path	= ($this->user) ? $this->config['datadir'] . $this->username . VAULT . VAULT_FILE : "";
 
 		$this->init();
 	}
@@ -73,13 +70,13 @@ class Vault_Model {
 		}
 
 		// Load vault
-		$vault = file_get_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE);
+		$vault = file_get_contents($this->config['datadir'] . $this->username . VAULT . VAULT_FILE);
 
 		// Try to decrypt vault
 		if (($vault_dec = Crypto::decrypt($vault, $currpass)) !== false) {
 			// Re-encrypt vault with new password
 			if (($vault_enc = Crypto::encrypt($vault_dec, $newpass)) !== false) {
-				file_put_contents($this->config['datadir'] . $this->username . self::$VAULT . self::$VAULT_FILE, $vault_enc);
+				file_put_contents($this->config['datadir'] . $this->username . VAULT . VAULT_FILE, $vault_enc);
 				return null;
 			}
 			else {

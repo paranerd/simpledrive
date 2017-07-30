@@ -37,6 +37,7 @@
 		<!-- Username -->
 		<?php if ($section != 'pub') : ?>
 		<div id="username" class="popup-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
+		<!-- <div id="username"><?php echo htmlentities($username) . " &#x25BF"; ?></div> -->
 		<?php endif; ?>
 	</div>
 
@@ -148,7 +149,7 @@
 	</div>
 
 	<!-- Upload menu -->
-	<div id="upload-menu" class="popup hidden">
+	<div id="upload-menu" class="popup popup-menu hidden">
 		<ul class="menu">
 			<li id="upload-file" class="upload-button">
 				<span class="icon icon-unknown"></span><?php echo "Upload " . $lang['file']; ?>
@@ -162,7 +163,7 @@
 	</div>
 
 	<!-- Create menu -->
-	<div id="create-menu" class="popup hidden">
+	<div id="create-menu" class="popup popup-menu hidden">
 		<ul class="menu">
 			<li class="popup-trigger" data-target="create" data-type="file"><span class="icon icon-unknown"></span><?php echo $lang['new'] . " " . $lang['file']; ?></li>
 			<li class="popup-trigger" data-target="create" data-type="folder"><span class="icon icon-folder"></span><?php echo $lang['new'] . " " . $lang['folder']; ?></li>
@@ -170,7 +171,7 @@
 	</div>
 
 	<!-- Context menu -->
-	<div id="contextmenu" class="popup hidden">
+	<div id="contextmenu" class="popup popup-menu hidden">
 		<ul class="menu">
 			<li id="context-gallery" class="hidden"><span class="icon icon-image"></span><?php echo $lang['gallery']; ?></li>
 			<li id="context-closegallery" class="hidden"><span class="icon icon-image"></span>Close <?php echo $lang['gallery']; ?></li>
@@ -192,7 +193,7 @@
 	</div>
 
 	<!-- Menu -->
-	<div id="menu" class="popup hidden">
+	<div id="menu" class="popup popup-menu hidden">
 		<ul class="menu">
 			<li><a href="files"><span class="icon icon-files"></span>Files</a></li>
 			<li><a href="user"><span class="icon icon-settings"></span>Settings</a></li>
@@ -202,7 +203,6 @@
 			<li><a href="vault"><span class="icon icon-key"></span>Vault</a></li>
 			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><?php echo $lang['info']; ?></li>
 			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><?php echo $lang['logout']; ?></a></li>
-			<li><span class="icon icon-key"></span>Test</li>
 		</ul>
 	</div>
 

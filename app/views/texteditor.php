@@ -53,7 +53,7 @@
 
 	<!-- Menu -->
 	<?php if ($username) : ?>
-	<div id="menu" class="popup hidden">
+	<div id="menu" class="popup popup-menu hidden">
 		<ul class="menu">
 			<li><a href="files"><span class="icon icon-files"></span>Files</a></li>
 			<li><a href="user"><span class="icon icon-settings"></span>Settings</a></li>

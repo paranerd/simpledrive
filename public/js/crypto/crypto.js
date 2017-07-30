@@ -9,7 +9,7 @@ var Crypto = {
 	blockSize: 128,
 	keySize: 256,
 
-	encrypt: function(msg, secret) {
+	encrypt: function(msg, secret, sign) {
 		// Generate IV (16 Bytes)
 		var iv = CryptoJS.lib.WordArray.random(this.blockSize / 8);
 
@@ -31,11 +31,22 @@ var Crypto = {
 		);
 
 		// Encode (iv + salt + payload)
-		return btoa(
+		var ciphertext64 = this.base64UrlEncode(
 			atob(CryptoJS.enc.Base64.stringify(iv)) +
 			atob(CryptoJS.enc.Base64.stringify(salt)) +
 			atob(encrypted.toString())
 		);
+
+		// Sign
+		if (sign) {
+			ciphertext64 = ciphertext64 + ":" + this.sign(ciphertext64, key);
+		}
+
+		return ciphertext64;
+	},
+
+	sign: function(str, key) {
+		return CryptoJS.HmacSHA256(str, key);
 	},
 
 	/* keySize is (key-length / word-length) (32bit; CryptoJS works with words) */
@@ -52,8 +63,14 @@ var Crypto = {
 	},
 
 	decrypt: function(encryptedString, secret) {
+		// Separate payload from potential hmac
+		var separated = encryptedString.trim().split(":");
+
+		// Extract HMAC if signed
+		var hmac = (separated[1]) ? separated[1] : "";
+
 		// Decode
-		var raw = CryptoJS.enc.Base64.parse(encryptedString);
+		var raw = this.base64UrlDecode(separated[0]);
 
 		// Extract IV
 		var iv = CryptoJS.lib.WordArray.create(raw.words.slice(0, this.blockSize / 32));
@@ -67,6 +84,10 @@ var Crypto = {
 		// Generate key
 		var key = this.generateKey(secret, salt);
 
+		if (hmac && !(this.sign(separated[0], key) == hmac)) {
+			return null;
+		}
+
 		// Init cipher
 		var cipherParams = CryptoJS.lib.CipherParams.create({ciphertext: ciphertext});
 
@@ -79,6 +100,14 @@ var Crypto = {
 
 		// Encode
 		return CryptoJS.enc.Utf8.stringify(plaintextArray);
+	},
+
+	base64UrlEncode: function(str) {
+		return btoa(str).replace(/\+/g, '-').replace(/\//g, '_');
+	},
+
+	base64UrlDecode: function(str) {
+		return CryptoJS.enc.Base64.parse(str.replace(/\-/g, '+').replace(/\_/g, '/'));
 	},
 
 	initAlphabet: function(uppercase, lowercase, numbers, specials) {

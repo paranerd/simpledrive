@@ -68,7 +68,7 @@
 	</div>
 
 	<!-- Create menu -->
-	<div id="create-menu" class="popup hidden">
+	<div id="create-menu" class="popup popup-menu hidden">
 		<ul class="menu">
 			<li class="create-trigger" data-type="website"><span class="icon icon-key"></span><?php echo $lang['new website']; ?></li>
 			<li class="create-trigger" data-type="note"><span class="icon icon-key"></span><?php echo $lang['new note']; ?></li>
@@ -76,7 +76,7 @@
 	</div>
 
 	<!-- Menu -->
-	<div id="menu" class="popup hidden">
+	<div id="menu" class="popup popup-menu hidden">
 		<ul class="menu">
 			<li><a href="files"><span class="icon icon-files"></span>Files</a></li>
 			<li><a href="user"><span class="icon icon-settings"></span>Settings</a></li>
@@ -90,7 +90,7 @@
 	</div>
 
 	<!-- Context menu -->
-	<div id="contextmenu" class="popup hidden">
+	<div id="contextmenu" class="popup popup-menu hidden">
 		<ul class="menu">
 			<li id="context-passphrase" class="hidden"><span class="icon icon-key"></span>Change password</li>
 			<hr class="hidden">

@@ -66,8 +66,8 @@ var UserController = new function() {
 			Backup.toggleEnable();
 		});
 
-		$("#clear-temp-button").on('click', function(e) {
-			UserModel.clearTemp();
+		$("#clear-cache-button").on('click', function(e) {
+			UserModel.clearCache();
 		});
 
 		$("#change-password").on('submit', function(e) {
@@ -172,9 +172,11 @@ var Backup = new function() {
 			data: {token: token},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			$("#backup-toggle-button").prop('disabled', true).text("Start");
+			Util.notify("Backup started", true, false);
+			$("#backup-toggle-button").prop('disabled', false).text("Start");
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
+			$("#backup-toggle-button").prop('disabled', false).text("Start");
 		});
 
 		setTimeout(function() { self.getStatus(); }, 3000);
@@ -345,9 +347,9 @@ var UserModel = new function() {
 		});
 	},
 
-	this.clearTemp = function() {
+	this.clearCache = function() {
 		$.ajax({
-			url: 'api/user/cleartemp',
+			url: 'api/user/clearcache',
 			type: 'post',
 			data: {token: token},
 			dataType: 'json'

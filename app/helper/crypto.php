@@ -34,7 +34,7 @@ class Crypto {
 		$ciphertext = openssl_encrypt($plaintext, self::$encryption_method, $key, OPENSSL_RAW_DATA, $iv);
 
 		// Encode
-		$ciphertext64 = base64_encode($iv . $salt . $ciphertext);
+		$ciphertext64 = self::base64_url_encode($iv . $salt . $ciphertext);
 
 		// Sign
 		if ($sign) {
@@ -42,6 +42,14 @@ class Crypto {
 		}
 
 		return $ciphertext64;
+	}
+
+	private function base64_url_encode($str) {
+		return strtr(base64_encode($str), '+/', '-_');
+	}
+
+	private function base64_url_decode($str) {
+		return base64_decode(strtr($str, '-_', '+/'));
 	}
 
 	/**
@@ -85,13 +93,14 @@ class Crypto {
 			return "";
 		}
 
-		$separated = explode(":", $data64);
+		// Separate payload from potential hmac
+		$separated = explode(":", trim($data64));
 
 		// Extract HMAC if signed
 		$hmac = (isset($separated[1])) ? $separated[1] : "";
 
  		// Convert data-string to array
- 		$data = base64_decode($separated[0]);
+ 		$data = self::base64_url_decode($separated[0]);
 
 		// Extract IV
 		$iv = substr($data, 0, self::$block_size);

@@ -10,21 +10,35 @@
 date_default_timezone_set('Europe/Berlin');
 header('Content-Type: text/html; charset=UTF-8');
 
+// Define Constants
 define('LOG', (__DIR__) . '/logs/status.log');
+define('CACHE', '/cache/');
+define('TRASH', '/trash/');
+define('FILES', '/files');
+define('THUMB', '/thumbnails/');
+define('LOCK', '/lock/');
+define('VAULT', '/vault/');
+define('VAULT_FILE', 'vault');
+define('PERMISSION_NONE', 0);
+define('PERMISSION_READ', 1);
+define('PERMISSION_WRITE', 2);
+define('PUBLIC_USER_ID', 1);
 
+// Include helpers
 require_once 'app/helper/database.php';
 require_once 'app/helper/util.php';
 require_once 'app/helper/crypto.php';
 require_once 'app/helper/response.php';
 
 // To differentiate between api- and render-calls
-$render			= (!isset($_REQUEST['api']) && !(isset($_REQUEST['request']) && $_REQUEST['request'] == 'api'));
 // Extract controller and action
-$request		= (isset($_REQUEST['request'])) ? $_REQUEST['request'] : null;
-$args			= ($request) ? explode('/', rtrim($request, '/')) : array();
-$controller		= (sizeof($args) > 0) ? array_shift($args) : 'files';
-$action			= (sizeof($args) > 0) ? array_shift($args) : '';
-$name			= ucfirst($controller) . "_Controller";
+$render       = (!isset($_REQUEST['api']) && !(isset($_REQUEST['request']) && $_REQUEST['request'] == 'api'));
+$token_source = ($render) ? $_COOKIE : $_REQUEST;
+$request      = (isset($_REQUEST['request'])) ? $_REQUEST['request'] : null;
+$args         = ($request) ? explode('/', rtrim($request, '/')) : array();
+$controller   = (sizeof($args) > 0) ? array_shift($args) : 'files';
+$action       = (sizeof($args) > 0) ? array_shift($args) : '';
+$name         = ucfirst($controller) . "_Controller";
 
 // Not installed - enter setup
 if (!file_exists('config/config.json') && ($controller != 'core' || $action != 'setup')) {
@@ -34,16 +48,14 @@ else if (!$request && $render) {
 	exit (Response::redirect('files'));
 }
 else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/' . $controller . '.php')) {
+	define('CONFIG', json_decode(file_get_contents('config/config.json'), true));
+
 	try {
 		require_once 'app/controller/' . $controller . '.php';
 
 		// Extract token
-		$token_source	= ($render) ? $_COOKIE : $_REQUEST;
-		$token			= (isset($token_source['token'])) ? Crypto::validate_token($token_source['token']) : '';
-
-		//file_put_contents(LOG, "controller: " . $controller . " | action: " . $action . " | token: " . $token . "\n", FILE_APPEND);
-
-		$c				= new $name($token);
+		$token = (isset($token_source['token'])) ? Crypto::validate_token($token_source['token']) : '';
+		$c     = new $name($token);
 
 		// Call to API
 		if (!$render && method_exists($name, $action)) {

@@ -1,17 +1,17 @@
 /* Fonts */
 
 @font-face {
-    font-family: 'robotolight';
-    src: url('../font/robotolight.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
+	font-family: 'robotolight';
+	src: url('../font/robotolight.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
 }
 
 @font-face {
-    font-family: 'robotoregular';
-    src: url('../font/robotoregular.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
+	font-family: 'robotoregular';
+	src: url('../font/robotoregular.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
 }
 
 /* General */
@@ -251,19 +251,29 @@ hr {
 	top: 50%;
 }
 
-.hidden:not(.popup),
-div.hidden:not(.popup) {
+.hidden:not(.popup):not(.popup-menu),
+div.hidden:not(.popup):not(.popup-menu) {
 	display: none;
 }
 
-.popup.hidden {
+.popup:not(.popup-menu).hidden {
 	-moz-opacity: 0;
 	opacity: 0;
+
 	-moz-transform: scale(0.01);
 	-webkit-transform: scale(0.01);
 	-o-transform: scale(0.01);
 	-ms-transform: scale(0.01);
 	transform: scale(0.01);
+}
+
+.popup-menu.hidden {
+	/*-moz-opacity: 0;
+	opacity: 0;*/
+	visibility: hidden;
+
+	max-height: 0;
+	transition: max-height 0.15s linear, opacity 0.1s linear 0.15s, visibility 0.1s linear 0.15s;
 }
 
 .icon {
@@ -906,12 +916,20 @@ label {
 	font-family: robotoregular, sans-serif;
 	font-size: 1rem;
 	z-index: 1003;
+}
 
+.popup:not(.popup-menu) {
 	-webkit-transition: all 100ms ease-out;
 	-moz-transition: all 100ms ease-out;
 	-ms-transition: all 100ms ease-out;
 	-o-transition: all 100ms ease-out;
 	transition: all 100ms ease-out;
+}
+
+.popup-menu {
+	overflow: hidden;
+	max-height: 500px;
+	transition: max-height 0.15s linear;
 }
 
 .popup .btn {

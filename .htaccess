@@ -1,15 +1,15 @@
 SetEnv HTACCESS on
 
 <IfModule mod_php5.c>
-php_value upload_max_filesize 20971520
-php_value post_max_size 20971520
+php_value upload_max_filesize 19922944
+php_value post_max_size 19922944
 php_flag log_errors on
 php_value error_log /var/www/html/simpledrive/logs/error.log
 </IfModule>
 
 <IfModule mod_php7.c>
-php_value upload_max_filesize 20971520
-php_value post_max_size 20971520
+php_value upload_max_filesize 19922944
+php_value post_max_size 19922944
 php_flag log_errors on
 php_value error_log /var/www/html/simpledrive/logs/error.log
 </IfModule>

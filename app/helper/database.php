@@ -9,7 +9,6 @@
 
 class Database {
 	private static $instance		= null;
-	private static $PUBLIC_USER_ID	= 1;
 
 	private function __construct() {
 		if (!function_exists('mysqli_connect')) {
@@ -703,7 +702,7 @@ class Database {
 	 */
 
 	public function share_is_unlocked($fid, $access, $token) {
-		$uid = $this->user_get_id_by_token($token) | self::$PUBLIC_USER_ID;
+		$uid = $this->user_get_id_by_token($token) | PUBLIC_USER_ID;
 		$share_base = $this->share_get_base($fid, $uid);
 
 		// Check if the share-base is shared with the user
@@ -720,7 +719,7 @@ class Database {
 				OR (userto = ? AND u.token = ?)
 			)
 		');
-		$stmt->bind_param('siiiis', $share_base, $access, self::$PUBLIC_USER_ID, $uid, self::$PUBLIC_USER_ID, $token);
+		$stmt->bind_param('siiiis', $share_base, $access, PUBLIC_USER_ID, $uid, PUBLIC_USER_ID, $token);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($total);

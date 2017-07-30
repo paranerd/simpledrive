@@ -12,26 +12,15 @@ require_once 'app/helper/sync.php';
 require_once 'app/model/user.php';
 
 class File_Model {
-	static $PERMISSION_NONE		= 0;
-	static $PERMISSION_READ		= 1;
-	static $PERMISSION_WRITE	= 2;
-	static $FILES				= "/files";
-	static $TRASH				= "/trash/";
-	static $TEMP				= "/tmp/";
-	static $THUMB				= "/thumbnails/";
-	static $LOCK				= "/lock/";
-	static $PUBLIC_USER_ID		= 1;
-
 	/**
-	 * Constructor, links db-connection, sets current user and config array
+	 * Constructor
 	 */
-
 	public function __construct($token) {
 		$this->token		= $token;
-		$this->config		= json_decode(file_get_contents('config/config.json'), true);
+		$this->config		= CONFIG;
 		$this->db			= Database::getInstance();
 		$this->user			= ($this->db) ? $this->db->user_get_by_token($token) : null;
-		$this->uid			= ($this->user) ? $this->user['id'] : self::$PUBLIC_USER_ID;
+		$this->uid			= ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
 		$this->username		= ($this->user) ? $this->user['username'] : "";
 
 		$this->init();
@@ -39,18 +28,18 @@ class File_Model {
 
 	private function init() {
 		if ($this->username) {
-			$base = $this->config['datadir'] . $this->username;
+			$userdir = $this->config['datadir'] . $this->username;
 			$dirs = array(
-				self::$FILES,
-				self::$TRASH,
-				self::$TEMP,
-				self::$THUMB,
-				self::$LOCK
+				FILES,
+				TRASH,
+				CACHE,
+				THUMB,
+				LOCK
 			);
 
 			foreach ($dirs as $dir) {
-				if (!file_exists($base . $dir)) {
-					mkdir($base . $dir, 0777, true);
+				if (!file_exists($userdir . $dir)) {
+					mkdir($userdir . $dir, 0777, true);
 				}
 			}
 		}
@@ -117,20 +106,20 @@ class File_Model {
 	 */
 
 	private function remove_thumbnail($file) {
-		$temp = $this->get_thumbnail_dir($file);
+		$thumb_dir = $this->get_thumbnail_dir($file);
 
 		if ($file['type'] == 'folder') {
 			$children = $this->db->cache_children_rec($file['id'], $this->uid, $file['ownerid']);
 
 			foreach ($children as $child) {
 				if ($child['type'] == 'image') {
-					unlink($temp . $child['id']);
+					unlink($thumb_dir . $child['id']);
 				}
 			}
 		}
 		else {
 			if ($file['type'] == 'image') {
-				unlink($temp . $file['id']);
+				unlink($thumb_dir . $file['id']);
 			}
 		}
 	}
@@ -165,24 +154,24 @@ class File_Model {
 		return true;
 	}
 
-	private function get_temp_dir($file) {
-		$temp = $this->config['datadir'] . $file['owner'] . self::$TEMP;
+	private function get_cache_dir($file) {
+		$cache_dir = $this->config['datadir'] . $file['owner'] . CACHE;
 
-		if ($file['owner'] != "" && !file_exists($temp)) {
-			mkdir($temp);
+		if ($file['owner'] != "" && !file_exists($cache_dir)) {
+			mkdir($cache_dir);
 		}
 
-		return $temp;
+		return $cache_dir;
 	}
 
 	private function get_thumbnail_dir($file) {
-		$temp = $this->config['datadir'] . $file['owner'] . self::$THUMB;
+		$thumb_dir = $this->config['datadir'] . $file['owner'] . THUMB;
 
-		if ($file['owner'] != "" && !file_exists($temp)) {
-			mkdir($temp);
+		if ($file['owner'] != "" && !file_exists($thumb_dir)) {
+			mkdir($thumb_dir);
 		}
 
-		return $temp;
+		return $thumb_dir;
 	}
 
 	/**
@@ -195,11 +184,11 @@ class File_Model {
 	 */
 
 	private function scale_image($file, $target_width, $target_height, $is_thumb) {
-		$src = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
-		$temp = ($is_thumb) ? $this->get_thumbnail_dir($file) : $this->get_temp_dir($file);
-		$destination = $temp . $file['id'];
+		$src = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
+		$dest_dir = ($is_thumb) ? $this->get_thumbnail_dir($file) : $this->get_cache_dir($file);
+		$destination = $dest_dir . $file['id'];
 
-		if (!file_exists($temp)) {
+		if (!file_exists($dest_dir)) {
 			return null;
 		}
 
@@ -311,7 +300,7 @@ class File_Model {
 	}
 
 	public function sync($target, $clientfiles, $lastsync) {
-		$file = $this->get_cached($target, self::$PERMISSION_WRITE);
+		$file = $this->get_cached($target, PERMISSION_WRITE);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
@@ -325,7 +314,7 @@ class File_Model {
 	}
 
 	public function search($needle) {
-		if ($this->uid == self::$PUBLIC_USER_ID) {
+		if ($this->uid == PUBLIC_USER_ID) {
 			throw new Exception('Access denied', '403');
 		}
 
@@ -338,14 +327,14 @@ class File_Model {
 	}
 
 	public function encrypt($target, $secret) {
-		$file = $this->get_cached($target, self::$PERMISSION_READ);
+		$file = $this->get_cached($target, PERMISSION_READ);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
-		if (Crypto::encrypt_file($path, $secret)) {
+		$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
+		if (Crypto::encrypt_file($path, $secret, true)) {
 			return null;
 		}
 
@@ -353,13 +342,13 @@ class File_Model {
 	}
 
 	public function decrypt($target, $secret) {
-		$file = $this->get_cached($target, self::$PERMISSION_READ);
+		$file = $this->get_cached($target, PERMISSION_READ);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
+		$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
 		if (Crypto::decrypt_file($path, $secret)) {
 			return null;
 		}
@@ -368,7 +357,7 @@ class File_Model {
 	}
 
 	public function children($target, $mode, $recursive = false, $need_md5 = false) {
-		$file = $this->get_cached($target, self::$PERMISSION_READ);
+		$file = $this->get_cached($target, PERMISSION_READ);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
@@ -390,10 +379,10 @@ class File_Model {
 			$files = $this->db->cache_get_trash($this->uid);
 		}
 		else if ($mode == "shareout" && strlen($file['path']) == 0) {
-			$files = $this->db->share_get_from($this->uid, self::$PERMISSION_READ);
+			$files = $this->db->share_get_from($this->uid, PERMISSION_READ);
 		}
 		else if ($mode == "sharein" && strlen($file['path']) == 0) {
-			$files = $this->db->share_get_with($this->uid, self::$PERMISSION_READ);
+			$files = $this->db->share_get_with($this->uid, PERMISSION_READ);
 		}
 		else {
 			$files = $this->db->cache_children($file['id'], $this->uid, $file['ownerid']);
@@ -419,13 +408,13 @@ class File_Model {
 			throw new Exception('Filename not allowed', '400');
 		}
 
-		$parent = $this->get_cached($target, self::$PERMISSION_WRITE);
+		$parent = $this->get_cached($target, PERMISSION_WRITE);
 
 		if (!$parent) {
 			throw new Exception('Permission denied', '403');
 		}
 
-		$path = $this->config['datadir'] . $parent['owner'] . self::$FILES . $parent['path'];
+		$path = $this->config['datadir'] . $parent['owner'] . FILES . $parent['path'];
 		$filename = ($orig_filename != "") ? $orig_filename : "Unknown " . $type;
 
 		if ($orig_filename == "" && file_exists($path . "/" . $filename)) {
@@ -442,7 +431,7 @@ class File_Model {
 
 		// Create file/folder
 		if (($type == 'file' && touch($path . "/" . $filename)) ||
-				($type == 'folder' && mkdir($path . "/" . $filename, 0777, true)))
+			($type == 'folder' && mkdir($path . "/" . $filename, 0777, true)))
 		{
 			$md5 = (is_dir($path . "/" . $filename)) ? "0" : md5_file($path . "/" . $filename);
 			return $this->db->cache_add($filename, $parent['id'], self::type($path . "/" . $filename), self::info($path . "/" . $filename), $parent['ownerid'], filemtime($path . "/" . $filename), $md5, $parent['path'] . "/" . $filename);
@@ -463,13 +452,13 @@ class File_Model {
 			throw new Exception('Filename not allowed', '400');
 		}
 
-		$file = $this->get_cached($id, self::$PERMISSION_WRITE);
+		$file = $this->get_cached($id, PERMISSION_WRITE);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		$oldpath = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
+		$oldpath = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
 		$newpath = dirname($oldpath) . "/" . $newname;
 
 		if (is_file($oldpath) && !strrpos($newpath, '.') && strrpos($oldpath, '.')) {
@@ -500,7 +489,7 @@ class File_Model {
 		$errors = 0;
 
 		foreach ($sources as $source) {
-			$file = $this->get_cached($source, self::$PERMISSION_WRITE);
+			$file = $this->get_cached($source, PERMISSION_WRITE);
 
 			// Access denied or homefolder
 			if (!$file || !$file['filename'] || !$file['path']) {
@@ -508,7 +497,7 @@ class File_Model {
 				continue;
 			}
 
-			$trashdir = $this->config['datadir'] . $file['owner'] . self::$TRASH;
+			$trashdir = $this->config['datadir'] . $file['owner'] . TRASH;
 
 			// Create trash if not exists
 			if (!file_exists($trashdir)) {
@@ -529,7 +518,7 @@ class File_Model {
 
 			// Move to trash
 			else {
-				if (rename($this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'], $trashdir . $file['id'])) {
+				if (rename($this->config['datadir'] . $file['owner'] . FILES . $file['path'], $trashdir . $file['id'])) {
 					$restorepath = (dirname($file['path']) == 1) ? "/" : dirname($file['path']);
 					$this->db->cache_trash($file['id'], $file['ownerid'], $file['path'], $restorepath);
 					$this->db->share_remove($file['id']);
@@ -556,8 +545,8 @@ class File_Model {
 	 */
 
 	public function share($target, $userto, $mail, $write, $public, $pass) {
-		$file = $this->get_cached($target, self::$PERMISSION_WRITE);
-		$access = ($write) ? self::$PERMISSION_WRITE : self::$PERMISSION_READ;
+		$file = $this->get_cached($target, PERMISSION_WRITE);
+		$access = ($write) ? PERMISSION_WRITE : PERMISSION_READ;
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
@@ -579,7 +568,7 @@ class File_Model {
 
 		// If the share is supposed to be public, do that
 		if ($public == 1) {
-			if (($share_id = $this->db->share($file['id'], self::$PUBLIC_USER_ID, Crypto::generate_password($pass), $access)) !== null) {
+			if (($share_id = $this->db->share($file['id'], PUBLIC_USER_ID, Crypto::generate_password($pass), $access)) !== null) {
 				$link = $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/pub/" . $share_id;
 				// Regex for verifying email: '/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/'
 				/*if (isset($_POST['mail']) && $_POST['mail'] != "" && $this->config['mailuser'] != '' && $this->config['mailpass'] != '') {
@@ -601,7 +590,7 @@ class File_Model {
 	 */
 
 	public function unshare($id) {
-		$file = $this->get_cached($id, self::$PERMISSION_READ);
+		$file = $this->get_cached($id, PERMISSION_READ);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
@@ -621,14 +610,14 @@ class File_Model {
 	 */
 
 	public function get_link($id) {
-		$file = $this->get_cached($id, self::$PERMISSION_READ);
+		$file = $this->get_cached($id, PERMISSION_READ);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
 		}
 
 		if ($share = $this->db->share_get_by_file_id($file['id'])) {
-			if ($share['userto'] == self::$PUBLIC_USER_ID) {
+			if ($share['userto'] == PUBLIC_USER_ID) {
 				return $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/pub/" . $share['id'];
 			}
 		}
@@ -644,24 +633,24 @@ class File_Model {
 	 */
 
 	public function copy($target, $sources) {
-		$targetfile = $this->get_cached($target, self::$PERMISSION_WRITE);
+		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
 
 		if (!$targetfile) {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		$targetpath = $this->config['datadir'] . $targetfile['owner'] . self::$FILES . $targetfile['path'] . "/";
+		$targetpath = $this->config['datadir'] . $targetfile['owner'] . FILES . $targetfile['path'] . "/";
 
 		$errors = 0;
 		foreach ($sources as $source) {
-			$sourcefile = $this->get_cached($source, self::$PERMISSION_READ);
+			$sourcefile = $this->get_cached($source, PERMISSION_READ);
 
 			if (!$sourcefile) {
 				$errors++;
 				continue;
 			}
 
-			$sourcepath = $this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'];
+			$sourcepath = $this->config['datadir'] . $sourcefile['owner'] . FILES . $sourcefile['path'];
 
 			if (file_exists($targetpath . $sourcefile['filename']) ||
 				strpos($targetpath, $sourcepath . "/") === 0 ||
@@ -691,9 +680,9 @@ class File_Model {
 
 	public function zip($target, $sources, $for_download = false) {
 		$target = (!$target && $for_download) ? '0' : $target;
-		$targetfile = $this->get_cached($target, self::$PERMISSION_READ);
+		$targetfile = $this->get_cached($target, PERMISSION_READ);
 
-		// Download-only doesn't need permissions, because zip will be created in temp
+		// Download-only doesn't need permissions, because zip will be created in cache
 		if (!$for_download && !$targetfile) {
 			throw new Exception('Error accessing file', '403');
 		}
@@ -703,21 +692,21 @@ class File_Model {
 			throw new Exception('Zip extension not installed', '500');
 		}
 
-		$temp = $this->get_temp_dir($targetfile);
+		$cache = $this->get_cache_dir($targetfile);
 
-		if ($for_download && !file_exists($temp)) {
-			throw new Exception('Could not create temp-folder', '500');
+		if ($for_download && !file_exists($cache)) {
+			throw new Exception('Could not create cache', '500');
 		}
 
 		$destination = "";
-		$destination_parent = ($for_download) ? $temp : $this->config['datadir'] . $targetfile['owner'] . self::$FILES . $targetfile['path'] . "/";
+		$destination_parent = ($for_download) ? $cache : $this->config['datadir'] . $targetfile['owner'] . FILES . $targetfile['path'] . "/";
 		$datestamp = date("o-m-d-His") . '.' . explode('.', microtime(true))[1];
 
 		if (count($sources) > 1) {
 			$destination = $destination_parent . $datestamp . ".zip";
 		}
 		else {
-			$firstfile = $this->get_cached(reset($sources), self::$PERMISSION_READ);
+			$firstfile = $this->get_cached(reset($sources), PERMISSION_READ);
 			if ($firstfile) {
 				// Strip extension if there is one
 				$filename = (strrpos($firstfile['filename'], '.')) ? substr($firstfile['filename'], 0, strrpos($firstfile['filename'], '.')) : $firstfile['filename'];
@@ -733,17 +722,17 @@ class File_Model {
 		$zip->open($destination, ZipArchive::CREATE);
 
 		foreach ($sources as $source) {
-			$sourcefile = $this->get_cached($source, self::$PERMISSION_READ);
+			$sourcefile = $this->get_cached($source, PERMISSION_READ);
 
 			if (!$sourcefile) {
 				continue;
 			}
 
-			if (is_dir($this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'])) {
-				$this->addFolderToZip($this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'] . "/", $zip, $sourcefile['filename'] . "/");
+			if (is_dir($this->config['datadir'] . $sourcefile['owner'] . FILES . $sourcefile['path'])) {
+				$this->addFolderToZip($this->config['datadir'] . $sourcefile['owner'] . FILES . $sourcefile['path'] . "/", $zip, $sourcefile['filename'] . "/");
 			}
 			else {
-				$zip->addFile($this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'], $sourcefile['filename']);
+				$zip->addFile($this->config['datadir'] . $sourcefile['owner'] . FILES . $sourcefile['path'], $sourcefile['filename']);
 			}
 		}
 
@@ -760,24 +749,24 @@ class File_Model {
 		$errors = 0;
 
 		foreach ($sources as $source) {
-			$file = $this->get_cached($source, self::$PERMISSION_READ);
+			$file = $this->get_cached($source, PERMISSION_READ);
 
 			if (!$file) {
 				$errors++;
 				continue;
 			}
 
-			$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
-			$home_path = $this->config['datadir'] . $file['owner'] . self::$FILES . "/" . $file['filename'];
-			$trash_path = $this->config['datadir'] . $file['owner'] . self::$TRASH . $file['id'];
+			$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
+			$home_path = $this->config['datadir'] . $file['owner'] . FILES . "/" . $file['filename'];
+			$trash_path = $this->config['datadir'] . $file['owner'] . TRASH . $file['id'];
 
 			$restore_path = $this->db->cache_get_restore_path($file['id']);
 			$restore_id = $this->db->cache_id_for_path($file['ownerid'], $restore_path);
 
 			// Restore to original location
-			if ($restore_id && file_exists($this->config['datadir'] . $file['owner'] . self::$FILES . $restore_path . "/") &&
-					!file_exists($this->config['datadir'] . $file['owner'] . self::$FILES . $restore_path . "/" . $file['filename']) &&
-					rename($trash_path, $this->config['datadir'] . $file['owner'] . self::$FILES . $restore_path . "/" . $file['filename']))
+			if ($restore_id && file_exists($this->config['datadir'] . $file['owner'] . FILES . $restore_path . "/") &&
+					!file_exists($this->config['datadir'] . $file['owner'] . FILES . $restore_path . "/" . $file['filename']) &&
+					rename($trash_path, $this->config['datadir'] . $file['owner'] . FILES . $restore_path . "/" . $file['filename']))
 			{
 				$this->db->cache_restore($file['id'], $restore_id, $file['ownerid'], $restore_path . "/" . $file['filename']);
 				continue;
@@ -806,24 +795,24 @@ class File_Model {
 	 */
 
 	public function move($target, $sources) {
-		$targetfile = $this->get_cached($target, self::$PERMISSION_WRITE);
+		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
 
 		if (!$targetfile) {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		$targetpath = $this->config['datadir'] . $targetfile['owner'] . self::$FILES . $targetfile['path'];
+		$targetpath = $this->config['datadir'] . $targetfile['owner'] . FILES . $targetfile['path'];
 
 		$errors = 0;
 		foreach ($sources as $source) {
-			$sourcefile = $this->get_cached($source, self::$PERMISSION_WRITE);
+			$sourcefile = $this->get_cached($source, PERMISSION_WRITE);
 
 			if (!$sourcefile) {
 				$errors++;
 				continue;
 			}
 
-			$sourcepath = $this->config['datadir'] . $sourcefile['owner'] . self::$FILES . $sourcefile['path'];
+			$sourcepath = $this->config['datadir'] . $sourcefile['owner'] . FILES . $sourcefile['path'];
 
 			if ($sourcefile['owner'] != $targetfile['owner']) {
 				$this->db->share_remove($sourcefile['id']);
@@ -858,7 +847,7 @@ class File_Model {
 	public function upload($target) {
 		if (isset($_FILES[0])) {
 			$max_upload = Util::convert_size(ini_get('upload_max_filesize'));
-			$parent = $this->get_cached($target, self::$PERMISSION_WRITE);
+			$parent = $this->get_cached($target, PERMISSION_WRITE);
 
 			if (!$parent || preg_match('/[\/\\\\]/', $_FILES[0]['name'])) {
 				throw new Exception('Access denied', '403');
@@ -869,7 +858,7 @@ class File_Model {
 				throw new Exception('File too big', '500');
 			}
 
-			$userdir = $this->config['datadir'] . $parent['owner'] . self::$FILES;
+			$userdir = $this->config['datadir'] . $parent['owner'] . FILES;
 			$rel_path = $parent['path'];
 
 			$parent_id = $parent['id'];
@@ -883,7 +872,7 @@ class File_Model {
 				$rel_path .= "/" . $next;
 
 				if (!file_exists($userdir . $rel_path)) {
-					if (mkdir($userdir . $rel_path, 0755) && $this->get_cached($parent_id, self::$PERMISSION_WRITE)) {
+					if (mkdir($userdir . $rel_path, 0755) && $this->get_cached($parent_id, PERMISSION_WRITE)) {
 						$parent_id = $this->add($userdir . $rel_path, $rel_path, $parent_id, $parent['ownerid']);
 					}
 					else {
@@ -892,7 +881,7 @@ class File_Model {
 				}
 				else {
 					$parent_id = $this->db->cache_id_for_path($parent['ownerid'], $rel_path);
-					$access_required = (sizeof($upload_relative_path_arr) == 0) ? self::$PERMISSION_WRITE : self::$PERMISSION_READ;
+					$access_required = (sizeof($upload_relative_path_arr) == 0) ? PERMISSION_WRITE : PERMISSION_READ;
 					if (!$this->get_cached($parent_id, $access_required)) {
 						throw new Exception('Access denied', '403');
 					}
@@ -932,7 +921,7 @@ class File_Model {
 		$share = $this->db->share_get($id);
 
 		// File not shared at all
-		if (!$share || !$share['userto'] == self::$PUBLIC_USER_ID) {
+		if (!$share || !$share['userto'] == PUBLIC_USER_ID) {
 			throw new Exception('File not found', '500');
 		}
 
@@ -944,7 +933,7 @@ class File_Model {
 		}
 
 		// Incorrect password
-		else if (!Crypto::verify_password($pass, $share['pass']) && !$this->db->share_is_unlocked($share['file'], self::$PERMISSION_READ, $this->token)) {
+		else if (!Crypto::verify_password($pass, $share['pass']) && !$this->db->share_is_unlocked($share['file'], PERMISSION_READ, $this->token)) {
 			throw new Exception('Wrong password', '403');
 		}
 		else {
@@ -972,14 +961,14 @@ class File_Model {
 
 		// Check each file for access permission
 		foreach ($targets as $target) {
-			$file = $this->get_cached($target, self::$PERMISSION_READ);
+			$file = $this->get_cached($target, PERMISSION_READ);
 
 			if (!$file) {
 				throw new Exception('Error accessing file', '403');
 			}
 		}
 
-		$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
+		$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
 
 		if (count($targets) > 1 || is_dir($path)) {
 			$delete_flag = true;
@@ -1022,7 +1011,7 @@ class File_Model {
 	}
 
 	public function get_id3($target) {
-		$file = $this->get_cached($target, self::$PERMISSION_READ);
+		$file = $this->get_cached($target, PERMISSION_READ);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
@@ -1033,13 +1022,13 @@ class File_Model {
 
 	public function save_odf($target) {
 		if (isset($_FILES['data'])) {
-			$file = $this->get_cached($target, self::$PERMISSION_WRITE);
+			$file = $this->get_cached($target, PERMISSION_WRITE);
 
 			if (!$file) {
 				throw new Exception('Error accessing file', '403');
 			}
 
-			if (move_uploaded_file($_FILES['data']['tmp_name'], $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'])) {
+			if (move_uploaded_file($_FILES['data']['tmp_name'], $this->config['datadir'] . $file['owner'] . FILES . $file['path'])) {
 				return null;
 			}
 		}
@@ -1048,27 +1037,27 @@ class File_Model {
 	}
 
 	public function load_text($target) {
-		$file = $this->get_cached($target, self::$PERMISSION_READ);
+		$file = $this->get_cached($target, PERMISSION_READ);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		if (is_readable($this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'])) {
-			return array('filename' => $file['filename'], 'content' => file_get_contents($this->config['datadir'] . $file['owner'] . self::$FILES . $file['path']));
+		if (is_readable($this->config['datadir'] . $file['owner'] . FILES . $file['path'])) {
+			return array('filename' => $file['filename'], 'content' => file_get_contents($this->config['datadir'] . $file['owner'] . FILES . $file['path']));
 		}
 
 		throw new Exception('Error accessing file', '403');
 	}
 
 	public function save_text($target, $data) {
-		$file = $this->get_cached($target, self::$PERMISSION_WRITE);
+		$file = $this->get_cached($target, PERMISSION_WRITE);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'];
+		$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
 		if (file_put_contents($path, $data) !== false) {
 			$this->db->cache_update($file['id'], self::type($path), self::info($path), filemtime($path), md5_file($path), $file['owner'], $file['path']);
 			return null;
@@ -1105,10 +1094,10 @@ class File_Model {
 	 */
 
 	public function scan($id, $update = false, $include_childs = false) {
-		$scan_lock = ($this->username) ? $this->config['datadir'] . $this->username . self::$LOCK . "scan" : null;
+		$scan_lock = ($this->username) ? $this->config['datadir'] . $this->username . LOCK . "scan" : null;
 		set_time_limit(0);
 
-		$file = $this->get_cached($id, self::$PERMISSION_READ);
+		$file = $this->get_cached($id, PERMISSION_READ);
 
 		if (!$file || !$file['ownerid'] || $file['ownerid'] != $this->uid || file_exists($scan_lock)) {
 			return;
@@ -1120,8 +1109,8 @@ class File_Model {
 		}
 		file_put_contents($scan_lock, '', LOCK_EX);
 
-		$path = $this->config['datadir'] . $file['owner'] . self::$FILES . $file['path'] . "/";
-		$trash_path = $this->config['datadir'] . $file['owner'] . self::$TRASH;
+		$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'] . "/";
+		$trash_path = $this->config['datadir'] . $file['owner'] . TRASH;
 
 		// Start scan
 		$this->scan_trash($file['ownerid'], $file['owner'], $trash_path);

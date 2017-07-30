@@ -8,8 +8,6 @@
  */
 
 class Core_Model {
-	private static $PUBLIC_USER_ID	= 1;
-
 	public function __construct() {
 		$this->db			= null;
 		$this->config_path	= 'config/config.json';
@@ -172,7 +170,7 @@ class Core_Model {
 
 		// User unknown
 		if (!$user) {
-			$this->db->log_write(self::$PUBLIC_USER_ID, 1, "Login", "Unknown login attempt: " . $username);
+			$this->db->log_write(PUBLIC_USER_ID, "warning", "Login", "Unknown login attempt: " . $username);
 		}
 		// User is on lockdown
 		else if ((time() - ($user['login_attempts'] - 2) * 30) - $user['last_login_attempt'] < 0) {

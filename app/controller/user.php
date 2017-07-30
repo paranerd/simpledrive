@@ -67,8 +67,8 @@ class User_Controller {
 		return $this->model->change_password($_REQUEST['currpass'], $_REQUEST['newpass']);
 	}
 
-	public function cleartemp() {
-		return $this->model->clear_temp();
+	public function clearcache() {
+		return $this->model->clear_cache();
 	}
 
 	public function admin() {

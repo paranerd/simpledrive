@@ -48,7 +48,7 @@ var Util = new function() {
 		});
 
 		$(document).on('click', '.close, .cancel', function(e) {
-			if ($(this).parents('.popup').length) {
+			if ($(this).parents('.popup').length || $(this).parents('.overlay').length) {
 				self.closePopup($(this).parent().attr('id'), false, true);
 			}
 			else if ($(this).parents('.widget').length) {
@@ -296,7 +296,9 @@ var Util = new function() {
 			$(target + " input").val('');
 		}
 
-		document.activeElement.blur();
+		if (document.activeElement) {
+			document.activeElement.blur();
+		}
 
 		return true;
 	}

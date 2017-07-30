@@ -119,7 +119,6 @@ var FileController = new function() {
 		 * Contextmenu action
 		 */
 		$("#contextmenu .menu li").on('click', function(e) {
-			return;
 			var id = $(this).attr('id')
 			var action = id.substr(id.indexOf('-') + 1);
 
@@ -184,41 +183,6 @@ var FileController = new function() {
 			//Util.closePopup('contextmenu');
 		});
 
-		$(document).on('mousedown', '.item', function(e) {
-			if ($(e.target).is(".thumbnail, .shared, input")) {
-				return;
-			}
-
-			FileView.mouseStart = {x: e.clientX, y: e.clientY};
-
-			if (!$(this).closest('.item').hasClass("selected")) {
-				FileModel.list.unselectAll();
-				FileView.closeRename();
-			}
-
-			FileModel.list.select(this.value);
-			FileView.startDrag = true;
-		});
-
-		$(document).on('click', '.item', function(e) {
-			// When click on thumbnail or shared-icon, only select!
-			if ($(e.target).is(".thumbnail, .shared, input")) {
-				return;
-			}
-
-			if (e.which == 1 && !FileView.dragging) {
-				FileModel.list.select(this.value);
-				FileModel.open();
-			}
-		});
-
-		$(document).on('mouseup', '.item', function(e) {
-			var id = this.value;
-			if (FileView.dragging && FileModel.list.get(id).type == "folder" && FileView.view != "trash" && typeof FileModel.list.getSelectedAt(id) === 'undefined') {
-				FileModel.move(FileModel.list.get(id).id);
-			}
-		});
-
 		$(document).on('mouseenter', '.item', function(e) {
 			if (FileModel.list.get(this.value).type == 'folder' && FileView.dragging && this.value != FileModel.list.getFirstSelected().id) {
 				$(this).addClass("highlight-folder");
@@ -279,6 +243,41 @@ var FileController = new function() {
 
 			if (e.which != 3) {
 				Util.closePopup('contextmenu');
+			}
+		});
+
+		$(document).on('mousedown', '.item', function(e) {
+			if ($(e.target).is(".thumbnail, .shared, input")) {
+				return;
+			}
+
+			FileView.mouseStart = {x: e.clientX, y: e.clientY};
+
+			if (!$(this).closest('.item').hasClass("selected")) {
+				FileModel.list.unselectAll();
+				FileView.closeRename();
+			}
+
+			FileModel.list.select(this.value);
+			FileView.startDrag = true;
+		});
+
+		$(document).on('click', '.item', function(e) {
+			// When click on thumbnail or shared-icon, only select!
+			if ($(e.target).is(".thumbnail, .shared, input")) {
+				return;
+			}
+
+			if (e.which == 1 && !FileView.dragging) {
+				FileModel.list.select(this.value);
+				FileModel.open();
+			}
+		});
+
+		$(document).on('mouseup', '.item', function(e) {
+			var id = this.value;
+			if (FileView.dragging && FileModel.list.get(id).type == "folder" && FileView.view != "trash" && typeof FileModel.list.getSelectedAt(id) === 'undefined') {
+				FileModel.move(FileModel.list.get(id).id);
 			}
 		});
 
