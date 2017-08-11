@@ -16,16 +16,17 @@ class User_Controller {
 	protected $valid_sections	= array('status');
 
 	public $required = array(
-		'get'			=> array('user'),
-		'create'		=> array('user', 'pass', 'admin'),
-		'delete'		=> array('user'),
-		'quota'			=> array('user'),
-		'changepw'		=> array('currpass', 'newpass'),
-		'setquota'		=> array('user', 'value'),
-		'setadmin'		=> array('user', 'enable'),
-		'setautoscan'	=> array('enable'),
-		'setfileview'	=> array('view'),
-		'setcolor'		=> array('color'),
+		'create'        => array('user', 'pass', 'admin'),
+		'delete'        => array('user'),
+		'changepw'      => array('currpass', 'newpass'),
+		'setquota'      => array('user', 'value'),
+		'setadmin'      => array('user', 'enable'),
+		'setautoscan'   => array('enable'),
+		'setfileview'   => array('view'),
+		'setcolor'      => array('color'),
+		'registertfa'   => array('client'),
+		'unregistertfa' => array('client'),
+		'tfaregistered' => array('client'),
 	);
 
 	public function __construct($token) {
@@ -44,7 +45,8 @@ class User_Controller {
 	}
 
 	public function get() {
-		return $this->model->get($_REQUEST['user']);
+		$username = (isset($_REQUEST['user'])) ? $_REQUEST['user'] : null;
+		return $this->model->get($username);
 	}
 
 	public function getall() {
@@ -60,7 +62,8 @@ class User_Controller {
 	}
 
 	public function quota() {
-		return $this->model->get_quota($_REQUEST['user']);
+		$username = (isset($_REQUEST['user'])) ? $_REQUEST['user'] : null;
+		return $this->model->get_quota($username);
 	}
 
 	public function changepw() {
@@ -69,6 +72,10 @@ class User_Controller {
 
 	public function clearcache() {
 		return $this->model->clear_cache();
+	}
+
+	public function cleartrash() {
+		return $this->model->clear_trash();
 	}
 
 	public function admin() {

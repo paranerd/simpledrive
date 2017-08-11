@@ -220,25 +220,6 @@ class Crypto {
 	}
 
 	/**
-	 * Generate authorization token, add session to db and set cookie
-	 * @param string uid
-	 * @param string hash public share hash (optional)
-	 * @return string|null authorization token
-	 */
-	public function generate_token($uid, $hash = "") {
-		$config		= json_decode(file_get_contents('config/config.json'), true);
-		$db			= Database::getInstance();
-		$expires	= time() + 60 * 60 * 24 * 7;
-
-		if ($token = $db->session_start($uid, $expires)) {
-			setcookie('token', $token, $expires, "/");
-			return $token;
-		}
-
-		return null;
-	}
-
-	/**
 	 * Validate authorization token
 	 * @param string token
 	 * @return string|null authorization token
@@ -253,20 +234,35 @@ class Crypto {
 	}
 
 	/**
-	 * Generate a random byte-sequence
-	 * @param int length
-	 * @return string random bytes
-	 */
-	 public function random_bytes($length) {
-		 return openssl_random_pseudo_bytes($length);
-	 }
+	* Generate a random byte-sequence
+	* @param int length
+	* @return string random bytes
+	*/
+	public function random_bytes($length) {
+		return openssl_random_pseudo_bytes($length);
+	}
 
-	 /**
-	  * Generate a random string
-	  * @param int length
-	  * @return string random string
-	  */
-	 public function random_string($length) {
-		 return bin2hex(openssl_random_pseudo_bytes($length / 2));
-	 }
+	/**
+	* Generate a random string
+	* @param int length
+	* @return string random string
+	*/
+	public function random_string($length) {
+		return bin2hex(openssl_random_pseudo_bytes($length / 2));
+	}
+
+	/**
+	* Generate a random number
+	* @param int length
+	* @return int
+	*/
+	public function random_number($length) {
+		$res = '';
+
+		for ($i = 0; $i < $length; $i++) {
+			$res .= mt_rand(0, 9);
+		}
+
+		return $res;
+	}
 }

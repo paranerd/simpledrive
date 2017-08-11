@@ -274,6 +274,10 @@ h2 {
 	color: #2e8b5e;
 }
 
+.cell a {
+	color: #2e8b5e !important;
+}
+
 /* General - Content - List */
 
 .filter {

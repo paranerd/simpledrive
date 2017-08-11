@@ -5,10 +5,7 @@
  * @link		http://simpledrive.org
  */
 
-var token;
-
 $(document).ready(function() {
-	token = $('head').data('token');
 	Util.getVersion();
 
 	EditorController.init();
@@ -109,7 +106,7 @@ var EditorModel = new function() {
 			$.ajax({
 				url: 'api/files/savetext',
 				type: 'post',
-				data: {token: token, target: self.id, data: content},
+				data: {target: self.id, data: content},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				$(".title-element-current").text(self.filename);
@@ -124,7 +121,7 @@ var EditorModel = new function() {
 		$.ajax({
 			url: 'api/files/loadtext',
 			type: 'post',
-			data: {token: token, target: self.id},
+			data: {target: self.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.filename = data.msg.filename;
@@ -149,7 +146,7 @@ var EditorModel = new function() {
 			$.ajax({
 				url: 'api/files/rename',
 				type: 'post',
-				data: {token: token, newFilename: newFilename, target: self.id},
+				data: {newFilename: newFilename, target: self.id},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				Util.closePopup('rename');

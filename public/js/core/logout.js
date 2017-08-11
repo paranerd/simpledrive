@@ -9,7 +9,6 @@ var token,
 	base;
 
 $(document).ready(function() {
-	token = $('head').data('token');
 	base = $('head').data('base');
 
 	logout();
@@ -19,7 +18,7 @@ function logout() {
 	$.ajax({
 		url: 'api/core/logout',
 		type: 'post',
-		data: {token: token},
+		data: {},
 		dataType: "json"
 	}).done(function(data, statusText, xhr) {
 		window.location.href = base + "core/login";

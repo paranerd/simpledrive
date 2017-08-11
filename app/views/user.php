@@ -59,15 +59,27 @@
 					<div class="cell">Used</div>
 					<div class="cell" id="mem-used">Loading...</div>
 				</div>
+				<div class="row">
+					<div class="cell">Cache</div>
+					<div class="cell"><span id="cache-size">Loading...</span> (<a href="#" id="clear-cache-button">Clear cache</a>)</div>
+				</div>
+				<div class="row">
+					<div class="cell">Trash</div>
+					<div class="cell"><span id="trash-size">Loading...</span> (<a href="#" id="clear-trash-button">Empty Trash</a>)</div>
+				</div>
 				<hr>
 				<h2>Security</h2>
+				<div class="row">
+					<div class="cell">Active Token</div>
+					<div class="cell"><span id="active-token">0</span> (<a href="#" id="invalidate-token">Invalidate</a>)</div>
+				</div>
 				<div class="row">
 					<div class="cell">Account Password</div>
 					<div class="cell"><button class="btn popup-trigger" data-target="change-password">Change</button></div>
 				</div>
 				<div class="row">
-					<div class="cell">Active token (<span id="active-token">0</span>)</div>
-					<div class="cell"><button id="invalidate-token" class="btn">Invalidate</button></div>
+					<div class="cell">Two-Factor-Authentication</div>
+					<div class="cell"><button id="twofactor" class="btn" disabled>Disable</button></div>
 				</div>
 				<hr>
 				<h2>Backup</h2>
@@ -107,10 +119,6 @@
 				<div class="row">
 					<div class="cell multi-line">Auto-Scan<br><span class="settings-info">Scan directories to cache before listing. Disable if you only insert data through simpleDrive-Interface.</span></div>
 					<div class="cell"><span class="checkbox"><span id="autoscan" class="checkbox-box"></span></span></div>
-				</div>
-				<div class="row">
-					<div class="cell">Temp Folder</div>
-					<div class="cell"><button id="clear-temp-button" class="btn">Clear</button></div>
 				</div>
 				<hr>
 			</div>

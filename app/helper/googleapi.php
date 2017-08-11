@@ -361,33 +361,13 @@ class Google_Api {
 	}
 
 	private function execute_request($url, $header, $params, $method = "POST") {
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_PORT , 443);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_HEADER, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-
-		if ($method == "PUT") {
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-			curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
-		}
-		else if ($method == "DELETE") {
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-		}
-		else if ($method == "POST") {
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-		}
-
-		$response = $this->parse_response(curl_exec($ch));
-		curl_close($ch);
-		return $response;
+		return $this->parse_response(Util::execute_web_request($url, $header, $params, $method));
 	}
 
 	private function parse_response($raw_data) {
 		$parsed_response = array('code' => -1, 'headers' => array(), 'body' => "");
 
-		$raw_data = explode("\r\n", $raw_data);
+		$raw_data = explode("\r\n", $raw_data['data']);
 
 		$parsed_response['code'] = explode(" ", $raw_data[0]);
 		$parsed_response['code'] = $parsed_response['code'][1];

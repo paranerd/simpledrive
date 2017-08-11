@@ -41,10 +41,16 @@ class Core_Controller {
 	}
 
 	public function login() {
-		return $this->model->login($_REQUEST['user'], $_REQUEST['pass']);
+		$two_factor_code = (isset($_REQUEST['code'])) ? $_REQUEST['code'] : null;
+		$remember = (isset($_REQUEST['remember'])) ? filter_var($_REQUEST['remember'], FILTER_VALIDATE_BOOLEAN) : false;
+		return $this->model->login($_REQUEST['user'], $_REQUEST['pass'], $two_factor_code, $remember);
 	}
 
 	public function logout() {
 		return $this->model->logout($_REQUEST['token']);
+	}
+
+	public function version() {
+		return $this->model->get_version($this->token);
 	}
 }

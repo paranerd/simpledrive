@@ -24,9 +24,8 @@ body {
 	user-select: none;
 	-webkit-user-select: none;
 	overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
 html {
@@ -708,6 +707,10 @@ label {
 .cell input {
 	width: 200px;
 	padding-left: 10px;
+}
+
+.cell a:hover {
+	text-decoration: underline;
 }
 
 .settings-info {

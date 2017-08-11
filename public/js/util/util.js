@@ -11,16 +11,30 @@ $(document).ready(function() {
 
 var Util = new function() {
 	var self = this;
+	this.token;
 	this.confirmCallback = null;
 	this.busyMessages = [];
 	this.strengths = ["Very weak", "Weak", "Ok", "Good", "Strong", "Very strong"];
 
 	this.init = function() {
+		this.setToken($('head').data('token'));
 		this.addMouseEvents();
 		this.addKeyEvents();
 		this.addFormEvents();
 		this.addOtherEvents();
 		self.copyToClipboard('');
+	}
+
+	this.setToken = function(token) {
+		self.token = token;
+		$.ajaxSetup({
+			//headers: {'X-CSRF-TOKEN': "WORX-TOKEN-WORX" },
+			data: {token: token}
+		});
+	}
+
+	this.getToken = function() {
+		return this.token;
 	}
 
 	this.addMouseEvents = function() {
@@ -275,12 +289,15 @@ var Util = new function() {
 		}
 
 		var target = (id) ? '#' + id : '.popup';
-		self.confirmCallback = null;
 
 		// Only hide overlay when closing all popups or specifically a form
 		// so closing i.e. notification doesn't close other popups
 		// Also empty clipboard (important for vault)
 		if (!id || (id && $(target).is('form'))) {
+			if (document.activeElement) {
+				document.activeElement.blur();
+			}
+			self.confirmCallback = null;
 			$(".overlay, .form-hidden").addClass("hidden");
 		}
 
@@ -294,10 +311,6 @@ var Util = new function() {
 		}
 		else {
 			$(target + " input").val('');
-		}
-
-		if (document.activeElement) {
-			document.activeElement.blur();
 		}
 
 		return true;
@@ -374,9 +387,9 @@ var Util = new function() {
 
 	this.getVersion = function() {
 		$.ajax({
-			url: 'api/system/version',
+			url: 'api/core/version',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			if (data.msg.recent) {

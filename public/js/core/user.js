@@ -6,12 +6,10 @@
  */
 
 var username,
-	token,
 	code;
 
 $(document).ready(function() {
 	username = $('head').data('username');
-	token = $('head').data('token');
 	code = $('head').data('code');
 	Util.getVersion();
 
@@ -24,6 +22,7 @@ $(document).ready(function() {
 	UserView.init();
 	UserModel.init();
 	Backup.getStatus();
+	TwoFactor.enabled();
 });
 
 var UserController = new function() {
@@ -53,6 +52,7 @@ var UserController = new function() {
 		});
 
 		$("#invalidate-token").on('click', function(e) {
+			e.preventDefault();
 			UserModel.invalidateToken();
 		});
 
@@ -67,13 +67,24 @@ var UserController = new function() {
 		});
 
 		$("#clear-cache-button").on('click', function(e) {
+			e.preventDefault();
 			UserModel.clearCache();
+		});
+
+		$("#clear-trash-button").on('click', function(e) {
+			e.preventDefault();
+			UserModel.clearTrash();
 		});
 
 		$("#change-password").on('submit', function(e) {
 			e.preventDefault();
 			UserModel.changePassword();
 		});
+
+		$("#twofactor").on('click', function(e) {
+			e.preventDefault();
+			TwoFactor.disable();
+		})
 
 		$("#setupbackup").on('submit', function(e) {
 			e.preventDefault();
@@ -125,7 +136,7 @@ var Backup = new function() {
 		$.ajax({
 			url: 'api/backup/token',
 			type: 'post',
-			data: {token: token, code: code},
+			data: {code: code},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			window.location = 'user';
@@ -153,7 +164,7 @@ var Backup = new function() {
 			$.ajax({
 				url: 'api/backup/enable',
 				type: 'post',
-				data: {token: token, pass: pass, enc: enc},
+				data: {pass: pass, enc: enc},
 				dataType: 'json'
 			}).done(function(data, statusText, xhr) {
 				window.location = data.msg;
@@ -169,7 +180,7 @@ var Backup = new function() {
 		$.ajax({
 			url: 'api/backup/start',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Backup started", true, false);
@@ -186,7 +197,7 @@ var Backup = new function() {
 		$.ajax({
 			url: 'api/backup/cancel',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			self.running = false;
@@ -200,7 +211,7 @@ var Backup = new function() {
 		$.ajax({
 			url: 'api/backup/disable',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			location.reload(true);
@@ -213,7 +224,7 @@ var Backup = new function() {
 		$.ajax({
 			url: 'api/backup/status',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			self.enabled = data.msg.enabled;
@@ -234,6 +245,36 @@ var Backup = new function() {
 	}
 }
 
+var TwoFactor = new function() {
+	var self = this;
+
+	this.enabled = function() {
+		$.ajax({
+			url: 'api/twofactor/enabled',
+			type: 'post',
+			data: {},
+			dataType: 'json'
+		}).done(function(data, statusText, xhr) {
+			$("#twofactor").prop('disabled', !data.msg);
+		}).fail(function(xhr, statusText, error) {
+			Util.notify(Util.getError(xhr), true, true);
+		});
+	}
+
+	this.disable = function() {
+		$.ajax({
+			url: 'api/twofactor/disable',
+			type: 'post',
+			data: {},
+			dataType: 'json'
+		}).done(function(data, statusText, xhr) {
+			$("#twofactor").prop('disabled', true);
+		}).fail(function(xhr, statusText, error) {
+			Util.notify(Util.getError(xhr), true, true);
+		});
+	}
+}
+
 var UserModel = new function() {
 	var self = this;
 
@@ -247,7 +288,7 @@ var UserModel = new function() {
 		$.ajax({
 			url: 'api/user/invalidatetoken',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Tokens invalidated", true, false);
@@ -261,7 +302,7 @@ var UserModel = new function() {
 		$.ajax({
 			url: 'api/user/activetoken',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			$("#active-token").text(data.msg);
@@ -280,7 +321,7 @@ var UserModel = new function() {
 		$.ajax({
 			url: 'api/user/get',
 			type: 'post',
-			data: {token: token, user: username},
+			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			$("#fileview").val(data.msg.fileview);
@@ -297,7 +338,7 @@ var UserModel = new function() {
 		$.ajax({
 			url: 'api/user/setfileview',
 			type: 'post',
-			data: {token: token, view: view},
+			data: {view: view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true);
@@ -310,7 +351,7 @@ var UserModel = new function() {
 		$.ajax({
 			url: 'api/user/setcolor',
 			type: 'post',
-			data: {token: token, color: color},
+			data: {color: color},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true);
@@ -323,7 +364,7 @@ var UserModel = new function() {
 		$.ajax({
 			url: 'api/user/setautoscan',
 			type: 'post',
-			data: {token: token, enable: enable},
+			data: {enable: enable},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true);
@@ -336,12 +377,14 @@ var UserModel = new function() {
 		$.ajax({
 			url: 'api/user/quota',
 			type: 'post',
-			data: {token: token, value: 0, user: username},
+			data: {value: 0},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			var percent = ((data.msg.used / data.msg.max) * 100).toFixed(0);
 			$("#mem-used").text(Util.byteToString(data.msg.used) + " (" + percent + "%)");
 			$("#mem-total").text(Util.byteToString(data.msg.max));
+			$("#cache-size").text(Util.byteToString(data.msg.cache));
+			$("#trash-size").text(Util.byteToString(data.msg.trash));
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -351,10 +394,25 @@ var UserModel = new function() {
 		$.ajax({
 			url: 'api/user/clearcache',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
+			self.getQuota();
 			Util.notify("Cache cleared", true);
+		}).fail(function(xhr, statusText, error) {
+			Util.notify(Util.getError(xhr), true, true);
+		});
+	},
+
+	this.clearTrash = function() {
+		$.ajax({
+			url: 'api/user/cleartrash',
+			type: 'post',
+			data: {},
+			dataType: 'json'
+		}).done(function(data, statusText, xhr) {
+			self.getQuota();
+			Util.notify("Trash cleared", true);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -378,10 +436,10 @@ var UserModel = new function() {
 		$.ajax({
 			url: 'api/user/changepw',
 			type: 'post',
-			data: {token: token, currpass: currpass, newpass: newpass1},
+			data: {currpass: currpass, newpass: newpass1},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			token = data.msg;
+			Util.setToken(data.msg);
 			Util.notify("Password changed", true);
 			$("#change-password-pass0, #change-password-pass1, #change-password-pass2").val('');
 			Util.closePopup('change-password');

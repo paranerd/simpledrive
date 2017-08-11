@@ -9,21 +9,18 @@
 
 class System_Model {
 	public function __construct($token) {
-		$this->config	= CONFIG; //json_decode(file_get_contents('config/config.json'), true);
+		$this->config	= CONFIG;
 		$this->db		= Database::getInstance();
-		$this->token	= $token;
-		$this->user		= $this->db->user_get_by_token($this->token);
-		$this->admin	= $this->db->user_is_admin($this->token);
+
+		if (!$this->db->user_is_admin($token)) {
+			throw new Exception('Permission denied', '403');
+		}
 	}
 
 	/**
 	 * Get server status info
 	 */
 	public function status() {
-		if (!$this->admin) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		$disktotal	= (disk_total_space(dirname(__FILE__)) != "") ? disk_total_space(dirname(__FILE__)) : disk_total_space('/');
 		$diskfree	= (disk_free_space(dirname(__FILE__)) != "") ? disk_free_space(dirname(__FILE__)) : disk_free_space('/');
 		$ssl		= (strpos(file_get_contents('.htaccess'), '#RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [QSA,NC,L]') === false);
@@ -49,10 +46,6 @@ class System_Model {
 	}
 
 	public function set_upload_limit($limit) {
-		if (!$this->admin) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		if (!ctype_digit($limit) || (ctype_digit($limit) && $limit < 1024)) {
 			throw new Exception('Illegal value for upload size', '400');
 		}
@@ -80,10 +73,6 @@ class System_Model {
 	}
 
 	public function set_domain($domain) {
-		if (!$this->admin) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		$this->config['domain'] = ($domain != "") ? $domain : $this->config['domain'];
 
 		// Write config file
@@ -95,10 +84,6 @@ class System_Model {
 	}
 
 	public function use_ssl($ssl) {
-		if (!$this->admin) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		$ssl						= ($ssl == "1") ? 1 : 0;
 		$ssl_comm					= ($ssl == "1") ? '' : '#';
 		$backup						= $this->config['protocol'];
@@ -144,13 +129,6 @@ class System_Model {
 	 * @return array log entries
 	 */
 	public function get_log($page) {
-		/*for ($i = 0; $i < 7; $i++) {
-			$this->db->log_write(2, "warning", "custom", "This Message");
-		}*/
-		if (!$this->admin) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		$page_size = 10;
 		return $this->db->log_get(($page) * $page_size, $page_size);
 	}
@@ -159,10 +137,6 @@ class System_Model {
 	 * Delete all log entries from database
 	 */
 	public function clear_log() {
-		if (!$this->admin) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		return $this->db->log_clear();
 	}
 
@@ -171,13 +145,9 @@ class System_Model {
 	 * @param name (of the plugin)
 	 */
 	public function get_plugin($name) {
-		if (!$this->admin) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		// MD5-Hashes for integrity-check
 		$plugins = array(
-			'webodf'	=> '5068218ac930295260f01e29d242aff7',
+			'webodf'	=> '058d00aaaa62763be63c328844083d49',
 			'sabredav'	=> '27a3b16e1ad67c23160aa1573713206d',
 			'phpmailer'	=> '080d71b0bf8f88aa04400ec3133cd91a'
 		);
@@ -196,27 +166,16 @@ class System_Model {
 			mkdir($plugin_path, 0777, true);
 		}
 
-		// Download plugin zip
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_HEADER, 1);
-		curl_setopt($ch, CURLOPT_URL, "http://simpledrive.org/plugins/" . $name);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-		$res = curl_exec($ch);
+		$response = Util::execute_web_request("http://simpledrive.org/plugins/" . $name, null, null, "GET", 80);
 
-		$res_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-		$data = substr($res, $header_size);
-		curl_close($ch);
-
-		if ($res_code !== 200) {
+		if ($response['status'] !== 200) {
 			throw new Exception('Error downloading plugin', '500');
 		}
 
 		// Write data to file
 		$zip_target = $plugin_path . "/" . $name . ".zip";
 		$file = fopen($zip_target, "w+");
-		fputs($file, $data);
+		fputs($file, $response['data']);
 		fclose($file);
 
 		// Integrity-check
@@ -244,36 +203,10 @@ class System_Model {
 	 * @param plugin_name
 	 */
 	public function remove_plugin($plugin_name) {
-		if (!$this->admin) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		if (Util::delete_dir('plugins/' . $plugin_name)) {
 			return null;
 		}
 
 		throw new Exception('An error occurred', '500');
-	}
-
-	/**
-	 * Get current installed version and recent version (from demo server)
-	 * @return array containing current and version
-	 */
-	public function get_version() {
-		if (!$this->user) {
-			throw new Exception('Permission denied', '403');
-		}
-
-		$version		= json_decode(file_get_contents('config/version.json'), true);
-		$url			= 'http://simpledrive.org/version';
-		$recent_version	= null;
-
-		// Get current version from demo server if connection is available
-		if (@fopen($url, 'r')) {
-			$result = json_decode(file_get_contents($url, false), true);
-			$recent_version = ($result && $result['build'] > $version['build']) ? $result['version'] : null;
-		}
-
-		return array('recent' => $recent_version, 'current' => $version['version']);
 	}
 }

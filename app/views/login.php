@@ -31,8 +31,14 @@
 	<form id="login" class="major-form center" action="#">
 		<div class="title">Login</div>
 
-		<input id="user" type="text" class="input-large" placeholder="Username" value="" required autofocus>
-		<input id="pass" type="password" class="input-large" placeholder="Password" value="" required>
+		<input id="user" type="text" class="input-large" placeholder="Username" value="" autofocus>
+		<input id="pass" type="password" class="input-large" placeholder="Password" value="">
+		<input id="code" type="text" class="input-large hidden" placeholder="Access code" value="" autocomplete="off">
+
+		<div id="remember-wrapper" class="checkbox hidden">
+			<span id="remember" class="checkbox-box"></span>
+			<span class="checkbox-label">Remember this device</span>
+		</div>
 
 		<div class="error error-large hidden"></div>
 

@@ -5,12 +5,15 @@
  * @link		http://simpledrive.org
  */
 
-var base;
+var base,
+	twoFactor = false;
 
 $(document).ready(function() {
 	base = $('head').data('base');
 
 	$(window).resize();
+	$("#code").val('');
+	$("#submit").prop('disabled', false);
 	if ($('head').data('demo')) {
 		enterDemoCredentials('demo', 'demo');
 	}
@@ -42,23 +45,35 @@ function enterDemoCredentials(username, password) {
 }
 
 function login() {
-	if ($("#user").val() == "" || $("#pass").val() == "") {
-		Util.showFormError('setup', "No blank fields");
+	if ($("#user").val() == "" || $("#pass").val() == "" ||
+		(twoFactor && $("#code").val() == ""))
+	{
+		Util.showFormError('login', "No blank fields");
 	}
 	else {
 		$("#submit").prop('disabled', true);
 		$.ajax({
 			url: 'api/core/login',
 			type: 'post',
-			data: {user: $("#user").val(), pass: $("#pass").val()},
+			data: {user: $("#user").val(), pass: $("#pass").val(), code: $("#code").val(), remember: $("#remember").hasClass("checkbox-checked")},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			$("#submit").prop('disabled', false);
+			// Token was returned
 			window.location.href = base + "files";
 		}).fail(function(xhr, statusText, error) {
-			$("#pass").val('');
+			if (xhr.status != 403 || twoFactor) {
+				Util.showFormError('login', Util.getError(xhr));
+			}
+
+			if (xhr.status == 403) {
+				// 2-Factor-Authentication
+				twoFactor = true;
+				$("#code, #remember-wrapper").removeClass("hidden").focus();
+				$("#user, #pass").addClass("hidden");
+			}
+		}).always(function() {
 			$("#submit").prop('disabled', false);
-			Util.showFormError('login', Util.getError(xhr));
+			$("#code").val('');
 		});
 	}
 }

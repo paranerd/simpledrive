@@ -33,7 +33,6 @@ class File_Model {
 				FILES,
 				TRASH,
 				CACHE,
-				THUMB,
 				LOCK
 			);
 
@@ -106,20 +105,20 @@ class File_Model {
 	 */
 
 	private function remove_thumbnail($file) {
-		$thumb_dir = $this->get_thumbnail_dir($file);
+		$cache_dir = $this->get_cache_dir($file);
 
 		if ($file['type'] == 'folder') {
 			$children = $this->db->cache_children_rec($file['id'], $this->uid, $file['ownerid']);
 
 			foreach ($children as $child) {
-				if ($child['type'] == 'image') {
-					unlink($thumb_dir . $child['id']);
+				if ($child['type'] == 'image' && file_exists($cache_dir . $child['id'])) {
+					unlink($cache_dir . $child['id']);
 				}
 			}
 		}
 		else {
-			if ($file['type'] == 'image') {
-				unlink($thumb_dir . $file['id']);
+			if ($file['type'] == 'image' && file_exists($cache_dir . $file['id'])) {
+				unlink($cache_dir . $file['id']);
 			}
 		}
 	}
@@ -164,16 +163,6 @@ class File_Model {
 		return $cache_dir;
 	}
 
-	private function get_thumbnail_dir($file) {
-		$thumb_dir = $this->config['datadir'] . $file['owner'] . THUMB;
-
-		if ($file['owner'] != "" && !file_exists($thumb_dir)) {
-			mkdir($thumb_dir);
-		}
-
-		return $thumb_dir;
-	}
-
 	/**
 	 * Creates a thumbnail from a pdf or scales an image so that its biggest size is smaller/equal to the biggest size of the target-dimensions while keeping the ratio
 	 * @param array file
@@ -183,10 +172,10 @@ class File_Model {
 	 * @return string Path of the scaled image
 	 */
 
-	private function scale_image($file, $target_width, $target_height, $is_thumb) {
+	private function scale_image($file, $target_width, $target_height, $thumb) {
 		$src = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
-		$dest_dir = ($is_thumb) ? $this->get_thumbnail_dir($file) : $this->get_cache_dir($file);
-		$destination = $dest_dir . $file['id'];
+		$dest_dir = $this->get_cache_dir($file);
+		$destination = ($thumb) ? $dest_dir . $file['id'] . "_thumb" : $dest_dir . $file['id'];
 
 		if (!file_exists($dest_dir)) {
 			return null;
@@ -324,36 +313,6 @@ class File_Model {
 			'files'		=> $files,
 			'needle'	=> $needle
 		);
-	}
-
-	public function encrypt($target, $secret) {
-		$file = $this->get_cached($target, PERMISSION_READ);
-
-		if (!$file) {
-			throw new Exception('Error accessing file', '403');
-		}
-
-		$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
-		if (Crypto::encrypt_file($path, $secret, true)) {
-			return null;
-		}
-
-		throw new Exception('Error encrypting file', '403');
-	}
-
-	public function decrypt($target, $secret) {
-		$file = $this->get_cached($target, PERMISSION_READ);
-
-		if (!$file) {
-			throw new Exception('Error accessing file', '403');
-		}
-
-		$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
-		if (Crypto::decrypt_file($path, $secret)) {
-			return null;
-		}
-
-		throw new Exception('Error decrypting file', '403');
 	}
 
 	public function children($target, $mode, $recursive = false, $need_md5 = false) {
@@ -700,7 +659,7 @@ class File_Model {
 
 		$destination = "";
 		$destination_parent = ($for_download) ? $cache : $this->config['datadir'] . $targetfile['owner'] . FILES . $targetfile['path'] . "/";
-		$datestamp = date("o-m-d-His") . '.' . explode('.', microtime(true))[1];
+		$datestamp = date("o-m-d-His");
 
 		if (count($sources) > 1) {
 			$destination = $destination_parent . $datestamp . ".zip";
@@ -743,6 +702,29 @@ class File_Model {
 		}
 
 		throw new Exception('Error creating zip file', '500');
+	}
+
+	public function unzip($target, $source) {
+		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
+		$sourcefile = $this->get_cached($source, PERMISSION_READ);
+
+		if (!$targetfile || !$sourcefile) {
+			throw new Exception('Error accessing file', '403');
+		}
+
+		$targetpath = $this->config['datadir'] . $targetfile['owner'] . FILES . $targetfile['path'] . "/";
+		$sourcepath = $this->config['datadir'] . $sourcefile['owner'] . FILES . $sourcefile['path'];
+
+		$zip = new ZipArchive;
+		$res = $zip->open($sourcepath);
+
+		if ($res == true) {
+			$zip->extractTo($targetpath);
+			$zip->close();
+			return null;
+		}
+
+		throw new Exception('Error unzipping', '500');
 	}
 
 	public function restore($sources) {
@@ -937,7 +919,7 @@ class File_Model {
 			throw new Exception('Wrong password', '403');
 		}
 		else {
-			$token = ($this->token) ? $this->token : Crypto::generate_token(0, $id);
+			$token = ($this->token) ? $this->token : $this->db->session_start(PUBLIC_USER_ID);
 
 			if ($token && $this->db->share_unlock($token, $id)) {
 				return array('share' => array('id' => $file['id'], 'filename' => $file['filename'], 'type' => $file['type']), 'token' => $token);
@@ -945,6 +927,64 @@ class File_Model {
 		}
 
 		throw new Exception('An error occurred', '500');
+	}
+
+	public function encrypt($target, $sources, $secret) {
+		// Check write permission for target directory
+		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
+		if (!$targetfile) {
+			throw new Exception('Error accessing file', '403');
+		}
+
+		// Check whether sources were passed
+		if (empty($sources)) {
+			throw new Exception('Nothing to encrypt', '400');
+		}
+
+		// Check each file for access permission
+		foreach ($sources as $source) {
+			$sourcefile = $this->get_cached($source, PERMISSION_READ);
+
+			if (!$sourcefile) {
+				throw new Exception('Error accessing file', '403');
+			}
+		}
+
+		// Determine path
+		$path = $this->config['datadir'] . $sourcefile['owner'] . FILES . $sourcefile['path'];
+		$destination;
+		if (count($sources) > 1 || is_dir($path)) {
+			$destination = $this->zip($target, $sources, false);
+		}
+		else {
+			$destination = $path;
+		}
+
+		// Encrypt
+		if (Crypto::encrypt_file($destination, $secret, true)) {
+			if ($destination != $path) {
+				unlink($destination);
+			}
+			return null;
+		}
+
+		throw new Exception('Error encrypting file', '403');
+	}
+
+	public function decrypt($target, $source, $secret) {
+		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
+		$sourcefile = $this->get_cached($source, PERMISSION_READ);
+
+		if (!$targetfile || !$sourcefile) {
+			throw new Exception('Error accessing file', '403');
+		}
+
+		$path = $this->config['datadir'] . $sourcefile['owner'] . FILES . $sourcefile['path'];
+		if (Crypto::decrypt_file($path, $secret)) {
+			return null;
+		}
+
+		throw new Exception('Error decrypting file', '403');
 	}
 
 	/**
@@ -955,7 +995,7 @@ class File_Model {
 	 * @return file
 	 */
 
-	public function get($targets, $width = null, $height = null, $thumb = 0) {
+	public function get($targets, $width = null, $height = null, $thumb) {
 		$path = null;
 		$delete_flag = false;
 
@@ -1110,10 +1150,9 @@ class File_Model {
 		file_put_contents($scan_lock, '', LOCK_EX);
 
 		$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'] . "/";
-		$trash_path = $this->config['datadir'] . $file['owner'] . TRASH;
 
 		// Start scan
-		$this->scan_trash($file['ownerid'], $file['owner'], $trash_path);
+		$this->scan_trash($file);
 
 		$start = time();
 
@@ -1189,21 +1228,8 @@ class File_Model {
 		}
 	}
 
-	public function scan_trash($oid, $owner, $path) {
-		if (!file_exists($path)) {
-			return;
-		}
-
-		$files = scandir($path);
-		$existing = array();
-
-		foreach ($files as $file) {
-			if (is_readable($path . $file) && substr($file, 0, 1) != ".") {
-				// Add trash-hash to list of existing files
-				array_push($existing, $file);
-			}
-		}
-
-		$this->db->cache_clean_trash($oid, $existing);
+	public function scan_trash($file) {
+		$existing = Util::get_files_in_dir($this->config['datadir'] . $file['owner'] . TRASH);
+		$this->db->cache_clean_trash($file['ownerid'], $existing);
 	}
 }

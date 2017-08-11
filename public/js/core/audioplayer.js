@@ -116,7 +116,7 @@ var AudioManager = new function() {
 
 		self.active = parseInt(id);
 
-		self.sound.src = 'api/files/get?target=' + encodeURIComponent(JSON.stringify([elem.id])).replace('(', '%28').replace(')', '%29') + '&token=' + token;
+		self.sound.src = 'api/files/get?target=' + encodeURIComponent(JSON.stringify([elem.id])).replace('(', '%28').replace(')', '%29') + '&token=' + Util.getToken();
 		self.sound.load();
 		$("#audio-title").removeClass("hidden").text(elem.filename);
 	}

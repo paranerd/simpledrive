@@ -12,11 +12,9 @@ var ImageManager = new function() {
 	this.slide = null;
 	this.slideshowStarted = false;
 	this.image = null;
-	this.bId = null;
 
 	this.abort = function() {
 		self.loading = false;
-		Util.endBusy(self.bId);
 		window.stop();
 	}
 
@@ -79,7 +77,6 @@ var ImageManager = new function() {
 
 		if (!self.loading) {
 			self.loading = true;
-			self.bId = Util.startBusy();
 		}
 		else {
 			self.abort();
@@ -89,51 +86,75 @@ var ImageManager = new function() {
 
 		// Reset image
 		$("#img-viewer").find("img").remove();
-		self.image = new Image();
+
+		var url = encodeURI('api/files/get?target=' + JSON.stringify([elem.id]) + '&width=' + window.innerWidth + '&height=' + window.innerHeight + '&token=' + Util.getToken());
+		self.setThumbnailAsBackground(elem.filename, id);
+		self.display(elem.filename, id, url);
+	}
+
+	this.display = function(filename, id, url) {
+		var bId = Util.startBusy();
 		$("#img-viewer").removeClass("hidden");
+		var img = new Image();
 
-		self.image.src = 'api/files/get?target=' + JSON.stringify([elem.id]) + '&width=' + window.innerWidth + '&height=' + window.innerHeight + '&token=' + token;
-
-		// Wait up to 5s for dimension-meta-data to load
 		var start = Date.now();
 		var interval = setInterval(function() {
-			if (Date.now() - start > 5000) {
+			if (img.naturalHeight || img.height) {
 				clearTimeout(interval);
-				Util.notify("Error displaying image", true, true);
-				self.loading = false;
-				Util.endBusy(self.bId);
+				if (id != self.active) {
+					return;
+				}
+				$("#img-viewer").children('img').remove();
+				var dim = self.scale(img);
+
+				img.style.position = "absolute";
+				img.style.height = dim.height + "px";
+				img.style.width = dim.width + "px";
+				img.style.left = ((window.innerWidth - dim.width) / 2) + "px";
+				img.style.top = ((window.innerHeight - dim.height) / 2) + "px";
+
+				$("#img-viewer").append(img);
+				$("#img-title").text(filename);
 			}
-			if (self.image.naturalHeight || self.image.height) {
-				clearTimeout(interval);
-				var imgHeight = self.image.naturalHeight || self.image.height;
-				var imgWidth = self.image.naturalWidth || self.image.width;
+		}, 100);
 
-				var shrinkTo = (imgHeight > window.innerHeight || imgWidth > window.innerWidth) ? Math.min(window.innerHeight / imgHeight, window.innerWidth / imgWidth) : 1;
-				var coverArea = 0.9;
-
-				var targetWidth = (imgWidth * shrinkTo) * coverArea;
-				var targetHeight = (imgHeight * shrinkTo) * coverArea;
-
-				self.image.style.position = "absolute";
-				self.image.style.height = targetHeight + "px";
-				self.image.style.width = targetWidth + "px";
-				self.image.style.left = ((window.innerWidth - targetWidth) / 2) + "px";
-				self.image.style.top = ((window.innerHeight - targetHeight) / 2) + "px";
-
-				$("#img-viewer").append(self.image)
-				$("#img-title").text(elem.filename);
-			}
-		}, 10);
-
-		self.image.onload = function() {
+		img.onload = function() {
 			self.loading = false;
-			Util.endBusy(self.bId);
+			Util.endBusy(bId);
 		}
 
-		self.image.onerror = function() {
+		img.onerror = function() {
+			if (id != self.active) {
+				return;
+			}
+			clearTimeout(interval);
 			Util.notify("Error displaying image", true, true);
 			self.loading = false;
-			Util.endBusy(self.bId);
+			Util.endBusy(bId);
+		}
+
+		img.src = url;
+	}
+
+	this.scale = function(img) {
+		var imgHeight = img.naturalHeight || img.height;
+		var imgWidth = img.naturalWidth || img.width;
+
+		var scaleTo = (imgHeight > window.innerHeight || imgWidth > window.innerWidth) ? Math.min(window.innerHeight / imgHeight, window.innerWidth / imgWidth) : 1;
+		var coverArea = 0.9;
+
+		var targetWidth = (imgWidth * scaleTo) * coverArea;
+		var targetHeight = (imgHeight * scaleTo) * coverArea;
+
+		return {width: targetWidth, height: targetHeight};
+	}
+
+	this.setThumbnailAsBackground = function(filename, id) {
+		var bg = $("#item" + id + " .thumbnail").css('background-image');
+		var url = bg.substr(bg.indexOf("api/"));
+		url = url.substr(0, url.length -2);
+		if (url) {
+			self.display(filename, id, url);
 		}
 	}
 

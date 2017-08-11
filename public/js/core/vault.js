@@ -5,10 +5,7 @@
  * @link		https://simpledrive.org
  */
 
-var token;
-
 $(document).ready(function() {
-	token = $('head').data('token');
 	Util.getVersion();
 
 	VaultModel.fetch();
@@ -215,7 +212,6 @@ var VaultController = new function() {
 		});
 
 		$("#password-generator").on('submit', function(e) {
-			console.log("submit");
 			e.preventDefault();
 			var useUppercase = $("#passgen-upper").hasClass("checkbox-checked");
 			var useLowercase = $("#passgen-lower").hasClass("checkbox-checked");
@@ -419,7 +415,7 @@ var VaultModel = new function() {
 				$.ajax({
 					url: 'api/vault/save',
 					type: 'post',
-					data: {token: token, vault: encryptedVault},
+					data: {vault: encryptedVault},
 					dataType: "json"
 				}).done(function(data, statusText, xhr) {
 					Util.notify("Saved.", true, false);
@@ -458,7 +454,7 @@ var VaultModel = new function() {
 		$.ajax({
 			url: 'api/vault/get',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			if (data.msg) {

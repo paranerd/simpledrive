@@ -13,7 +13,7 @@ class Backup_Model {
 	public function __construct($token) {
 		$this->db				= Database::getInstance();
 		$this->user				= ($this->db) ? $this->db->user_get_by_token($token) : null;
-		$this->uid				= ($this->user) ? $this->user['id'] : 0;
+		$this->uid				= ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
 		$this->username			= ($this->user) ? $this->user['username'] : "";
 		$this->config			= CONFIG;
 
@@ -25,21 +25,51 @@ class Backup_Model {
 		$this->enc_filename		= true;
 
 		$this->api				= new Google_Api($token);
+
+		if (!$this->uid) {
+			throw new Exception('Permission denied', '403');
+		}
 	}
 
 	public function status() {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		return array('enabled' => $this->api->enabled(), 'running' => file_exists($this->lock));
 	}
 
-	public function start() {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
+	public function enable($pass, $enc_filename) {
+		if ($enc_filename && strlen($pass) == 0) {
+			throw new Exception('Password not set', '400');
+		}
+		else if ($pass && !$this->db->backup_enable($this->uid, $pass, intval($enc_filename))) {
+			throw new Exception('Could not set backup password', '500');
+		}
+		else if ($auth_url = $this->api->create_auth_url()) {
+			return $auth_url;
 		}
 
+		throw new Exception('Unknown error occurred', '500');
+	}
+
+	public function cancel() {
+		if (!file_exists($this->lock) || unlink($this->lock)) {
+			return null;
+		}
+
+		throw new Exception('Could not remove lock', '500');
+	}
+
+	public function disable() {
+		if ($this->api->disable()) {
+			return null;
+		}
+
+		throw new Exception('Could not disable backup', '500');
+	}
+
+	public function set_token($code) {
+		return $this->api->set_token($code);
+	}
+
+	public function start() {
 		// Check if connected to the internet
 		if (!Util::connection_available()) {
 			throw new Exception('No internet connection', '500');
@@ -88,14 +118,6 @@ class Backup_Model {
 		}
 	}
 
-	public function set_token($code) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
-		return $this->api->set_token($code);
-	}
-
 	private function traverse($path, $parent_id) {
 		$files = scandir($path);
 
@@ -140,47 +162,5 @@ class Backup_Model {
 				}
 			}
 		}
-	}
-
-	public function enable($pass, $enc_filename) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
-		if ($enc_filename && strlen($pass) == 0) {
-			throw new Exception('Password not set', '400');
-		}
-		else if ($pass && !$this->db->backup_enable($this->uid, $pass, intval($enc_filename))) {
-			throw new Exception('Could not set backup password', '500');
-		}
-		else if ($auth_url = $this->api->create_auth_url()) {
-			return $auth_url;
-		}
-
-		throw new Exception('Unknown error occurred', '500');
-	}
-
-	public function cancel() {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
-		if (!file_exists($this->lock) || unlink($this->lock)) {
-			return null;
-		}
-
-		throw new Exception('Could not remove lock', '500');
-	}
-
-	public function disable() {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
-		if ($this->api->disable()) {
-			return null;
-		}
-
-		throw new Exception('Could not disable backup', '500');
 	}
 }

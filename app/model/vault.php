@@ -17,11 +17,15 @@ class Vault_Model {
 		$this->username		= ($this->user) ? $this->user['username'] : "";
 		$this->vault_path	= ($this->user) ? $this->config['datadir'] . $this->username . VAULT . VAULT_FILE : "";
 
+		if (!$this->uid) {
+			throw new Exception('Permission denied', '403');
+		}
+
 		$this->init();
 	}
 
 	private function init() {
-		if ($this->username && $this->vault_path) {
+		if ($this->vault_path) {
 			if (!file_exists(dirname($this->vault_path))) {
 				mkdir(dirname($this->vault_path), 0777, true);
 			}
@@ -32,10 +36,7 @@ class Vault_Model {
 	}
 
 	public function get() {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-		else if (!file_exists($this->vault_path)) {
+		if (!file_exists($this->vault_path)) {
 			throw new Exception('Vault does not exist', '404');
 		}
 		else {
@@ -45,10 +46,6 @@ class Vault_Model {
 	}
 
 	public function sync($client_vault, $last_edit) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		if ($last_edit > filemtime($this->vault_path)) {
 			file_put_contents($this->vault_path, $client_vault);
 		}
@@ -57,18 +54,10 @@ class Vault_Model {
 	}
 
 	public function save($client_vault) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		return (file_put_contents($this->vault_path, $client_vault) !== false);
 	}
 
 	public function change_password($currpass, $newpass) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		// Load vault
 		$vault = file_get_contents($this->config['datadir'] . $this->username . VAULT . VAULT_FILE);
 

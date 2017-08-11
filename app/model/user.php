@@ -13,11 +13,16 @@ class User_Model {
 		$this->config	= CONFIG;
 		$this->db		= Database::getInstance();
 		$this->user		= $this->db->user_get_by_token($token);
-		$this->uid		= ($this->user) ? $this->user['id'] : 0;
+		$this->uid		= ($this->user) ? $this->user['id'] : null;
 		$this->username	= ($this->user) ? $this->user['username'] : "";
+
+		if (!$this->uid) {
+			throw new Exception('Permission denied', '403');
+		}
 	}
 
 	public function get($username) {
+		$username = ($username) ? $username : $this->username;
 		if ($username == $this->username || $this->user['admin']) {
 			return $this->db->user_get_by_name($username);
 		}
@@ -27,7 +32,7 @@ class User_Model {
 	}
 
 	public function get_all() {
-		if (!$this->uid || !$this->user['admin']) {
+		if (!$this->user['admin']) {
 			throw new Exception('Permission denied', '403');
 		}
 
@@ -35,7 +40,7 @@ class User_Model {
 	}
 
 	public function create($username, $pass, $admin, $mail) {
-		if (!$this->uid || !$this->user['admin']) {
+		if (!$this->user['admin']) {
 			throw new Exception('Permission denied', '403');
 		}
 
@@ -67,10 +72,6 @@ class User_Model {
 	}
 
 	public function set_fileview($value) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		$supported = array('list', 'grid');
 
 		if (in_array($value, $supported)) {
@@ -82,10 +83,6 @@ class User_Model {
 	}
 
 	public function set_color($value) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		$supported = array('light', 'dark');
 
 		if (in_array($value, $supported)) {
@@ -141,9 +138,6 @@ class User_Model {
 
 	public function set_autoscan($enable) {
 		$enable = ($enable == "1") ? 1 : 0;
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
 
 		if ($this->db->user_set_autoscan($this->uid, $enable)) {
 			return null;
@@ -180,6 +174,7 @@ class User_Model {
 	}
 
 	public function get_quota($username) {
+		$username = ($username) ? $username : $this->username;
 		$user = $this->db->user_get_by_name($username);
 
 		if (!$user || ($username != $this->username && !$this->user['admin'])) {
@@ -189,8 +184,18 @@ class User_Model {
 		$max = ($user['max_storage'] == '0') ? (disk_total_space(dirname(__FILE__)) != "") ? disk_total_space(dirname(__FILE__)) : disk_total_space('/') : $user['max_storage'];
 		$used = Util::dir_size($this->config['datadir'] . $username);
 		$free = ($user['max_storage'] == '0') ? ((disk_free_space(dirname(__FILE__)) != "") ? disk_free_space(dirname(__FILE__)) : disk_free_space('/')) : $max - $used;
+		$cache_dir = $this->config['datadir'] . $this->username . CACHE;
+		$trash_dir = $this->config['datadir'] . $this->username . TRASH;
+		$cache = file_exists($cache_dir) ? Util::dir_size($cache_dir) : 0;
+		$trash = file_exists($trash_dir) ? Util::dir_size($trash_dir) : 0;
 
-		return array('max' => $max, 'used' => $used, 'free' => $free);
+		return array(
+			'max'   => $max,
+			'used'  => $used,
+			'free'  => $free,
+			'cache' => $cache,
+			'trash' => $trash
+		);
 	}
 
 	public function change_password($currpass, $newpass) {
@@ -202,7 +207,7 @@ class User_Model {
 
 		if (Crypto::verify_password($currpass, $user['pass'])) {
 			if ($this->db->user_set_password($this->uid, Crypto::generate_password($newpass))) {
-				$token = Crypto::generate_token($this->uid);
+				$token = $this->db->session_start($this->uid);
 				$this->db->session_invalidate($this->uid, $token);
 				return $token;
 			}
@@ -215,15 +220,21 @@ class User_Model {
 	}
 
 	public function clear_cache() {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
-
 		if (Util::delete_dir($this->config['datadir'] . $this->username . CACHE)) {
 			return null;
 		}
 
 		throw new Exception('Error clearing cache', '500');
+	}
+
+	public function clear_trash() {
+		if (Util::delete_dir($this->config['datadir'] . $this->username . TRASH)) {
+			$existing = Util::get_files_in_dir($this->config['datadir'] . $this->username . TRASH);
+			$this->db->cache_clean_trash($this->uid, $existing);
+			return null;
+		}
+
+		throw new Exception('Error clearing trash', '500');
 	}
 
 	/**
@@ -247,6 +258,6 @@ class User_Model {
 	}
 
 	public function is_admin() {
-		return $this->user && $this->user['admin'];
+		return ($this->user && $this->user['admin']);
 	}
 }

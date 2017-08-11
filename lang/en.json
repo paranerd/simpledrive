@@ -24,6 +24,7 @@
     "unshare": "Unshare",
     "rename": "Rename",
     "zip": "Zip",
+	"unzip": "Unzip",
     "download": "Download",
     "delete": "Delete",
     "create": "Create",

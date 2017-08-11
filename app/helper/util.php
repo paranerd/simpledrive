@@ -15,7 +15,6 @@ class Util {
 	 * @param msg
 	 * @return string on error | null on success
 	 */
-
 	public function send_mail($subject, $recipient, $msg) {
 		// Check if phpmailer plugin is installed
 		if (!file_exists('plugins/phpmailer/PHPMailerAutoload.php')) {
@@ -58,7 +57,6 @@ class Util {
 	 * @param string $path
 	 * @param string $owner owner of the directory to delete
 	 */
-
 	public function delete_dir($path) {
 		$objects = scandir($path);
 		foreach ($objects as $object) {
@@ -81,7 +79,6 @@ class Util {
 	 * @param string $sourcepath
 	 * @param string $targetpath
 	 */
-
 	public function copy_dir($sourcepath, $targetpath) {
 		mkdir($targetpath);
 		$objects = scandir($sourcepath);
@@ -104,7 +101,6 @@ class Util {
 	/**
 	 * Takes a size string with optional "G", "M" or "K" suffix and converts it into the byte-size
 	 */
-
 	public function convert_size($size_string) {
 		switch (substr($size_string, -1)) {
 			case 'G':
@@ -140,7 +136,6 @@ class Util {
 	 * @param array $array haystack
 	 * @return array|null index and md5-sum if found
 	 */
-
 	public function search_in_array_2D($array, $key, $value) {
 		foreach ($array as $x => $arr) {
 			if ($arr && array_key_exists($key, $arr) && $arr[$key] == $value) {
@@ -186,5 +181,66 @@ class Util {
 
 	public function log($msg) {
 		file_put_contents(LOG, print_r($msg, true) . "\n", FILE_APPEND);
+	}
+
+	public function get_files_in_dir($path) {
+		if (!file_exists($path)) {
+			return array();
+		}
+
+		$files = scandir($path);
+		$filenames = array();
+
+		foreach ($files as $filename) {
+			if (is_readable($path . $filename) && substr($filename, 0, 1) != ".") {
+				// Add trash-hash to list of existing files
+				array_push($filenames, $filename);
+			}
+		}
+
+		return $filenames;
+	}
+
+	public function execute_web_request($url, $header, $params, $method = "POST", $port = 443) {
+		// Initialize connection
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_PORT, $port);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+
+		// Set header
+		if ($header) {
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+		}
+
+		// Set method
+		if ($method == "PUT") {
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+			curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+		}
+		else if ($method == "DELETE") {
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+		}
+		else if ($method == "POST" && $params) {
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+		}
+
+		// Get response
+		$response = curl_exec($ch);
+
+		// Get Status
+		$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+		// Separate header from body
+		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+		$data = substr($response, $header_size);
+		curl_close($ch);
+
+		return array(
+			'status' => $status,
+			'data'   => $data
+		);
 	}
 }

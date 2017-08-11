@@ -5,12 +5,7 @@
  * @link		http://simpledrive.org
  */
 
-var username,
-	token;
-
 $(document).ready(function() {
-	username = $('head').data('username');
-	token = $('head').data('token');
 	Util.getVersion();
 
 	SystemController.init();
@@ -383,7 +378,7 @@ var Status = new function() {
 		$.ajax({
 			url: 'api/system/status',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			SystemView.displayStatus(data);
@@ -407,7 +402,7 @@ var Status = new function() {
 		$.ajax({
 			url: 'api/system/uploadlimit',
 			type: 'post',
-			data: {token: token, value: size},
+			data: {value: size},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true);
@@ -421,7 +416,7 @@ var Status = new function() {
 		$.ajax({
 			url: 'api/system/setdomain',
 			type: 'post',
-			data: {token: token, domain: domain},
+			data: {domain: domain},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true);
@@ -435,7 +430,7 @@ var Status = new function() {
 		$.ajax({
 			url: 'api/system/usessl',
 			type: 'post',
-			data: {token: token, enable: enable},
+			data: {enable: enable},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true);
@@ -460,7 +455,7 @@ var LogModel = new function() {
 		$.ajax({
 			url: 'api/system/log',
 			type: 'post',
-			data: {token: token, page: page},
+			data: {page: page},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			self.pageCurrent = page;
@@ -476,7 +471,7 @@ var LogModel = new function() {
 			$.ajax({
 				url: 'api/system/clearlog',
 				type: 'post',
-				data: {token: token},
+				data: {},
 				dataType: 'json'
 			}).done(function(data, statusText, xhr) {
 				self.fetch(false, 0);
@@ -498,7 +493,7 @@ var PluginsModel = new function() {
 		$.ajax({
 			url: 'api/system/status',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			SystemView.displayPlugins(data.msg.plugins);
@@ -514,7 +509,7 @@ var PluginsModel = new function() {
 		$.ajax({
 			url: 'api/system/getplugin',
 			type: 'post',
-			data: {token: token, name: name},
+			data: {name: name},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Installation complete", true);
@@ -529,7 +524,7 @@ var PluginsModel = new function() {
 		$.ajax({
 			url: 'api/system/removeplugin',
 			type: 'post',
-			data: {token: token, name: name},
+			data: {name: name},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Plugin " + name + " removed", true);
@@ -573,7 +568,7 @@ var UsersModel = new function() {
 		$.ajax({
 			url: 'api/user/getall',
 			type: 'post',
-			data: {token: token},
+			data: {},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.list.setData(data.msg, 'username');
@@ -586,7 +581,7 @@ var UsersModel = new function() {
 		$.ajax({
 			url: 'api/user/quota',
 			type: 'post',
-			data: {token: token, user: username},
+			data: {user: username},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			$("#user-quota-free" + id).text(Util.byteToString(data.msg.used));
@@ -604,7 +599,7 @@ var UsersModel = new function() {
 			$.ajax({
 				url: 'api/user/delete',
 				type: 'post',
-				data: {token: token, user: self.list.getFirstSelected().item.username},
+				data: {user: self.list.getFirstSelected().item.username},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				self.fetch();
@@ -621,7 +616,7 @@ var UsersModel = new function() {
 		$.ajax({
 			url: 'api/user/setadmin',
 			type: 'post',
-			data: {token: token, user: self.list.getFirstSelected().item.username, enable: admin},
+			data: {user: self.list.getFirstSelected().item.username, enable: admin},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true, false);
@@ -648,7 +643,7 @@ var UsersModel = new function() {
 		$.ajax({
 			url: 'api/user/setquota',
 			type: 'post',
-			data: {token: token, user: self.list.getFirstSelected().item.username, value: size},
+			data: {user: self.list.getFirstSelected().item.username, value: size},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true, false);
@@ -671,7 +666,7 @@ var UsersModel = new function() {
 			$.ajax({
 				url: 'api/user/create',
 				type: 'post',
-				data: {token: token, user: $("#createuser-name").val(), pass: $("#createuser-pass1").val(), admin: admin, mail: $("#createuser-mail").val()},
+				data: {user: $("#createuser-name").val(), pass: $("#createuser-pass1").val(), admin: admin, mail: $("#createuser-mail").val()},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				Util.closePopup('createuser');

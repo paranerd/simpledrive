@@ -8,7 +8,7 @@
  */
 
 class Database {
-	private static $instance		= null;
+	private static $instance = null;
 
 	private function __construct() {
 		if (!function_exists('mysqli_connect')) {
@@ -28,7 +28,7 @@ class Database {
 			throw new Exception('Could not access config', '500');
 		}
 
-		$this->fingerprint = hash('sha256', $_SERVER['REMOTE_ADDR']);
+		$this->fingerprint = hash('sha256', $_SERVER['REMOTE_ADDR']); // $_SERVER['HTTP_USER_AGENT']
 	}
 
 	// Empty to prevent duplication of connection
@@ -216,6 +216,33 @@ class Database {
 				PRIMARY KEY (id),
 				pass varchar(100),
 				encrypt_filename tinyint(1)
+			)'
+		);
+
+		$link->query(
+			'CREATE TABLE IF NOT EXISTS sd_two_factor_clients (
+				id int(11),
+				PRIMARY KEY (id),
+				uid int(11),
+				FOREIGN KEY (uid)
+				REFERENCES sd_users (id)
+				ON DELETE CASCADE,
+				client_token varchar(160),
+				fingerprint varchar(64)
+			)'
+		);
+
+		$this->query(
+			'CREATE TABLE IF NOT EXISTS sd_two_factor_codes (
+				id int(11),
+				PRIMARY KEY (id),
+				uid int(11),
+				FOREIGN KEY (uid)
+				REFERENCES sd_users (id)
+				ON DELETE CASCADE,
+				code int(5),
+				expires int(11),
+				fingerprint varchar(64)
 			)'
 		);
 
@@ -569,9 +596,9 @@ class Database {
 	 * @param expires
 	 * @return boolean true if successful
 	 */
-
-	public function session_start($uid, $expires) {
+	public function session_start($uid) {
 		$token = $this->session_get_unique_token();
+		$expires = time() + 60 * 60 * 24 * 7; // 1 week
 
 		$stmt = $this->link->prepare(
 			'INSERT INTO sd_session (token, user, expires, fingerprint)
@@ -586,7 +613,13 @@ class Database {
 			$this->session_invalidate_client($uid, $token);
 		}
 
-		return ($stmt->affected_rows != 0) ? $token : null;
+		if ($stmt->affected_rows != 0) {
+			setcookie('token', $token, $expires, "/");
+			$this->user_set_login($uid, time());
+			return $token;
+		}
+
+		return null;
 	}
 
 	public function session_get_unique_token() {
@@ -609,7 +642,6 @@ class Database {
 	/**
 	 * Returns true if the token exists and is connected to the current client
 	 */
-
 	public function session_validate_token($token) {
 		$stmt = $this->link->prepare(
 			'SELECT COUNT(token)
@@ -676,6 +708,165 @@ class Database {
 		return ($stmt->affected_rows != 0);
 	}
 
+	public function two_factor_register($uid, $client_token) {
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_two_factor_clients (uid, client_token, fingerprint)
+			VALUES (?, ?, ?)'
+		);
+		$stmt->bind_param('iss', $uid, $client_token, $this->fingerprint);
+		$stmt->execute();
+
+		return ($stmt->affected_rows == 1);
+	}
+
+	public function two_factor_unregister($uid, $client_token) {
+		$stmt = $this->link->prepare(
+			'DELETE
+			FROM sd_two_factor_clients
+			WHERE uid = ?
+			AND client_token = ?
+			AND fingerprint = ?'
+		);
+		$stmt->bind_param('iss', $uid, $client_token, $this->fingerprint);
+		$stmt->execute();
+
+		return ($stmt->affected_rows == 1);
+	}
+
+	public function two_factor_disable($uid) {
+		$stmt = $this->link->prepare(
+			'DELETE
+			FROM sd_two_factor_clients
+			WHERE uid = ?'
+		);
+		$stmt->bind_param('i', $uid);
+		$stmt->execute();
+
+		return ($stmt->affected_rows > 0);
+	}
+
+	public function two_factor_is_registered($uid, $client_token) {
+		$stmt = $this->link->prepare(
+			'SELECT COUNT(uid)
+			FROM sd_two_factor_clients
+			WHERE uid = ?
+			AND client_token = ?'
+		);
+		$stmt->bind_param('is', $uid, $client_token);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($count);
+		$stmt->fetch();
+
+		return ($count > 0);
+	}
+
+	public function two_factor_is_enabled($uid) {
+		$stmt = $this->link->prepare(
+			'SELECT COUNT(uid)
+			FROM sd_two_factor_clients
+			WHERE uid = ?'
+		);
+		$stmt->bind_param('i', $uid);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($count);
+		$stmt->fetch();
+
+		return ($count > 0);
+	}
+
+	public function two_factor_required($uid) {
+		$enabled = $this->two_factor_is_enabled($uid);
+
+		$stmt = $this->link->prepare(
+			'SELECT COUNT(uid)
+			FROM sd_two_factor_clients
+			WHERE uid = ?
+			AND fingerprint = ?'
+		);
+		$stmt->bind_param('is', $uid, $this->fingerprint);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($count);
+		$stmt->fetch();
+
+		return ($enabled && $count == 0);
+	}
+
+	public function two_factor_unlock($uid, $code, $remember = false) {
+		$time = time();
+		$stmt = $this->link->prepare(
+			'DELETE
+			FROM sd_two_factor_codes
+			WHERE uid = ?
+			AND code = ?
+			AND fingerprint = ?
+			AND expires > ?'
+		);
+		$stmt->bind_param('iisi', $uid, $code, $this->fingerprint, $time);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->fetch();
+
+		if ($stmt->affected_rows > 0 && $remember) {
+			$this->two_factor_register($uid, "");
+		}
+
+		return ($stmt->affected_rows > 0);
+	}
+
+	public function two_factor_cleanup_codes() {
+		$time = time();
+		$stmt = $this->link->prepare(
+			'DELETE
+			FROM sd_two_factor_codes
+			WHERE expires < ?'
+		);
+		$stmt->bind_param('i', $time);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->fetch();
+
+		return null;
+	}
+
+	public function two_factor_generate_code($uid) {
+		$this->two_factor_cleanup_codes();
+		$code = Crypto::random_number(5);
+		$expires = time() + 60 * 5; // 5 minutes
+
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_two_factor_codes (uid, code, expires, fingerprint)
+			VALUES (?, ?, ?, ?)'
+		);
+		$stmt->bind_param('iiis', $uid, $code, $expires, $this->fingerprint);
+		$stmt->execute();
+
+		return ($stmt->affected_rows == 1) ? $code : null;
+	}
+
+	public function two_factor_get_clients($uid) {
+		//return array("d_RsLAMOiJE:APA91bFq57SDloEbeR9QdHrjY6AT3dbGc5Cm5MEpUXMF5eFveBddNCjSus74x3v9uOEDMJ7vhcn73IUYYMczGU057D3QjYOCX7h8ASxd-hmXbRfAceAOVDAfa-OQf2tV8AQtEDNuhc_I");
+
+		$stmt = $this->link->prepare(
+			'SELECT client_token
+			FROM sd_two_factor_clients
+			WHERE uid = ?'
+		);
+		$stmt->bind_param('i', $uid);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($client);
+
+		$clients = array();
+		while ($stmt->fetch()) {
+			array_push($clients, $client);
+		}
+
+		return $clients;
+	}
+
 	/**
 	 * Remove authorization token
 	 * @param token
@@ -703,6 +894,7 @@ class Database {
 
 	public function share_is_unlocked($fid, $access, $token) {
 		$uid = $this->user_get_id_by_token($token) | PUBLIC_USER_ID;
+		$public_uid = PUBLIC_USER_ID;
 		$share_base = $this->share_get_base($fid, $uid);
 
 		// Check if the share-base is shared with the user
@@ -719,7 +911,7 @@ class Database {
 				OR (userto = ? AND u.token = ?)
 			)
 		');
-		$stmt->bind_param('siiiis', $share_base, $access, PUBLIC_USER_ID, $uid, PUBLIC_USER_ID, $token);
+		$stmt->bind_param('siiiis', $share_base, $access, $public_uid, $uid, $public_uid, $token);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($total);
@@ -1469,6 +1661,21 @@ class Database {
 		} while ($stmt->num_rows > 0);
 
 		return implode('/', $path);
+	}
+
+	public function cache_parent($id) {
+		$stmt = $this->link->prepare(
+			'SELECT parent
+			FROM sd_cache
+			WHERE id = ?'
+		);
+		$stmt->bind_param('s', $id);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($parent_id);
+		$stmt->fetch();
+
+		return $parent_id;
 	}
 
 	public function cache_parents($id, $uid) {

@@ -16,29 +16,30 @@ class Files_Controller {
 	protected $valid_sections	= array('files', 'sharein', 'shareout', 'trash', 'pub', 'webdav', 'texteditor', 'odfeditor');
 
 	public $required = array(
-		'children'	=> array('target', 'mode'),
-		'create'	=> array('target', 'type'),
-		'rename'	=> array('target', 'newFilename'),
-		'copy'		=> array('target', 'source'),
-		'move'		=> array('target', 'source'),
-		'restore'	=> array('target'),
-		'delete'	=> array('target'),
-		'zip'		=> array('target', 'source'),
-		'share'		=> array('target', 'userto', 'mail', 'write', 'pubAcc', 'key'),
-		'unshare'	=> array('target'),
-		'getlink'	=> array('target'),
-		'get'		=> array('target'),
-		'upload'	=> array('target'),
-		'getpub'	=> array('hash', 'key'),
 		'audioinfo'	=> array('target'),
+		'children'	=> array('target', 'mode'),
+		'copy'		=> array('target', 'source'),
+		'create'	=> array('target', 'type'),
+		'decrypt'	=> array('target', 'source', 'secret'),
+		'delete'	=> array('target'),
+		'encrypt'	=> array('target', 'source', 'secret'),
+		'get'		=> array('target'),
+		'getlink'	=> array('target'),
+		'getpub'	=> array('hash', 'key'),
+		'loadtext'	=> array('target'),
+		'move'		=> array('target', 'source'),
+		'rename'	=> array('target', 'newFilename'),
+		'restore'	=> array('target'),
 		'saveodf'	=> array('target'),
 		'savetext'	=> array('target', 'data'),
-		'loadtext'	=> array('target'),
-		'sync'		=> array('target', 'source', 'lastsync'),
 		'scan'		=> array('target'),
 		'search'	=> array('needle'),
-		'encrypt'	=> array('target', 'secret'),
-		'decrypt'	=> array('target', 'secret'),
+		'share'		=> array('target', 'userto', 'mail', 'write', 'pubAcc', 'key'),
+		'sync'		=> array('target', 'source', 'lastsync'),
+		'unshare'	=> array('target'),
+		'unzip'		=> array('target', 'source'),
+		'upload'	=> array('target'),
+		'zip'		=> array('target', 'source'),
 	);
 
 	public function __construct($token) {
@@ -87,6 +88,10 @@ class Files_Controller {
 
 	public function zip() {
 		return $this->model->zip($_REQUEST['target'], json_decode($_REQUEST['source'], true));
+	}
+
+	public function unzip() {
+		return $this->model->unzip($_REQUEST['target'], $_REQUEST['source']);
 	}
 
 	public function share() {
@@ -145,10 +150,10 @@ class Files_Controller {
 	}
 
 	public function encrypt() {
-		return $this->model->encrypt($_REQUEST['target'], $_REQUEST['secret']);
+		return $this->model->encrypt($_REQUEST['target'], json_decode($_REQUEST['source'], true), $_REQUEST['secret']);
 	}
 
 	public function decrypt() {
-		return $this->model->decrypt($_REQUEST['target'], $_REQUEST['secret']);
+		return $this->model->decrypt($_REQUEST['target'], $_REQUEST['source'], $_REQUEST['secret']);
 	}
 }

@@ -15,7 +15,6 @@ define('LOG', (__DIR__) . '/logs/status.log');
 define('CACHE', '/cache/');
 define('TRASH', '/trash/');
 define('FILES', '/files');
-define('THUMB', '/thumbnails/');
 define('LOCK', '/lock/');
 define('VAULT', '/vault/');
 define('VAULT_FILE', 'vault');
@@ -52,13 +51,16 @@ else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/'
 
 	try {
 		require_once 'app/controller/' . $controller . '.php';
-
 		// Extract token
 		$token = (isset($token_source['token'])) ? Crypto::validate_token($token_source['token']) : '';
 		$c     = new $name($token);
 
+		// Call to render
+		if ($render && method_exists($name, 'render')) {
+			exit ($c->render($action, $args));
+		}
 		// Call to API
-		if (!$render && method_exists($name, $action)) {
+		else if (!$render && method_exists($name, $action)) {
 			// Check if every required parameter has been set
 			if (array_key_exists($action, $c->required) && $missing = Util::array_has_keys($_REQUEST, $c->required[$action])) {
 				exit (Response::error('400', 'Missing argument: ' . $missing, $render));
@@ -67,10 +69,6 @@ else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/'
 			$res = $c->$action();
 			// Don't exit any msg on 'get' because it gets appended to the data
 			exit (($controller == 'files' && $action == 'get') ? '' : Response::success($res));
-		}
-		// Call to render
-		else if ($render && method_exists($name, 'render')) {
-			exit ($c->render($action, $args));
 		}
 	} catch (Exception $e) {
 		exit (Response::error($e->getCode(), $e->getMessage(), $render));

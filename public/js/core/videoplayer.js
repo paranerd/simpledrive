@@ -45,7 +45,7 @@ var VideoManager = new function() {
 			self.init();
 		}
 
-		self.video.src = 'api/files/get?target=' + encodeURIComponent(JSON.stringify([elem.id])).replace('(', '%28').replace(')', '%29') + '&token=' + token;
+		self.video.src = 'api/files/get?target=' + encodeURIComponent(JSON.stringify([elem.id])).replace('(', '%28').replace(')', '%29') + '&token=' + Util.getToken();
 		self.video.load();
 	},
 

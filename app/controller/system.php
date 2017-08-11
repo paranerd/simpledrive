@@ -59,10 +59,6 @@ class System_Controller {
 		return $this->model->status();
 	}
 
-	public function version() {
-		return $this->model->get_version();
-	}
-
 	public function uploadlimit() {
 		return $this->model->set_upload_limit($_REQUEST['value']);
 	}

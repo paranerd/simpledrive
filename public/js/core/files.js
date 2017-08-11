@@ -5,12 +5,10 @@
  * @link		https://simpledrive.org
  */
 
-var	username,
-	token;
+var	username;
 
 $(document).ready(function() {
 	username = $('head').data('username');
-	token = $('head').data('token');
 	Util.getVersion();
 
 	FileView.init($('head').data('view'));
@@ -88,23 +86,25 @@ var FileController = new function() {
 						$("#context-rename").removeClass("hidden");
 					}
 					// Encrypt
-					if (!multi && target.type != "folder" && target.type != "encrypted") {
+					if (target.type != "encrypted") {
 						$("#context-encrypt").removeClass("hidden");
 					}
 					// Decrypt
 					if (!multi && target.type == "encrypted") {
 						$("#context-decrypt").removeClass("hidden");
 					}
-
+					// Unzip
+					if (target.type == 'archive') {
+						$("#context-unzip").removeClass("hidden");
+					}
 					// Zip
-					$("#context-zip").removeClass("hidden");
-
+					else {
+						$("#context-zip").removeClass("hidden");
+					}
 					// Copy
 					$("#context-copy").removeClass("hidden");
-
 					// Cut
 					$("#context-cut").removeClass("hidden");
-
 					// Download
 					$("#context-download").removeClass("hidden");
 				}
@@ -163,6 +163,10 @@ var FileController = new function() {
 					FileModel.zip();
 					break;
 
+				case 'unzip':
+					FileModel.unzip();
+					break;
+
 				case 'download':
 					FileModel.download();
 					break;
@@ -179,8 +183,6 @@ var FileController = new function() {
 					FileView.closeGallery();
 					break;
 			}
-
-			//Util.closePopup('contextmenu');
 		});
 
 		$(document).on('mouseenter', '.item', function(e) {
@@ -432,7 +434,7 @@ var FileController = new function() {
 					break;
 
 				case 46: // Del
-					if (!$(e.target).is('input')) {
+					if (!$(e.target).is('input') && FileModel.list.getSelectedCount() > 0) {
 						FileModel.remove();
 					}
 					break;
@@ -484,8 +486,7 @@ var FileController = new function() {
 		});
 
 		window.onpopstate = function(e) {
-			var id = Util.getUrlParameter('id');
-			id = (!id || id == 'null') ? '0' : id;
+			var id = (history.state && history.state.id) ? history.state.id : '0';
 			FileModel.fetch(id, true);
 		};
 	}
@@ -505,6 +506,7 @@ var FileView = new function() {
 
 	this.init = function(view) {
 		self.view = (view) ? view : "files";
+		self.setView(view);
 		self.enableLazyLoad();
 
 		if (!Util.isDirectorySupported()) {
@@ -529,7 +531,7 @@ var FileView = new function() {
 		$.ajax({
 			url: 'api/user/setfileview',
 			type: 'post',
-			data: {token: token, view: fileviewAfter},
+			data: {view: fileviewAfter},
 			dataType: "json"
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
@@ -642,7 +644,7 @@ var FileView = new function() {
 
 			if (thumbnail && thumbnail.style.backgroundImage == '' && visible && (item.type == 'image' || item.type == 'pdf')) {
 				var img = new Image();
-				img.src = "api/files/get?target=" + JSON.stringify([item.id]) + "&width=" + $(".thumbnail").width() + "&height=" + $(".thumbnail").height() + "&thumbnail=1&token=" + token;
+				img.src = encodeURI("api/files/get?target=" + JSON.stringify([item.id]) + "&width=" + $(".thumbnail").width() + "&height=" + $(".thumbnail").height() + "&thumbnail=1&token=" + Util.getToken());
 				img.onload = function() {
 					if (requestID == FileModel.requestID) {
 						$(thumbnail).removeClass("icon-" + item.type);
@@ -868,7 +870,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/create',
 			type: 'post',
-			data: {token: token, target: self.id, type: $("#create-type").val(), filename: $("#create-input").val()},
+			data: {target: self.id, type: $("#create-type").val(), filename: $("#create-input").val()},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.fetch();
@@ -921,10 +923,10 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/get',
 			type: 'post',
-			data: {token: token, target: JSON.stringify(self.list.getAllSelectedIDs())}
+			data: {target: JSON.stringify(self.list.getAllSelectedIDs())}
 		}).done(function(data, statusText, xhr) {
 			$('<form id="download-form" class="hidden" action="api/files/get" method="post"><input name="token"></input><input name="target"></input></form>').appendTo('body');
-			$('[name="token"]').val(token);
+			$('[name="token"]').val(Util.getToken());
 			$('[name="target"]').val(JSON.stringify(self.list.getAllSelectedIDs()));
 			$('#download-form').submit();
 		}).fail(function(xhr, statusText, error) {
@@ -956,7 +958,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/children',
 			type: 'post',
-			data: {token: token, target: id, mode: FileView.view},
+			data: {target: id, mode: FileView.view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.id = id;
@@ -967,10 +969,10 @@ var FileModel = new function() {
 
 			if (!back) {
 				if (id.length > 1) {
-					window.history.pushState(null, '', 'files/' + FileView.view + '/' + id);
+					window.history.pushState({id: id}, '', 'files/' + FileView.view + '/' + id);
 				}
 				else {
-					window.history.pushState(null, '', 'files/' + FileView.view);
+					window.history.pushState({id: id}, '', 'files/' + FileView.view);
 				}
 			}
 		}).fail(function(xhr, statusText, error) {
@@ -989,7 +991,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/getlink',
 			type: 'post',
-			data: {token: token, target: elem.id},
+			data: {target: elem.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify(data.msg, false, false);
@@ -1029,12 +1031,11 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/getpub',
 			type: 'post',
-			data: {token: token, hash: hash, key: key},
+			data: {hash: hash, key: key},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			//self.setHierarchy([], []);
 			self.hierarchy = [];
-			token = data.msg.token;
+			Util.setToken(data.msg.token);
 
 			if (data.msg.share.type == "folder") {
 				$("#pubfile").animate({'top' : '-' + window.innerHeight + 'px'}, 500, function () {$("#pubfile").addClass("hidden");});
@@ -1073,7 +1074,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/move',
 			type: 'post',
-			data: {token: token, source: JSON.stringify(self.list.getAllSelectedIDs()), target: target, trash: 'false'},
+			data: {source: JSON.stringify(self.list.getAllSelectedIDs()), target: target, trash: 'false'},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify(data.msg, true);
@@ -1133,19 +1134,19 @@ var FileModel = new function() {
 	this.openODT = function(id) {
 		$("#odt-form").remove();
 		$('<form id="odt-form" class="hidden" action="files/odfeditor/' + id + '" target="_blank" method="post"><input name="token"/></form>').appendTo('body');
-		$('[name="token"]').val(token);
+		$('[name="token"]').val(Util.getToken());
 		$('[name="public"]').val(self.public);
 		$('#odt-form').submit();
 	}
 
 	this.openPDF = function(id) {
-		window.location.href = 'api/files/get?target=' + JSON.stringify([id])+ '&token=' + token;
+		window.location.href = 'api/files/get?target=' + JSON.stringify([id])+ '&token=' + Util.getToken();
 	}
 
 	this.openText = function(id) {
 		$("#text-form").remove();
 		$('<form id="text-form" class="hidden" action="files/texteditor/' + id + '" target="_blank" method="post"><input name="token"/><input name="public"/></form>').appendTo('body');
-		$('[name="token"]').val(token);
+		$('[name="token"]').val(Util.getToken());
 		$('[name="public"]').val(self.public);
 		$('#text-form').submit();
 	}
@@ -1157,7 +1158,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/' + action,
 			type: 'post',
-			data: {token: token, source: JSON.stringify(self.clipboard), target: self.id, trash: 'false'},
+			data: {source: JSON.stringify(self.clipboard), target: self.id, trash: 'false'},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			// Something
@@ -1179,7 +1180,7 @@ var FileModel = new function() {
 			$.ajax({
 				url: 'api/files/rename',
 				type: 'post',
-				data: {token: token, newFilename: newFilename, target: self.list.getFirstSelected().item.id},
+				data: {newFilename: newFilename, target: self.list.getFirstSelected().item.id},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				FileView.closeRename();
@@ -1200,7 +1201,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/scan',
 			type: 'post',
-			data: {token: token, target: self.id},
+			data: {target: self.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.fetch();
@@ -1217,7 +1218,7 @@ var FileModel = new function() {
 			$.ajax({
 				url: 'api/files/delete',
 				type: 'post',
-				data: {token: token, target: JSON.stringify(self.list.getAllSelectedIDs())},
+				data: {target: JSON.stringify(self.list.getAllSelectedIDs())},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				Util.notify("Successfully removed", true, false);
@@ -1236,7 +1237,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/restore',
 			type: 'post',
-			data: {token: token, target: JSON.stringify(self.list.getAllSelectedIDs())},
+			data: {target: JSON.stringify(self.list.getAllSelectedIDs())},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.notify(data.msg, true);
@@ -1264,7 +1265,7 @@ var FileModel = new function() {
 			$.ajax({
 				url: 'api/files/share',
 				type: 'post',
-				data: {token: token, target: target.id, mail: mail, key: key, userto: user, pubAcc: pubAcc, write: write},
+				data: {target: target.id, mail: mail, key: key, userto: user, pubAcc: pubAcc, write: write},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
 				var msg = (pubAcc) ? data.msg : target.filename + " shared with " + user;
@@ -1284,7 +1285,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/unshare',
 			type: 'post',
-			data: {token: token, target: self.list.getFirstSelected().item.id},
+			data: {target: self.list.getFirstSelected().item.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.fetch();
@@ -1382,7 +1383,7 @@ var FileModel = new function() {
 		var path = (full) ? full.substring(0, full.length - (file.name).length) : "";
 		fd.append('paths', path);
 		fd.append('target', elem.target);
-		fd.append('token', token);
+		fd.append('token', Util.getToken());
 		fd.append(0, file);
 		xhr.send(fd);
 	}
@@ -1408,7 +1409,23 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/zip',
 			type: 'post',
-			data: {token: token, target: self.id, source: JSON.stringify(self.list.getAllSelectedIDs())},
+			data: {target: self.id, source: JSON.stringify(self.list.getAllSelectedIDs())},
+			dataType: "json"
+		}).done(function(data, statusText, xhr) {
+			self.fetch();
+		}).fail(function(xhr, statusText, error) {
+			Util.notify(Util.getError(xhr), true, true);
+		}).always(function() {
+			Util.endBusy(bId);
+		});
+	}
+
+	this.unzip = function() {
+		var bId = Util.startBusy("Unzipping...");
+		$.ajax({
+			url: 'api/files/unzip',
+			type: 'post',
+			data: {target: self.id, source: self.list.getFirstSelected().item.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.fetch();
@@ -1429,7 +1446,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/search',
 			type: 'post',
-			data: {token: token, needle: needle},
+			data: {needle: needle},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			FileView.setView('files', true);
@@ -1454,7 +1471,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/encrypt',
 			type: 'post',
-			data: {token: token, target: self.list.getFirstSelected().item.id, secret: secret},
+			data: {target: self.id, source: JSON.stringify(self.list.getAllSelectedIDs()), secret: secret},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.closePopup('encrypt');
@@ -1476,7 +1493,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/decrypt',
 			type: 'post',
-			data: {token: token, target: self.list.getFirstSelected().item.id, secret: secret},
+			data: {target: self.list.getFirstSelected().item.id, secret: secret},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			Util.closePopup('decrypt');

@@ -7,6 +7,8 @@
  * @link		https://simpledrive.org
  */
 
+require_once 'app/model/twofactor.php';
+
 class Core_Model {
 	public function __construct() {
 		$this->db			= null;
@@ -74,7 +76,7 @@ class Core_Model {
 
 			//cache_add($filename, $parent, $type, $size, $owner, $edit, $md5, $path) {
 			if ($id = $this->db->user_create($username, Crypto::generate_password($pass), 1, $mail)) {
-				return Crypto::generate_token($id);
+				return $this->db->session_start($id);
 			}
 		} catch (Exception $e) {
 			if (file_exists($this->config_path)) {
@@ -156,14 +158,14 @@ class Core_Model {
 	}
 
 	/**
-	 * Innitiate token generation
+	 * Initiate token generation
 	 * After 3 login attempts add a 30s cooldown for every further attempt to slow down bruteforce attacks
 	 * @param username
 	 * @param pass
 	 * @return string authorization token
 	 */
 
-	public function login($username, $pass) {
+	public function login($username, $pass, $two_factor_code = null, $remember = false) {
 		$this->db	= Database::getInstance();
 		$username	= strtolower($username);
 		$user		= $this->db->user_get_by_name($username, true);
@@ -179,20 +181,24 @@ class Core_Model {
 		}
 		// Correct
 		else if (Crypto::verify_password($pass, $user['pass'])) {
-			$this->db->user_set_login($user['id'], time());
+			// Check if Two-Factor-Authentication is required and if so can be unlocked
+			if (Twofactor_Model::unlock($user['id'], $two_factor_code, $remember)) {
+				// Protect user directories
+				$this->create_user_htaccess();
 
-			// Protect user directories
-			$this->create_user_htaccess();
+				return $this->db->session_start($user['id']);
+			}
 
-			return Crypto::generate_token($user['id']);
+			throw new Exception('Two-Factor-Authentication required', '403');
 		}
 		// Wrong password
 		else {
 			$this->db->user_increase_login_counter($user['id'], time());
-			$this->db->log_write($user['id'], 1, "Login", "Login failed");
+			$this->db->log_write($user['id'], "Warning", "Login", "Login failed");
 		}
 
-		throw new Exception('Wrong username/password', '500');
+		header('WWW-Authenticate: BasicCustom realm="simpleDrive"');
+		throw new Exception('Wrong username/password', '401');
 	}
 
 	public function logout($token) {
@@ -201,5 +207,28 @@ class Core_Model {
 
 		unset($_COOKIE['token']);
 		setcookie('token', null, -1, '/');
+	}
+
+	/**
+	 * Get current installed version and recent version (from demo server)
+	 * @return array containing current and version
+	 */
+	public function get_version($token) {
+		$this->db = Database::getInstance();
+		if (!$this->db->user_get_by_token($token)) {
+			throw new Exception('Permission denied', '403');
+		}
+
+		$version		= json_decode(file_get_contents('config/version.json'), true);
+		$url			= 'http://simpledrive.org/version';
+		$recent_version	= null;
+
+		// Get current version from demo server if connection is available
+		if (@fopen($url, 'r')) {
+			$result = json_decode(file_get_contents($url, false), true);
+			$recent_version = ($result && $result['build'] > $version['build']) ? $result['version'] : null;
+		}
+
+		return array('recent' => $recent_version, 'current' => $version['version']);
 	}
 }

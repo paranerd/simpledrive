@@ -186,6 +186,7 @@
 			<hr class="hidden">
 			<li id="context-rename" class="hidden"><span class="icon icon-rename"></span><?php echo $lang['rename']; ?></li>
 			<li id="context-zip" class="hidden"><span class="icon icon-archive"></span><?php echo $lang['zip']; ?></li>
+			<li id="context-unzip" class="hidden"><span class="icon icon-archive"></span><?php echo $lang['unzip']; ?></li>
 			<li id="context-download" class="hidden"><span class="icon icon-download"></span><?php echo $lang['download']; ?></li>
 			<hr class="hidden">
 			<li id="context-delete" class="hidden"><span class="icon icon-trash"></span><?php echo $lang['delete']; ?></li>
