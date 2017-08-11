@@ -12,7 +12,6 @@ require_once 'app/model/twofactor.php';
 class Core_Model {
 	public function __construct() {
 		$this->db			= null;
-		$this->config_path	= 'config/config.json';
 	}
 
 	/**
@@ -47,7 +46,7 @@ class Core_Model {
 		}
 
 		// Check if already installed
-		if (file_exists($this->config_path)) {
+		if (file_exists(CONFIG)) {
 			throw new Exception('Already installed', '403');
 		}
 
@@ -79,13 +78,13 @@ class Core_Model {
 				return $this->db->session_start($id);
 			}
 		} catch (Exception $e) {
-			if (file_exists($this->config_path)) {
-				unlink($this->config_path);
+			if (file_exists(CONFIG)) {
+				unlink(CONFIG);
 			}
 			throw new Exception($e->getMessage(), $e->getCode());
 		}
 
-		unlink($this->config_path);
+		unlink(CONFIG);
 		throw new Exception('Could not create user', '500');
 	}
 
@@ -117,7 +116,7 @@ class Core_Model {
 		);
 
 		// Write config file
-		return file_put_contents($this->config_path, json_encode($config, JSON_PRETTY_PRINT));
+		return file_put_contents(CONFIG, json_encode($config, JSON_PRETTY_PRINT));
 	}
 
 	/**
@@ -146,7 +145,7 @@ class Core_Model {
 	 */
 
 	private function create_user_htaccess() {
-		$config = json_decode(file_get_contents($this->config_path), true);
+		$config = json_decode(file_get_contents(CONFIG), true);
 
 		if (!file_exists($config['datadir'] . '/.htaccess')) {
 			$data =
@@ -219,7 +218,7 @@ class Core_Model {
 			throw new Exception('Permission denied', '403');
 		}
 
-		$version		= json_decode(file_get_contents('config/version.json'), true);
+		$version		= json_decode(file_get_contents(VERSION), true);
 		$url			= 'http://simpledrive.org/version';
 		$recent_version	= null;
 

@@ -14,8 +14,8 @@ class Database {
 		if (!function_exists('mysqli_connect')) {
 			throw new Exception('MySQLi is not installed', '500');
 		}
-		else if (is_readable('config/config.json')) {
-			$config = json_decode(file_get_contents('config/config.json'), true);
+		else if (is_readable(CONFIG)) {
+			$config = json_decode(file_get_contents(CONFIG), true);
 			$this->link = new mysqli($config['dbserver'], $config['dbuser'], $config['dbpass'], $config['dbname']);
 
 			if ($this->link->connect_error) {
@@ -232,7 +232,7 @@ class Database {
 			)'
 		);
 
-		$this->query(
+		$link->query(
 			'CREATE TABLE IF NOT EXISTS sd_two_factor_codes (
 				id int(11),
 				PRIMARY KEY (id),

@@ -16,12 +16,12 @@ class File_Model {
 	 * Constructor
 	 */
 	public function __construct($token) {
-		$this->token		= $token;
-		$this->config		= CONFIG;
-		$this->db			= Database::getInstance();
-		$this->user			= ($this->db) ? $this->db->user_get_by_token($token) : null;
-		$this->uid			= ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
-		$this->username		= ($this->user) ? $this->user['username'] : "";
+		$this->token    = $token;
+		$this->config   = json_decode(file_get_contents(CONFIG), true);
+		$this->db       = Database::getInstance();
+		$this->user     = ($this->db) ? $this->db->user_get_by_token($token) : null;
+		$this->uid      = ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
+		$this->username = ($this->user) ? $this->user['username'] : "";
 
 		$this->init();
 	}

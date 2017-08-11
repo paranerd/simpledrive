@@ -22,6 +22,8 @@ define('PERMISSION_NONE', 0);
 define('PERMISSION_READ', 1);
 define('PERMISSION_WRITE', 2);
 define('PUBLIC_USER_ID', 1);
+define('CONFIG', 'config/config.json');
+define('VERSION', 'config/version.json');
 
 // Include helpers
 require_once 'app/helper/database.php';
@@ -40,14 +42,13 @@ $action       = (sizeof($args) > 0) ? array_shift($args) : '';
 $name         = ucfirst($controller) . "_Controller";
 
 // Not installed - enter setup
-if (!file_exists('config/config.json') && ($controller != 'core' || $action != 'setup')) {
+if (!file_exists(CONFIG) && ($controller != 'core' || $action != 'setup')) {
 	exit (Response::redirect('core/setup'));
 }
 else if (!$request && $render) {
 	exit (Response::redirect('files'));
 }
 else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/' . $controller . '.php')) {
-	define('CONFIG', json_decode(file_get_contents('config/config.json'), true));
 
 	try {
 		require_once 'app/controller/' . $controller . '.php';

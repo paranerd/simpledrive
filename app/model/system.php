@@ -9,8 +9,8 @@
 
 class System_Model {
 	public function __construct($token) {
-		$this->config	= CONFIG;
-		$this->db		= Database::getInstance();
+		$this->config = json_decode(file_get_contents(CONFIG), true);
+		$this->db     = Database::getInstance();
 
 		if (!$this->db->user_is_admin($token)) {
 			throw new Exception('Permission denied', '403');
@@ -31,7 +31,7 @@ class System_Model {
 			'phpmailer'		=> is_dir('plugins/phpmailer')
 		);
 
-		$version = json_decode(file_get_contents('config/version.json'), true);
+		$version = json_decode(file_get_contents(VERSION), true);
 
 		return array(
 			'users'			=> count($this->db->user_get_all()),
@@ -76,7 +76,7 @@ class System_Model {
 		$this->config['domain'] = ($domain != "") ? $domain : $this->config['domain'];
 
 		// Write config file
-		if (file_put_contents('config/config.json', json_encode($this->config, JSON_PRETTY_PRINT))) {
+		if (file_put_contents(CONFIG, json_encode($this->config, JSON_PRETTY_PRINT))) {
 			return null;
 		}
 
@@ -92,7 +92,7 @@ class System_Model {
 		$htaccess					= file('.htaccess');
 
 		// Write config file
-		if (!file_put_contents('config/config.json', json_encode($this->config, JSON_PRETTY_PRINT))) {
+		if (!file_put_contents(CONFIG, json_encode($this->config, JSON_PRETTY_PRINT))) {
 			throw new Exception('Error writing config', '500');
 		}
 
@@ -116,7 +116,7 @@ class System_Model {
 		$this->config['protocol'] = $backup;
 
 		// Write config file
-		if (file_put_contents('config/config.json', json_encode($this->config, JSON_PRETTY_PRINT))) {
+		if (file_put_contents(CONFIG, json_encode($this->config, JSON_PRETTY_PRINT))) {
 			return null;
 		}
 

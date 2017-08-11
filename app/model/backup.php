@@ -15,7 +15,7 @@ class Backup_Model {
 		$this->user				= ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid				= ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
 		$this->username			= ($this->user) ? $this->user['username'] : "";
-		$this->config			= CONFIG;
+		$this->config			= json_decode(file_get_contents(CONFIG), true);
 
 		$this->cache			= ($this->user) ? $this->config['datadir'] . $this->username . CACHE : "";
 		$this->lock				= ($this->user) ? $this->config['datadir'] . $this->username . LOCK . "backup" : "";

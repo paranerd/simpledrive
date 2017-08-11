@@ -8,12 +8,10 @@
  */
 
 // Check if sabredav plugin is installed
-if (!file_exists('plugins/sabredav')) {
-	header('Location: ' . $base . '404');
-	return null;
+if (!file_exists('plugins/sabredav') || true) {
+	exit (Response::error('404', 'The requested site could not be found...', true));
 }
 
-require_once 'app/helper/database.php';
 require_once 'app/model/core.php';
 require_once 'plugins/sabredav/vendor/autoload.php';
 
@@ -24,7 +22,7 @@ use
 
 $request	= Sapi::getRequest();
 $response	= new Response();
-$CONFIG		= json_decode(file_get_contents('config/config.json'), true);
+$CONFIG		= json_decode(file_get_contents(CONFIG), true);
 
 $basicAuth = new Auth\Basic("Locked down area", $request, $response);
 $basicAuth->requireLogin();
