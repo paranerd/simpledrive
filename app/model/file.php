@@ -111,14 +111,14 @@ class File_Model {
 			$children = $this->db->cache_children_rec($file['id'], $this->uid, $file['ownerid']);
 
 			foreach ($children as $child) {
-				if ($child['type'] == 'image' && file_exists($cache_dir . $child['id'])) {
-					unlink($cache_dir . $child['id']);
+				if ($child['type'] == 'image' && file_exists($cache_dir . $child['id'] . "_thumb")) {
+					unlink($cache_dir . $child['id'] . "_thumb");
 				}
 			}
 		}
 		else {
-			if ($file['type'] == 'image' && file_exists($cache_dir . $file['id'])) {
-				unlink($cache_dir . $file['id']);
+			if ($file['type'] == 'image' && file_exists($cache_dir . $file['id'] . "_thumb")) {
+				unlink($cache_dir . $file['id'] . "_thumb");
 			}
 		}
 	}
@@ -194,7 +194,7 @@ class File_Model {
 			}
 			return $destination;
 		}
-		// IMAGE
+		// Image
 		else {
 			// Scale image to fit target dimensions
 			$src_info = getimagesize($src);
@@ -207,7 +207,15 @@ class File_Model {
 			$src_big = max($src_width, $src_height);
 			$src_small = min($src_width, $src_height);
 
-			$scale_to = min($target_big / $src_big, $target_small / $src_small);
+			if ($thumb) {
+				// Thumbs cover; smaller thumb-side must fit bigger target-side
+				$scale_to = max($target_big / $src_big, $target_small / $src_small);
+			}
+			else {
+				// Regular images fit; save bandwidth/storage, make big img-side match big target-side
+				$scale_to = min($target_big / $src_big, $target_small / $src_small);
+			}
+
 			$scale_to = ($scale_to > 1) ? 1 : $scale_to;
 
 			$scaled_width = intval($src_width * $scale_to);
@@ -219,7 +227,7 @@ class File_Model {
 			if (file_exists($destination)) {
 				$dest_info = getimagesize($destination);
 
-				if ($dest_info[0] >= $target_width || $dest_info[1] >= $target_height) {
+				if ($dest_info[0] >= $scaled_width || $dest_info[1] >= $scaled_height) {
 					return $destination;
 				}
 			}
@@ -363,7 +371,7 @@ class File_Model {
 	 */
 
 	public function create($target, $type, $orig_filename = "") {
-		if (preg_match('/[\/\\\\]/', $orig_filename)) {
+		if (!$this->filename_valid($orig_filename)) {
 			throw new Exception('Filename not allowed', '400');
 		}
 
@@ -407,7 +415,7 @@ class File_Model {
 	 */
 
 	public function rename($id, $newname) {
-		if (preg_match('/[\/\\\\]/', $newname)) {
+		if (!!$this->filename_valid($newname)) {
 			throw new Exception('Filename not allowed', '400');
 		}
 
@@ -831,7 +839,7 @@ class File_Model {
 			$max_upload = Util::convert_size(ini_get('upload_max_filesize'));
 			$parent = $this->get_cached($target, PERMISSION_WRITE);
 
-			if (!$parent || preg_match('/[\/\\\\]/', $_FILES[0]['name'])) {
+			if (!$parent || !$this->filename_valid($_FILES[0]['name'])) {
 				throw new Exception('Access denied', '403');
 			}
 
@@ -863,6 +871,7 @@ class File_Model {
 				}
 				else {
 					$parent_id = $this->db->cache_id_for_path($parent['ownerid'], $rel_path);
+					// Only need write access for the last directory
 					$access_required = (sizeof($upload_relative_path_arr) == 0) ? PERMISSION_WRITE : PERMISSION_READ;
 					if (!$this->get_cached($parent_id, $access_required)) {
 						throw new Exception('Access denied', '403');
@@ -877,11 +886,14 @@ class File_Model {
 			if (move_uploaded_file($_FILES[0]['tmp_name'], $userdir . $rel_path)) {
 				if ($exists) {
 					$id = $this->db->cache_id_for_path($parent['ownerid'], $rel_path);
+					$existing = $this->get_cached($id, PERMISSION_WRITE);
+					$this->remove_thumbnail($existing);
 					$this->db->cache_update($id, self::type($userdir . $rel_path), self::info($userdir . $rel_path), filemtime($userdir . $rel_path), md5_file($userdir . $rel_path), $parent['owner'], $rel_path);
 				}
 				else {
 					$this->add($userdir . $rel_path, $rel_path, $parent['id'], $parent['ownerid']);
 				}
+
 				return null;
 			}
 			else {
@@ -990,14 +1002,15 @@ class File_Model {
 	/**
 	 * Returns file to client (in 200kB chunks, so images can build up progressively)
 	 * @param array targets file-id(s) to return
-	 * @param integer width screen width for shrinking to save bandwidth
-	 * @param integer height screen heightfor shrinking to save bandwidth
+	 * @param integer width screen width for scaling to save bandwidth
+	 * @param integer height screen height for scaling to save bandwidth
 	 * @return file
 	 */
 
 	public function get($targets, $width = null, $height = null, $thumb) {
 		$path = null;
 		$delete_flag = false;
+		$download_rate = 1024; // Send file in 1-MB-chunks
 
 		// Check each file for access permission
 		foreach ($targets as $target) {
@@ -1022,8 +1035,7 @@ class File_Model {
 		}
 
 		if (file_exists($destination) && is_file($destination)) {
-			$download_rate = 200;
-			header('Cache-control: private');
+			header('Cache-control: private, max-age=86400, no-transform');
 			$finfo = finfo_open(FILEINFO_MIME_TYPE);
 			header("Content-Type: " . finfo_file($finfo, $destination));
 			//header('Content-Type: application/octet-stream');
@@ -1231,5 +1243,9 @@ class File_Model {
 	public function scan_trash($file) {
 		$existing = Util::get_files_in_dir($this->config['datadir'] . $file['owner'] . TRASH);
 		$this->db->cache_clean_trash($file['ownerid'], $existing);
+	}
+
+	private function filename_valid($filename) {
+		return !preg_match('/[^A-Za-z0-9\!\"\§\$\%\&\(\)\{\}\[\]\=\*\'\#\-\_\.\,\;\²\³]/', $filename);
 	}
 }

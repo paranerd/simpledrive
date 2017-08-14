@@ -8,22 +8,23 @@
  */
 
 class Google_Api {
-	static $API_FILES_URL    = 'https://www.googleapis.com/drive/v3/files';
-	static $ACCESS           = 'offline';
-	static $SCOPES           = 'https://www.googleapis.com/auth/drive';
-	static $APPLICATION      = 'simpleDrive';
+	static $API_FILES_URL  = 'https://www.googleapis.com/drive/v3/files';
+	static $API_UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable";
+	static $SCOPES         = 'https://www.googleapis.com/auth/drive';
+	static $ACCESS         = 'offline';
+	static $APPLICATION    = 'simpleDrive';
 
 	public function __construct($user_token) {
-		$this->db             = Database::getInstance();
-		$this->user           = ($this->db) ? $this->db->user_get_by_token($user_token) : null;
-		$this->username       = ($this->user) ? $this->user['username'] : "";
-		$this->config         = CONFIG;
+		$this->db          = Database::getInstance();
+		$this->user        = ($this->db) ? $this->db->user_get_by_token($user_token) : null;
+		$this->username    = ($this->user) ? $this->user['username'] : "";
+		$this->config      = json_decode(file_get_contents(CONFIG), true);
 
-		$this->cred_path      = $_SERVER['DOCUMENT_ROOT'] . $this->config['installdir'] . 'config/google_client_secret.json';
-		$this->token_path     = $this->config['datadir'] . $this->username . "/token/google_access_token.json";
-		$this->credentials    = $this->read_credentials();
-		$this->token          = $this->read_token();
-		$this->counter        = 0;
+		$this->cred_path   = $_SERVER['DOCUMENT_ROOT'] . $this->config['installdir'] . 'config/google_client_secret.json';
+		$this->token_path  = $this->config['datadir'] . $this->username . "/token/google_access_token.json";
+		$this->credentials = $this->read_credentials();
+		$this->token       = $this->read_token();
+		$this->counter     = 0;
 	}
 
 	public function enabled() {
@@ -31,11 +32,7 @@ class Google_Api {
 	}
 
 	public function disable() {
-		if (!file_exists($this->token_path) || unlink($this->token_path)) {
-			return true;
-		}
-
-		return false;
+		return (!file_exists($this->token_path) || unlink($this->token_path));
 	}
 
 	private function read_credentials() {
@@ -48,7 +45,7 @@ class Google_Api {
 			}
 		}
 
-		throw new Exception('Could not read credentials', '500');
+		return null;
 	}
 
 	private function read_token() {
@@ -65,6 +62,10 @@ class Google_Api {
 	}
 
 	public function set_token($code) {
+		if (!$this->credentials) {
+			throw new Exception('Could not read credentials', '500');
+		}
+
 		$header = array('Content-Type: application/x-www-form-urlencoded');
 
 		$params = array(
@@ -87,6 +88,10 @@ class Google_Api {
 	}
 
 	public function refresh_token() {
+		if (!$this->credentials) {
+			throw new Exception('Could not read credentials', '500');
+		}
+
 		if (!$this->token) {
 			return false;
 		}
@@ -176,6 +181,10 @@ class Google_Api {
 	}
 
 	public function create_auth_url() {
+		if (!$this->credentials) {
+			throw new Exception('Could not read credentials', '500');
+		}
+
 		return $this->credentials['auth_uri']
 				. "?response_type=code"
 				. "&redirect_uri=" . urlencode($this->credentials['redirect_uris'][0])
@@ -238,7 +247,7 @@ class Google_Api {
 			"Content-Type: application/json; charset=UTF-8"
 		);
 
-		$response = $this->execute_request("https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable", $header, json_encode($params));
+		$response = $this->execute_request(self::$API_UPLOAD_URL, $header, json_encode($params));
 
 		// Access token expired, let's get a new one and try again
 		if ($response['code'] == "401" && $this->counter < 1 && $this->refresh_token()) {
@@ -249,10 +258,7 @@ class Google_Api {
 		$this->counter = 0;
 
 		// Error checking
-		if ($response['code'] != "200") {
-			return false;
-		}
-		if (!isset($response['headers']['location'])) {
+		if ($response['code'] != "200" || !isset($response['headers']['location'])) {
 			return false;
 		}
 
@@ -284,16 +290,17 @@ class Google_Api {
 			throw new Exception('Missing or illegal token', '500');
 		}
 
-		$location				= $this->create_file($path, $filename, $parent_id, $description);
-		$file_size				= filesize($path) ;
-		$mime_type				= mime_content_type($path);
-		$final_output			= null;
-		$last_range				= false;
-		$transaction_counter	= 0;
-		$average_upload_speed	= 0;
-		$do_exponential_backoff	= false;
-		$backoff_counter		= 0;
-		$chunk_size				= 256 * 1024 * 400 ; // this will upload files 100MB at a time
+		$location               = $this->create_file($path, $filename, $parent_id, $description);
+		$file_size              = filesize($path) ;
+		$mime_type              = mime_content_type($path);
+		$final_output           = null;
+		$last_range             = false;
+		$transaction_counter    = 0;
+		$average_upload_speed   = 0;
+		$do_exponential_backoff = false;
+		$backoff_counter        = 0;
+		$max_backoffs           = 5;
+		$chunk_size             = 256 * 1024 * 400 ; // this will upload files 100MB at a time
 
 		while (true) {
 			$transaction_counter++ ;
@@ -305,7 +312,7 @@ class Google_Api {
 				usleep(rand(0, 1000));
 				$backoff_counter++;
 
-				if ($backoff_counter > 5) {
+				if ($backoff_counter > $max_backoffs) {
 					return false;
 				}
 			}

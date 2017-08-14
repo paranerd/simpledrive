@@ -644,7 +644,8 @@ var FileView = new function() {
 
 			if (thumbnail && thumbnail.style.backgroundImage == '' && visible && (item.type == 'image' || item.type == 'pdf')) {
 				var img = new Image();
-				img.src = encodeURI("api/files/get?target=" + JSON.stringify([item.id]) + "&width=" + $(".thumbnail").width() + "&height=" + $(".thumbnail").height() + "&thumbnail=1&token=" + Util.getToken());
+				var size = ($(".thumbnail").width() < 50) ? 50 : $(".thumbnail").width();
+				img.src = encodeURI("api/files/get?target=" + JSON.stringify([item.id]) + "&width=" + size + "&height=" + size + "&thumbnail=1&token=" + Util.getToken());
 				img.onload = function() {
 					if (requestID == FileModel.requestID) {
 						$(thumbnail).removeClass("icon-" + item.type);
@@ -1485,7 +1486,7 @@ var FileModel = new function() {
 
 	this.decrypt = function(secret) {
 		if (!secret) {
-			Util.showFormError('encrypt', "Password cannot be empty!");
+			Util.showFormError('decrypt', "Password cannot be empty!");
 			return;
 		}
 

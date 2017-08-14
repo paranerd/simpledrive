@@ -81,7 +81,6 @@ class Core_Model {
 			if (file_exists(CONFIG)) {
 				unlink(CONFIG);
 			}
-			Util::log($e->getTrace());
 			throw new Exception($e->getMessage(), $e->getCode());
 		}
 

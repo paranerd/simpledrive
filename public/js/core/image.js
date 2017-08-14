@@ -89,10 +89,10 @@ var ImageManager = new function() {
 
 		var url = encodeURI('api/files/get?target=' + JSON.stringify([elem.id]) + '&width=' + window.innerWidth + '&height=' + window.innerHeight + '&token=' + Util.getToken());
 		self.setThumbnailAsBackground(elem.filename, id);
-		self.display(elem.filename, id, url);
+		self.display(elem.filename, id, url, false);
 	}
 
-	this.display = function(filename, id, url) {
+	this.display = function(filename, id, url, isThumb) {
 		var bId = Util.startBusy();
 		$("#img-viewer").removeClass("hidden");
 		var img = new Image();
@@ -105,7 +105,7 @@ var ImageManager = new function() {
 					return;
 				}
 				$("#img-viewer").children('img').remove();
-				var dim = self.scale(img);
+				var dim = self.scale(img, isThumb);
 
 				img.style.position = "absolute";
 				img.style.height = dim.height + "px";
@@ -136,15 +136,17 @@ var ImageManager = new function() {
 		img.src = url;
 	}
 
-	this.scale = function(img) {
+	this.scale = function(img, isThumb) {
 		var imgHeight = img.naturalHeight || img.height;
 		var imgWidth = img.naturalWidth || img.width;
 
-		var scaleTo = (imgHeight > window.innerHeight || imgWidth > window.innerWidth) ? Math.min(window.innerHeight / imgHeight, window.innerWidth / imgWidth) : 1;
-		var coverArea = 0.9;
+		var scaleTo;
 
-		var targetWidth = (imgWidth * scaleTo) * coverArea;
-		var targetHeight = (imgHeight * scaleTo) * coverArea;
+		var scaleTo = (imgHeight > window.innerHeight || imgWidth > window.innerWidth || isThumb) ? Math.min(window.innerHeight / imgHeight, window.innerWidth / imgWidth) : 1;
+		var coverage = 0.9;
+
+		var targetWidth = (imgWidth * scaleTo) * coverage;
+		var targetHeight = (imgHeight * scaleTo) * coverage;
 
 		return {width: targetWidth, height: targetHeight};
 	}
@@ -154,7 +156,7 @@ var ImageManager = new function() {
 		var url = bg.substr(bg.indexOf("api/"));
 		url = url.substr(0, url.length -2);
 		if (url) {
-			self.display(filename, id, url);
+			self.display(filename, id, url, true);
 		}
 	}
 

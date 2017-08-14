@@ -65,6 +65,10 @@ class Twofactor_Model {
 		throw new Exception('Error disabling Two-Factor-Authentication', '500');
 	}
 
+	public function update($client_old, $client_new) {
+		return $this->db->two_factor_update($this->uid, $client_old, $client_new);
+	}
+
 	/**
 	 * Check if Two-Factor-Authentication is required
 	 * and if the code passed can unlock

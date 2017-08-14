@@ -200,7 +200,8 @@ h2 {
 }
 
 #busy {
-	border: 4px solid rgba(200, 200, 200, .25);
+	color: white;
+	background: rgba(46,139,94,0.5);
 }
 
 #busy .busy-indicator {
@@ -360,10 +361,6 @@ body.light a {
 .light hr {
 	background-color: #bbb;
 	background: #666;
-}
-
-.light #busy {
-	background-color: rgba(255,255,255,0.2);
 }
 
 /* Light - Header */
@@ -556,10 +553,6 @@ body.light a {
 
 .dark #info {
 	color: #eee;
-}
-
-.dark #busy {
-	background-color: rgba(0,0,0,0.2);
 }
 
 .dark .settings-info {

@@ -221,20 +221,20 @@ class Database {
 
 		$link->query(
 			'CREATE TABLE IF NOT EXISTS sd_two_factor_clients (
-				id int(11),
+				id int(11) AUTO_INCREMENT,
 				PRIMARY KEY (id),
 				uid int(11),
 				FOREIGN KEY (uid)
 				REFERENCES sd_users (id)
 				ON DELETE CASCADE,
-				client_token varchar(160),
+				client varchar(160),
 				fingerprint varchar(64)
 			)'
 		);
 
 		$link->query(
 			'CREATE TABLE IF NOT EXISTS sd_two_factor_codes (
-				id int(11),
+				id int(11) AUTO_INCREMENT,
 				PRIMARY KEY (id),
 				uid int(11),
 				FOREIGN KEY (uid)
@@ -708,26 +708,26 @@ class Database {
 		return ($stmt->affected_rows != 0);
 	}
 
-	public function two_factor_register($uid, $client_token) {
+	public function two_factor_register($uid, $client) {
 		$stmt = $this->link->prepare(
-			'INSERT INTO sd_two_factor_clients (uid, client_token, fingerprint)
+			'INSERT INTO sd_two_factor_clients (uid, client, fingerprint)
 			VALUES (?, ?, ?)'
 		);
-		$stmt->bind_param('iss', $uid, $client_token, $this->fingerprint);
+		$stmt->bind_param('iss', $uid, $client, $this->fingerprint);
 		$stmt->execute();
 
 		return ($stmt->affected_rows == 1);
 	}
 
-	public function two_factor_unregister($uid, $client_token) {
+	public function two_factor_unregister($uid, $client) {
 		$stmt = $this->link->prepare(
 			'DELETE
 			FROM sd_two_factor_clients
 			WHERE uid = ?
-			AND client_token = ?
+			AND client = ?
 			AND fingerprint = ?'
 		);
-		$stmt->bind_param('iss', $uid, $client_token, $this->fingerprint);
+		$stmt->bind_param('iss', $uid, $client, $this->fingerprint);
 		$stmt->execute();
 
 		return ($stmt->affected_rows == 1);
@@ -745,14 +745,14 @@ class Database {
 		return ($stmt->affected_rows > 0);
 	}
 
-	public function two_factor_is_registered($uid, $client_token) {
+	public function two_factor_is_registered($uid, $client) {
 		$stmt = $this->link->prepare(
 			'SELECT COUNT(uid)
 			FROM sd_two_factor_clients
 			WHERE uid = ?
-			AND client_token = ?'
+			AND client = ?'
 		);
-		$stmt->bind_param('is', $uid, $client_token);
+		$stmt->bind_param('is', $uid, $client);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($count);
@@ -847,10 +847,8 @@ class Database {
 	}
 
 	public function two_factor_get_clients($uid) {
-		//return array("d_RsLAMOiJE:APA91bFq57SDloEbeR9QdHrjY6AT3dbGc5Cm5MEpUXMF5eFveBddNCjSus74x3v9uOEDMJ7vhcn73IUYYMczGU057D3QjYOCX7h8ASxd-hmXbRfAceAOVDAfa-OQf2tV8AQtEDNuhc_I");
-
 		$stmt = $this->link->prepare(
-			'SELECT client_token
+			'SELECT client
 			FROM sd_two_factor_clients
 			WHERE uid = ?'
 		);
@@ -861,10 +859,25 @@ class Database {
 
 		$clients = array();
 		while ($stmt->fetch()) {
-			array_push($clients, $client);
+			if ($client) {
+				array_push($clients, $client);
+			}
 		}
 
 		return $clients;
+	}
+
+	public function two_factor_update($uid, $client_old, $client_new) {
+		$stmt = $this->link->prepare(
+			'UPDATE sd_two_factor_clients
+			SET client = ?
+			WHERE uid = ?
+			AND client = ?'
+		);
+		$stmt->bind_param('sis', $client_new, $uid, $client_old);
+		$stmt->execute();
+		$stmt->fetch();
+		return ($stmt->affected_rows > 0);
 	}
 
 	/**

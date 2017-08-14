@@ -16,6 +16,7 @@ class Twofactor_Controller {
 		'register'   => array('client'),
 		'registered' => array('client'),
 		'unregister' => array('client'),
+		'update'     => array('client_old', 'client_new')
 	);
 
 	public function __construct($token) {
@@ -40,5 +41,9 @@ class Twofactor_Controller {
 
 	public function disable() {
 		return $this->model->disable();
+	}
+
+	public function update() {
+		return $this->model->update($_REQUEST['client_old'], $_REQUEST['client_new']);
 	}
 }

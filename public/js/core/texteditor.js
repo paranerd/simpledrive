@@ -74,6 +74,7 @@ var EditorModel = new function() {
 	this.filename = "";
 	this.saveLoop = null;
 	this.changed = false;
+	this.tabSize = 4;
 
 	this.init = function(id) {
 		self.id = id;
@@ -83,11 +84,16 @@ var EditorModel = new function() {
 	this.insertTab = function() {
 		var pos = $("#texteditor").prop('selectionStart');
 		var v = $("#texteditor").val();
+		var lastLineBreak = v.substring(0, pos).lastIndexOf("\n") + 1;
+		var charCount = v.substring(lastLineBreak, pos).length;
+		var tabWidth = (Math.ceil(charCount / self.tabSize) * self.tabSize) - charCount;
+		tabWidth = (tabWidth == 0) ? self.tabSize : tabWidth;
+
 		$("#texteditor").focus();
-		$("#texteditor").val(v.substring(0, pos) + '    ' + v.substring(pos, v.length));
+		$("#texteditor").val(v.substring(0, pos) + Array(tabWidth + 1).join(' ') + v.substring(pos, v.length));
 		self.changed = true;
 		$(".title-element-current").text(self.filename + "*");
-		Util.setSelectionRange($("#texteditor"), pos + 4, pos + 4);
+		Util.setSelectionRange($("#texteditor"), pos + tabWidth, pos + tabWidth);
 	}
 
 	this.autosave = function() {
