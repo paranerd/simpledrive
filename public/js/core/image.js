@@ -58,20 +58,6 @@ var ImageManager = new function() {
 		});
 	}
 
-	this.next = function(slideshow) {
-		if (!self.active || (slideshow && !self.slideshowStarted)) {
-			return;
-		}
-
-		var files = FileModel.list.getAllFiltered();
-		for (var i = parseInt(self.active) + 1; i < parseInt(self.active) + files.length + 1; i++) {
-			if (files[i % files.length].type == 'image') {
-				self.open(i % files.length);
-				return (i % files.length);
-			}
-		}
-	}
-
 	this.open = function(id) {
 		self.active = id;
 
@@ -152,16 +138,15 @@ var ImageManager = new function() {
 	}
 
 	this.setThumbnailAsBackground = function(filename, id) {
-		var bg = $("#item" + id + " .thumbnail").css('background-image');
-		var url = bg.substr(bg.indexOf("api/"));
-		url = url.substr(0, url.length -2);
-		if (url) {
-			self.display(filename, id, url, true);
+		// Extract background-url between (including) 'api/ and (excluding) '"'
+		var url = $("#item" + id + " .thumbnail").css('background-image').match(/api\/(.*?)(?=\")/);
+		if (url[0]) {
+			self.display(filename, id, url[0], true);
 		}
 	}
 
 	this.prev = function() {
-		if (!self.active) {
+		if (self.active == null) {
 			return;
 		}
 
@@ -175,8 +160,23 @@ var ImageManager = new function() {
 		}
 	}
 
+	this.next = function(slideshow) {
+		if (self.active == null || (slideshow && !self.slideshowStarted)) {
+			return;
+		}
+
+		var files = FileModel.list.getAllFiltered();
+		for (var i = parseInt(self.active) + 1; i < parseInt(self.active) + files.length; i++) {
+			var index = (i % files.length + files.length) % files.length;
+			if (files[index].type == 'image') {
+				self.open(index);
+				return (index);
+			}
+		}
+	}
+
 	this.remove = function() {
-		if (!self.active) {
+		if (self.active == null) {
 			return;
 		}
 
@@ -189,7 +189,7 @@ var ImageManager = new function() {
 	}
 
 	this.slideshow = function(forceClose) {
-		if (!self.active) {
+		if (self.active == null) {
 			return;
 		}
 

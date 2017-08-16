@@ -644,7 +644,7 @@ var FileView = new function() {
 
 			if (thumbnail && thumbnail.style.backgroundImage == '' && visible && (item.type == 'image' || item.type == 'pdf')) {
 				var img = new Image();
-				var size = ($(".thumbnail").width() < 50) ? 50 : $(".thumbnail").width();
+				var size = ($(".thumbnail").width() < 70) ? 70 : $(".thumbnail").width();
 				img.src = encodeURI("api/files/get?target=" + JSON.stringify([item.id]) + "&width=" + size + "&height=" + size + "&thumbnail=1&token=" + Util.getToken());
 				img.onload = function() {
 					if (requestID == FileModel.requestID) {

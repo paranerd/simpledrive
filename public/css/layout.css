@@ -107,6 +107,25 @@ hr {
 	margin: 0;
 }
 
+.close:not(.btn-overlay) {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	height: 30px;
+	width: 30px;
+	line-height: 30px;
+	text-align: center;
+	font-family: sans-serif;
+	font-size: 1.5rem;
+	cursor: pointer;
+}
+
+.overlay .close {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+}
+
 .btn {
 	position: relative;
 	margin: 0;
@@ -150,7 +169,7 @@ hr {
 	width: 50px;
 	border: none;
 	border-radius: 25px;
-	font-size: 28px;
+	font-size: 1rem;
 	line-height: 50px;
 	text-align: center;
 	cursor: pointer;
@@ -241,8 +260,8 @@ hr {
 .overlay-action {
 	position: relative;
 	top: 20px;
-	left: 20px;
-	float: left;
+	right: 20px;
+	float: right;
 }
 
 .overlay-nav {
@@ -294,25 +313,6 @@ div.hidden:not(.popup):not(.popup-menu) {
 
 .error-large {
 	font-size: 1.3rem;
-}
-
-.close {
-	position: absolute;
-	top: 5px;
-	right: 5px;
-	height: 30px;
-	width: 30px;
-	line-height: 30px;
-	text-align: center;
-	font-family: sans-serif;
-	font-size: 1.5rem;
-	cursor: pointer;
-}
-
-.close-large {
-	top: 20px;
-	right: 30px;
-	font-size: 3rem;
 }
 
 .popup:not(#notification) .close {

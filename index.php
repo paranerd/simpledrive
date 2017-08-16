@@ -67,9 +67,7 @@ else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/'
 				exit (Response::error('400', 'Missing argument: ' . $missing, $render));
 			}
 
-			$res = $c->$action();
-			// Don't exit any msg on 'get' because it gets appended to the data
-			exit (($controller == 'files' && $action == 'get') ? '' : Response::success($res));
+			exit (Response::success($c->$action()));
 		}
 	} catch (Exception $e) {
 		exit (Response::error($e->getCode(), $e->getMessage(), $render));

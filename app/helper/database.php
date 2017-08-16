@@ -1620,8 +1620,12 @@ class Database {
 		return ($stmt->affected_rows == 1) ? $path : null;
 	}
 
-	/*
-	 * Path must start and not end with "/"
+	/**
+	 * Returns the FileID from cache
+	 *
+	 * @param int uid
+	 * @param string path (must start and not end with "/")
+	 * @return string|null FileID
 	 */
 
 	public function cache_id_for_path($uid, $path) {

@@ -45,11 +45,11 @@ class File_Model {
 	}
 
 	/**
-	 * Returns type of path, e.g. "folder", "audio", "pdf"
+	 * Return type of path, e.g. "folder", "audio", "pdf"
+	 *
 	 * @param string $path
 	 * @return string
 	 */
-
 	public static function type($path) {
 		if (extension_loaded('fileinfo')) {
 			$finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -91,19 +91,19 @@ class File_Model {
 
 	/**
 	 * Returns filesize for files, filecount for directories
+	 *
 	 * @param string $path
 	 * @return string
 	 */
-
 	public static function info($path) {
 		return (is_dir($path)) ? (count(scandir($path)) - 2) : filesize($path);
 	}
 
 	/**
 	 * Removes all image-thumbnails (recursively if $file is a directory)
+	 *
 	 * @param array file
 	 */
-
 	private function remove_thumbnail($file) {
 		$cache_dir = $this->get_cache_dir($file);
 
@@ -123,13 +123,21 @@ class File_Model {
 		}
 	}
 
+	private function remove_from_cache($file) {
+		$cache_dir = $this->get_cache_dir($file);
+
+		if (file_exists($cache_dir . $file['id'])) {
+			unlink($cache_dir . $file['id']);
+		}
+	}
+
 	/**
 	 * Recursively deletes directory
+	 *
 	 * @param integer ownerid
 	 * @param string id
 	 * @param string path
 	 */
-
 	public function recursive_remove($ownerid, $id, $path) {
 		$files = scandir($path);
 
@@ -165,13 +173,13 @@ class File_Model {
 
 	/**
 	 * Creates a thumbnail from a pdf or scales an image so that its biggest size is smaller/equal to the biggest size of the target-dimensions while keeping the ratio
+	 *
 	 * @param array file
 	 * @param integer Width of the container
 	 * @param integer Height of the container
 	 * @param boolean Used to differentiate where to store the scaled image
 	 * @return string Path of the scaled image
 	 */
-
 	private function scale_image($file, $target_width, $target_height, $thumb) {
 		$src = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
 		$dest_dir = $this->get_cache_dir($file);
@@ -239,6 +247,7 @@ class File_Model {
 				$img = ImageCreateFromGIF($src);
 				imageCopyResampled($scaled, $img, 0, 0, 0, 0, $scaled_width, $scaled_height, $src_width, $src_height);
 				ImageGIF($scaled, $destination);
+
 				return $destination;
 			}
 			// JPEG
@@ -246,6 +255,10 @@ class File_Model {
 				$img = ImageCreateFromJPEG($src);
 				imageCopyResampled($scaled, $img, 0, 0, 0, 0, $scaled_width, $scaled_height, $src_width, $src_height);
 				ImageJPEG($scaled, $destination);
+
+				/*$img2 = ImageCreateFromJPEG($destination);
+				$rotate = imagerotate($img2, 90, 0);
+				ImageJPEG($rotate);*/
 
 				return $destination;
 			}
@@ -267,12 +280,12 @@ class File_Model {
 	}
 
 	/**
-	 * Recursively adds a directory to a zip-archive
+	 * Recursively add a directory to a zip-archive
+	 *
 	 * @param string dir directory-path to add
 	 * @param ZipArchive $zipArchive
 	 * @param string zipdir
 	 */
-
 	private function addFolderToZip($dir, $zipArchive, $zipdir) {
 		if (is_dir($dir)) {
 			if ($dh = opendir($dir)) {
@@ -363,13 +376,13 @@ class File_Model {
 	}
 
 	/**
-	 * Creates file/folder, if no filename is specified it iterates over "Unknown file", "Unknown file (1)", etc.
+	 * Create file/folder, if no filename is specified it iterates over "Unknown file", "Unknown file (1)", etc.
+	 *
 	 * @param string target ID of the directory the element is created in
 	 * @param string type "folder" or "file"
 	 * @param string orig_filename name of new element (optional)
 	 * @return string|null only return status info if something went wrong
 	 */
-
 	public function create($target, $type, $orig_filename = "") {
 		if (!$this->filename_valid($orig_filename)) {
 			throw new Exception('Filename not allowed', '400');
@@ -408,14 +421,14 @@ class File_Model {
 	}
 
 	/**
-	 * Renames a file/folder
+	 * Rename a file/folder
+	 *
 	 * @param integer File-ID
 	 * @param string newname new filename
 	 * @return string|null only return status info if something went wrong
 	 */
-
 	public function rename($id, $newname) {
-		if (!!$this->filename_valid($newname)) {
+		if (!$this->filename_valid($newname)) {
 			throw new Exception('Filename not allowed', '400');
 		}
 
@@ -448,10 +461,10 @@ class File_Model {
 
 	/**
 	 * Delete file or move it to trash
+	 *
 	 * @param array sources File-ID(s) to delete
 	 * @return string|null only return status if something went wrong
 	 */
-
 	public function delete($sources) {
 		$errors = 0;
 
@@ -502,7 +515,8 @@ class File_Model {
 	}
 
 	/**
-	 * Shares a file
+	 * Share a file
+	 *
 	 * @param string target File-ID to be shared
 	 * @param string userto user the file is shared with
 	 * @param string mail mail address to notify somebody about file sharing
@@ -510,7 +524,6 @@ class File_Model {
 	 * @param integer public 1 for public access, 0 otherwise
 	 * @param string pass access password
 	 */
-
 	public function share($target, $userto, $mail, $write, $public, $pass) {
 		$file = $this->get_cached($target, PERMISSION_WRITE);
 		$access = ($write) ? PERMISSION_WRITE : PERMISSION_READ;
@@ -552,7 +565,8 @@ class File_Model {
 	}
 
 	/**
-	 * Remove a share
+	 * Remove share-entry from DB
+	 *
 	 * @param string id
 	 */
 
@@ -571,7 +585,8 @@ class File_Model {
 	}
 
 	/**
-	 * Returns the share-link if the file was shared to public
+	 * Return the share-link if the file was shared to public
+	 *
 	 * @param string id
 	 * @return string
 	 */
@@ -593,7 +608,8 @@ class File_Model {
 	}
 
 	/**
-	 * Copies file(s) to specified directory
+	 * Copie file(s) to specified directory
+	 *
 	 * @param integer target ID of target-directory
 	 * @param array sources File-ID(s) to copy
 	 * @return string|null only return status info if something went wrong
@@ -638,7 +654,8 @@ class File_Model {
 	}
 
 	/**
-	 * Zips file(s)
+	 * Zip file(s)
+	 *
 	 * @param integer target Directory-id to save zip-file in
 	 * @param array sources List of files to zip
 	 * @param boolean for_download If file is supposed to be downloaded
@@ -778,12 +795,12 @@ class File_Model {
 	}
 
 	/**
-	 * Moves file(s) to specified target
+	 * Move file(s) to specified target
+	 *
 	 * @param integer target target-folder-id
 	 * @param array sources file-id(s) to move
 	 * @return string|null only return status info if something went wrong
 	 */
-
 	public function move($target, $sources) {
 		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
 
@@ -830,10 +847,10 @@ class File_Model {
 	}
 
 	/**
-	 * Uploads files in the $_FILES-array to the specified directory
+	 * Upload files in the $_FILES-array to the specified directory
+	 *
 	 * @param integer id of target-directory to upload to
 	 */
-
 	public function upload($target) {
 		if (isset($_FILES[0])) {
 			$max_upload = Util::convert_size(ini_get('upload_max_filesize'));
@@ -880,15 +897,12 @@ class File_Model {
 			}
 
 			$rel_path .= ($_POST['paths']) ? "/" . $_FILES[0]['name'] : $_FILES[0]['name'];
-			$exists = file_exists($userdir . $rel_path);
+			$fid = $this->db->cache_id_for_path($parent['ownerid'], $rel_path);
 
 			// Actually write the file
 			if (move_uploaded_file($_FILES[0]['tmp_name'], $userdir . $rel_path)) {
-				if ($exists) {
-					$id = $this->db->cache_id_for_path($parent['ownerid'], $rel_path);
-					$existing = $this->get_cached($id, PERMISSION_WRITE);
-					$this->remove_thumbnail($existing);
-					$this->db->cache_update($id, self::type($userdir . $rel_path), self::info($userdir . $rel_path), filemtime($userdir . $rel_path), md5_file($userdir . $rel_path), $parent['owner'], $rel_path);
+				if ($fid) {
+					$this->update($fid);
 				}
 				else {
 					$this->add($userdir . $rel_path, $rel_path, $parent['id'], $parent['ownerid']);
@@ -904,13 +918,30 @@ class File_Model {
 		throw new Exception('No files to upload', '500');
 	}
 
+	private function update($fid) {
+		$file = $this->get_cached($fid, PERMISSION_WRITE);
+
+		if (!$file) {
+			return false;
+		}
+
+		$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
+		$md5 = (is_dir($path)) ? "0" : md5_file($path);
+		$this->db->cache_update($fid, self::type($path), self::info($path), filemtime($path), $md5, $file['owner'], $file['path']);
+
+		if ($md5 != $file['md5']) {
+			$this->remove_thumbnail($file);
+			$this->remove_from_cache($file);
+		}
+	}
+
 	/**
 	 * Get file-info for public share-id, check for access permissions and return if granted
+	 *
 	 * @param string id public share-id
 	 * @param string pass password
 	 * @return array share-info
 	 */
-
 	public function get_public($id, $pass) {
 		$share = $this->db->share_get($id);
 
@@ -1001,16 +1032,15 @@ class File_Model {
 
 	/**
 	 * Returns file to client (in 200kB chunks, so images can build up progressively)
+	 *
 	 * @param array targets file-id(s) to return
 	 * @param integer width screen width for scaling to save bandwidth
 	 * @param integer height screen height for scaling to save bandwidth
 	 * @return file
 	 */
-
 	public function get($targets, $width = null, $height = null, $thumb) {
 		$path = null;
 		$delete_flag = false;
-		$download_rate = 1024; // Send file in 1-MB-chunks
 
 		// Check each file for access permission
 		foreach ($targets as $target) {
@@ -1035,27 +1065,10 @@ class File_Model {
 		}
 
 		if (file_exists($destination) && is_file($destination)) {
-			header('Cache-control: private, max-age=86400, no-transform');
-			$finfo = finfo_open(FILEINFO_MIME_TYPE);
-			header("Content-Type: " . finfo_file($finfo, $destination));
-			//header('Content-Type: application/octet-stream');
-			header('Content-Length: '.filesize($destination));
-			header("Content-Disposition: attachment; filename=" . urlencode(basename($destination)));
-
-			finfo_close($finfo);
-			flush();
-			$f = fopen($destination, "r");
-			while (!feof($f)) {
-				// send the current file part to the browser
-				print fread($f, round($download_rate * 1024));
-				// flush the content to the browser
-				flush();
+			if (!Response::set_cache_header(filemtime($destination))) {
+				Response::set_download($destination, $delete_flag);
 			}
-			fclose($f);
 
-			if ($delete_flag) {
-				unlink($destination);
-			}
 			return null;
 		}
 
@@ -1111,7 +1124,7 @@ class File_Model {
 
 		$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
 		if (file_put_contents($path, $data) !== false) {
-			$this->db->cache_update($file['id'], self::type($path), self::info($path), filemtime($path), md5_file($path), $file['owner'], $file['path']);
+			$this->update($file['id']);
 			return null;
 		}
 
@@ -1120,11 +1133,11 @@ class File_Model {
 
 	/**
 	 * Get file-info from DB and check if user has permission to access and return if so
+	 *
 	 * @param integer id file-ID
 	 * @param integer access required access-rights
 	 * @return array file
 	 */
-
 	public function get_cached($id, $access) {
 		if (!$access) {
 			return;
@@ -1140,12 +1153,18 @@ class File_Model {
 
 	/**
 	 * Get file-info from DB and check if user has permission to access and return if so
+	 * Note: When update && !include_childs,
+	 * all child elements will be removed from an updated directory
+	 *
 	 * @param id folder-ID
 	 * @param update whether or not to update file-info
 	 * @param include_childs wether or not to go recursive
 	 */
-
 	public function scan($id, $update = false, $include_childs = false) {
+		// REMOVE ME
+		$update = true;
+		$include_childs = true;
+		// REMOVE ME
 		$scan_lock = ($this->username) ? $this->config['datadir'] . $this->username . LOCK . "scan" : null;
 		set_time_limit(0);
 
@@ -1190,8 +1209,7 @@ class File_Model {
 				$size++;
 				if ($child_id = $this->db->cache_has_child($owner, $id, $file)) {
 					if ($update) {
-						$md5 = (is_dir($path . $file)) ? "0" : md5_file($path . $file);
-						$this->db->cache_update($child_id, self::type($path . $file), self::info($path . $file), filemtime($path . $file), $md5, $owner, $rel_path . $file);
+						$this->update($child_id);
 					}
 					else {
 						array_push($ids, $child_id);

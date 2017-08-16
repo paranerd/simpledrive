@@ -69,16 +69,14 @@ h2 {
 	background-color: black;
 }
 
-.overlay-action,
-.overlay-nav {
+.btn-overlay {
 	color: grey;
 	background-color: rgba(0,0,0,0);
 	border: none;
 }
 
-.overlay-action:hover,
-.overlay-nav:hover {
-	color: #2e8b5e;
+.btn-overlay:hover {
+	color: white;
 	background-color: rgba(255,255,255,0.2);
 }
 
@@ -354,7 +352,7 @@ body.light a {
 	box-shadow: 0px 0px 15px 3px rgba(0,0,0,0.2) !important;
 }
 
-.light .close:hover {
+.light .close:not(.overlay .close):hover {
 	color: black !important;
 }
 
@@ -543,7 +541,7 @@ body.light a {
 	font-family: robotoregular, Arial;
 }
 
-.dark .close:hover {
+.dark .close:not(.overlay .close):hover {
 	color: #ccc;
 }
 
