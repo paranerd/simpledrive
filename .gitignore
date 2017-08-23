@@ -43,9 +43,7 @@ Temporary Items
 .apdisk
 
 /config/config.json
-/config/googledrive/access-token*
 /docs/
 /plugins/
 /logs/error.log
 /logs/status.log
-release_test.php

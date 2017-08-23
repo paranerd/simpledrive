@@ -22,6 +22,10 @@ define('PERMISSION_NONE', 0);
 define('PERMISSION_READ', 1);
 define('PERMISSION_WRITE', 2);
 define('PUBLIC_USER_ID', 1);
+define('TOKEN_EXPIRATION', 60 * 60 * 24 * 7); // 1 week
+define('TFA_EXPIRATION', 30);
+define('TFA_MAX_ATTEMPTS', 3);
+define('LOGIN_MAX_ATTEMPTS', 3);
 define('CONFIG', 'config/config.json');
 define('VERSION', 'config/version.json');
 
@@ -31,7 +35,7 @@ require_once 'app/helper/util.php';
 require_once 'app/helper/crypto.php';
 require_once 'app/helper/response.php';
 
-// To differentiate between api- and render-calls
+// Differentiate between api- and render-calls
 // Extract controller and action
 $render       = (!isset($_REQUEST['api']) && !(isset($_REQUEST['request']) && $_REQUEST['request'] == 'api'));
 $token_source = ($render) ? $_COOKIE : $_REQUEST;
@@ -41,15 +45,16 @@ $controller   = (sizeof($args) > 0) ? array_shift($args) : 'files';
 $action       = (sizeof($args) > 0) ? array_shift($args) : '';
 $name         = ucfirst($controller) . "_Controller";
 
-// Not installed - enter setup
+// Not installed - redirect to setup
 if (!file_exists(CONFIG) && ($controller != 'core' || $action != 'setup')) {
 	exit (Response::redirect('core/setup'));
 }
+// No action specified - redirect to files
 else if (!$request && $render) {
 	exit (Response::redirect('files'));
 }
+// Check if controller exists
 else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/' . $controller . '.php')) {
-
 	try {
 		require_once 'app/controller/' . $controller . '.php';
 		// Extract token

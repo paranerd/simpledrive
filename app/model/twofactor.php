@@ -10,20 +10,35 @@
 class Twofactor_Model {
 	static $FIREBASE_API_KEY = "AAAAQpBzHQY:APA91bGBXIzXD5-Ycc78zWDLhUB589ky-Ck-R45maLyfjOvZAfScaUb6qSDZJy9fAL--YWIryu0X4u07YtINUk9vU9GBZRXalon8xENm35TVSWpMSuPHgrVqSpWE-Onwi1JtHR1x37rG";
 
+	/**
+	 * Constructor
+	 * @param string $token
+	 */
 	public function __construct($token) {
 		$this->db   = Database::getInstance();
 		$this->user = ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid  = ($this->user) ? $this->user['id'] : null;
 	}
 
+	/**
+	 * Check if TFA is enabled for current user
+	 * @throws Exception
+	 * @return boolean
+	 */
 	public function enabled() {
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
 		}
 
-		return $this->db->two_factor_is_enabled($this->uid);
+		return (count($this->db->two_factor_get_clients($this->uid)) > 0);
 	}
 
+	/**
+	 * Register client for TFA
+	 * @param string $client
+	 * @throws Exception
+	 * @return null
+	 */
 	public function register($client) {
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
@@ -32,9 +47,16 @@ class Twofactor_Model {
 		if ($this->db->two_factor_register($this->uid, $client)) {
 			return null;
 		}
+
 		throw new Exception('Error registering for Two-Factor-Authentication', '500');
 	}
 
+	/**
+	 * Check if client is registered for TFA
+	 * @param string $client
+	 * @throws Exception
+	 * @return boolean
+	 */
 	public function registered($client) {
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
@@ -43,6 +65,12 @@ class Twofactor_Model {
 		return $this->db->two_factor_is_registered($this->uid, $client);
 	}
 
+	/**
+	 * Remove registered TFA-client
+	 * @param string $client
+	 * @throws Exception
+	 * @return null
+	 */
 	public function unregister($client) {
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
@@ -51,9 +79,15 @@ class Twofactor_Model {
 		if ($this->db->two_factor_unregister($this->uid, $client)) {
 			return null;
 		}
+
 		throw new Exception('Error unregistering from Two-Factor-Authentication', '500');
 	}
 
+	/**
+	 * Disable TFA
+	 * @throws Exception
+	 * @return null
+	 */
 	public function disable() {
 		if (!$this->uid) {
 			throw new Exception('Permission denied', '403');
@@ -62,45 +96,120 @@ class Twofactor_Model {
 		if ($this->db->two_factor_disable($this->uid)) {
 			return null;
 		}
+
 		throw new Exception('Error disabling Two-Factor-Authentication', '500');
 	}
 
+	/**
+	 * Update client registration token
+	 * @param string $client_old
+	 * @param string $client_new
+	 * @throws Exception
+	 * @return boolean
+	 */
 	public function update($client_old, $client_new) {
-		return $this->db->two_factor_update($this->uid, $client_old, $client_new);
+		if (!$this->uid) {
+			throw new Exception('Permission denied', '403');
+		}
+
+		return $this->db->two_factor_update_client($this->uid, $client_old, $client_new);
 	}
 
 	/**
-	 * Check if Two-Factor-Authentication is required
-	 * and if the code passed can unlock
-	 * @param int uid
-	 * @param int code
-	 * @param boolean remember
+	 * Check if TFA is required - send TFA token if so
+	 * @param int $uid
+	 * @throws Exception
 	 * @return boolean
 	 */
-	public static function unlock($uid, $code, $remember) {
+	public static function required($uid) {
 		if (!$uid) {
 			throw new Exception('Permission denied', '403');
 		}
 
 		$db = Database::getInstance();
 		$required = $db->two_factor_required($uid);
-		$unlock = $db->two_factor_unlock($uid, $code, $remember);
 
-		if ($required && !$unlock) {
-			if (!$code) {
-				$code = $db->two_factor_generate_code($uid);
-				$clients = $db->two_factor_get_clients($uid);
-				self::send($clients, $code);
-				return false;
-			}
-
-			throw new Exception('Wrong access code', '403');
-			return false;
+		if ($required) {
+			self::send_code($uid, Util::client_fingerprint());
 		}
 
-		return true;
+		return $required;
 	}
 
+	/**
+	 * Try to unlock TFA, send code otherwise
+	 * @param int $code
+	 * @param string $fingerprint
+	 * @param boolean $remember
+	 * @throws Exception
+	 * @return null
+	 */
+	public static function unlock($code, $fingerprint, $remember) {
+		$db = Database::getInstance();
+
+		// Get uid for pending code if exists
+		$uid = $db->two_factor_get_user($fingerprint);
+
+		if (!$uid) {
+			throw new Exception('Two-Factor-Authentication failed', '400');
+		}
+
+		// Try Unlock or send code
+		if ($db->two_factor_unlock($uid, $code, $fingerprint, $remember) ||
+			self::send_code($uid, $fingerprint))
+		{
+			return null;
+		}
+
+		throw new Exception('Wrong access code', '403');
+	}
+
+	/**
+	 * Check the db for up to 30s for a TFA-code to be unlocked
+	 * @throws Exception
+	 * @return boolean
+	 */
+	public static function is_unlocked() {
+		$db = Database::getInstance();
+
+		for ($i = 0; $i < TFA_EXPIRATION; $i++) {
+			$unlocked = $db->two_factor_unlocked();
+			if ($unlocked == true) {
+				return true;
+			}
+			else if ($unlocked === null) {
+				// No code to unlock
+				break;
+			}
+			sleep(1);
+		}
+
+		throw new Exception('Two-Factor-Authentication failed', '400');
+	}
+
+	/**
+	 * Generate TFA code to be sent to the client
+	 * @param int $uid
+	 * @return boolean
+	 */
+	private function send_code($uid, $fingerprint) {
+		$db = Database::getInstance();
+
+		if ($code = $db->two_factor_generate_code($uid, $fingerprint)) {
+			$clients = $db->two_factor_get_clients($uid);
+			self::send($clients, $code);
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Send TFA code to registered clients
+	 * @param array $registration_ids
+	 * @param string $message
+	 * @return boolean
+	 */
 	private static function send($registration_ids, $message) {
 		$url = 'https://fcm.googleapis.com/fcm/send';
 
@@ -111,18 +220,19 @@ class Twofactor_Model {
 
 		$data = array(
 			'data' => array(
-				'title'   => "Access code",
-				'message' => $message
+				'title'       => "Access code",
+				'code'        => $message,
+				'fingerprint' => Util::client_fingerprint()
 			)
 		);
 
-		$fields = array(
+		$params = array(
 			'registration_ids' => $registration_ids,
-			'data' => $data,
+			'data'             => $data,
 		);
 
-		$res = Util::execute_web_request($url, $headers, json_encode($fields));
+		$res = Util::execute_http_request($url, $headers, json_encode($params));
 
-		return ($res['status'] == 200);
+		return ($res['code'] == 200);
 	}
 }

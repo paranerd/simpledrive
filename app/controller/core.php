@@ -12,13 +12,13 @@ require_once 'app/model/core.php';
 class Core_Controller {
 	protected $model;
 	protected $default_section = "login";
-	protected $default_view = "login";
-	protected $valid_sections = array('login', 'logout', 'setup');
+	protected $default_view    = "login";
+	protected $valid_sections  = array('login', 'logout', 'setup');
 
 	public $required = array(
-		'login'		=> array('user', 'pass'),
-		'logout'	=> array('token'),
-		'setup'		=> array('user', 'pass', 'dbuser', 'dbpass')
+		'login'  => array('user', 'pass'),
+		'logout' => array('token'),
+		'setup'  => array('user', 'pass', 'dbuser', 'dbpass')
 	);
 
 	public function __construct($token) {
@@ -41,9 +41,8 @@ class Core_Controller {
 	}
 
 	public function login() {
-		$two_factor_code = (isset($_REQUEST['code'])) ? $_REQUEST['code'] : null;
-		$remember = (isset($_REQUEST['remember'])) ? filter_var($_REQUEST['remember'], FILTER_VALIDATE_BOOLEAN) : false;
-		return $this->model->login($_REQUEST['user'], $_REQUEST['pass'], $two_factor_code, $remember);
+		$callback = (isset($_REQUEST['callback'])) ? filter_var($_REQUEST['callback'], FILTER_VALIDATE_BOOLEAN) : false;
+		return $this->model->login($_REQUEST['user'], $_REQUEST['pass'], $callback);
 	}
 
 	public function logout() {

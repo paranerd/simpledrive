@@ -268,20 +268,20 @@
 		<div class="title"><?php echo $lang['share']; ?></div>
 
 		<label><?php echo $lang['username']; ?></label>
-		<input id="share-user" class="input-indent" type="text" placeholder="<?php echo $lang['username']; ?>">
+		<input id="share-user" class="input-indent" type="text" tabindex=1 placeholder="<?php echo $lang['username']; ?>">
 
 		<label for="share-key" class="hidden form-hidden"><?php echo $lang['password']; ?></label>
-		<input id="share-key" type="text" class="hidden form-hidden" placeholder="<?php echo $lang['password']; ?> (optional)" autocomplete="off">
+		<input id="share-key" type="text" class="hidden form-hidden" tabindex=2 placeholder="<?php echo $lang['password']; ?> (optional)" autocomplete="off">
 
 		<label for="share-mail" class="hidden form-hidden">Mail</label>
-		<input id="share-mail" type="text" class="hidden form-hidden" placeholder="Mail (optional)">
+		<input id="share-mail" type="text" class="hidden form-hidden" tabindex=3 placeholder="Mail (optional)">
 
 		<div class="checkbox">
-			<span id="share-write" class="checkbox-box"></span>
+			<span id="share-write" class="checkbox-box" tabindex=4></span>
 			<span class="checkbox-label"><?php echo $lang['write']; ?></span>
 		</div>
 		<div class="checkbox">
-			<span id="share-public" class="checkbox-box toggle-hidden"></span>
+			<span id="share-public" class="checkbox-box toggle-hidden" tabindex=5></span>
 			<span class="checkbox-label"><?php echo $lang['public']; ?></span>
 		</div>
 
@@ -291,7 +291,6 @@
 
 	<!-- Image Viewer -->
 	<div id="img-viewer" class="overlay hidden">
-		<!-- <span id="img-close" class="btn-circle close"><span class="icon icon-arrow-left"></span></span> -->
 		<button id="img-close" class="btn-circle btn-overlay close"><span class="icon icon-arrow-left"></span></button>
 
 		<button id="img-slideshow" class="btn-circle btn-overlay overlay-action"><span class="icon icon-play"></span></button>

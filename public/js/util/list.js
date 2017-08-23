@@ -98,11 +98,13 @@ var List = (function() {
 
 		add: function(data) {
 			this.data.push(data);
+			this.display();
 		},
 
 		update: function(id, data) {
 			if (this.data.length > id) {
 				this.data[id] = data;
+				this.display();
 			}
 		},
 

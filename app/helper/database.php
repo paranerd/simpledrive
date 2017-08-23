@@ -10,6 +10,10 @@
 class Database {
 	private static $instance = null;
 
+	/**
+	 * Establish database connection and set fingerprint
+	 * @throws Exception
+	 */
 	private function __construct() {
 		if (!function_exists('mysqli_connect')) {
 			throw new Exception('MySQLi is not installed', '500');
@@ -28,12 +32,18 @@ class Database {
 			throw new Exception('Could not access config', '500');
 		}
 
-		$this->fingerprint = hash('sha256', $_SERVER['REMOTE_ADDR']); // $_SERVER['HTTP_USER_AGENT']
+		$this->fingerprint = Util::client_fingerprint();
 	}
 
-	// Empty to prevent duplication of connection
+	/**
+	 * Empty to prevent duplication of connection
+	 */
 	private function __clone() {}
 
+	/**
+	 * Return an instance of this class (to prevent multiple open connections)
+	 * @return Database
+	 */
 	public static function getInstance() {
 		if (!isset(self::$instance)) {
 			try {
@@ -49,41 +59,52 @@ class Database {
 
 	/**
 	 * Create database and tables
-	 * @param user admin user
-	 * @param pass admin password
-	 * @param db_server address of the database-server
-	 * @param db_name custom name for the database
-	 * @param db_user database user
-	 * @param db_pass database password
-	 * @return array containing used credentials or error
+	 * @param string $username Admin user
+	 * @param string $pass Admin password
+	 * @param string $db_server Address of the database-server
+	 * @param string $db_name Custom name for the database
+	 * @param string $db_user Database user
+	 * @param string $db_pass Database password
+	 * @throws Exception
+	 * @return array Containing used credentials
 	 */
-
 	public static function setup($username, $pass, $db_server, $db_name, $db_user, $db_pass) {
 		if (!function_exists('mysqli_connect')) {
 			throw new Exception('MySQLi is not installed', '500');
 		}
 
+		// Establish database-link
 		$link = new mysqli($db_server, $db_user, $db_pass);
 
 		if ($link->connect_error) {
 			throw new Exception('Could not connect to database', '500');
 		}
 
-		if (!$db_selected = $link->select_db($db_name)) {
+		// Delete potentially existing database
+		if ($link->select_db($db_name)) {
+			$stmt = $link->prepare(
+				'DROP DATABASE IF EXISTS ' . mysqli_real_escape_string($link, $db_name)
+			);
+			$stmt->execute();
+
+			if ($link->select_db($db_name)) {
+				throw new Exception('Could not remove existing database', '500');
+			}
+		}
+
+		// Create new database
+		if (!$link->select_db($db_name)) {
 			$stmt = $link->prepare(
 				'CREATE DATABASE IF NOT EXISTS ' . mysqli_real_escape_string($link, $db_name)
 			);
 			$stmt->execute();
 
-			if (!$select = $link->select_db($db_name)) {
+			if (!$link->select_db($db_name)) {
 				throw new Exception('Could not create database', '500');
 			}
 		}
 
-		$link->query(
-			'DROP TABLE IF EXISTS sd_unlocked, sd_shares, sd_cache, sd_users, sd_log, sd_session, sd_trash, sd_history'
-		);
-
+		// Create a new database-user
 		$createuser = $link->query(
 			"CREATE USER '$username'@'$db_server'
 			IDENTIFIED BY '$pass'"
@@ -97,6 +118,7 @@ class Database {
 			$db_pass = $pass;
 		}
 
+		// Create tables
 		$link->query(
 			'CREATE TABLE IF NOT EXISTS sd_users (
 				id int(11) AUTO_INCREMENT,
@@ -203,14 +225,6 @@ class Database {
 		);
 
 		$link->query(
-			'CREATE TABLE IF NOT EXISTS sd_thumbnails (
-				id varchar(32),
-				PRIMARY KEY (id),
-				path varchar(200)
-			)'
-		);
-
-		$link->query(
 			'CREATE TABLE IF NOT EXISTS sd_backup (
 				id int(11),
 				PRIMARY KEY (id),
@@ -240,12 +254,14 @@ class Database {
 				FOREIGN KEY (uid)
 				REFERENCES sd_users (id)
 				ON DELETE CASCADE,
-				code int(5),
+				code varchar(5),
 				expires int(11),
-				fingerprint varchar(64)
+				fingerprint varchar(64) UNIQUE,
+				attempts int(11) DEFAULT 0
 			)'
 		);
 
+		// Create public user
 		$link->query(
 			'INSERT INTO sd_users (user)
 			VALUES ("public")'
@@ -256,12 +272,11 @@ class Database {
 
 	/**
 	 * Set backup password and whether or not to encrypt filenames for cloud backup
-	 * @param user
-	 * @param pass
-	 * @param encrypt_filename
-	 * @return boolean true if successful
+	 * @param int $uid
+	 * @param string $pass
+	 * @param boolean $encrypt_filename
+	 * @return boolean
 	 */
-
 	public function backup_enable($uid, $pass, $encrypt_filename) {
 		$stmt = $this->link->prepare(
 			'INSERT INTO sd_backup (id, pass, encrypt_filename)
@@ -272,6 +287,11 @@ class Database {
 		return ($stmt->execute());
 	}
 
+	/**
+	 * Return details regarding cloud backup
+	 * @param int $uid
+	 * @return null
+	 */
 	public function backup_info($uid) {
 		$stmt = $this->link->prepare(
 			'SELECT pass, encrypt_filename
@@ -293,14 +313,32 @@ class Database {
 		return null;
 	}
 
+	/**
+	 * Get a user by name
+	 * @param string $username
+	 * @param boolean $full To determine the level of detail
+	 * @return array
+	 */
 	public function user_get_by_name($username, $full = false) {
 		return $this->user_get("user", $username, $full);
 	}
 
+	/**
+	 * Get a user by id
+	 * @param int $uid
+	 * @param boolean $full To determine the level of detail
+	 * @return array
+	 */
 	public function user_get_by_id($uid, $full = false) {
 		return $this->user_get("id", $uid, $full);
 	}
 
+	/**
+	 * Get a user by token
+	 * @param string $token
+	 * @param boolean $full To determine the level of detail
+	 * @return array
+	 */
 	public function user_get_by_token($token, $full = false) {
 		if ($uid = $this->user_get_id_by_token($token)) {
 			return $this->user_get("id", $uid, $full);
@@ -308,6 +346,13 @@ class Database {
 		return null;
 	}
 
+	/**
+	 * Get a user
+	 * @param string $column What attribute to filter for
+	 * @param string $value
+	 * @param boolean $full To determine the level of detail
+	 * @return array
+	 */
 	private function user_get($column, $value, $full = false) {
 		$stmt = $this->link->prepare(
 			'SELECT id, user, pass, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan
@@ -324,12 +369,12 @@ class Database {
 		$stmt->store_result();
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $username, $pass, $admin, $max_storage, $color, $fileview, $login_attempts, $last_login_attempt, $last_login, $autoscan);
+		$stmt->bind_result($uid, $username, $pass, $admin, $max_storage, $color, $fileview, $login_attempts, $last_login_attempt, $last_login, $autoscan);
 
 		if ($stmt->fetch()) {
 			// Filter user data
 			$user = array(
-				'id'			=> $id,
+				'id'			=> $uid,
 				'username'		=> strtolower($username),
 				'admin'			=> $admin,
 				'max_storage'	=> $max_storage,
@@ -354,10 +399,9 @@ class Database {
 	}
 
 	/**
-	 * Get info about user
-	 * @return array containing info for all users
+	 * Get info about all users
+	 * @return array Containing info for all users
 	 */
-
 	public function user_get_all() {
 		$stmt = $this->link->prepare(
 			'SELECT id, user, admin, color, fileview, last_login
@@ -366,12 +410,12 @@ class Database {
 		);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $username, $admin, $color, $fileview, $last_login);
+		$stmt->bind_result($uid, $username, $admin, $color, $fileview, $last_login);
 
 		$user_array = array();
 		while ($stmt->fetch()) {
 			array_push($user_array, array(
-				'id'			=> $id,
+				'id'			=> $uid,
 				'username'		=> strtolower($username),
 				'admin'			=> $admin,
 				'color'			=> $color,
@@ -384,11 +428,10 @@ class Database {
 	}
 
 	/**
-	 * Get user from authorization token
-	 * @param token
-	 * @return string username
+	 * Get UserID from authorization token
+	 * @param string $token
+	 * @return int|null
 	 */
-
 	private function user_get_id_by_token($token) {
 		$time = time();
 		$stmt = $this->link->prepare(
@@ -401,18 +444,17 @@ class Database {
 		$stmt->bind_param('ssi', $token, $this->fingerprint, $time);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id);
+		$stmt->bind_result($uid);
 		$stmt->fetch();
 
-		return ($stmt->affected_rows != 0 && strlen($id) > 0) ? $id : null;
+		return ($stmt->affected_rows != 0 && strlen($uid) > 0) ? $uid : null;
 	}
 
 	/**
 	 * Check for admin privileges
-	 * @param token authorization-token
-	 * @return boolean true if user has admin privileges
+	 * @param string $token
+	 * @return boolean
 	 */
-
 	public function user_is_admin($token) {
 		$user = $this->user_get_by_token($token);
 		return ($user && $user['admin']);
@@ -420,13 +462,12 @@ class Database {
 
 	/**
 	 * Create new user
-	 * @param user
-	 * @param pass
-	 * @param admin
-	 * @param mail
-	 * @return boolean true if successful
+	 * @param string $username
+	 * @param string $pass
+	 * @param boolean $admin
+	 * @param string $mail
+	 * @return int|null
 	 */
-
 	public function user_create($username, $pass, $admin, $mail) {
 		$stmt = $this->link->prepare(
 			'INSERT INTO sd_users (user, pass, admin, mail)
@@ -444,17 +485,15 @@ class Database {
 
 	/**
 	 * Delete user
-	 * @param user
+	 * @param int $uid
+	 * @return boolean
 	 */
-
 	public function user_remove($uid) {
 		$stmt = $this->link->prepare(
 			'DELETE FROM sd_users
 			WHERE id = ?'
 		);
 		$stmt->bind_param('i', $uid);
-		//$stmt->execute();
-
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();
@@ -464,11 +503,10 @@ class Database {
 
 	/**
 	 * Increase number of login attempts
-	 * @param user
-	 * @param time current time
+	 * @param int $uid
 	 */
-
-	public function user_increase_login_counter($uid, $time) {
+	public function user_increase_login_counter($uid) {
+		$time = time();
 		$stmt = $this->link->prepare(
 			'UPDATE sd_users
 			SET login_attempts = login_attempts + 1, last_login_attempt = ?
@@ -480,26 +518,25 @@ class Database {
 
 	/**
 	 * Reset number of login attempts to 0
-	 * @param user
+	 * @param int $uid
 	 */
-
-	public function user_set_login($uid, $timestamp) {
+	public function user_set_login($uid) {
+		$time = time();
 		$stmt = $this->link->prepare(
 			'UPDATE sd_users
 			SET login_attempts = 0, last_login = ?
 			WHERE id = ?'
 		);
-		$stmt->bind_param('ii', $timestamp, $uid);
+		$stmt->bind_param('ii', $time, $uid);
 		$stmt->execute();
 	}
 
 	/**
-	 * Update user rights
-	 * @param user
-	 * @param admin
-	 * @return boolean true if successful
+	 * Update user access
+	 * @param int $uid
+	 * @param boolean $admin
+	 * @return boolean
 	 */
-
 	public function user_set_admin($uid, $admin) {
 		$stmt = $this->link->prepare(
 			'UPDATE sd_users
@@ -510,6 +547,12 @@ class Database {
 		return ($stmt->execute());
 	}
 
+	/**
+	 * Enable/disable autoscan
+	 * @param int $uid
+	 * @param boolean $enable
+	 * @return boolean
+	 */
 	public function user_set_autoscan($uid, $enable) {
 		$stmt = $this->link->prepare(
 			'UPDATE sd_users
@@ -522,11 +565,10 @@ class Database {
 
 	/**
 	 * Update user quota
-	 * @param user
-	 * @param max_storage
-	 * @return boolean true if successful
+	 * @param int $uid
+	 * @param int $max_storage
+	 * @return boolean
 	 */
-
 	public function user_set_storage_max($uid, $max_storage) {
 		$stmt = $this->link->prepare(
 			'UPDATE sd_users
@@ -539,11 +581,10 @@ class Database {
 
 	/**
 	 * Change user password
-	 * @param user
-	 * @param pass
-	 * @return boolean true if successful
+	 * @param int $uid
+	 * @param string $pass
+	 * @return boolean
 	 */
-
 	public function user_set_password($uid, $pass) {
 		$stmt = $this->link->prepare(
 			'UPDATE sd_users
@@ -560,10 +601,9 @@ class Database {
 
 	/**
 	 * Set fileview
-	 * @param user
-	 * @param fileview
+	 * @param int $uid
+	 * @param string $fileview
 	 */
-
 	public function user_set_fileview($uid, $fileview) {
 		$stmt = $this->link->prepare(
 			'UPDATE sd_users
@@ -576,10 +616,9 @@ class Database {
 
 	/**
 	 * Set theme color
-	 * @param user
-	 * @param color
+	 * @param int $uid
+	 * @param string $color
 	 */
-
 	public function user_set_color($uid, $color) {
 		$stmt = $this->link->prepare(
 			'UPDATE sd_users
@@ -592,13 +631,12 @@ class Database {
 
 	/**
 	 * Save authorization token, expiration date and client's fingerprint
-	 * @param uid
-	 * @param expires
-	 * @return boolean true if successful
+	 * @param int $uid
+	 * @return boolean
 	 */
 	public function session_start($uid) {
 		$token = $this->session_get_unique_token();
-		$expires = time() + 60 * 60 * 24 * 7; // 1 week
+		$expires = time() + TOKEN_EXPIRATION;
 
 		$stmt = $this->link->prepare(
 			'INSERT INTO sd_session (token, user, expires, fingerprint)
@@ -615,13 +653,33 @@ class Database {
 
 		if ($stmt->affected_rows != 0) {
 			setcookie('token', $token, $expires, "/");
-			$this->user_set_login($uid, time());
+			$this->user_set_login($uid);
 			return $token;
 		}
 
 		return null;
 	}
 
+	/**
+	 * Remove authorization token
+	 * @param string $token
+	 * @return boolean
+	 */
+	public function session_end($token) {
+		$stmt = $this->link->prepare(
+			'DELETE
+			FROM sd_session
+			WHERE token = ?'
+		);
+		$stmt->bind_param('s', $token);
+
+		return ($stmt->execute());
+	}
+
+	/**
+	 * Generate a new unique authentication token
+	 * @return string
+	 */
 	public function session_get_unique_token() {
 		$token;
 
@@ -640,7 +698,9 @@ class Database {
 	}
 
 	/**
-	 * Returns true if the token exists and is connected to the current client
+	 * Check if token exists for the client
+	 * @param string $token
+	 * @return boolean
 	 */
 	public function session_validate_token($token) {
 		$stmt = $this->link->prepare(
@@ -658,6 +718,11 @@ class Database {
 		return ($count == 1);
 	}
 
+	/**
+	 * Count all active tokens for a user
+	 * @param int $uid
+	 * @return int
+	 */
 	public function session_active_token($uid) {
 		$stmt = $this->link->prepare(
 			'SELECT COUNT(token)
@@ -675,8 +740,10 @@ class Database {
 
 	/**
 	 * Ends all sessions for a user but the current active
+	 * @param int $uid
+	 * @param string $token
+	 * @return boolean
 	 */
-
 	public function session_invalidate($uid, $token) {
 		$stmt = $this->link->prepare(
 			'DELETE
@@ -692,6 +759,12 @@ class Database {
 		return ($stmt->affected_rows != 0);
 	}
 
+	/**
+	 * End all sessions for a user on a specific client (but not the current)
+	 * @param int $uid
+	 * @param string $token
+	 * @return boolean
+	 */
 	public function session_invalidate_client($uid, $token) {
 		$stmt = $this->link->prepare(
 			'DELETE
@@ -708,6 +781,12 @@ class Database {
 		return ($stmt->affected_rows != 0);
 	}
 
+	/**
+	 * Register a client for TFA
+	 * @param int $uid
+	 * @param string $client Identification-Token for sending TFA-code
+	 * @return boolean
+	 */
 	public function two_factor_register($uid, $client) {
 		$stmt = $this->link->prepare(
 			'INSERT INTO sd_two_factor_clients (uid, client, fingerprint)
@@ -719,6 +798,12 @@ class Database {
 		return ($stmt->affected_rows == 1);
 	}
 
+	/**
+	 * Unregister a client for TFA
+	 * @param int $uid
+	 * @param string $client Identification-Token
+	 * @return boolean
+	 */
 	public function two_factor_unregister($uid, $client) {
 		$stmt = $this->link->prepare(
 			'DELETE
@@ -730,9 +815,14 @@ class Database {
 		$stmt->bind_param('iss', $uid, $client, $this->fingerprint);
 		$stmt->execute();
 
-		return ($stmt->affected_rows == 1);
+		return ($stmt->affected_rows > 0);
 	}
 
+	/**
+	 * Disable TFA for user
+	 * @param int $uid
+	 * @return boolean
+	 */
 	public function two_factor_disable($uid) {
 		$stmt = $this->link->prepare(
 			'DELETE
@@ -745,6 +835,12 @@ class Database {
 		return ($stmt->affected_rows > 0);
 	}
 
+	/**
+	 * Check if a client is registered for a user
+	 * @param int $uid
+	 * @param string $client
+	 * @return boolean
+	 */
 	public function two_factor_is_registered($uid, $client) {
 		$stmt = $this->link->prepare(
 			'SELECT COUNT(uid)
@@ -761,91 +857,31 @@ class Database {
 		return ($count > 0);
 	}
 
-	public function two_factor_is_enabled($uid) {
+	/**
+	 * Get UserID by fingerprint
+	 * @param string $fingerprint
+	 * @return int
+	 */
+	public function two_factor_get_user($fingerprint) {
 		$stmt = $this->link->prepare(
-			'SELECT COUNT(uid)
-			FROM sd_two_factor_clients
-			WHERE uid = ?'
-		);
-		$stmt->bind_param('i', $uid);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($count);
-		$stmt->fetch();
-
-		return ($count > 0);
-	}
-
-	public function two_factor_required($uid) {
-		$enabled = $this->two_factor_is_enabled($uid);
-
-		$stmt = $this->link->prepare(
-			'SELECT COUNT(uid)
-			FROM sd_two_factor_clients
-			WHERE uid = ?
-			AND fingerprint = ?'
-		);
-		$stmt->bind_param('is', $uid, $this->fingerprint);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($count);
-		$stmt->fetch();
-
-		return ($enabled && $count == 0);
-	}
-
-	public function two_factor_unlock($uid, $code, $remember = false) {
-		$time = time();
-		$stmt = $this->link->prepare(
-			'DELETE
+			'SELECT uid
 			FROM sd_two_factor_codes
-			WHERE uid = ?
-			AND code = ?
-			AND fingerprint = ?
-			AND expires > ?'
+			WHERE fingerprint = ?'
 		);
-		$stmt->bind_param('iisi', $uid, $code, $this->fingerprint, $time);
+		$stmt->bind_param('s', $fingerprint);
 		$stmt->execute();
 		$stmt->store_result();
+		$stmt->bind_result($uid);
 		$stmt->fetch();
 
-		if ($stmt->affected_rows > 0 && $remember) {
-			$this->two_factor_register($uid, "");
-		}
-
-		return ($stmt->affected_rows > 0);
+		return $uid;
 	}
 
-	public function two_factor_cleanup_codes() {
-		$time = time();
-		$stmt = $this->link->prepare(
-			'DELETE
-			FROM sd_two_factor_codes
-			WHERE expires < ?'
-		);
-		$stmt->bind_param('i', $time);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->fetch();
-
-		return null;
-	}
-
-	public function two_factor_generate_code($uid) {
-		$this->two_factor_cleanup_codes();
-		$code = Crypto::random_number(5);
-		$expires = time() + 60 * 5; // 5 minutes
-
-		$stmt = $this->link->prepare(
-			'INSERT INTO sd_two_factor_codes (uid, code, expires, fingerprint)
-			VALUES (?, ?, ?, ?)'
-		);
-		$stmt->bind_param('iiis', $uid, $code, $expires, $this->fingerprint);
-		$stmt->execute();
-
-		return ($stmt->affected_rows == 1) ? $code : null;
-	}
-
+	/**
+	 * Get all clients registered for a user
+	 * @param int $uid
+	 * @return array
+	 */
 	public function two_factor_get_clients($uid) {
 		$stmt = $this->link->prepare(
 			'SELECT client
@@ -867,44 +903,202 @@ class Database {
 		return $clients;
 	}
 
-	public function two_factor_update($uid, $client_old, $client_new) {
+	/**
+	 * Check if there are clients registered for a user
+	 * and the current fingerprint matches none of them
+	 * @param int $uid
+	 * @return boolean
+	 */
+	public function two_factor_required($uid) {
+		$enabled = count($this->two_factor_get_clients($uid)) > 0;
+
 		$stmt = $this->link->prepare(
-			'UPDATE sd_two_factor_clients
-			SET client = ?
+			'SELECT COUNT(uid)
+			FROM sd_two_factor_clients
 			WHERE uid = ?
-			AND client = ?'
+			AND fingerprint = ?'
 		);
-		$stmt->bind_param('sis', $client_new, $uid, $client_old);
+		$stmt->bind_param('is', $uid, $this->fingerprint);
 		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($count);
 		$stmt->fetch();
+
+		return ($enabled && $count == 0);
+	}
+
+	/**
+	 * Unlock TFA-code
+	 * @param int $uid
+	 * @param string $code
+	 * @param string $fingerprint
+	 * @param boolean $remember Whether or not to exclude client from future TFA-requests
+	 */
+	public function two_factor_unlock($uid, $code, $fingerprint, $remember = false) {
+		$time = time();
+
+		$stmt = $this->link->prepare(
+			'UPDATE sd_two_factor_codes
+			SET unlocked = 1
+			WHERE code = ?
+			AND fingerprint = ?
+			AND expires > ?'
+		);
+		$stmt->bind_param('ssi', $code, $fingerprint, $time);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->fetch();
+
+		if ($stmt->affected_rows > 0 && $remember) {
+			$this->two_factor_register($uid, "");
+		}
+		else if ($stmt->affected_rows < 1) {
+			$this->two_factor_increment_attempts($uid);
+		}
+
 		return ($stmt->affected_rows > 0);
 	}
 
 	/**
-	 * Remove authorization token
-	 * @param token
-	 * @return boolean true if successful
+	 * Check if TFA-code has been unlocked
+	 * @return boolean|null
 	 */
+	public function two_factor_unlocked() {
+		$stmt = $this->link->prepare(
+			'SELECT unlocked
+			FROM sd_two_factor_codes
+			WHERE fingerprint = ?'
+		);
+		$stmt->bind_param('s', $this->fingerprint);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($unlocked);
+		$stmt->fetch();
 
-	public function session_end($token) {
+		// Remove unlocked and expired codes
+		$this->two_factor_cleanup_codes();
+
+		return ($stmt->affected_rows > 0) ? $unlocked : null;
+	}
+
+	/**
+	 * Increment number of TFA-unlock-attempts
+	 * @return boolean
+	 */
+	public function two_factor_increment_attempts() {
+		$stmt = $this->link->prepare(
+			'UPDATE sd_two_factor_codes
+			SET attempts = attempts + 1
+			WHERE fingerprint = ?'
+		);
+		$stmt->bind_param('s', $this->fingerprint);
+		$stmt->execute();
+		$stmt->fetch();
+
+		return ($stmt->affected_rows > 0);
+	}
+
+	/**
+	 * Remove TFA-codes that are expired, unlocked and/or have exceeded their max attempts
+	 * @return boolean
+	 */
+	public function two_factor_cleanup_codes() {
+		$time = time();
+		$max_attempts = TFA_MAX_ATTEMPTS;
 		$stmt = $this->link->prepare(
 			'DELETE
-			FROM sd_session
-			WHERE token = ?'
+			FROM sd_two_factor_codes
+			WHERE expires <= ?
+			OR attempts >= ?
+			OR unlocked = 1'
 		);
-		$stmt->bind_param('s', $token);
+		$stmt->bind_param('ii', $time, $max_attempts);
 
 		return ($stmt->execute());
 	}
 
 	/**
-	 * Check if accessing user is allowed to access a shared file
-	 * @param id
-	 * @param access
-	 * @param token
-	 * @return boolean true if unlocked
+	 * Check if there is a TFA-code for client
+	 * @param string $fingerprint
+	 * @return boolean|null
 	 */
+	public function two_factor_code_pending($fingerprint) {
+		$stmt = $this->link->prepare(
+			'SELECT code
+			FROM sd_two_factor_codes
+			WHERE fingerprint = ?'
+		);
+		$stmt->bind_param('s', $fingerprint);
+		$stmt->execute();
+		$stmt->store_result();
+		$stmt->bind_result($code);
+		$stmt->fetch();
 
+		return ($stmt->affected_rows > 0) ? $code : null;
+	}
+
+	/**
+	 * Generate TFA-code
+	 * @param int $uid
+	 * @param string $fingerprint
+	 * @return string|null
+	 */
+	public function two_factor_generate_code($uid, $fingerprint) {
+		// Remove expired codes
+		$this->two_factor_cleanup_codes();
+
+		// Do not generate a new code if there still is a valid one
+		if ($this->two_factor_code_pending($fingerprint) !== null) {
+			return null;
+		}
+
+		$code = Crypto::random_number(5);
+		$expires = time() + TFA_EXPIRATION; // 30 seconds
+
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_two_factor_codes (uid, code, expires, fingerprint)
+			VALUES (?, ?, ?, ?)
+			ON DUPLICATE KEY
+			UPDATE code = ?'
+		);
+		$stmt->bind_param('isiss', $uid, $code, $expires, $fingerprint, $code);
+		$stmt->execute();
+
+		return ($stmt->affected_rows == 1) ? $code : null;
+	}
+
+	/**
+	 * Update Identification-Token for sending TFA-code
+	 * @param int $uid
+	 * @param string $client_old
+	 * @param string $client_new
+	 * @return boolean
+	 */
+	public function two_factor_update_client($uid, $client_old, $client_new) {
+		$clients = $this->two_factor_get_clients($uid);
+		if (Util::search_in_array_1D($client_old) === null) {
+			return false;
+		}
+
+		$stmt = $this->link->prepare(
+			'UPDATE sd_two_factor_clients
+			SET client = ?
+			WHERE client = ?'
+		);
+		$stmt->bind_param('sis', $client_new, $uid, $client_old);
+		$stmt->execute();
+		$stmt->fetch();
+
+		return ($stmt->affected_rows > 0);
+	}
+
+	/**
+	 * Check if accessing user is allowed to access a shared file
+	 * @param string $fid
+	 * @param int $access
+	 * @param string $token
+	 * @return boolean
+	 */
 	public function share_is_unlocked($fid, $access, $token) {
 		$uid = $this->user_get_id_by_token($token) | PUBLIC_USER_ID;
 		$public_uid = PUBLIC_USER_ID;
@@ -934,36 +1128,34 @@ class Database {
 	}
 
 	/**
-	 * Generates a unique 8-hex id that is used in public share-links
-	 * @return string share-id
+	 * Generate a unique 8-hex id that is used in public share-links
+	 * @return string ShareID
 	 */
-
 	private function share_get_unique_id() {
-		$id;
+		$sid;
 
 		do {
-			$id = Crypto::random_string(8);
+			$sid = Crypto::random_string(8);
 			$stmt = $this->link->prepare(
 				'SELECT id
 				FROM sd_shares
 				WHERE id = ?'
 			);
-			$stmt->bind_param('s', $id);
+			$stmt->bind_param('s', $sid);
 			$stmt->execute();
 		} while ($stmt->num_rows > 0);
 
-		return $id;
+		return $sid;
 	}
 
 	/**
 	 * Add new share
-	 * @param fid file-id
-	 * @param userto username to share with (optional)
-	 * @param key password (optional)
-	 * @param write whether or not to allow changes and downloads for share
-	 * @return boolean true if successful
+	 * @param string $fid
+	 * @param int $userto UserID to share with (optional)
+	 * @param string $pass Password (optional)
+	 * @param int $access
+	 * @return boolean
 	 */
-
 	public function share($fid, $userto, $pass, $access) {
 		$sid = $this->share_get_unique_id();
 		$stmt = $this->link->prepare(
@@ -976,6 +1168,12 @@ class Database {
 		return ($stmt->affected_rows == 1) ? $sid : null;
 	}
 
+	/**
+	 * Grant access to share
+	 * @param string $token
+	 * @param int $sid
+	 * @return string|null
+	 */
 	public function share_unlock($token, $sid) {
 		$stmt = $this->link->prepare(
 			'INSERT INTO sd_unlocked (token, share_id)
@@ -991,10 +1189,9 @@ class Database {
 
 	/**
 	 * Get share info
-	 * @param id
-	 * @return array share info
+	 * @param string $fid
+	 * @return array
 	 */
-
 	public function share_get_by_file_id($fid) {
 		$stmt = $this->link->prepare(
 			'SELECT id, userto, pass, access
@@ -1004,11 +1201,11 @@ class Database {
 		$stmt->bind_param('s', $fid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $userto, $pass, $access);
+		$stmt->bind_result($sid, $userto, $pass, $access);
 
 		if ($stmt->fetch()) {
 			return array(
-				'id'			=> $id,
+				'id'		=> $sid,
 				'userto'	=> $userto,
 				'pass'		=> $pass,
 				'access'	=> $access
@@ -1019,17 +1216,16 @@ class Database {
 
 	/**
 	 * Get share info
-	 * @param id share-id
-	 * @return array share info
+	 * @param int $sid ShareID
+	 * @return array Share info
 	 */
-
-	public function share_get($id) {
+	public function share_get($sid) {
 		$stmt = $this->link->prepare(
 			'SELECT file, userto, pass, access
 			FROM sd_shares
 			WHERE id = ?'
 		);
-		$stmt->bind_param('s', $id);
+		$stmt->bind_param('s', $sid);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($file, $userto, $pass, $access);
@@ -1046,13 +1242,11 @@ class Database {
 	}
 
 	/**
-	 * Get share info
-	 * @param uid
-	 * @param access_request
-	 * @return array share info
+	 * Get all files a user shared
+	 * @param int $uid
+	 * @return array
 	 */
-
-	public function share_get_from($uid, $access_request) {
+	public function share_get_from($uid) {
 		$stmt = $this->link->prepare(
 			'SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.file
 			FROM sd_shares
@@ -1064,7 +1258,7 @@ class Database {
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $id, $share_id);
+		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $fid, $sid);
 
 		$files = array();
 		while ($stmt->fetch()) {
@@ -1075,7 +1269,7 @@ class Database {
 				'owner'			=> $owner,
 				'edit'			=> $edit,
 				'md5'			=> $md5,
-				'id'			=> $id,
+				'id'			=> $fid,
 				'shared'		=> true,
 				'selfshared'	=> true,
 			));
@@ -1084,13 +1278,11 @@ class Database {
 	}
 
 	/**
-	 * Get share info
-	 * @param uid
-	 * @param access_request
-	 * @return array share info
+	 * Get all files shared with a user
+	 * @param int $uid
+	 * @return array
 	 */
-
-	public function share_get_with($uid, $access_request) {
+	public function share_get_with($uid) {
 		$stmt = $this->link->prepare(
 			'SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.file
 			FROM sd_cache
@@ -1102,7 +1294,7 @@ class Database {
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $id, $share_id);
+		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $fid, $sid);
 
 		$files = array();
 		while ($stmt->fetch()) {
@@ -1113,7 +1305,7 @@ class Database {
 				'owner'			=> $owner,
 				'edit'			=> $edit,
 				'md5'			=> $md5,
-				'id'			=> $id,
+				'id'			=> $fid,
 				'shared'		=> true,
 				'selfshared'	=> true,
 			));
@@ -1122,21 +1314,11 @@ class Database {
 	}
 
 	/**
-	 * Delete share
-	 * @param id file-id
-	 * @param owner
-	 * @param userto
-	 * @param path relative to simpledrive installation
+	 * Remove share
+	 * @param string $fid
 	 * @return boolean
 	 */
-
 	public function share_remove($fid) {
-		/*$stmt = $this->link->prepare(
-			'DELETE sh, u
-			FROM sd_shares sh
-			LEFT JOIN sd_unlocked u ON sh.hash = u.hash
-			WHERE sh.file = ?'
-		);*/
 		$stmt = $this->link->prepare(
 			'DELETE
 			FROM sd_shares
@@ -1147,7 +1329,13 @@ class Database {
 		return ($stmt->execute());
 	}
 
-	public function share_get_base($id, $uid) {
+	/**
+	 * Get closest shared parent (root if none)
+	 * @param string $fid
+	 * @param int $uid
+	 * @return string
+	 */
+	public function share_get_base($fid, $uid) {
 		do {
 			$stmt = $this->link->prepare(
 				'SELECT sd_cache.id, sd_cache.parent, sd_cache.owner, sd_shares.access, sd_shares.userto
@@ -1155,17 +1343,17 @@ class Database {
 				LEFT JOIN sd_shares ON sd_cache.id = sd_shares.file
 				WHERE sd_cache.id = ?'
 			);
-			$stmt->bind_param('s', $id);
+			$stmt->bind_param('s', $fid);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($id, $parent, $owner, $access, $userto);
+			$stmt->bind_result($fid, $parent, $owner, $access, $userto);
 
 			while ($stmt->fetch()) {
 				if ($access && ($owner == $uid || $userto === $uid)) {
-					return $id;
+					return $fid;
 				}
 			}
-			$id = $parent;
+			$fid = $parent;
 		} while ($stmt->num_rows > 0);
 
 		return "0";
@@ -1173,12 +1361,11 @@ class Database {
 
 	/**
 	 * Write log entry
-	 * @param uid
-	 * @param type e.g. ERROR, INFO, etc.
-	 * @param source where did the error occurr?
-	 * @param msg actual error message
+	 * @param int $uid
+	 * @param string $type E.g. ERROR, INFO, etc.
+	 * @param string $source Where did the error occurr?
+	 * @param string $msg Actual error message
 	 */
-
 	public function log_write($uid, $type, $source, $msg) {
 		$date = date('d.m.Y-H:i:s');
 		$stmt = $this->link->prepare(
@@ -1190,12 +1377,11 @@ class Database {
 	}
 
 	/**
-	 * Get log
-	 * @param integer from start with nth entry
-	 * @param integer size how many to return
-	 * @return array containing log size and log entries
+	 * Get log entries
+	 * @param int $from Start with nth entry
+	 * @param int $size How many to return
+	 * @return array Containing log size and log entries
 	 */
-
 	public function log_get($from, $size) {
 		$stmt0 = $this->link->query(
 			'SELECT COUNT(*)
@@ -1230,9 +1416,8 @@ class Database {
 
 	/**
 	 * Delete log
-	 * @return boolean true
+	 * @return boolean
 	 */
-
 	public function log_clear() {
 		$stmt = $this->link->prepare(
 			'DELETE FROM sd_log'
@@ -1242,30 +1427,45 @@ class Database {
 	}
 
 	/**
+	 * Trash file
 	 * Remember original path for trashed items
-	 * @param user owner
-	 * @param filename original filename followed by trash hash
-	 * @param parent
-	 * @return boolean true
+	 * @param string $fid
+	 * @param int $oid
+	 * @param string $path
+	 * @param string $restorepath
+	 * @return boolean
 	 */
-
-	public function cache_trash($id, $owner, $path, $restorepath) {
+	public function cache_trash($fid, $oid, $path, $restorepath) {
 		$stmt = $this->link->prepare(
 			'INSERT INTO sd_trash (id, restorepath)
 			VALUES (?, ?)'
 		);
-		$stmt->bind_param('ss', $id, $restorepath);
+		$stmt->bind_param('ss', $fid, $restorepath);
 		$stmt->execute();
 
-		$this->history_add($id, $path, $owner, time(), true);
+		$this->history_add($fid, $path, $oid, time(), true);
 		return true;
 	}
 
-	public function cache_get_size($id, $uid, $access_request) {
-		return $this->cache_get_size_recursive($id, $uid, $access_request);
+	/**
+	 * Get size of a file or folder
+	 * @param string $fid
+	 * @param int $uid
+	 * @param int $access
+	 * @return int
+	 */
+	public function cache_get_size($fid, $uid, $access) {
+		return $this->cache_get_size_recursive($fid, $uid, $access);
 	}
 
-	private function cache_get_size_recursive($id, $uid, $access_request) {
+	/**
+	 * Get size of a file or folder (recursively if folder)
+	 * @param string $fid
+	 * @param int $uid
+	 * @param int $access
+	 * @return int
+	 */
+	private function cache_get_size_recursive($fid, $uid, $access) {
 		$total = 0;
 
 		$stmt = $this->link->prepare(
@@ -1273,17 +1473,17 @@ class Database {
 			FROM sd_cache
 			WHERE parent = ?'
 		);
-		$stmt->bind_param('s', $id);
+		$stmt->bind_param('s', $fid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $size, $filename);
+		$stmt->bind_result($fid, $size, $filename);
 
 		while ($stmt->fetch()) {
 			$total += $size;
 
-			if ($children = $this->cache_children($id, $uid, $access_request)) {
+			if ($children = $this->cache_children($fid, $uid, $access)) {
 				for ($i = 0; $i < sizeof($children); $i++) {
-					$total += $this->cache_get_size_recursive($children[$i]['id'], $uid, $access_request);;
+					$total += $this->cache_get_size_recursive($children[$i]['id'], $uid, $access);;
 				}
 			}
 		}
@@ -1292,69 +1492,94 @@ class Database {
 	}
 
 	/**
-	 * Sets the size of a directory
-	 * @param id
-	 * @param size element count
+	 * Set the size of a directory
+	 * @param string $fid
+	 * @param int $size Element count
 	 */
-
-	public function cache_update_size($id, $size) {
+	public function cache_update_size($fid, $size) {
 		$stmt = $this->link->prepare(
 			'UPDATE sd_cache
 			SET size = ?
 			WHERE id = ?'
 		);
-		$stmt->bind_param('ss', $size, $id);
+		$stmt->bind_param('ss', $size, $fid);
 		$stmt->execute();
 	}
 
+	/**
+	 * Generate new unique FileID
+	 * @return int
+	 */
 	private function cache_get_unique_id() {
-		$id;
+		$fid;
 
 		do {
-			$id = Crypto::random_string(32);
+			$fid = Crypto::random_string(32);
 			$stmt = $this->link->prepare(
 				'SELECT id
 				FROM sd_cache
 				WHERE id = ?'
 			);
-			$stmt->bind_param('s', $id);
+			$stmt->bind_param('s', $fid);
 			$stmt->execute();
 		} while ($stmt->num_rows > 0);
 
-		return $id;
+		return $fid;
 	}
 
-	public function cache_add($filename, $parent, $type, $size, $owner, $edit, $md5, $path) {
+	/**
+	 * Add file to cache
+	 * @param string $filename
+	 * @param string $parent FileID
+	 * @param string $type
+	 * @param int $size
+	 * @param int $oid OwnerID
+	 * @param int $edit
+	 * @param string $md5
+	 * @param string $path
+	 * @return int
+	 */
+	public function cache_add($filename, $parent, $type, $size, $oid, $edit, $md5, $path) {
 		$timestamp = time();
-		$id = $this->cache_get_unique_id();
+		$fid = $this->cache_get_unique_id();
 		$stmt = $this->link->prepare(
 			'INSERT INTO sd_cache (id, filename, parent, type, size, owner, edit, md5, lastscan)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
 		);
-		$stmt->bind_param('ssssisisi', $id, $filename, $parent, $type, $size, $owner, $edit, $md5, $timestamp);
+		$stmt->bind_param('ssssisisi', $fid, $filename, $parent, $type, $size, $oid, $edit, $md5, $timestamp);
 		$stmt->execute();
 
-		$this->history_add($id, $path, $owner, $timestamp, false);
-		return $id;
+		$this->history_add($fid, $path, $oid, $timestamp, false);
+		return $fid;
 	}
 
-	public function cache_refresh($id) {
-		$timestamp = time();
+	/**
+	 * Update last-scan-timestamp for a file
+	 * @param string $fid
+	 * @return boolean
+	 */
+	public function cache_refresh($fid) {
+		$time = time();
 		$stmt = $this->link->prepare(
 			'UPDATE sd_cache
 			SET lastscan = ?
 			WHERE id = ?'
 		);
-		$stmt->bind_param('is', $timestamp, $id);
+		$stmt->bind_param('is', $time, $fid);
 		$stmt->execute();
 		$stmt->fetch();
 		return ($stmt->affected_rows > 0);
 	}
 
-	public function cache_refresh_array($ids) {
+	/**
+	 * Update last-scan-timestamp for multiple files
+	 * @param array $fids
+	 * @return boolean
+	 */
+	public function cache_refresh_array($fids) {
 		$timestamp = time();
-		// Escape all ids to prevent SQL injection
-		$escaped_ids = $this->escape_array($ids);
+		// Escape all ids to prevent SQL-Injection
+		$escaped_ids = $this->escape_array($fids);
 		$stmt = $this->link->prepare(
 			'UPDATE sd_cache
 			SET lastscan = ?
@@ -1364,6 +1589,11 @@ class Database {
 		return ($stmt->execute());
 	}
 
+	/**
+	 * Escape array to prevent SQL-Injection
+	 * @param array $arr
+	 * @return array
+	 */
 	private function escape_array($arr) {
 		foreach ($arr as $key => $value) {
 			$arr[$key] = mysqli_real_escape_string($this->link, $value);
@@ -1371,7 +1601,18 @@ class Database {
 		return $arr;
 	}
 
-	public function cache_update($id, $type, $size, $edit, $md5, $owner, $path) {
+	/**
+	 * Update file in cache
+	 * @param string $fid
+	 * @param string $type
+	 * @param int $size
+	 * @param int $edit
+	 * @param string $md5
+	 * @param int $oid
+	 * @param string $path
+	 * @return int|null
+	 */
+	public function cache_update($fid, $type, $size, $edit, $md5, $oid, $path) {
 		$timestamp = time();
 
 		$stmt = $this->link->prepare(
@@ -1379,16 +1620,21 @@ class Database {
 			SET type = ?, size = ?, edit = ?, md5 = ?, lastscan = ?
 			WHERE id = ?'
 		);
-		$stmt->bind_param('siisis', $type, $size, $edit, $md5, $timestamp, $id);
+		$stmt->bind_param('siisis', $type, $size, $edit, $md5, $timestamp, $fid);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->fetch();
 
-		$this->history_add($id, $path, $owner, $timestamp, false);
+		$this->history_add($fid, $path, $oid, $timestamp, false);
 
-		return ($stmt->affected_rows == 1) ? $id : null;
+		return ($stmt->affected_rows == 1) ? $fid : null;
 	}
 
+	/**
+	 * Get all trashed files for user
+	 * @param int $uid
+	 * @return array
+	 */
 	public function cache_get_trash($uid) {
 		$stmt = $this->link->prepare(
 			'SELECT sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_users.user, sd_cache.edit, sd_cache.md5, sd_cache.id
@@ -1400,7 +1646,7 @@ class Database {
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $id);
+		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $fid);
 
 		$files = array();
 		while ($stmt->fetch()) {
@@ -1412,13 +1658,18 @@ class Database {
 				'owner'					=> $owner,
 				'edit'					=> $edit,
 				'md5'					=> $md5,
-				'id'					=> $id
+				'id'					=> $fid
 			));
 		}
 
 		return $files;
 	}
 
+	/**
+	 * Get root-directory-id for user
+	 * @param int $uid
+	 * @return int|null
+	 */
 	public function cache_get_root_id($uid) {
 		$stmt = $this->link->prepare(
 			'SELECT id
@@ -1430,11 +1681,17 @@ class Database {
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id);
+		$stmt->bind_result($fid);
 
-		return ($stmt->fetch()) ? $id : null;
+		return ($stmt->fetch()) ? $fid : null;
 	}
 
+	/**
+	 * Search for filename in cache
+	 * @param int $uid
+	 * @param string $needle
+	 * @return array
+	 */
 	public function cache_search($uid, $needle) {
 		$stmt = $this->link->prepare(
 				'SELECT id
@@ -1446,17 +1703,23 @@ class Database {
 		$stmt->bind_param('is', $uid, $needle);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id);
+		$stmt->bind_result($fid);
 
 		$files = array();
 		while($stmt->fetch()) {
-			array_push($files, $this->cache_get($id, $uid));
+			array_push($files, $this->cache_get($fid, $uid));
 		}
 		return $files;
 	}
 
-	public function cache_get($id, $uid) {
-		$share_base = $this->share_get_base($id, $uid);
+	/**
+	 * Get file from cache
+	 * @param string $fid
+	 * @param int $uid
+	 * @return array|null
+	 */
+	public function cache_get($fid, $uid) {
+		$share_base = $this->share_get_base($fid, $uid);
 
 		$stmt = $this->link->prepare(
 			'SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.id
@@ -1466,38 +1729,40 @@ class Database {
 			LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
 			WHERE sd_cache.id = ?'
 		);
-		$stmt->bind_param('s', $id);
+		$stmt->bind_param('s', $fid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $filename, $parent, $type, $size, $edit, $md5, $ownerid, $owner, $trash);
+		$stmt->bind_result($fid, $filename, $parent, $type, $size, $edit, $md5, $oid, $owner, $trash);
 
 		if ($stmt->fetch()) {
 			return array(
-				'id'			=> $id,
+				'id'			=> $fid,
 				'filename'		=> $filename,
 				'parent'		=> $parent,
 				'type'			=> $type,
 				'size'			=> $size,
-				'ownerid'		=> $ownerid,
+				'ownerid'		=> $oid,
 				'owner'			=> $owner,
 				'edit'			=> $edit,
 				'md5'			=> $md5,
 				'trash'			=> $trash,
-				'path'			=> $this->cache_relative_path($id),
+				'path'			=> $this->cache_relative_path($fid),
 				'shared'		=> ($share_base != "0"),
-				'selfshared'	=> ($share_base == $id)
+				'selfshared'	=> ($share_base == $fid)
 			);
 		}
 		return null;
 	}
 
 	/**
-	 * Returns all files in a directory and its children
+	 * Return all files in a directory and its children
 	 * Path is relative to the given "root"
+	 * @param int $oid
+	 * @param string $fid
+	 * @return array
 	 */
-
-	public function cache_get_all($owner, $id = "0") {
-		$root = ($id != "0") ? $this->cache_relative_path($id) : "";
+	public function cache_get_all($oid, $fid = "0") {
+		$root = ($fid != "0") ? $this->cache_relative_path($fid) : "";
 		$files = array();
 
 		$stmt = $this->link->prepare(
@@ -1508,30 +1773,36 @@ class Database {
 			AND f.parent = ?
 			AND t.id IS NULL'
 		);
-		$stmt->bind_param('is', $owner, $id);
+		$stmt->bind_param('is', $oid, $fid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id, $type, $edit, $md5);
+		$stmt->bind_result($fid, $type, $edit, $md5);
 
 		while ($stmt->fetch()) {
 			array_push($files, array(
-				'id'	=> $id,
+				'id'	=> $fid,
 				'type'	=> $type,
-				'path'	=> substr($this->cache_relative_path($id), strlen($root)),
+				'path'	=> substr($this->cache_relative_path($fid), strlen($root)),
 				'edit'	=> $edit,
 				'md5'	=> $md5)
 			);
 
 			if ($type == "folder") {
-				$files = array_merge($files, $this->cache_get_all($owner, $id));
+				$files = array_merge($files, $this->cache_get_all($oid, $fid));
 			}
 		}
 
 		return $files;
 	}
 
-	// Returns true if parent has a file that is not trashed
-	public function cache_has_child($owner, $parent, $filename) {
+	/**
+	 * Return FileID if parent has a file with $filename that is not trashed
+	 * @param int $oid
+	 * @param string $parent
+	 * @param string $filename
+	 * @return string|null
+	 */
+	public function cache_has_child($oid, $parent, $filename) {
 		$stmt = $this->link->prepare(
 			'SELECT sd_cache.id
 			FROM sd_cache
@@ -1541,19 +1812,27 @@ class Database {
 			AND filename = ?
 			AND sd_trash.id IS NULL'
 		);
-		$stmt->bind_param('iss', $owner, $parent, $filename);
+		$stmt->bind_param('iss', $oid, $parent, $filename);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($id);
+		$stmt->bind_result($fid);
 		$stmt->fetch();
 
-		return ($stmt->affected_rows > 0) ? $id : null;
+		return ($stmt->affected_rows > 0) ? $fid : null;
 	}
 
-	public function cache_children($id, $uid, $oid, $allow_trashed = false) {
-		$share_base = $this->share_get_base($id, $uid);
+	/**
+	 * Get all direct children in folder
+	 * @param string $fid
+	 * @param int $uid
+	 * @param int $oid
+	 * @param boolean $allow_trashed
+	 * @return array
+	 */
+	public function cache_children($fid, $uid, $oid, $allow_trashed = false) {
+		$share_base = $this->share_get_base($fid, $uid);
 
-		if ($this->cache_trashed($id) && !$allow_trashed) {
+		if ($this->cache_trashed($fid) && !$allow_trashed) {
 			return array();
 		}
 
@@ -1569,15 +1848,15 @@ class Database {
 			GROUP BY sd_cache.id
 		');
 
-		$stmt->bind_param('si', $id, $oid);
+		$stmt->bind_param('si', $fid, $oid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $id, $share_id);
+		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $fid, $sid);
 
 		$files = array();
 		while ($stmt->fetch()) {
 			array_push($files, array(
-				'id'			=> $id,
+				'id'			=> $fid,
 				'filename'		=> $filename,
 				'parent'		=> $parent,
 				'type'			=> $type,
@@ -1585,16 +1864,23 @@ class Database {
 				'owner'			=> $owner,
 				'edit'			=> $edit,
 				'md5'			=> $md5,
-				'shared'		=> ($share_base != "0" || $share_id),
-				'selfshared'	=> $share_id != null
+				'shared'		=> ($share_base != "0" || $sid),
+				'selfshared'	=> $sid != null
 			));
 		}
 
 		return $files;
 	}
 
-	public function cache_children_rec($id, $uid, $oid) {
-		$children = $this->cache_children($id, $uid, $oid, true);
+	/**
+	 * Get all children in folder (including sub-folders)
+	 * @param string $fid
+	 * @param int $uid
+	 * @param int $oid
+	 * @return array
+	 */
+	public function cache_children_rec($fid, $uid, $oid) {
+		$children = $this->cache_children($fid, $uid, $oid, true);
 
 		foreach ($children as $child) {
 			if ($child['type'] == 'folder') {
@@ -1605,13 +1891,18 @@ class Database {
 		return $children;
 	}
 
-	public function cache_get_restore_path($id) {
+	/**
+	 * Get restore path for trashed file
+	 * @param string $fid
+	 * @return string|null
+	 */
+	public function cache_get_restore_path($fid) {
 		$stmt = $this->link->prepare(
 			'SELECT restorepath
 			FROM sd_trash
 			WHERE id = ?'
 		);
-		$stmt->bind_param('s', $id);
+		$stmt->bind_param('s', $fid);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($path);
@@ -1621,20 +1912,18 @@ class Database {
 	}
 
 	/**
-	 * Returns the FileID from cache
-	 *
-	 * @param int uid
-	 * @param string path (must start and not end with "/")
-	 * @return string|null FileID
+	 * Get FileID for path from cache
+	 * @param int $uid
+	 * @param string $path (must start and not end with "/")
+	 * @return string|null
 	 */
-
 	public function cache_id_for_path($uid, $path) {
 		$path = explode("/", $path);
 		array_shift($path);
-		$id = $this->cache_get_root_id($uid);
+		$fid = $this->cache_get_root_id($uid);
 
 		if (!$path[0]) {
-			return $id;
+			return $fid;
 		}
 
 		do {
@@ -1648,17 +1937,22 @@ class Database {
 				AND sd_cache.filename = ?
 				AND sd_trash.id IS NULL'
 			);
-			$stmt->bind_param('iss', $uid, $id, $filename);
+			$stmt->bind_param('iss', $uid, $fid, $filename);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($id);
+			$stmt->bind_result($fid);
 			$stmt->fetch();
-		} while ($stmt->num_rows > 0 && sizeof($path) > 0 && $id != null);
+		} while ($stmt->num_rows > 0 && sizeof($path) > 0 && $fid != null);
 
-		return $id;
+		return $fid;
 	}
 
-	public function cache_relative_path($id) {
+	/**
+	 * Build relative path for file
+	 * @param string $fid
+	 * @return string
+	 */
+	public function cache_relative_path($fid) {
 		$path = array();
 
 		do {
@@ -1667,10 +1961,10 @@ class Database {
 				FROM sd_cache
 				WHERE id = ?'
 			);
-			$stmt->bind_param('s', $id);
+			$stmt->bind_param('s', $fid);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($id, $filename);
+			$stmt->bind_result($fid, $filename);
 
 			if ($stmt->fetch()) {
 				array_unshift($path, $filename);
@@ -1680,13 +1974,18 @@ class Database {
 		return implode('/', $path);
 	}
 
-	public function cache_parent($id) {
+	/**
+	 * Get direct parent for file
+	 * @param string $fid
+	 * @return string
+	 */
+	public function cache_parent($fid) {
 		$stmt = $this->link->prepare(
 			'SELECT parent
 			FROM sd_cache
 			WHERE id = ?'
 		);
-		$stmt->bind_param('s', $id);
+		$stmt->bind_param('s', $fid);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($parent_id);
@@ -1695,8 +1994,14 @@ class Database {
 		return $parent_id;
 	}
 
-	public function cache_parents($id, $uid) {
-		$share_base = $this->share_get_base($id, $uid);
+	/**
+	 * Get all parents for file
+	 * @param string $fid
+	 * @param int $uid
+	 * @return array
+	 */
+	public function cache_parents($fid, $uid) {
+		$share_base = $this->share_get_base($fid, $uid);
 		$parents = array();
 
 		do {
@@ -1705,82 +2010,118 @@ class Database {
 				FROM sd_cache
 				WHERE id = ?'
 			);
-			$stmt->bind_param('s', $id);
+			$stmt->bind_param('s', $fid);
 			$stmt->execute();
 			$stmt->store_result();
 			$stmt->bind_result($parent, $filename, $oid);
 
 			if ($stmt->fetch()) {
-				array_unshift($parents, array('id' => $id, 'filename' => $filename));
-				if ($id == $share_base && $oid != $uid) {
+				array_unshift($parents, array('id' => $fid, 'filename' => $filename));
+				if ($fid == $share_base && $oid != $uid) {
 					break;
 				}
-				$id = $parent;
+				$fid = $parent;
 			}
-			else if ($id == "0") {
-				array_unshift($parents, array('id' => $id, 'filename' => ""));
+			else if ($fid == "0") {
+				array_unshift($parents, array('id' => $fid, 'filename' => ""));
 			}
 		} while ($stmt->num_rows > 0);
 
 		return $parents;
 	}
 
-	public function cache_restore($id, $to, $oid, $path) {
+	/**
+	 * Remove file from trash
+	 * @param string $fid
+	 * @param string $to Destination path (for history)
+	 * @param int $oid
+	 * @param string $path
+	 * @return boolean
+	 */
+	public function cache_restore($fid, $to, $oid, $path) {
 		$stmt = $this->link->prepare(
 			'DELETE FROM sd_trash
 			WHERE id = ?'
 		);
-		$stmt->bind_param('s', $id);
+		$stmt->bind_param('s', $fid);
 		$stmt->execute();
 
-		return ($this->cache_move($id, $to, null, $path, $oid));
+		return ($this->cache_move($fid, $to, null, $path, $oid));
 	}
 
-	public function cache_move($id, $dest, $oldpath, $newpath, $oid) {
+	/**
+	 * Move file to new parent
+	 * @param string $fid
+	 * @param string $dest
+	 * @param string $oldpath (for history)
+	 * @param string $newpath (for history)
+	 * @param int $oid
+	 * @return boolean
+	 */
+	public function cache_move($fid, $dest, $oldpath, $newpath, $oid) {
 		$stmt = $this->link->prepare(
 			'UPDATE sd_cache
 			SET parent = ?
 			WHERE id = ?'
 		);
-		$stmt->bind_param('ss', $dest, $id);
+		$stmt->bind_param('ss', $dest, $fid);
 
 		if ($stmt->execute()) {
 			if ($oldpath) {
-				$this->history_add($id, $oldpath, $oid, time(), true);
+				$this->history_add($fid, $oldpath, $oid, time(), true);
 			}
-			$this->history_add($id, $newpath, $oid, time(), false);
+			$this->history_add($fid, $newpath, $oid, time(), false);
 		}
 
 		return true;
 	}
 
-	public function cache_rename($id, $oldpath, $newpath, $new_filename, $oid) {
+	/**
+	 * Rename file
+	 * @param string $fid
+	 * @param string $oldpath
+	 * @param string $newpath
+	 * @param string $new_filename
+	 * @param int $oid
+	 * @return boolean
+	 */
+	public function cache_rename($fid, $oldpath, $newpath, $new_filename, $oid) {
 		$stmt = $this->link->prepare(
 			'UPDATE sd_cache
 			SET filename = ?
 			WHERE id = ?'
 		);
-		$stmt->bind_param('ss', $new_filename, $id);
+		$stmt->bind_param('ss', $new_filename, $fid);
 
 		if ($stmt->execute()) {
-			$this->history_add($id, $oldpath, $oid, time(), true);
-			$this->history_add($id, $newpath, $oid, time(), false);
+			$this->history_add($fid, $oldpath, $oid, time(), true);
+			$this->history_add($fid, $newpath, $oid, time(), false);
 		}
 
 		return true;
 	}
 
-	public function cache_remove($id) {
+	/**
+	 * Remove file from cache
+	 * @param string $fid
+	 * @return boolean
+	 */
+	public function cache_remove($fid) {
 		$stmt = $this->link->prepare(
 			'DELETE
 			FROM sd_cache
 			WHERE id = ?'
 		);
-		$stmt->bind_param('s', $id);
+		$stmt->bind_param('s', $fid);
 		return ($stmt->execute());
 	}
 
-	public function cache_trashed($id) {
+	/**
+	 * Check if file is trashed
+	 * @param string $fid
+	 * @return boolean
+	 */
+	public function cache_trashed($fid) {
 		do {
 			$stmt = $this->link->prepare(
 				'SELECT sd_cache.parent, sd_trash.id
@@ -1788,10 +2129,10 @@ class Database {
 				LEFT JOIN sd_trash ON sd_cache.id = sd_trash.id
 				WHERE sd_cache.id = ?'
 			);
-			$stmt->bind_param('s', $id);
+			$stmt->bind_param('s', $fid);
 			$stmt->execute();
 			$stmt->store_result();
-			$stmt->bind_result($id, $trash_id);
+			$stmt->bind_result($fid, $trash_id);
 			$stmt->fetch();
 
 			if ($trash_id) {
@@ -1802,34 +2143,47 @@ class Database {
 		return false;
 	}
 
-	public function cache_clean($parent, $owner, $start, $recursive = false, $force_delete = false) {
+	/**
+	 * Remove all files from trash that have not been updated since $start
+	 * @param string $parent FileID
+	 * @param int $oid
+	 * @param int $start Timestamp from when the update started
+	 * @param boolean $include_childs If sub-directories should be included
+	 * @param boolean $force_delete Forces the file to be deleted from cache
+	 */
+	public function cache_clean($parent, $oid, $start, $include_childs = false, $force_delete = false) {
 		$stmt = $this->link->prepare(
 			'SELECT filename, id, type, lastscan
 			FROM sd_cache
 			WHERE parent = ?
 			AND owner = ?'
 		);
-		$stmt->bind_param('ss', $parent, $owner);
+		$stmt->bind_param('ss', $parent, $oid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($filename, $id, $type, $lastscan);
+		$stmt->bind_result($filename, $fid, $type, $lastscan);
 
 		while ($stmt->fetch()) {
-			$force_delete = $lastscan < $start && !$this->cache_trashed($id);
+			$force_delete = $lastscan < $start && !$this->cache_trashed($fid);
 
 			// Only go into recursion if user explicitly it (really slow!) or on deletion (to avoid loose links)
-			if (($recursive || $force_delete) && $type == "folder") {
-				$this->cache_clean($id, $owner, $start, $recursive, $force_delete);
+			if (($include_childs || $force_delete) && $type == "folder") {
+				$this->cache_clean($fid, $oid, $start, $include_childs, $force_delete);
 			}
 
 			if ($force_delete) {
-				$this->cache_remove($id);
+				$this->cache_remove($fid);
 			}
 		}
 	}
 
-	public function cache_clean_trash($uid, $existing) {
-		$escaped_existing = $this->escape_array($existing);
+	/**
+	 * Remove files from cache that don't exist on disk
+	 * @param int $uid
+	 * @param array $existing_files
+	 */
+	public function cache_clean_trash($uid, $existing_files) {
+		$escaped_existing = $this->escape_array($existing_files);
 		$stmt = $this->link->prepare(
 			'DELETE t
 			FROM sd_trash t
@@ -1841,65 +2195,14 @@ class Database {
 		$stmt->execute();
 	}
 
-	public function thumbnail_create($id, $path) {
-		$stmt = $this->link->prepare(
-			'INSERT INTO sd_thumbnails (id, path)
-			VALUES (?, ?)'
-		);
-		$stmt->bind_param('ss', $id, $path);
-		return ($stmt->execute());
-	}
-
-	public function thumbnail_remove($id) {
-		$stmt = $this->link->prepare(
-			'DELETE FROM sd_thumbnails
-			WHERE id = ?'
-		);
-		$stmt->bind_param('s', $id);
-		return ($stmt->execute());
-	}
-
-	public function thumbnail_get_path($id) {
-		$stmt = $this->link->prepare(
-			'SELECT path FROM sd_thumbnails
-			WHERE id = ?'
-		);
-		$stmt->bind_param('s', $id);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($path);
-		$stmt->fetch();
-
-		return ($stmt->affected_rows == 1) ? $path : null;
-	}
-
-	public function thumbnail_get_all($id) {
-		$thumb_paths = array();
-
-		$stmt = $this->link->prepare(
-			'SELECT filename, id, type
-			FROM sd_cache
-			WHERE parent = ?'
-		);
-		$stmt->bind_param('s', $id);
-		$stmt->execute();
-		$stmt->store_result();
-		$stmt->bind_result($filename, $id, $type);
-
-		while ($stmt->fetch()) {
-			if ($type == "folder") {
-				$thumb_paths = array_merge($thumb_paths, $this->thumbnail_get_all($id));
-			}
-			else if ($type == "image" || $type == "pdf") {
-				$path = $this->thumbnail_get_path($id);
-				array_push($thumb_paths, array('id' => $id, 'path' => $path));
-			}
-		}
-
-		return $thumb_paths;
-	}
-
-	public function history_for_user($owner, $timestamp, $only_deleted = false) {
+	/**
+	 * Get change-history for user
+	 * @param int $oid
+	 * @param int $timestamp Only get entries from after this time
+	 * @param boolean $only_deleted Only return entries about deletions
+	 * @return array
+	 */
+	public function history_for_user($oid, $timestamp, $only_deleted = false) {
 		$entries = array();
 
 		$stmt = $this->link->prepare(
@@ -1912,7 +2215,7 @@ class Database {
 				WHERE h1.path = h2.path
 				AND timestamp > ?)'
 			);
-		$stmt->bind_param('si', $owner, $timestamp);
+		$stmt->bind_param('si', $oid, $timestamp);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($path, $deleted, $timestamp);
@@ -1927,48 +2230,40 @@ class Database {
 	}
 
 	/**
-	 * Add element to history to mark time of deletion/renaming/moving
-	 * @param id
-	 * @param delete did the file get deleted?
-	 * @param timestamp
+	 * Add folder to history to mark time of deletion/renaming/moving
+	 * @param int $fid
+	 * @param string $path
+	 * @param int $oid
+	 * @param int $timestamp
+	 * @param boolean $deleted Has the file been deleted?
+	 * @param boolean $include_parents
 	 */
-
-	public function history_add_file($path, $owner, $timestamp, $delete) {
-		$stmt = $this->link->prepare(
-			'INSERT INTO sd_history (deleted, timestamp, owner, path)
-			VALUES (?, ?, ?, ?)'
-		);
-		$stmt->bind_param('iiis', $delete, $timestamp, $owner, $path);
-		$stmt->execute();
-		return true;
-	}
-
-	public function history_add($id, $path, $owner, $timestamp, $delete, $include_parents = true) {
-		$id_backup = $id;
+	public function history_add($fid, $path, $oid, $timestamp, $deleted, $include_parents = true) {
+		$fid_backup = $fid;
 		$path_backup = $path;
 
 		// Entry for file/folder itself
-		$this->history_add_file($path, $owner, $timestamp, $delete);
+		$this->history_add_file($path, $oid, $timestamp, $deleted);
 
 		// Entry for parents
-		if (!$delete && $include_parents) {
+		if (!$deleted && $include_parents) {
 			do {
 				$stmt = $this->link->prepare(
 					'SELECT parent
 					FROM sd_cache
 					WHERE id = ?'
 				);
-				$stmt->bind_param('s', $id);
+				$stmt->bind_param('s', $fid);
 				$stmt->execute();
 				$stmt->store_result();
-				$stmt->bind_result($id);
+				$stmt->bind_result($fid);
 				$stmt->fetch();
 
-				$path = $this->cache_relative_path($id);
+				$path = $this->cache_relative_path($fid);
 				if ($path) {
-					$this->history_add_file($path, $owner, $timestamp, $delete);
+					$this->history_add_file($path, $oid, $timestamp, $deleted);
 				}
-			} while ($id && $id != "0");
+			} while ($fid && $fid != "0");
 		}
 
 		// Entry for children
@@ -1977,19 +2272,37 @@ class Database {
 			FROM sd_cache
 			WHERE parent = ?'
 		);
-		$stmt2->bind_param('s', $id_backup);
+		$stmt2->bind_param('s', $fid_backup);
 		$stmt2->execute();
 		$stmt2->store_result();
 		$stmt2->bind_result($child_id, $filename, $type);
 
 		while ($stmt2->fetch()) {
 			if ($type == "folder") {
-				$this->history_add($child_id, $path_backup . "/" . $filename, $owner, $timestamp, $delete, false);
+				$this->history_add($child_id, $path_backup . "/" . $filename, $oid, $timestamp, $deleted, false);
 			}
 			else {
-				$this->history_add_file($path_backup . "/" . $filename, $owner, $timestamp, $delete);
+				$this->history_add_file($path_backup . "/" . $filename, $oid, $timestamp, $delete);
 			}
 		}
+	}
+
+	/**
+	 * Add file to history to mark time of deletion/renaming/moving
+	 * @param string $path
+	 * @param int $oid
+	 * @param int $timestamp
+	 * @param boolean $delete Did the file get deleted?
+	 * @return boolean
+	 */
+	public function history_add_file($path, $oid, $timestamp, $deleted) {
+		$stmt = $this->link->prepare(
+			'INSERT INTO sd_history (deleted, timestamp, owner, path)
+			VALUES (?, ?, ?, ?)'
+		);
+		$stmt->bind_param('iiis', $deleted, $timestamp, $oid, $path);
+		$stmt->execute();
+		return true;
 	}
 }
 ?>

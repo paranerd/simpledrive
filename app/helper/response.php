@@ -9,18 +9,17 @@
 
 class Response {
 	static $DOWNLOAD_RATE = 1024; // Send files in 1-MB-chunks
-	//static $DOWNLOAD_FLAG = false;
 	static $DOWNLOAD_PATH;
 	static $DOWNLOAD_DEL = false;
 
 	/**
 	 * Return error message to client
-	 * @param int code HTTP-Status-Code
-	 * @param string msg Error message
-	 * @param boolean render
+	 * @param int $code HTTP-Status-Code
+	 * @param string $msg Error message
+	 * @param boolean $render
 	 * @return string
 	 */
-	static public function error($code, $msg, $render = false) {
+	public static function error($code, $msg, $render = false) {
 		if ($render) {
 			$base = self::base();
 			require_once 'app/views/error.php';
@@ -35,16 +34,15 @@ class Response {
 	 * Return method-result to api or set parameters for rendering
 	 * If a user is required, client will be redirected to login/setup if none is found
 	 * Setup and login don't require a user
-	 *
-	 * @param string info result-message
-	 * @param boolean render
-	 * @param string|null token for authorization
-	 * @param string section
-	 * @param string args additional arguments (e.g. FileID)
-	 * @param boolean need_user
+	 * @param string $info Result-message
+	 * @param boolean $render
+	 * @param string|null $token For authorization
+	 * @param string $section
+	 * @param string $args Additional arguments (e.g. FileID)
+	 * @param boolean $need_user
 	 * @return string|null
 	 */
-	static public function success($info, $render = false, $token = null, $section = '', $args = null, $need_user = true) {
+	public static function success($info, $render = false, $token = null, $section = '', $args = null, $need_user = true) {
 		if ($render) {
 			$db			= ($need_user) ? Database::getInstance() : null;
 			$user		= ($db) ? $db->user_get_by_token($token) : null;
@@ -77,13 +75,12 @@ class Response {
 	/**
 	 * Check whether a resource needs to be sent
 	 * or if the version in client-cache can be used
-	 *
-	 * @param int timestamp
-	 * @param string identifier
-	 * @param boolean strict
+	 * @param int $timestamp
+	 * @param string $identifier
+	 * @param boolean $strict
 	 * @return boolean
 	 */
-	static public function set_cache_header($timestamp, $identifier = "", $strict = false) {
+	public static function set_cache_header($timestamp, $identifier = "", $strict = false) {
 		// Are we still allowed to send headers?
 		if (headers_sent()) {
 			return false;
@@ -119,18 +116,18 @@ class Response {
 		return false;
 	}
 
-	static public function set_download($path, $delete_flag) {
+	public static function set_download($path, $delete_flag) {
 		self::$DOWNLOAD_PATH = $path;
 		self::$DOWNLOAD_DEL = $delete_flag;
 	}
 
 	/**
 	 * Send file to client
-	 *
-	 * @param string destination filepath
-	 * @param boolean delete_flag whether or not the file should be deletet after download
+	 * @param string $destination Filepath
+	 * @param boolean $delete_flag Whether or not the file should be deletet after download
+	 * @return null
 	 */
-	static public function download($destination, $delete_flag) {
+	public static function download($destination, $delete_flag) {
 		//self::$DOWNLOAD_FLAG = true;
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
 		header('Cache-control: private, max-age=86400, no-transform');
@@ -159,27 +156,25 @@ class Response {
 
 	/**
 	 * Get interface language
-	 *
-	 * @return string language array
+	 * @return array Language array
 	 */
-	static private function lang() {
+	private static function lang() {
 		$lang_code = (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && file_exists('lang/' . substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) . '.json')) ? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en';
 		return json_decode(file_get_contents('lang/' . $lang_code . '.json'), true);
 	}
 
 	/**
 	 * Determine base (for js, css, redirects, etc.)
-	 *
-	 * @return string base-path
+	 * @return string Base-path
 	 */
-	static private function base() {
+	private static function base() {
 		return rtrim(dirname($_SERVER['PHP_SELF']), '/') . '/';
 	}
 
 	/**
 	 * Redirect client
 	 */
-	static public function redirect($target) {
+	public static function redirect($target) {
 		header('Location: ' . self::base() . $target);
 	}
 }

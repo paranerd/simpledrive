@@ -99,6 +99,13 @@ var Util = new function() {
 			}
 		});
 
+		$(document).on('keydown', '.checkbox-box', function(e) {
+			// Toggle checkbox on space and enter
+			if (e.keyCode == 32 || e.keyCode == 13) {
+				$(this).click();
+			}
+		});
+
 		$(document).on('keyup', '.password-check', function(e) {
 			var id = $(this).data('strength');
 
@@ -540,5 +547,19 @@ var Util = new function() {
 		}
 
 		return null;
+	}
+
+	this.autofill = function(id, value, callback) {
+		var i = 0;
+		var fill = setInterval(function() {
+			$("#" + id).val($("#" + id).val() + value.charAt(i));
+			i++;
+			if (i == value.length) {
+				clearTimeout(fill);
+				if (callback) {
+					callback();
+				}
+			}
+		}, 100);
 	}
 }

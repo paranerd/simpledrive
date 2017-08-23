@@ -10,12 +10,13 @@
 class Util {
 	/**
 	 * Send mail using smtp
-	 * @param subject
-	 * @param recipient
-	 * @param msg
-	 * @return string on error | null on success
+	 * @param string $subject
+	 * @param string $recipient
+	 * @param string $msg
+	 * @throws Exception
+	 * @return string|null
 	 */
-	public function send_mail($subject, $recipient, $msg) {
+	public static function send_mail($subject, $recipient, $msg) {
 		// Check if phpmailer plugin is installed
 		if (!file_exists('plugins/phpmailer/PHPMailerAutoload.php')) {
 			return null;
@@ -45,19 +46,19 @@ class Util {
 		$mail->Body    = $msg;
 		$mail->AltBody = $msg;
 
-		if($mail->send()) {
+		if ($mail->send()) {
 			return null;
-		} else {
-			return $mail->ErrorInfo;
 		}
+
+		throw new Exception($mail->ErrorInfo, '500');
 	}
 
 	/**
 	 * Recursively deletes directory
 	 * @param string $path
-	 * @param string $owner owner of the directory to delete
+	 * @return boolean
 	 */
-	public function delete_dir($path) {
+	public static function delete_dir($path) {
 		$objects = scandir($path);
 		foreach ($objects as $object) {
 			if ($object != "." && $object != "..") {
@@ -78,8 +79,9 @@ class Util {
 	 * Recursively copies a directory to the specified target
 	 * @param string $sourcepath
 	 * @param string $targetpath
+	 * @return boolean
 	 */
-	public function copy_dir($sourcepath, $targetpath) {
+	public static function copy_dir($sourcepath, $targetpath) {
 		mkdir($targetpath);
 		$objects = scandir($sourcepath);
 
@@ -100,8 +102,10 @@ class Util {
 
 	/**
 	 * Takes a size string with optional "G", "M" or "K" suffix and converts it into the byte-size
+	 * @param string $size_string
+	 * @return int
 	 */
-	public function convert_size($size_string) {
+	public static function convert_size($size_string) {
 		switch (substr($size_string, -1)) {
 			case 'G':
 				return floatval($size_string) * 1024 * 1024 * 1024;
@@ -114,8 +118,13 @@ class Util {
 		}
 	}
 
-	public function bytes_to_string($byte_string) {
-		$size = $byte_string;
+	/**
+	 * Convert byte-size to string containing "GB", etc.
+	 * @param int $byte_string
+	 * @return string
+	 */
+	public static function bytes_to_string($bytes) {
+		$size = $bytes;
 		if ($size > (1024 * 1024 * 1024)) {
 			return floor(($size / (1024 * 1024 * 1024)) * 100) / 100 . " GB";
 		}
@@ -132,11 +141,12 @@ class Util {
 
 	/**
 	 * Searches an array of files for a specified path
-	 * @param string $path needle
-	 * @param array $array haystack
-	 * @return array|null index and md5-sum if found
+	 * @param array $array Haystack
+	 * @param string $key
+	 * @param string $value
+	 * @return int|null Index
 	 */
-	public function search_in_array_2D($array, $key, $value) {
+	public static function search_in_array_2D($array, $key, $value) {
 		foreach ($array as $x => $arr) {
 			if ($arr && array_key_exists($key, $arr) && $arr[$key] == $value) {
 				return $x;
@@ -146,19 +156,51 @@ class Util {
 		return null;
 	}
 
-	public function search_in_array_1D($array, $value) {
+	/**
+	 * Searches an array of files for a specified path
+	 * @param array $array Haystack
+	 * @param string $value
+	 * @return int|null index
+	 */
+	public static function search_in_array_1D($array, $value) {
 		foreach ($array as $key => $elem) {
 			if ($elem == $value) {
 				return $key;
 			}
 		}
+
+		return null;
 	}
 
-	public function array_remove_keys($arr, $bad_keys) {
+	/**
+	 * Remove keys from array
+	 * @param array $arr
+	 * @param array $bad_keys Keys to remove
+	 * @return array
+	 */
+	public static function array_remove_keys($arr, $bad_keys) {
 		return array_diff_key($arr, array_flip($bad_keys));
 	}
 
-	public function dir_size($path) {
+	/**
+	 * Check if keys exists in array
+	 * @param array $arr
+	 * @param array $keys
+	 */
+	public static function array_has_keys($arr, $keys) {
+		foreach ($keys as $key) {
+			if (!isset($arr[$key])) {
+				return $key;
+			}
+		}
+	}
+
+	/**
+	 * Get size of a directory
+	 * @param string $path
+	 * @return int
+	 */
+	public static function dir_size($path) {
 		$size = 0;
 		foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)) as $file) {
 			$size += $file->getSize();
@@ -167,23 +209,28 @@ class Util {
 		return $size;
 	}
 
-	public function array_has_keys($arr, $keys) {
-		foreach ($keys as $key) {
-			if (!isset($arr[$key])) {
-				return $key;
-			}
-		}
-	}
-
-	public function connection_available() {
+	/**
+	 * Checks for internet connection by trying to connect to google
+	 * @return boolean
+	 */
+	public static function connection_available() {
 		return @fopen('http://google.com', 'r');
 	}
 
-	public function log($msg) {
+	/**
+	 * Write to log file
+	 * @param string $msg
+	 */
+	public static function log($msg) {
 		file_put_contents(LOG, print_r($msg, true) . "\n", FILE_APPEND);
 	}
 
-	public function get_files_in_dir($path) {
+	/**
+	 * Get all files in directory (first level)
+	 * @param string $path
+	 * @return array
+	 */
+	public static function get_files_in_dir($path) {
 		if (!file_exists($path)) {
 			return array();
 		}
@@ -201,7 +248,18 @@ class Util {
 		return $filenames;
 	}
 
-	public function execute_web_request($url, $header, $params, $method = "POST", $port = 443) {
+	/**
+	 * Execute an HTTP-Request
+	 * @param string $url
+	 * @param array $header
+	 * @param array $params
+	 * @param string $method
+	 * @param boolean $json_response
+	 * @return array
+	 */
+	public static function execute_http_request($url, $header, $params, $method = "POST", $json_response = false) {
+		// Determine port
+		$port = (strpos($url, "https") === 0) ? 443 : 80;
 		// Initialize connection
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -227,20 +285,61 @@ class Util {
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 		}
 
-		// Get response
-		$response = curl_exec($ch);
-
-		// Get Status
-		$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-		// Separate header from body
+		// Get response and info
+		$response_raw = curl_exec($ch);
+		$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-		$data = substr($response, $header_size);
+
+		// Close connection
 		curl_close($ch);
 
+		// Format response
+		return self::format_http_response($response_raw, $code, $header_size, $json_response);
+	}
+
+	/**
+	 * Extract code, headers and body from response and format
+	 * @param string $response
+	 * @param int $code
+	 * @param int $header_size
+	 * @param boolean $is_json
+	 * @return array
+	 */
+	private static function format_http_response($response, $code, $header_size, $is_json = false) {
+		// Extract header and convert the string to an array
+		$header_string = substr($response, 0, $header_size);
+		$header_array = explode("\r\n", $header_string);
+		$headers = array();
+
+		for ($i = 1; $i < count($header_array); $i++) {
+			$header_line = trim($header_array[$i]);
+
+			if ($header_line != "") {
+				if (substr_count($header_line, ':') >= 1) {
+					$header_line_array = explode(':', $header_line, 2);
+					$headers[strtolower($header_line_array[0])] = trim($header_line_array[1]);
+				}
+			}
+		}
+
+		// Extract body
+		$body = substr($response, $header_size);
+		if ($is_json) {
+			$body = json_decode($body, true);
+		}
+
 		return array(
-			'status' => $status,
-			'data'   => $data
+			'code'    => $code,
+			'headers' => $headers,
+			'body'    => $body
 		);
+	}
+
+	/**
+	 * Calculate fingerprint for current client
+	 * @return string
+	 */
+	public static function client_fingerprint() {
+		return hash('sha256', $_SERVER['REMOTE_ADDR']); // $_SERVER['HTTP_USER_AGENT']
 	}
 }

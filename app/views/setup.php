@@ -46,9 +46,9 @@ $enabled = isset($_SERVER['HTACCESS']);
 
 		<input id="mail" class="input-medium hidden form-hidden" type="text" placeholder="Mail Address" value="">
 		<input id="mailpass" class="input-medium hidden form-hidden" type="password" placeholder="Mail password" value="">
-		<input id="datadir" class="input-medium hidden form-hidden" type="text" placeholder="Data Directory" value="">
-		<input id="dbserver" class="input-medium hidden form-hidden" type="text" placeholder="Database Server" value="">
-		<input id="dbname" class="input-medium hidden form-hidden" type="text" placeholder="Database Name" value="">
+		<input id="datadir" class="input-medium hidden form-hidden" type="text" placeholder="Data Directory" value="<?php echo dirname(dirname(__DIR__)) . "/docs/"; ?>">
+		<input id="dbserver" class="input-medium hidden form-hidden" type="text" placeholder="Database Server" value="localhost">
+		<input id="dbname" class="input-medium hidden form-hidden" type="text" placeholder="Database Name" value="simpledrive">
 
 		<div class="error error-large hidden"></div>
 		<button id="submit" class="btn btn-large center-hor">Setup</button>

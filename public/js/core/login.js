@@ -5,74 +5,90 @@
  * @link		http://simpledrive.org
  */
 
-var base,
-	twoFactor = false;
+var base;
 
 $(document).ready(function() {
 	base = $('head').data('base');
 
 	$(window).resize();
-	$("#code").val('');
-	$("#submit").prop('disabled', false);
+
+	$(":submit").prop('disabled', false);
+
 	if ($('head').data('demo')) {
-		enterDemoCredentials('demo', 'demo');
+		enterDemoUser();
 	}
+
+	$("#login").on('submit', function(e) {
+		e.preventDefault();
+		login($("#user").val(), $("#pass").val());
+	});
+
+	$("#tfa").on('submit', function(e) {
+		e.preventDefault();
+		submitTFA($("#code").val());
+	});
 });
 
-$("#login").on('submit', function(e) {
-	e.preventDefault();
-	login();
-});
-
-function enterDemoCredentials(username, password) {
-	var i = 0;
-	var enterUser = setInterval(function() {
-		$("#user").val($("#user").val() + username.charAt(i));
-		i++;
-		if (i == username.length) {
-			clearTimeout(enterUser);
-			i = 0;
-			var enterPass = setInterval(function() {
-				$("#pass").val($("#pass").val() + password.charAt(i));
-				i++;
-				if (i == password.length) {
-					clearTimeout(enterPass);
-					$("#login").submit();
-				}
-			}, 100);
-		}
-	}, 100);
+function enterDemoUser() {
+	$("#user").val('');
+	Util.autofill("user", 'demo', enterDemoPass);
 }
 
-function login() {
-	if ($("#user").val() == "" || $("#pass").val() == "" ||
-		(twoFactor && $("#code").val() == ""))
-	{
+function enterDemoPass() {
+	Util.autofill("pass", 'demo', function() { login($("#user").val(), $("#pass").val()); });
+}
+
+function login(user, pass, callback) {
+	if (user == "" || pass == "") {
 		Util.showFormError('login', "No blank fields");
 	}
 	else {
-		$("#submit").prop('disabled', true);
+		$("#login :submit").prop('disabled', true);
 		$.ajax({
 			url: 'api/core/login',
 			type: 'post',
-			data: {user: $("#user").val(), pass: $("#pass").val(), code: $("#code").val(), remember: $("#remember").hasClass("checkbox-checked")},
+			data: {user: user, pass: pass, callback: callback},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			// Token was returned
 			window.location.href = base + "files";
 		}).fail(function(xhr, statusText, error) {
-			if (xhr.status != 403 || twoFactor) {
+			// TFA required
+			if (xhr.status == 403) {
+				$("#login").addClass("hidden");
+				$("#tfa").removeClass("hidden");
+				$("#code").focus();
+				login(user, pass, true);
+			}
+			// Wrong credentials
+			else {
+				$("#login").removeClass("hidden");
+				$("#tfa").addClass("hidden");
 				Util.showFormError('login', Util.getError(xhr));
 			}
-
-			if (xhr.status == 403) {
-				// 2-Factor-Authentication
-				twoFactor = true;
-				$("#code, #remember-wrapper").removeClass("hidden").focus();
-				$("#user, #pass").addClass("hidden");
-			}
 		}).always(function() {
-			$("#submit").prop('disabled', false);
+			$("#login :submit").prop('disabled', false);
+			$("#code, #pass").val('');
+		});
+	}
+}
+
+function submitTFA(code) {
+	if (code == "") {
+		Util.showFormError('tfa', "No blank fields");
+	}
+	else {
+		$("#tfa :submit").prop('disabled', true);
+		$.ajax({
+			url: 'api/twofactor/unlock',
+			type: 'post',
+			data: {code: code, remember: $("#remember").hasClass("checkbox-checked")},
+			dataType: "json"
+		}).done(function(data, statusText, xhr) {
+			// Maybe show progress
+		}).fail(function(xhr, statusText, error) {
+			Util.showFormError('tfa', Util.getError(xhr));
+		}).always(function() {
+			$("#tfa :submit").prop('disabled', false);
 			$("#code").val('');
 		});
 	}

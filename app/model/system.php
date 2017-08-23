@@ -8,6 +8,10 @@
  */
 
 class System_Model {
+	/**
+	 * Constructor
+	 * @param string $token
+	 */
 	public function __construct($token) {
 		$this->config = json_decode(file_get_contents(CONFIG), true);
 		$this->db     = Database::getInstance();
@@ -19,6 +23,7 @@ class System_Model {
 
 	/**
 	 * Get server status info
+	 * @return array
 	 */
 	public function status() {
 		$disktotal	= (disk_total_space(dirname(__FILE__)) != "") ? disk_total_space(dirname(__FILE__)) : disk_total_space('/');
@@ -45,6 +50,12 @@ class System_Model {
 		);
 	}
 
+	/**
+	 * Set upload-limit
+	 * @param $limit
+	 * @throws Exception
+	 * @return null
+	 */
 	public function set_upload_limit($limit) {
 		if (!ctype_digit($limit) || (ctype_digit($limit) && $limit < 1024)) {
 			throw new Exception('Illegal value for upload size', '400');
@@ -72,6 +83,11 @@ class System_Model {
 		throw new Exception('Error updating htaccess', '500');
 	}
 
+	/**
+	 * Set domain (used for public shares)
+	 * @throws Exception
+	 * @return null
+	 */
 	public function set_domain($domain) {
 		$this->config['domain'] = ($domain != "") ? $domain : $this->config['domain'];
 
@@ -83,6 +99,12 @@ class System_Model {
 		throw new Exception('Error writing config', '500');
 	}
 
+	/**
+	 * Update .htaccess to enforce SSL or not
+	 * @param boolean $ssl
+	 * @throws Exception
+	 * @return null
+	 */
 	public function use_ssl($ssl) {
 		$ssl						= ($ssl == "1") ? 1 : 0;
 		$ssl_comm					= ($ssl == "1") ? '' : '#';
@@ -125,8 +147,8 @@ class System_Model {
 
 	/**
 	 * Get 10 log entries
-	 * @param page indicates at which entry to start
-	 * @return array log entries
+	 * @param int $page Indicates at which entry to start
+	 * @return array Log entries
 	 */
 	public function get_log($page) {
 		$page_size = 10;
@@ -135,6 +157,7 @@ class System_Model {
 
 	/**
 	 * Delete all log entries from database
+	 * @return boolean
 	 */
 	public function clear_log() {
 		return $this->db->log_clear();
@@ -142,7 +165,8 @@ class System_Model {
 
 	/**
 	 * Download and extract a plugin
-	 * @param name (of the plugin)
+	 * @param string $name (of the plugin)
+	 * @return null
 	 */
 	public function get_plugin($name) {
 		// MD5-Hashes for integrity-check
@@ -166,9 +190,9 @@ class System_Model {
 			mkdir($plugin_path, 0777, true);
 		}
 
-		$response = Util::execute_web_request("http://simpledrive.org/plugins/" . $name, null, null, "GET", 80);
+		$response = Util::execute_http_request("http://simpledrive.org/plugins/" . $name, null, null, "GET");
 
-		if ($response['status'] !== 200) {
+		if ($response['code'] !== 200) {
 			throw new Exception('Error downloading plugin', '500');
 		}
 
@@ -200,7 +224,8 @@ class System_Model {
 
 	/**
 	 * Remove plugin directory
-	 * @param plugin_name
+	 * @param string $plugin_name
+	 * @return null
 	 */
 	public function remove_plugin($plugin_name) {
 		if (Util::delete_dir('plugins/' . $plugin_name)) {

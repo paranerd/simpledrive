@@ -8,19 +8,31 @@
  */
 
 class User_Model {
+	/**
+	 * Constructor
+	 * @param string $token
+	 * @throws Exception
+	 */
 	public function __construct($token) {
-		$this->token    = $token;
-		$this->config   = json_decode(file_get_contents(CONFIG), true);
-		$this->db       = Database::getInstance();
-		$this->user     = $this->db->user_get_by_token($token);
-		$this->uid      = ($this->user) ? $this->user['id'] : null;
-		$this->username = ($this->user) ? $this->user['username'] : "";
+		$this->token     = $token;
+		$this->config    = json_decode(file_get_contents(CONFIG), true);
+		$this->db        = Database::getInstance();
+		$this->user      = $this->db->user_get_by_token($token);
+		$this->uid       = ($this->user) ? $this->user['id'] : null;
+		$this->username  = ($this->user) ? $this->user['username'] : "";
+		$this->installed = count($this->db->user_get_all()) > 1;
 
-		if (!$this->uid) {
+		if ($this->installed && !$this->uid) {
 			throw new Exception('Permission denied', '403');
 		}
 	}
 
+	/**
+	 * Get user by name
+	 * @param string $username
+	 * @throws Exception
+	 * @return array
+	 */
 	public function get($username) {
 		$username = ($username) ? $username : $this->username;
 		if ($username == $this->username || $this->user['admin']) {
@@ -31,6 +43,11 @@ class User_Model {
 		}
 	}
 
+	/**
+	 * Get all users (admin required)
+	 * @throws Exception
+	 * @return array
+	 */
 	public function get_all() {
 		if (!$this->user['admin']) {
 			throw new Exception('Permission denied', '403');
@@ -39,8 +56,17 @@ class User_Model {
 		return $this->db->user_get_all();
 	}
 
+	/**
+	 * Create new user
+	 * @param string $username
+	 * @param string $pass
+	 * @param string $admin
+	 * @param string $mail
+	 * @throws Exception
+	 * @return int UserID
+	 */
 	public function create($username, $pass, $admin, $mail) {
-		if (!$this->user['admin']) {
+		if ($this->installed && !$this->user['admin']) {
 			throw new Exception('Permission denied', '403');
 		}
 
@@ -53,11 +79,12 @@ class User_Model {
 		$username = preg_replace("/[^a-zA-Z0-9_\-]+/", "", $username);
 
 		if (!$this->db->user_get_by_name($username)) {
-			if (!$this->db->user_create($username, Crypto::generate_password($pass), $admin, $mail)) {
+			$uid = $this->db->user_create($username, Crypto::generate_password($pass), $admin, $mail);
+			if ($uid == null) {
 				throw new Exception('Error creating user', '500');
 			}
 
-			if (!file_exists($this->config['datadir'] . $username) && !mkdir($this->config['datadir'] . $username, 0755)) {
+			if (!file_exists($this->config['datadir'] . $username) && !mkdir($this->config['datadir'] . $username, 0755, true)) {
 				throw new Exception('Error creating user directory', '403');
 			}
 
@@ -65,12 +92,18 @@ class User_Model {
 				$message = "Thank you " . $username . ",<BR> you successfully created a new user account!";
 				Util::send_mail("New user account", $mail, $message);
 			}
-			return true;
+			return $uid;
 		}
 
 		throw new Exception('User exists', '403');
 	}
 
+	/**
+	 * Set fileview
+	 * @param string $value
+	 * @throws Exception
+	 * @return null
+	 */
 	public function set_fileview($value) {
 		$supported = array('list', 'grid');
 
@@ -82,6 +115,12 @@ class User_Model {
 		throw new Exception('Theme not found', '400');
 	}
 
+	/**
+	 * Set theme color
+	 * @param string $value
+	 * @throws Exception
+	 * @return null
+	 */
 	public function set_color($value) {
 		$supported = array('light', 'dark');
 
@@ -93,6 +132,13 @@ class User_Model {
 		throw new Exception('Color not found', '400');
 	}
 
+	/**
+	 * Set max quota (admin required)
+	 * @param string $username
+	 * @param int $max
+	 * @throws Exception
+	 * @return null
+	 */
 	public function set_quota_max($username, $max) {
 		$user = $this->db->user_get_by_name($username);
 		if (!$user || !$this->user['admin']) {
@@ -101,15 +147,11 @@ class User_Model {
 
 		$max_storage = strval($max);
 
-		//$diskspace = (disk_free_space(dirname(__FILE__)) != undefined) ? disk_free_space(dirname(__FILE__)) : disk_free_space('/');
 		$usedspace = Util::dir_size($this->config['datadir'] . $username);
 
 		if ($usedspace > $max_storage && $max_storage != 0) {
 			throw new Exception('Max storage < Used storage', '400');
 		}
-		/*else if($max_storage > $diskspace) {
-			$max_storage = $diskspace;
-		}*/
 
 		if ($this->db->user_set_storage_max($user['id'], $max)) {
 			return null;
@@ -118,6 +160,13 @@ class User_Model {
 		throw new Exception('Error updating user', '500');
 	}
 
+	/**
+	 * Grant/revoke admin privileges (admin required)
+	 * @param string $username
+	 * @param boolean $admin
+	 * @throws Exception
+	 * @return null
+	 */
 	public function set_admin($username, $admin) {
 		$be_admin = ($admin == "1") ? 1 : 0;
 		$user = $this->db->user_get_by_name($username);
@@ -136,6 +185,12 @@ class User_Model {
 		throw new Exception('Error updating user', '500');
 	}
 
+	/**
+	 * Enable/disable autoscan
+	 * @param boolean $enable
+	 * @throws Exception
+	 * @return null
+	 */
 	public function set_autoscan($enable) {
 		$enable = ($enable == "1") ? 1 : 0;
 
@@ -146,6 +201,12 @@ class User_Model {
 		throw new Exception('Error updating user', '500');
 	}
 
+	/**
+	 * Delete user by name
+	 * @param string $username
+	 * @throws Exception
+	 * @return null
+	 */
 	public function delete($username) {
 		$user = $this->db->user_get_by_name($username);
 		if (!$this->user['admin']) {
@@ -162,6 +223,12 @@ class User_Model {
 		throw new Exception('Error deleting user', '500');
 	}
 
+	/**
+	 * Check user's quota (queried by File_Model)
+	 * @param string $uid
+	 * @param int $add Additional required space
+	 * @return boolean
+	 */
 	public function check_quota($uid, $add) {
 		$user = $this->db->user_get_by_id($uid);
 
@@ -173,6 +240,12 @@ class User_Model {
 		return false;
 	}
 
+	/**
+	 * Get user's quota
+	 * @param string $username
+	 * @throws Exception
+	 * @return array
+	 */
 	public function get_quota($username) {
 		$username = ($username) ? $username : $this->username;
 		$user = $this->db->user_get_by_name($username);
@@ -181,12 +254,17 @@ class User_Model {
 			throw new Exception('Permission denied', '403');
 		}
 
+		// Get total, used and free diskspace
 		$max = ($user['max_storage'] == '0') ? (disk_total_space(dirname(__FILE__)) != "") ? disk_total_space(dirname(__FILE__)) : disk_total_space('/') : $user['max_storage'];
 		$used = Util::dir_size($this->config['datadir'] . $username);
 		$free = ($user['max_storage'] == '0') ? ((disk_free_space(dirname(__FILE__)) != "") ? disk_free_space(dirname(__FILE__)) : disk_free_space('/')) : $max - $used;
+
+		// Get cache size
 		$cache_dir = $this->config['datadir'] . $this->username . CACHE;
-		$trash_dir = $this->config['datadir'] . $this->username . TRASH;
 		$cache = file_exists($cache_dir) ? Util::dir_size($cache_dir) : 0;
+
+		// Get trash size
+		$trash_dir = $this->config['datadir'] . $this->username . TRASH;
 		$trash = file_exists($trash_dir) ? Util::dir_size($trash_dir) : 0;
 
 		return array(
@@ -198,6 +276,13 @@ class User_Model {
 		);
 	}
 
+	/**
+	 * Change password
+	 * @param string $currpass
+	 * @param string $newpass
+	 * @throws Exception
+	 * @return string Auth-Token
+	 */
 	public function change_password($currpass, $newpass) {
 		$user = $this->db->user_get_by_name($this->username, true);
 
@@ -219,6 +304,11 @@ class User_Model {
 		throw new Exception('Wrong password', '403');
 	}
 
+	/**
+	 * Remove cache directory
+	 * @throws Exception
+	 * @return null
+	 */
 	public function clear_cache() {
 		if (Util::delete_dir($this->config['datadir'] . $this->username . CACHE)) {
 			return null;
@@ -227,6 +317,11 @@ class User_Model {
 		throw new Exception('Error clearing cache', '500');
 	}
 
+	/**
+	 * Remove trash directory
+	 * @throws Exception
+	 * @return null
+	 */
 	public function clear_trash() {
 		if (Util::delete_dir($this->config['datadir'] . $this->username . TRASH)) {
 			$existing = Util::get_files_in_dir($this->config['datadir'] . $this->username . TRASH);
@@ -238,25 +333,25 @@ class User_Model {
 	}
 
 	/**
-	 * Get current view or set next available one
-	 * @param username
-	 * @param type (color or fileview)
-	 * @param change true changes to next available one, false returns current one
-	 * @return array containing current and new view (equal on change = false)
+	 * Get number of active tokens
+	 * @return int
 	 */
-	public function load_view() {
-		$user = $this->db->user_get_by_name($this->username);
-		return array('color' => $user['color'], 'fileview' => $user['fileview']);
-	}
-
 	public function active_token() {
 		return $this->db->session_active_token($this->uid);
 	}
 
+	/**
+	 * Invalidate all tokens but the current one
+	 * @return boolean
+	 */
 	public function invalidate_token() {
-		$this->db->session_invalidate($this->uid, $this->token);
+		return $this->db->session_invalidate($this->uid, $this->token);
 	}
 
+	/**
+	 * Check if current user is admin
+	 * @return boolean
+	 */
 	public function is_admin() {
 		return ($this->user && $this->user['admin']);
 	}

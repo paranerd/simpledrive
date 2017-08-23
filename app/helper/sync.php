@@ -7,35 +7,42 @@
  * @link		http://simpledrive.org
  */
 
+ /**
+  * Sync-Process
+  *
+  * Client sends a list of all its files
+  * Server gets a list of all its files
+  *
+  * Handle files that exist on both client and server
+  * 		If they've got matching checksums, remove them from both lists (no need to further process them)
+  * 		Otherwise compare edit-dates, keep the most recent and delete or mark-for-delete the other one
+  *
+  * For the remaining client-files check if there is an entry in server-history
+  * 		If there is, it is for deletion and it is more recent than the file's last edit-date, mark the client-file for deletion
+  * 		Otherwise mark it for upload (but do not upload folders from client!)
+  *
+  * For the remaining server-files check the last history-entry
+  * 		If none exists or it is not for deletion, add it to client-list for download
+  * 		Otherwise delete from server
+  */
 class Sync {
 	/**
-	 * Sync-Process
-	 *
-	 * Client sends a list of all its files
-	 * Server gets a list of all its files
-	 *
-	 * Handle files that exist on both client and server
-	 * 		If they've got matching checksums, remove them from both lists (no need to further process them)
-	 * 		Otherwise compare edit-dates, keep the most recent and delete or mark-for-delete the other one
-	 *
-	 * For the remaining client-files check if there is an entry in server-history
-	 * 		If there is, it is for deletion and it is more recent than the file's last edit-date, mark the client-file for deletion
-	 * 		Otherwise mark it for upload (but do not upload folders from client!)
-	 *
-	 * For the remaining server-files check the last history-entry
-	 * 		If it is not for deletion, add it to client-list for download
-	 * 		Otherwise delete from server
+	 * Constructor
+	 * @param File_Model $file To access the delete-function
 	 */
-
 	public function __construct($file) {
-		$this->file		= $file;
+		$this->file = $file;
 	}
 
-	public function start($target, $clientfiles, $serverfiles, $history, $last_sync) {
-		$start = microtime(true);
-
-		return;
-
+	/**
+	 * Start sync-process
+	 * @param array $clientfiles
+	 * @param array $serverfiles
+	 * @param array $history
+	 * @param int $last_sync
+	 * @return array
+	 */
+	public function start($clientfiles, $serverfiles, $history, $last_sync) {
 		// Eliminate matches
 		$files = $this->eliminate_matches($clientfiles, $serverfiles);
 		$clientfiles = $files[0];
@@ -46,10 +53,16 @@ class Sync {
 
 		// Mark the remaining serverfiles for download
 		$clientfiles = $this->process_serverfiles($clientfiles, $serverfiles, $history);
-		
+
 		return $clientfiles;
 	}
 
+	/**
+	 * Remove exact matches (same md5) from both arrays
+	 * @param array $clientfiles
+	 * @param array $serverfiles
+	 * @return array Containing both client- and server-files separately
+	 */
 	private function eliminate_matches($clientfiles, $serverfiles) {
 		$size = sizeof($clientfiles);
 		for ($i = 0; $i < $size; $i++) {
@@ -78,6 +91,15 @@ class Sync {
 		return array($clientfiles, $serverfiles);
 	}
 
+	/**
+	 * Mark client-entries
+	 * Delete if there is a newer version on the server
+	 * Upload if there is an older or no version on the server
+	 * and the server hasn't deleted the file after last client-edit
+	 * @param array $clientfiles
+	 * @param array $history
+	 * @return array
+	 */
 	private function process_clientfiles($clientfiles, $history) {
 		for ($i = 0; $i < sizeof($clientfiles); $i++) {
 			$match = Util::search_in_array_2D($history, 'path', $clientfiles[$i]['path']);
@@ -96,6 +118,15 @@ class Sync {
 		return $clientfiles;
 	}
 
+	/**
+	 * Process the remaining serverfiles that don't have an exact match on the client
+	 * Add serverfile to client-array for download
+	 * if no history entry exists or it is not for deletion
+	 * @param array $clientfiles
+	 * @param array $serverfiles
+	 * @param array $history
+	 * @return array
+	 */
 	private function process_serverfiles($clientfiles, $serverfiles, $history) {
 		for ($i = 0; $i < sizeof($serverfiles); $i++) {
 			$match = Util::search_in_array_2D($history, 'path', $serverfiles[$i]['path']);
@@ -114,6 +145,12 @@ class Sync {
 		return $clientfiles;
 	}
 
+	/**
+	 * Mark client-folder and all its children for deletion
+	 * @param array $clientfiles
+	 * @param string $path
+	 * @return array
+	 */
 	private function mark_folder_for_delete($clientfiles, $path) {
 		for ($i = 0; $i < sizeof($clientfiles); $i++) {
 			if (strpos($clientfiles[$i]['path'], $path) === 0) {

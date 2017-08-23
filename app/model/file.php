@@ -14,6 +14,7 @@ require_once 'app/model/user.php';
 class File_Model {
 	/**
 	 * Constructor
+	 * @param string $token
 	 */
 	public function __construct($token) {
 		$this->token    = $token;
@@ -26,6 +27,9 @@ class File_Model {
 		$this->init();
 	}
 
+	/**
+	 * Create all necessary directories
+	 */
 	private function init() {
 		if ($this->username) {
 			$userdir = $this->config['datadir'] . $this->username;
@@ -46,7 +50,6 @@ class File_Model {
 
 	/**
 	 * Return type of path, e.g. "folder", "audio", "pdf"
-	 *
 	 * @param string $path
 	 * @return string
 	 */
@@ -90,8 +93,7 @@ class File_Model {
 	}
 
 	/**
-	 * Returns filesize for files, filecount for directories
-	 *
+	 * Return filesize for files, filecount for directories
 	 * @param string $path
 	 * @return string
 	 */
@@ -100,9 +102,8 @@ class File_Model {
 	}
 
 	/**
-	 * Removes all image-thumbnails (recursively if $file is a directory)
-	 *
-	 * @param array file
+	 * Remove all image-thumbnails (recursively if $file is a directory)
+	 * @param array $file
 	 */
 	private function remove_thumbnail($file) {
 		$cache_dir = $this->get_cache_dir($file);
@@ -123,6 +124,9 @@ class File_Model {
 		}
 	}
 
+	/**
+	 * Remove file from disk-cache
+	 */
 	private function remove_from_cache($file) {
 		$cache_dir = $this->get_cache_dir($file);
 
@@ -132,35 +136,39 @@ class File_Model {
 	}
 
 	/**
-	 * Recursively deletes directory
-	 *
-	 * @param integer ownerid
-	 * @param string id
-	 * @param string path
+	 * Recursively delete directory
+	 * @param int $oid
+	 * @param string $fid
+	 * @param string $path
+	 * @return boolean
 	 */
-	public function recursive_remove($ownerid, $id, $path) {
+	public function recursive_remove($oid, $fid, $path) {
 		$files = scandir($path);
 
 		foreach ($files as $file) {
 			if ($file != "." && $file != "..") {
-				$id = $this->db->cache_has_child($ownerid, $id, $file);
+				$fid = $this->db->cache_has_child($oid, $fid, $file);
 
 				if (filetype($path . "/" . $file) == "dir") {
-					$this->recursive_remove($ownerid, $id, $path . "/" . $file);
+					$this->recursive_remove($oid, $fid, $path . "/" . $file);
 				}
-				else if (unlink($path . "/" . $file) && $id) {
-					$this->db->cache_remove($id);
+				else if (unlink($path . "/" . $file) && $fid) {
+					$this->db->cache_remove($fid);
 				}
 			}
 		}
 
 		reset($files);
 		if (rmdir($path)) {
-			$this->db->cache_remove($id);
+			$this->db->cache_remove($fid);
 		}
 		return true;
 	}
 
+	/**
+	 * Create cache-directory if not exists and return path
+	 * @param array $file
+	 */
 	private function get_cache_dir($file) {
 		$cache_dir = $this->config['datadir'] . $file['owner'] . CACHE;
 
@@ -172,12 +180,11 @@ class File_Model {
 	}
 
 	/**
-	 * Creates a thumbnail from a pdf or scales an image so that its biggest size is smaller/equal to the biggest size of the target-dimensions while keeping the ratio
-	 *
-	 * @param array file
-	 * @param integer Width of the container
-	 * @param integer Height of the container
-	 * @param boolean Used to differentiate where to store the scaled image
+	 * Create thumbnail from a pdf or scales an image so that its biggest size is smaller/equal to the biggest size of the target-dimensions while keeping the ratio
+	 * @param array $file
+	 * @param int $target_width Width of the container
+	 * @param int $target_height Height of the container
+	 * @param boolean $thumb To determine cache-filename
 	 * @return string Path of the scaled image
 	 */
 	private function scale_image($file, $target_width, $target_height, $thumb) {
@@ -256,10 +263,6 @@ class File_Model {
 				imageCopyResampled($scaled, $img, 0, 0, 0, 0, $scaled_width, $scaled_height, $src_width, $src_height);
 				ImageJPEG($scaled, $destination);
 
-				/*$img2 = ImageCreateFromJPEG($destination);
-				$rotate = imagerotate($img2, 90, 0);
-				ImageJPEG($rotate);*/
-
 				return $destination;
 			}
 			// PNG
@@ -281,10 +284,9 @@ class File_Model {
 
 	/**
 	 * Recursively add a directory to a zip-archive
-	 *
-	 * @param string dir directory-path to add
+	 * @param string $dir Directory-path to add
 	 * @param ZipArchive $zipArchive
-	 * @param string zipdir
+	 * @param string $zipdir
 	 */
 	private function addFolderToZip($dir, $zipArchive, $zipdir) {
 		if (is_dir($dir)) {
@@ -309,20 +311,31 @@ class File_Model {
 		}
 	}
 
-	public function sync($target, $clientfiles, $lastsync) {
+	/**
+	 * Synchronize files between server client
+	 * @param string $target FileID
+	 * @param array $clientfiles
+	 * @param int $last_sync
+	 */
+	public function sync($target, $clientfiles, $last_sync) {
 		$file = $this->get_cached($target, PERMISSION_WRITE);
 
-		if (!$file) {
+		if (!$file || $this->uid == PUBLIC_USER_ID) {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		$history = $this->db->history_for_user($this->uid, $lastsync);
+		$history = $this->db->history_for_user($this->uid, $last_sync);
 		$serverfiles = $this->db->cache_get_all($this->uid, $file['id']);
 
 		$s = new Sync($this);
-		$s->start($file['id'], $clientfiles, $serverfiles, $history, $lastsync);
+		$s->start($clientfiles, $serverfiles, $history, $last_sync);
 	}
 
+	/**
+	 * Search for filename in cache
+	 * @param string $needle
+	 * @return array
+	 */
 	public function search($needle) {
 		if ($this->uid == PUBLIC_USER_ID) {
 			throw new Exception('Access denied', '403');
@@ -336,7 +349,13 @@ class File_Model {
 		);
 	}
 
-	public function children($target, $mode, $recursive = false, $need_md5 = false) {
+	/**
+	 * Return children of a folder or shared or trashed files
+	 * @param string $target FileID
+	 * @param string $mode ("sharein", "shareout", etc.)
+	 * @return array
+	 */
+	public function children($target, $mode) {
 		$file = $this->get_cached($target, PERMISSION_READ);
 
 		if (!$file) {
@@ -344,7 +363,7 @@ class File_Model {
 		}
 
 		// Scan folder if autoscan is enabled
-		if ($this->db->user_get_by_id($file['ownerid'])['autoscan']) {
+		if (true || $this->db->user_get_by_id($file['ownerid'])['autoscan']) {
 			$this->scan($file['id']);
 		}
 
@@ -359,10 +378,10 @@ class File_Model {
 			$files = $this->db->cache_get_trash($this->uid);
 		}
 		else if ($mode == "shareout" && strlen($file['path']) == 0) {
-			$files = $this->db->share_get_from($this->uid, PERMISSION_READ);
+			$files = $this->db->share_get_from($this->uid);
 		}
 		else if ($mode == "sharein" && strlen($file['path']) == 0) {
-			$files = $this->db->share_get_with($this->uid, PERMISSION_READ);
+			$files = $this->db->share_get_with($this->uid);
 		}
 		else {
 			$files = $this->db->cache_children($file['id'], $this->uid, $file['ownerid']);
@@ -376,12 +395,12 @@ class File_Model {
 	}
 
 	/**
-	 * Create file/folder, if no filename is specified it iterates over "Unknown file", "Unknown file (1)", etc.
-	 *
-	 * @param string target ID of the directory the element is created in
-	 * @param string type "folder" or "file"
-	 * @param string orig_filename name of new element (optional)
-	 * @return string|null only return status info if something went wrong
+	 * Create file/folder
+	 * If no filename is specified it iterates over "Unknown file", "Unknown file (1)", etc.
+	 * @param string $target FileID of the directory the element is created in
+	 * @param string $type Can be either "folder" or "file"
+	 * @param string $orig_filename Name of new element (optional)
+	 * @return string FileID
 	 */
 	public function create($target, $type, $orig_filename = "") {
 		if (!$this->filename_valid($orig_filename)) {
@@ -422,17 +441,16 @@ class File_Model {
 
 	/**
 	 * Rename a file/folder
-	 *
-	 * @param integer File-ID
-	 * @param string newname new filename
-	 * @return string|null only return status info if something went wrong
+	 * @param int $fid
+	 * @param string $newname
+	 * @return null
 	 */
-	public function rename($id, $newname) {
+	public function rename($fid, $newname) {
 		if (!$this->filename_valid($newname)) {
 			throw new Exception('Filename not allowed', '400');
 		}
 
-		$file = $this->get_cached($id, PERMISSION_WRITE);
+		$file = $this->get_cached($fid, PERMISSION_WRITE);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
@@ -461,9 +479,8 @@ class File_Model {
 
 	/**
 	 * Delete file or move it to trash
-	 *
-	 * @param array sources File-ID(s) to delete
-	 * @return string|null only return status if something went wrong
+	 * @param array $sources File-ID(s) to delete
+	 * @return null
 	 */
 	public function delete($sources) {
 		$errors = 0;
@@ -516,13 +533,12 @@ class File_Model {
 
 	/**
 	 * Share a file
-	 *
-	 * @param string target File-ID to be shared
-	 * @param string userto user the file is shared with
-	 * @param string mail mail address to notify somebody about file sharing
-	 * @param integer write 1 for write access, 0 otherwise
-	 * @param integer public 1 for public access, 0 otherwise
-	 * @param string pass access password
+	 * @param string $target File-ID to be shared
+	 * @param string $userto User the file is shared with
+	 * @param string $mail Mail address to notify somebody about file sharing
+	 * @param boolean $write 1 for write access, 0 otherwise
+	 * @param boolean $public 1 for public access, 0 otherwise
+	 * @param string|null Link if $public
 	 */
 	public function share($target, $userto, $mail, $write, $public, $pass) {
 		$file = $this->get_cached($target, PERMISSION_WRITE);
@@ -566,18 +582,16 @@ class File_Model {
 
 	/**
 	 * Remove share-entry from DB
-	 *
-	 * @param string id
+	 * @param string $fid
 	 */
-
-	public function unshare($id) {
-		$file = $this->get_cached($id, PERMISSION_READ);
+	public function unshare($fid) {
+		$file = $this->get_cached($fid, PERMISSION_READ);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		if ($this->db->share_remove($file['id'])) {
+		if ($this->db->share_remove($fid)) {
 			return null;
 		}
 
@@ -586,19 +600,17 @@ class File_Model {
 
 	/**
 	 * Return the share-link if the file was shared to public
-	 *
-	 * @param string id
+	 * @param string $fid
 	 * @return string
 	 */
-
-	public function get_link($id) {
-		$file = $this->get_cached($id, PERMISSION_READ);
+	public function get_link($fid) {
+		$file = $this->get_cached($fid, PERMISSION_READ);
 
 		if (!$file) {
 			throw new Exception('Error accessing file', '403');
 		}
 
-		if ($share = $this->db->share_get_by_file_id($file['id'])) {
+		if ($share = $this->db->share_get_by_file_id($fid)) {
 			if ($share['userto'] == PUBLIC_USER_ID) {
 				return $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/pub/" . $share['id'];
 			}
@@ -608,13 +620,11 @@ class File_Model {
 	}
 
 	/**
-	 * Copie file(s) to specified directory
-	 *
-	 * @param integer target ID of target-directory
-	 * @param array sources File-ID(s) to copy
-	 * @return string|null only return status info if something went wrong
+	 * Copy file(s) to specified directory
+	 * @param string $target FileID of target-directory
+	 * @param array $sources FileID(s) to copy
+	 * @return null
 	 */
-
 	public function copy($target, $sources) {
 		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
 
@@ -655,13 +665,11 @@ class File_Model {
 
 	/**
 	 * Zip file(s)
-	 *
-	 * @param integer target Directory-id to save zip-file in
-	 * @param array sources List of files to zip
-	 * @param boolean for_download If file is supposed to be downloaded
-	 * @return string path to created zip-file
+	 * @param string $target DirectoryID to save zip-file in
+	 * @param array $sources List of files to zip
+	 * @param boolean $for_download If file is supposed to be downloaded
+	 * @return string Path to created zip-file
 	 */
-
 	public function zip($target, $sources, $for_download = false) {
 		$target = (!$target && $for_download) ? '0' : $target;
 		$targetfile = $this->get_cached($target, PERMISSION_READ);
@@ -729,6 +737,12 @@ class File_Model {
 		throw new Exception('Error creating zip file', '500');
 	}
 
+	/**
+	 * Unzip file
+	 * @param string $target FileID to extract to
+	 * @param string $source Path to file to extract
+	 * @return null
+	 */
 	public function unzip($target, $source) {
 		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
 		$sourcefile = $this->get_cached($source, PERMISSION_READ);
@@ -752,6 +766,11 @@ class File_Model {
 		throw new Exception('Error unzipping', '500');
 	}
 
+	/**
+	 * Restore file(s) from trash
+	 * @param array $sources FileIDs
+	 * @return string Result info
+	 */
 	public function restore($sources) {
 		$errors = 0;
 
@@ -796,10 +815,9 @@ class File_Model {
 
 	/**
 	 * Move file(s) to specified target
-	 *
-	 * @param integer target target-folder-id
-	 * @param array sources file-id(s) to move
-	 * @return string|null only return status info if something went wrong
+	 * @param int $target Target-FolderID
+	 * @param array $sources FileID(s) to move
+	 * @return string Result info
 	 */
 	public function move($target, $sources) {
 		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
@@ -848,8 +866,7 @@ class File_Model {
 
 	/**
 	 * Upload files in the $_FILES-array to the specified directory
-	 *
-	 * @param integer id of target-directory to upload to
+	 * @param string $target FileID of target-directory to upload to
 	 */
 	public function upload($target) {
 		if (isset($_FILES[0])) {
@@ -918,6 +935,10 @@ class File_Model {
 		throw new Exception('No files to upload', '500');
 	}
 
+	/**
+	 * Update file-info
+	 * @param string $fid
+	 */
 	private function update($fid) {
 		$file = $this->get_cached($fid, PERMISSION_WRITE);
 
@@ -937,13 +958,12 @@ class File_Model {
 
 	/**
 	 * Get file-info for public share-id, check for access permissions and return if granted
-	 *
-	 * @param string id public share-id
-	 * @param string pass password
+	 * @param string $sid Public ShareID
+	 * @param string $pass
 	 * @return array share-info
 	 */
-	public function get_public($id, $pass) {
-		$share = $this->db->share_get($id);
+	public function get_public($sid, $pass) {
+		$share = $this->db->share_get($sid);
 
 		// File not shared at all
 		if (!$share || !$share['userto'] == PUBLIC_USER_ID) {
@@ -964,7 +984,7 @@ class File_Model {
 		else {
 			$token = ($this->token) ? $this->token : $this->db->session_start(PUBLIC_USER_ID);
 
-			if ($token && $this->db->share_unlock($token, $id)) {
+			if ($token && $this->db->share_unlock($token, $sid)) {
 				return array('share' => array('id' => $file['id'], 'filename' => $file['filename'], 'type' => $file['type']), 'token' => $token);
 			}
 		}
@@ -972,6 +992,13 @@ class File_Model {
 		throw new Exception('An error occurred', '500');
 	}
 
+	/**
+	 * Encrypt file
+	 * @param string $target FileID
+	 * @param array $sources
+	 * @param string $secret
+	 * @return null
+	 */
 	public function encrypt($target, $sources, $secret) {
 		// Check write permission for target directory
 		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
@@ -1014,6 +1041,13 @@ class File_Model {
 		throw new Exception('Error encrypting file', '403');
 	}
 
+	/**
+	 * Decrypt file
+	 * @param string $target FileID
+	 * @param string $source
+	 * @param string $secret
+	 * @return null
+	 */
 	public function decrypt($target, $source, $secret) {
 		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
 		$sourcefile = $this->get_cached($source, PERMISSION_READ);
@@ -1031,12 +1065,11 @@ class File_Model {
 	}
 
 	/**
-	 * Returns file to client (in 200kB chunks, so images can build up progressively)
-	 *
-	 * @param array targets file-id(s) to return
-	 * @param integer width screen width for scaling to save bandwidth
-	 * @param integer height screen height for scaling to save bandwidth
-	 * @return file
+	 * Send file to client
+	 * @param array $targets FileID(s) to return
+	 * @param int $width Screen width for scaling to save bandwidth
+	 * @param int $height Screen height for scaling to save bandwidth
+	 * @return null
 	 */
 	public function get($targets, $width = null, $height = null, $thumb) {
 		$path = null;
@@ -1075,6 +1108,11 @@ class File_Model {
 		throw new Exception('Error downloading', '500');
 	}
 
+	/**
+	 * Get ID3-Info for audio-file
+	 * @param string $target FileID
+	 * @return string filename
+	 */
 	public function get_id3($target) {
 		$file = $this->get_cached($target, PERMISSION_READ);
 
@@ -1085,6 +1123,11 @@ class File_Model {
 		return $file['filename'];
 	}
 
+	/**
+	 * Save ODF to file
+	 * @param string $target FileID
+	 * @return null
+	 */
 	public function save_odf($target) {
 		if (isset($_FILES['data'])) {
 			$file = $this->get_cached($target, PERMISSION_WRITE);
@@ -1101,6 +1144,11 @@ class File_Model {
 		throw new Exception('Error saving file', '500');
 	}
 
+	/**
+	 * Send text from file to client
+	 * @param string $target FileID
+	 * @return string
+	 */
 	public function load_text($target) {
 		$file = $this->get_cached($target, PERMISSION_READ);
 
@@ -1115,6 +1163,11 @@ class File_Model {
 		throw new Exception('Error accessing file', '403');
 	}
 
+	/**
+	 * Save text to file
+	 * @param string $target FileID
+	 * @param string $data
+	 */
 	public function save_text($target, $data) {
 		$file = $this->get_cached($target, PERMISSION_WRITE);
 
@@ -1132,43 +1185,35 @@ class File_Model {
 	}
 
 	/**
-	 * Get file-info from DB and check if user has permission to access and return if so
-	 *
-	 * @param integer id file-ID
-	 * @param integer access required access-rights
-	 * @return array file
+	 * Get file-info from DB, check if user has permission to access and return if so
+	 * @param int $fid FileID
+	 * @param int $access Required access-rights
+	 * @return array|null
 	 */
-	public function get_cached($id, $access) {
+	public function get_cached($fid, $access) {
 		if (!$access) {
 			return;
 		}
 
 		// Get proper ID
-		$id = ($id && $id != "0") ? $id : $this->db->cache_get_root_id($this->uid);
+		$fid = ($fid && $fid != "0") ? $fid : $this->db->cache_get_root_id($this->uid);
 		// Get file from database
-		$file = $this->db->cache_get($id, $this->uid);
+		$file = $this->db->cache_get($fid, $this->uid);
 		// Only return the file if owned or shared
 		return ($file && ($file['ownerid'] == $this->uid || $this->db->share_is_unlocked($file['id'], $access, $this->token))) ? $file : null;
 	}
 
 	/**
 	 * Get file-info from DB and check if user has permission to access and return if so
-	 * Note: When update && !include_childs,
-	 * all child elements will be removed from an updated directory
-	 *
-	 * @param id folder-ID
-	 * @param update whether or not to update file-info
-	 * @param include_childs wether or not to go recursive
+	 * @param string $fid
+	 * @param boolean $update Whether or not to update file-info
+	 * @param boolean $include_childs Whether or not to go recursively
 	 */
-	public function scan($id, $update = false, $include_childs = false) {
-		// REMOVE ME
-		$update = true;
-		$include_childs = true;
-		// REMOVE ME
+	public function scan($fid, $update = false, $include_childs = false) {
 		$scan_lock = ($this->username) ? $this->config['datadir'] . $this->username . LOCK . "scan" : null;
 		set_time_limit(0);
 
-		$file = $this->get_cached($id, PERMISSION_READ);
+		$file = $this->get_cached($fid, PERMISSION_READ);
 
 		if (!$file || !$file['ownerid'] || $file['ownerid'] != $this->uid || file_exists($scan_lock)) {
 			return;
@@ -1191,7 +1236,7 @@ class File_Model {
 			$this->scan_folder($path, $file['path'] . "/", $file['id'], $file['ownerid'], $update, $include_childs);
 		}
 
-		$this->db->cache_clean($file['id'], $file['ownerid'], $start, $update, $include_childs);
+		$this->db->cache_clean($file['id'], $file['ownerid'], $start, $include_childs);
 
 		// Release lock when finished
 		if (file_exists($scan_lock)) {
@@ -1199,7 +1244,16 @@ class File_Model {
 		}
 	}
 
-	private function scan_folder($path, $rel_path, $id, $owner, $update, $include_childs) {
+	/**
+	 * Scan folder and sync files to cache
+	 * @param string $path Absolute path
+	 * @param string $rel_path Relative path
+	 * @param string $fid
+	 * @param int $oid
+	 * @param boolean $update If true: md5, filesize, filemtime, etc. will be re-checked
+	 * @param boolean $include_childs Whether or not to go recursively
+	 */
+	private function scan_folder($path, $rel_path, $fid, $oid, $update, $include_childs) {
 		$files = scandir($path);
 		$size = 0;
 		$ids = array();
@@ -1207,7 +1261,7 @@ class File_Model {
 		foreach ($files as $file) {
 			if (is_readable($path . $file) && substr($file, 0, 1) != ".") {
 				$size++;
-				if ($child_id = $this->db->cache_has_child($owner, $id, $file)) {
+				if ($child_id = $this->db->cache_has_child($oid, $fid, $file)) {
 					if ($update) {
 						$this->update($child_id);
 					}
@@ -1216,11 +1270,11 @@ class File_Model {
 					}
 
 					if ($include_childs && is_dir($path . $file)) {
-						$this->scan_folder($path . $file . "/", $rel_path . $file . "/", $child_id, $owner, $update, $include_childs);
+						$this->scan_folder($path . $file . "/", $rel_path . $file . "/", $child_id, $oid, $update, $include_childs);
 					}
 				}
 				else {
-					$this->add($path . $file, $rel_path . $file, $id, $owner, $include_childs);
+					$this->add($path . $file, $rel_path . $file, $fid, $oid, $include_childs);
 				}
 				clearstatcache();
 			}
@@ -1229,40 +1283,65 @@ class File_Model {
 		if (!$update) {
 			$this->db->cache_refresh_array($ids);
 		}
-		$this->db->cache_update_size($id, $size);
+		$this->db->cache_update_size($fid, $size);
 	}
 
-	public function add($path, $rel_path, $parent_id, $owner, $include_childs = false) {
+	/**
+	 * Add file to db-cache
+	 * @param string $path Absolute path
+	 * @param string $rel_path Relative path
+	 * @param string $parent_id FileID
+	 * @param int $oid
+	 * @param boolean $include_childs
+	 * @return string FileID
+	 */
+	public function add($path, $rel_path, $parent_id, $oid, $include_childs = false) {
 		$md5 = (is_dir($path)) ? "0" : md5_file($path);
-		$child_id = $this->db->cache_add(basename($path), $parent_id, self::type($path), self::info($path), $owner, filemtime($path), $md5, $rel_path);
+		$child_id = $this->db->cache_add(basename($path), $parent_id, self::type($path), self::info($path), $oid, filemtime($path), $md5, $rel_path);
 
 		if ($include_childs && is_dir($path)) {
-			$this->add_folder($path . "/", $rel_path . "/", $child_id, $owner);
+			$this->add_folder($path . "/", $rel_path . "/", $child_id, $oid);
 		}
 
 		return $child_id;
 	}
 
-	private function add_folder($path, $rel_path, $id, $owner) {
+	/**
+	 * Add folder to db-cache
+	 * @param string $path Absolute path
+	 * @param string $rel_path Relative path
+	 * @param string $fid
+	 * @param int $oid
+	 */
+	private function add_folder($path, $rel_path, $fid, $oid) {
 		$files = scandir($path);
 
 		foreach ($files as $file) {
 			if (is_readable($path . $file) && substr($file, 0, 1) != ".") {
 				$md5 = (is_dir($path . $file)) ? "0" : md5_file($path . $file);
-				$child_id = $this->db->cache_add($file, $id, self::type($path . $file), self::info($path . $file), $owner, filemtime($path . $file), $md5, $rel_path . $file);
+				$child_id = $this->db->cache_add($file, $fid, self::type($path . $file), self::info($path . $file), $oid, filemtime($path . $file), $md5, $rel_path . $file);
 
 				if (is_dir($path . $file)) {
-					$this->add_folder($path . $file . "/", $rel_path . $file . "/", $child_id, $owner);
+					$this->add_folder($path . $file . "/", $rel_path . $file . "/", $child_id, $oid);
 				}
 			}
 		}
 	}
 
+	/**
+	 * Remove entries from trash if they don't exist on disk
+	 * @param array $file
+	 */
 	public function scan_trash($file) {
 		$existing = Util::get_files_in_dir($this->config['datadir'] . $file['owner'] . TRASH);
 		$this->db->cache_clean_trash($file['ownerid'], $existing);
 	}
 
+	/**
+	 * Only allow certain characters in filenames
+	 * @param string $filename
+	 * @return boolean
+	 */
 	private function filename_valid($filename) {
 		return !preg_match('/[^A-Za-z0-9\!\"\§\$\%\&\(\)\{\}\[\]\=\*\'\#\-\_\.\,\;\²\³]/', $filename);
 	}

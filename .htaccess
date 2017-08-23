@@ -28,7 +28,7 @@ Header set Content-Security-Policy "default-src 'self'; img-src 'self'; script-s
 <IfModule mod_rewrite.c>
 RewriteEngine on
 
-#RewriteCond %{HTTPS} off
+RewriteCond %{HTTPS} off
 #RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [QSA,NC,L]
 #RewriteRule .* - [env=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 

@@ -14,12 +14,11 @@ class Crypto {
 
 	/**
 	 * Encrypt string
-	 * @param string plaintext to be encrypted
-	 * @param string secret passphrase
-	 * @param boolean sign whether or not to prepend hmac-hash for integrity
+	 * @param string $plaintext to be encrypted
+	 * @param string $secret passphrase
+	 * @param boolean $sign whether or not to prepend hmac-hash for integrity
 	 * @return string encrypted string
 	 */
-
 	public function encrypt($plaintext, $secret, $sign = false) {
 		// Generate IV - on error try random_tring(self::$block_size)
 		$iv = self::random_bytes(self::$block_size);
@@ -44,24 +43,33 @@ class Crypto {
 		return $ciphertext64;
 	}
 
+	/**
+	 * Encode string as base64
+	 * @param string $str
+	 * @return string
+	 */
 	private function base64_url_encode($str) {
 		return strtr(base64_encode($str), '+/', '-_');
 	}
 
+	/**
+	 * Decode base64-encoded string
+	 * @param string $str
+	 * @return string
+	 */
 	private function base64_url_decode($str) {
 		return base64_decode(strtr($str, '-_', '+/'));
 	}
 
 	/**
 	 * Encrypt file
-	 * @param string path absolute path to file
-	 * @param string secret passphrase
-	 * @param boolean sign whether or not to prepend hmac-hash for integrity
-	 * @param boolean encrypt_filename whether or not to encrypt the filename
-	 * @param string destination directory to create encrypted file in (with trailing slash!)
-	 * @return string absolute path to encrypted file
+	 * @param string $path Absolute path to file
+	 * @param string $secret Passphrase
+	 * @param boolean $sign Whether or not to prepend hmac-hash for integrity
+	 * @param boolean $encrypt_filename Whether or not to encrypt the filename
+	 * @param string $destination Directory to create encrypted file in (with trailing slash!)
+	 * @return string Absolute path to encrypted file
 	 */
-
 	public function encrypt_file($path, $secret, $sign = false, $encrypt_filename = false, $destination = "") {
 		// Read plaintext from file
 		$data = file_get_contents($path);
@@ -82,12 +90,11 @@ class Crypto {
 	}
 
 	/**
-	 * Encrypt string or file
-	 * @param string data encrypted string in Base64
-	 * @param string secret passphrase
-	 * @return string decrypted string
+	 * Decrypt string
+	 * @param string $data64 Base64-encoded encrypted
+	 * @param string $secret Passphrase
+	 * @return string Decrypted string
 	 */
-
 	public function decrypt($data64, $secret) {
 		if (!$data64) {
 			return "";
@@ -125,13 +132,12 @@ class Crypto {
 
 	/**
 	 * Decrypt file
-	 * @param string path absolute path to file
-	 * @param string secret passphrase
-	 * @param boolean filename_encrypted whether or not the filename is encrypted
-	 * @param string destination directory to create decrypted file in (with trailing slash!)
-	 * @return string absolute path to decrypted file
+	 * @param string $path Absolute path to file
+	 * @param string $secret Passphrase
+	 * @param boolean $filename_encrypted Whether or not the filename is encrypted
+	 * @param string $destination directory To create decrypted file in (with trailing slash!)
+	 * @return string Absolute path to decrypted file
 	 */
-
 	public function decrypt_file($path, $secret, $filename_encrypted = false, $destination = "") {
 		// Read ciphertext from file
 		$ciphertext = file_get_contents($path);
@@ -157,9 +163,9 @@ class Crypto {
 
 	/**
 	 * Add PKCS5-Padding
-	 * @param string text plaintext
-	 * @param int blocksize
-	 * @return string padded plaintext
+	 * @param string $text plaintext
+	 * @param int $blocksize
+	 * @return string Padded plaintext
 	 */
 	public function pkcs5_pad($text, $blocksize) {
 		$pad = $blocksize - (strlen($text) % $blocksize);
@@ -168,8 +174,8 @@ class Crypto {
 
 	/**
 	 * Remove PKCS5-Padding
-	 * @param string text plaintext
-	 * @return string unpadded plaintext
+	 * @param string $text Plaintext
+	 * @return string Unpadded plaintext
 	 */
 	public function pkcs5_unpad($text) {
 		$pad = ord($text{strlen($text)-1});
@@ -180,9 +186,9 @@ class Crypto {
 
 	/**
 	 * Generate an HMAC-Signature
-	 * @param string data string to be signed
-	 * @param string key secret passphrase
-	 * @return string hmac
+	 * @param string $data String to be signed
+	 * @param string $key Secret passphrase
+	 * @return string HMAC
 	 */
 	public function sign($data, $key) {
 		return hash_hmac('sha256', $data, $key);
@@ -190,8 +196,8 @@ class Crypto {
 
 	/**
 	 * Generate a PBKDF2-Key
-	 * @param string secret
-	 * @param string salt
+	 * @param string $secret
+	 * @param string $salt
 	 * @return string
 	 */
 	private function generate_key($secret, $salt) {
@@ -200,8 +206,8 @@ class Crypto {
 
 	/**
 	 * Generate a cryptographically secure password-hash
-	 * @param string pass
-	 * @return string password-hash
+	 * @param string $pass
+	 * @return string Password-hash
 	 */
 	public function generate_password($pass) {
 		$options = ['cost' => 11];
@@ -211,8 +217,8 @@ class Crypto {
 
 	/**
 	 * Check if a password matches a given hash
-	 * @param string pass
-	 * @param string hash
+	 * @param string $pass
+	 * @param string $hash
 	 * @return boolean
 	 */
 	public function verify_password($pass, $hash) {
@@ -221,8 +227,8 @@ class Crypto {
 
 	/**
 	 * Validate authorization token
-	 * @param string token
-	 * @return string|null authorization token
+	 * @param string $token
+	 * @return string|null Authorization token
 	 */
 	public function validate_token($token) {
 		try {
@@ -235,8 +241,8 @@ class Crypto {
 
 	/**
 	* Generate a random byte-sequence
-	* @param int length
-	* @return string random bytes
+	* @param int $length
+	* @return string
 	*/
 	public function random_bytes($length) {
 		return openssl_random_pseudo_bytes($length);
@@ -244,8 +250,8 @@ class Crypto {
 
 	/**
 	* Generate a random string
-	* @param int length
-	* @return string random string
+	* @param int $length
+	* @return string
 	*/
 	public function random_string($length) {
 		return bin2hex(openssl_random_pseudo_bytes($length / 2));
@@ -253,7 +259,7 @@ class Crypto {
 
 	/**
 	* Generate a random number
-	* @param int length
+	* @param int $length
 	* @return int
 	*/
 	public function random_number($length) {

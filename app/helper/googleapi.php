@@ -14,6 +14,10 @@ class Google_Api {
 	static $ACCESS         = 'offline';
 	static $APPLICATION    = 'simpleDrive';
 
+	/**
+	 * Constructor
+	 * @param string $user_token
+	 */
 	public function __construct($user_token) {
 		$this->db          = Database::getInstance();
 		$this->user        = ($this->db) ? $this->db->user_get_by_token($user_token) : null;
@@ -27,14 +31,26 @@ class Google_Api {
 		$this->counter     = 0;
 	}
 
+	/**
+	 * Check if google-token exists
+	 * @return boolean
+	 */
 	public function enabled() {
 		return ($this->token !== null);
 	}
 
+	/**
+	 * Remove google-token if exists
+	 * @return boolean
+	 */
 	public function disable() {
 		return (!file_exists($this->token_path) || unlink($this->token_path));
 	}
 
+	/**
+	 * Read credentials from file
+	 * @return string|null
+	 */
 	private function read_credentials() {
 		if (is_readable($this->cred_path)) {
 			$credentials = json_decode(file_get_contents($this->cred_path), true);
@@ -48,6 +64,10 @@ class Google_Api {
 		return null;
 	}
 
+	/**
+	 * Read google-token from file
+	 * @return string|null
+	 */
 	private function read_token() {
 		if (is_readable($this->token_path)) {
 			$token = json_decode(file_get_contents($this->token_path), true);
@@ -61,6 +81,12 @@ class Google_Api {
 		return null;
 	}
 
+	/**
+	 * Write google-token
+	 * @param string $code Google-Auth-Code
+	 * @throws Exception
+	 * @return boolean
+	 */
 	public function set_token($code) {
 		if (!$this->credentials) {
 			throw new Exception('Could not read credentials', '500');
@@ -87,6 +113,11 @@ class Google_Api {
 		return false;
 	}
 
+	/**
+	 * Request a new token from Google
+	 * @throws Exception
+	 * @return boolean
+	 */
 	public function refresh_token() {
 		if (!$this->credentials) {
 			throw new Exception('Could not read credentials', '500');
@@ -121,6 +152,12 @@ class Google_Api {
 		return false;
 	}
 
+	/**
+	 * Get files in folder
+	 * @param string $id
+	 * @throws Exception
+	 * @return array
+	 */
 	public function children($id) {
 		if (!$this->token) {
 			throw new Exception('Missing or illegal token', '500');
@@ -140,6 +177,14 @@ class Google_Api {
 		//file_put_contents(LOG, "children: " . print_r($response, true) . "\n", FILE_APPEND);
 	}
 
+	/**
+	 * Search for filename in folder
+	 * @param string $name Search-needle
+	 * @param string $parent_id Folder to search in
+	 * @param boolean $exactly Should $name match the filename exactly or just occur in it?
+	 * @throws Exception
+	 * @return array|null
+	 */
 	public function search($name, $parent_id = "root", $exactly = false) {
 		if (!$this->token) {
 			throw new Exception('Missing or illegal token', '500');
@@ -175,11 +220,18 @@ class Google_Api {
 				'description'	=> (array_key_exists('description', $response['body']['files'][0])) ? $response['body']['files'][0]['description'] : "",
 				'name'			=> $response['body']['files'][0]['name'],
 			);
+
 			return $file;
 		}
-		return false;
+
+		return null;
 	}
 
+	/**
+	 * Generate a Google-Auth-URL
+	 * @throws Exception
+	 * @return string
+	 */
 	public function create_auth_url() {
 		if (!$this->credentials) {
 			throw new Exception('Could not read credentials', '500');
@@ -193,6 +245,13 @@ class Google_Api {
 				. "&access_type=" . urlencode(self::$ACCESS) . "&approval_prompt=auto";
 	}
 
+	/**
+	 * Create Google-Folder
+	 * @param string $name
+	 * @param string $parent_id
+	 * @throws Exception
+	 * @return string|null FolderID
+	 */
 	public function create_folder($name, $parent_id = "root") {
 		if (!$this->token) {
 			throw new Exception('Missing or illegal token', '500');
@@ -200,7 +259,7 @@ class Google_Api {
 
 		$params = array(
 			'name'		=> $name,
-			'parents'	=> array(array('kind' => 'drive#parentReference', 'id' => $parent_id)),
+			'parents'		=> array($parent_id),
 			'mimeType'	=> "application/vnd.google-apps.folder"
 		);
 
@@ -218,13 +277,22 @@ class Google_Api {
 
 		$this->counter = 0;
 
-		if($response['body'] && $response['body']['id']) {
+		if ($response['body'] && $response['body']['id']) {
 			return $response['body']['id'];
 		}
 
 		return null;
 	}
 
+	/**
+	 * Create Google-File
+	 * @param string $path
+	 * @param string $filename
+	 * @param string $parent_id
+	 * @param string $description
+	 * @throws Exception
+	 * @return string|null FileID
+	 */
 	public function create_file($path, $filename, $parent_id, $description) {
 		if (!$this->token) {
 			throw new Exception('Missing or illegal token', '500');
@@ -259,12 +327,17 @@ class Google_Api {
 
 		// Error checking
 		if ($response['code'] != "200" || !isset($response['headers']['location'])) {
-			return false;
+			return null;
 		}
 
 		return $response['headers']['location'];
 	}
 
+	/**
+	 * Delete Google-File
+	 * @param string $id
+	 * @throws Exception
+	 */
 	public function delete($id) {
 		if (!$this->token) {
 			throw new Exception('Missing or illegal token', '500');
@@ -285,6 +358,15 @@ class Google_Api {
 		$this->counter = 0;
 	}
 
+	/**
+	 * Upload file to Google
+	 * @param string $path
+	 * @param string $filename
+	 * @param string $parent_id
+	 * @param string $description
+	 * @throws Exception
+	 * @return boolean
+	 */
 	public function upload($path, $filename, $parent_id = "root", $description = "") {
 		if (!$this->token) {
 			throw new Exception('Missing or illegal token', '500');
@@ -367,44 +449,15 @@ class Google_Api {
 		}
 	}
 
+	/**
+	 * Execute the http request
+	 * @param string $url
+	 * @param array $header
+	 * @param array $params
+	 * @param string $method
+	 * @return array
+	 */
 	private function execute_request($url, $header, $params, $method = "POST") {
-		return $this->parse_response(Util::execute_web_request($url, $header, $params, $method));
-	}
-
-	private function parse_response($raw_data) {
-		$parsed_response = array('code' => -1, 'headers' => array(), 'body' => "");
-
-		$raw_data = explode("\r\n", $raw_data['data']);
-
-		$parsed_response['code'] = explode(" ", $raw_data[0]);
-		$parsed_response['code'] = $parsed_response['code'][1];
-
-		for ($i = 1; $i < count($raw_data); $i++) {
-			$raw_datum = $raw_data[$i] ;
-
-			$raw_datum = trim($raw_datum);
-			if ($raw_datum != "") {
-				if (substr_count($raw_datum, ':') >= 1) {
-					$raw_datum = explode(':', $raw_datum, 2);
-					$parsed_response['headers'][strtolower($raw_datum[0])] = trim($raw_datum[1]);
-				}  else {
-					// We're in the headers section of parsing an HTTP section and no colon was found for line: {$raw_datum}
-					return false;
-				}
-			}
-			else {
-				// We've moved to the body section
-				if (($i + 1) < count($raw_data)) {
-					for ($j = ($i + 1); $j < count($raw_data); $j++) {
-						$parsed_response['body'] .= $raw_data[$j] . "\n" ;
-					}
-				}
-
-				break ;
-			}
-		}
-
-		$parsed_response['body'] = json_decode($parsed_response['body'], true);
-		return $parsed_response;
+		return Util::execute_http_request($url, $header, $params, $method, true);
 	}
 }

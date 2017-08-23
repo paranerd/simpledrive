@@ -33,16 +33,25 @@
 
 		<input id="user" type="text" class="input-large" placeholder="Username" value="" autofocus>
 		<input id="pass" type="password" class="input-large" placeholder="Password" value="">
-		<input id="code" type="text" class="input-large hidden" placeholder="Access code" value="" autocomplete="off">
 
-		<div id="remember-wrapper" class="checkbox hidden">
-			<span id="remember" class="checkbox-box"></span>
+		<div class="error error-large hidden"></div>
+
+		<button class="btn btn-large center-hor">Login</button>
+	</form>
+
+	<form id="tfa" class="major-form center hidden" action="#">
+		<div class="title">Two-Factor-Authentication</div>
+
+		<input id="code" type="text" class="input-large" placeholder="Access code" value="" autocomplete="off" tabindex=1>
+
+		<div id="remember-wrapper" class="checkbox">
+			<span id="remember" class="checkbox-box" tabindex=2></span>
 			<span class="checkbox-label">Remember this device</span>
 		</div>
 
 		<div class="error error-large hidden"></div>
 
-		<button id="submit" class="btn btn-large center-hor">Login</button>
+		<button class="btn btn-large center-hor">Unlock</button>
 	</form>
 
 	<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>

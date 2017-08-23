@@ -8,6 +8,11 @@
  */
 
 class Vault_Model {
+	/**
+	 * Constructor
+	 * @param string $token
+	 * @throws Exception
+	 */
 	public function __construct($token) {
 		$this->token      = $token;
 		$this->config     = json_decode(file_get_contents(CONFIG), true);
@@ -24,6 +29,9 @@ class Vault_Model {
 		$this->init();
 	}
 
+	/**
+	 * Create vault-dir and vault-file
+	 */
 	private function init() {
 		if ($this->vault_path) {
 			if (!file_exists(dirname($this->vault_path))) {
@@ -35,6 +43,11 @@ class Vault_Model {
 		}
 	}
 
+	/**
+	 * Get vault
+	 * @throws Exception
+	 * @return string
+	 */
 	public function get() {
 		if (!file_exists($this->vault_path)) {
 			throw new Exception('Vault does not exist', '404');
@@ -45,6 +58,12 @@ class Vault_Model {
 		}
 	}
 
+	/**
+	 * Sync vault (keep last edited)
+	 * @param string $client_vault Encrypted client_vault
+	 * @param int $last_edit
+	 * @return string The most up-to-date vault
+	 */
 	public function sync($client_vault, $last_edit) {
 		if ($last_edit > filemtime($this->vault_path)) {
 			file_put_contents($this->vault_path, $client_vault);
@@ -53,29 +72,12 @@ class Vault_Model {
 		return file_get_contents($this->vault_path);
 	}
 
+	/**
+	 * Save vault
+	 * @param string $client_vault
+	 * @return boolean
+	 */
 	public function save($client_vault) {
 		return (file_put_contents($this->vault_path, $client_vault) !== false);
-	}
-
-	public function change_password($currpass, $newpass) {
-		// Load vault
-		$vault = file_get_contents($this->config['datadir'] . $this->username . VAULT . VAULT_FILE);
-
-		// Try to decrypt vault
-		if (($vault_dec = Crypto::decrypt($vault, $currpass)) !== false) {
-			// Re-encrypt vault with new password
-			if (($vault_enc = Crypto::encrypt($vault_dec, $newpass)) !== false) {
-				file_put_contents($this->config['datadir'] . $this->username . VAULT . VAULT_FILE, $vault_enc);
-				return null;
-			}
-			else {
-				throw new Exception('Error re-encrypting vault', '500');
-			}
-		}
-		else {
-			throw new Exception('Wrong passphrase', '403');
-		}
-
-		return null;
 	}
 }

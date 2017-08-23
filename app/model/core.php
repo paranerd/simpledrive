@@ -7,33 +7,36 @@
  * @link		https://simpledrive.org
  */
 
+require_once 'app/model/user.php';
 require_once 'app/model/twofactor.php';
 
 class Core_Model {
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
-		$this->db			= null;
+		$this->db = null;
 	}
 
 	/**
 	 * Initiate database setup, create docs- and user-folder, write config, update htaccess and create user
-	 * @param user
-	 * @param pass
-	 * @param mail
-	 * @param mail_pass
-	 * @param db_server
-	 * @param db_name
-	 * @param db_user
-	 * @param db_pass
-	 * @param datadir
-	 * @return string authorization token
+	 * @param string $username
+	 * @param string $pass
+	 * @param string $mail
+	 * @param string $mail_pass
+	 * @param string $db_server
+	 * @param string $db_name
+	 * @param string $db_user
+	 * @param string $db_pass
+	 * @param string $datadir
+	 * @throws Exception
+	 * @return string Authorization token
 	 */
-
 	public function setup($username, $pass, $mail, $mail_pass, $db_server, $db_name, $db_user, $db_pass, $datadir) {
 		$username	= strtolower(str_replace(' ', '', $username));
 		$datadir	= ($datadir != "") ? rtrim($datadir, '/') . '/' : dirname(dirname(__DIR__)) . "/docs/";
 		$db_server	= (strlen($db_server) > 0) ? $db_server : 'localhost';
 		$db_name	= (strlen($db_name) > 0) ? $db_name : 'simpledrive';
-		$db_setup;
 
 		// Check if datadir contains '.' or '../'
 		if (preg_match('/(\.\.\/|\.)/', $datadir)) {
@@ -51,31 +54,22 @@ class Core_Model {
 		}
 
 		try {
+			// Setup database
 			$db_setup = Database::setup($username, $pass, $db_server, $db_name, $db_user, $db_pass);
-
-			// Set log path in htaccess
-			$this->update_main_htaccess();
-
-			// Create documents folder
-			if (!file_exists($datadir) && !mkdir($datadir, 0755)) {
-				throw new Exception('Could not create documents folder', '500');
-			}
-
-			// Create user directory
-			if (!file_exists($datadir . $username) && !mkdir($datadir . $username, 0755)) {
-				throw new Exception('Could not create user directory', '500');
-			}
 
 			// Write config file
 			if (!$this->create_config($datadir, $db_server, $db_name, $db_setup['user'], $db_setup['pass'], $mail, $mail_pass)) {
 				throw new Exception('Could not write config file', '500');
 			}
 
-			$this->db = Database::getInstance();
+			// Set log path in htaccess
+			$this->update_main_htaccess();
 
-			//cache_add($filename, $parent, $type, $size, $owner, $edit, $md5, $path) {
-			if ($id = $this->db->user_create($username, Crypto::generate_password($pass), 1, $mail)) {
-				return $this->db->session_start($id);
+			// Create user and token
+			$user = new User_Model(null);
+			if ($uid = $user->create($username, $pass, true, $mail)) {
+				$this->db = Database::getInstance();
+				return $this->db->session_start($uid);
 			}
 		} catch (Exception $e) {
 			if (file_exists(CONFIG)) {
@@ -83,23 +77,19 @@ class Core_Model {
 			}
 			throw new Exception($e->getMessage(), $e->getCode());
 		}
-
-		unlink(CONFIG);
-		throw new Exception('Could not create user', '500');
 	}
 
 	/**
 	 * Write setup info to config
-	 * @param datadir location of the docs-folder
-	 * @param db_server
-	 * @param db_name
-	 * @param db_user
-	 * @param db_pass
-	 * @param mail (optional)
-	 * @param mail_pass (optional)
-	 * @return boolean true if successful
+	 * @param string $datadir Location of the docs-folder
+	 * @param string $db_server
+	 * @param string $db_name
+	 * @param string $db_user
+	 * @param string $db_pass
+	 * @param string $mail (optional)
+	 * @param string $mail_pass (optional)
+	 * @return boolean
 	 */
-
 	private function create_config($datadir, $db_server, $db_name, $db_user, $db_pass, $mail, $mail_pass) {
 		$config = array(
 			'salt'			=> Crypto::random_string(64),
@@ -121,9 +111,8 @@ class Core_Model {
 
 	/**
 	 * Update log-location in htaccess
-	 * @return boolean true if successful
+	 * @return boolean
 	 */
-
 	private function update_main_htaccess() {
 		$lines = file('.htaccess');
 		$write = '';
@@ -143,7 +132,6 @@ class Core_Model {
 	/**
 	 * Ensure user directories are not publicly readable
 	 */
-
 	private function create_user_htaccess() {
 		$config = json_decode(file_get_contents(CONFIG), true);
 
@@ -158,13 +146,15 @@ class Core_Model {
 
 	/**
 	 * Initiate token generation
-	 * After 3 login attempts add a 30s cooldown for every further attempt to slow down bruteforce attacks
-	 * @param username
-	 * @param pass
-	 * @return string authorization token
+	 * After 3 failed login attempts add a 30s cooldown for every further attempt
+	 * to slow down bruteforce attacks
+	 * @param string $username
+	 * @param string $pass
+	 * @param boolean $callback
+	 * @throws Exception
+	 * @return string Authorization token
 	 */
-
-	public function login($username, $pass, $two_factor_code = null, $remember = false) {
+	public function login($username, $pass, $callback = false) {
 		$this->db	= Database::getInstance();
 		$username	= strtolower($username);
 		$user		= $this->db->user_get_by_name($username, true);
@@ -174,14 +164,16 @@ class Core_Model {
 			$this->db->log_write(PUBLIC_USER_ID, "warning", "Login", "Unknown login attempt: " . $username);
 		}
 		// User is on lockdown
-		else if ((time() - ($user['login_attempts'] - 2) * 30) - $user['last_login_attempt'] < 0) {
-			$lockdown_time = (time() - ($user['login_attempts'] + 1 - 2) * 30) - $user['last_login_attempt'];
+		else if ((time() - ($user['login_attempts'] - (LOGIN_MAX_ATTEMPTS - 1)) * 30) - $user['last_login_attempt'] < 0) {
+			$lockdown_time = (time() - ($user['login_attempts'] + 1 - (LOGIN_MAX_ATTEMPTS - 1)) * 30) - $user['last_login_attempt'];
 			throw new Exception('Locked for ' . abs($lockdown_time) . 's', '500');
 		}
 		// Correct
 		else if (Crypto::verify_password($pass, $user['pass'])) {
-			// Check if Two-Factor-Authentication is required and if so can be unlocked
-			if (Twofactor_Model::unlock($user['id'], $two_factor_code, $remember)) {
+			// Check if TFA is required or register callback
+			if (!Twofactor_Model::required($user['id']) ||
+				($callback && Twofactor_Model::is_unlocked()))
+			{
 				// Protect user directories
 				$this->create_user_htaccess();
 
@@ -192,14 +184,18 @@ class Core_Model {
 		}
 		// Wrong password
 		else {
-			$this->db->user_increase_login_counter($user['id'], time());
-			$this->db->log_write($user['id'], "Warning", "Login", "Login failed");
+			$this->db->user_increase_login_counter($user['id']);
+			$this->db->log_write($user['id'], "warning", "Login", "Login failed");
 		}
 
 		header('WWW-Authenticate: BasicCustom realm="simpleDrive"');
 		throw new Exception('Wrong username/password', '401');
 	}
 
+	/**
+	 * End session and remove cookie
+	 * @param string $token
+	 */
 	public function logout($token) {
 		$this->db = Database::getInstance();
 		$this->db->session_end($token);
@@ -210,7 +206,9 @@ class Core_Model {
 
 	/**
 	 * Get current installed version and recent version (from demo server)
-	 * @return array containing current and version
+	 * @param string $token
+	 * @throws Exception
+	 * @return array Containing current and version
 	 */
 	public function get_version($token) {
 		$this->db = Database::getInstance();

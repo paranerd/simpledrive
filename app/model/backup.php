@@ -10,6 +10,11 @@
 require_once 'app/helper/googleapi.php';
 
 class Backup_Model {
+	/**
+	 * Constructor
+	 * @throws Exception
+	 * @param string $token
+	 */
 	public function __construct($token) {
 		$this->db				= Database::getInstance();
 		$this->user				= ($this->db) ? $this->db->user_get_by_token($token) : null;
@@ -31,10 +36,21 @@ class Backup_Model {
 		}
 	}
 
+	/**
+	 * Check if backup is enabled and running
+	 * @return boolean
+	 */
 	public function status() {
 		return array('enabled' => $this->api->enabled(), 'running' => file_exists($this->lock));
 	}
 
+	/**
+	 * Set backup-info and generate authentication-url
+	 * @param string $pass To encrypt files
+	 * @param boolean $enc_filename Whether or not to encrypt filenames
+	 * @throws Exception
+	 * @return string Auth-URL
+	 */
 	public function enable($pass, $enc_filename) {
 		if ($enc_filename && strlen($pass) == 0) {
 			throw new Exception('Password not set', '400');
@@ -49,6 +65,11 @@ class Backup_Model {
 		throw new Exception('Unknown error occurred', '500');
 	}
 
+	/**
+	 * Remove backup-lock
+	 * @throws Exception
+	 * @return null
+	 */
 	public function cancel() {
 		if (!file_exists($this->lock) || unlink($this->lock)) {
 			return null;
@@ -57,6 +78,11 @@ class Backup_Model {
 		throw new Exception('Could not remove lock', '500');
 	}
 
+	/**
+	 * Disable backup
+	 * @throws Exception
+	 * @return null
+	 */
 	public function disable() {
 		if ($this->api->disable()) {
 			return null;
@@ -65,10 +91,19 @@ class Backup_Model {
 		throw new Exception('Could not disable backup', '500');
 	}
 
+	/**
+	 * Set auth token
+	 * @return boolean
+	 */
 	public function set_token($code) {
 		return $this->api->set_token($code);
 	}
 
+	/**
+	 * Start backup
+	 * @throws Exception
+	 * @return null
+	 */
 	public function start() {
 		// Check if connected to the internet
 		if (!Util::connection_available()) {
@@ -101,6 +136,10 @@ class Backup_Model {
 		return null;
 	}
 
+	/**
+	 * Set backup-lock
+	 * @throws Exception
+	 */
 	private function set_lock() {
 		if (!file_exists(dirname($this->lock))) {
 			mkdir(dirname($this->lock));
@@ -112,19 +151,28 @@ class Backup_Model {
 		file_put_contents($this->lock, '', LOCK_EX);
 	}
 
+	/**
+	 * Relase backup-lock
+	 */
 	private function release_lock() {
 		if (file_exists($this->lock)) {
 			unlink($this->lock);
 		}
 	}
 
+	/**
+	 * Walk recursively over $path and upload/delete if necessary
+	 * @param string $path
+	 * @param string $parent_id
+	 * @return null
+	 */
 	private function traverse($path, $parent_id) {
 		$files = scandir($path);
 
 		foreach ($files as $file) {
 			// Was backup canceled by user?
 			if (!file_exists($this->lock)) {
-				return;
+				return null;
 			}
 
 			if (is_readable($path . $file) && substr($file, 0, 1) !== '.') {

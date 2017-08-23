@@ -94,10 +94,6 @@ class User_Controller {
 		return $this->model->set_autoscan($_REQUEST['enable']);
 	}
 
-	public function theme() {
-		return $this->model->load_view();
-	}
-
 	public function setfileview() {
 		return $this->model->set_fileview($_REQUEST['view']);
 	}
