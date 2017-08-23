@@ -119,6 +119,8 @@ class System_Model {
 		}
 
 		foreach ($htaccess as $line) {
+			// (Un)comment the two lines necessary for https-rerouting
+			// BOTH are required to change!
 			if (strpos($line, 'RewriteCond %{HTTPS} off') !== false) {
 				$write .= $ssl_comm . 'RewriteCond %{HTTPS} off' . PHP_EOL;
 			}
