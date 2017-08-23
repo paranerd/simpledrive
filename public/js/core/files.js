@@ -255,12 +255,15 @@ var FileController = new function() {
 
 			FileView.mouseStart = {x: e.clientX, y: e.clientY};
 
-			if (!$(this).closest('.item').hasClass("selected")) {
+			if (e.ctrlKey) {
+				FileModel.list.toggleSelection(this.value);
+			}
+			else if (!$(this).closest('.item').hasClass("selected") && !e.ctrlKey) {
 				FileModel.list.unselectAll();
-				FileView.closeRename();
+				FileModel.list.select(this.value);
 			}
 
-			FileModel.list.select(this.value);
+			FileView.closeRename();
 			FileView.startDrag = true;
 		});
 
@@ -270,7 +273,7 @@ var FileController = new function() {
 				return;
 			}
 
-			if (e.which == 1 && !FileView.dragging) {
+			else if (e.which == 1 && !e.ctrlKey && !FileView.dragging) {
 				FileModel.list.select(this.value);
 				FileModel.open();
 			}
