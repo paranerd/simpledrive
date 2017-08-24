@@ -24,6 +24,23 @@
  * For the remaining server-files check the last history-entry
  * 		If none exists or it is not for deletion, add it to client-list for download
  * 		Otherwise delete from server
+ *
+ * Client must set $last_sync after all files have been synched, not on sync-start!
+ * Otherwise the following problem might occurr:
+ * 		Initial sync at 0
+ * 		A creates a file at 50
+ * 		Next sync at 100
+ * 		A sets $last_sync = 100
+ * 		B does not have the file, so B is supposed to get it
+ * 		Sync gets aborted before download
+ * 		Next sync at 200:
+ * 		B does not have the file and las edit was before last sync, so the algorithm
+ * 		assumes that B deleted it after sync and A hasn't updated it since,
+ * 		so the file gets deleted
+ *
+ * Expected behaviour:
+ * 		When the 200-sync starts, $last_sync is still 0, so the file's edit
+ * 		at 50 is more recent than last sync so it's scheduled for download again
  */
 class Sync {
 	/**
