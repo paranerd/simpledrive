@@ -257,7 +257,8 @@ class Database {
 				code varchar(5),
 				expires int(11),
 				fingerprint varchar(64) UNIQUE,
-				attempts int(11) DEFAULT 0
+				attempts int(11) DEFAULT 0,
+				unlocked int(1) DEFAULT 0
 			)'
 		);
 
