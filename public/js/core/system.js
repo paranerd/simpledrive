@@ -289,7 +289,7 @@ var SystemView = new function() {
 	this.displayUsers = function(users) {
 		self.update('users');
 
-		for(var i in users) {
+		for (var i in users) {
 			var item = users[i];
 			var type = (item.admin == "1") ? "admin" : "user";
 
@@ -336,7 +336,7 @@ var SystemView = new function() {
 			var quotaMax = document.createElement("span");
 			quotaMax.id = "user-quota-total" + i;
 			quotaMax.className = "item-elem col3";
-			quotaMax.innerHTML = "calculating...";
+			quotaMax.innerHTML = (item.quotamax) ? Util.byteToString(item.quotamax) : "calculating...";
 			$("#item" + i).append(quotaMax);
 
 			quotaMax.onclick = function(e) {
@@ -347,19 +347,25 @@ var SystemView = new function() {
 
 			// Quota Used
 			var quotaUsed = document.createElement("span");
-			quotaUsed.id = "user-quota-free" + i;
+			quotaUsed.id = "user-quota-used" + i;
 			quotaUsed.className = "item-elem col4";
 			quotaUsed.value = i;
-			quotaUsed.innerHTML = "calculating...";
+			quotaUsed.innerHTML = (item.quotaused) ? Util.byteToString(item.quotaused) : "calculating...";
 			$("#item" + i).append(quotaUsed);
-
-			UsersModel.getQuota(item.username, i);
 
 			// Last Update
 			var lastUpdate = document.createElement("span");
 			lastUpdate.className = "item-elem col5";
 			lastUpdate.innerHTML = Util.timestampToDate(item.last_login);
 			$("#item" + i).append(lastUpdate);
+		}
+
+		// Get quota for all users asynchronously
+		if (!UsersModel.calledForQuota) {
+			UsersModel.calledForQuota = true;
+			for (var i in users) {
+				UsersModel.getQuota(users[i].username, i);
+			}
 		}
 
 		$(window).resize();
@@ -536,6 +542,7 @@ var PluginsModel = new function() {
 
 var UsersModel = new function() {
 	var self = this;
+	this.calledForQuota = false;
 	this.list = new List("users", SystemView.displayUsers);
 
 	this.showChangeQuota = function(id) {
@@ -583,10 +590,9 @@ var UsersModel = new function() {
 			data: {user: username},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			$("#user-quota-free" + id).text(Util.byteToString(data.msg.used));
-			$("#user-quota-total" + id).text(Util.byteToString(data.msg.max));
 			var user = self.list.get(id);
-			user['usedspace'] = data.msg.used;
+			user['quotaused'] = data.msg.used;
+			user['quotamax'] = data.msg.max;
 			self.list.update(id, user);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);

@@ -340,11 +340,11 @@ class Util {
 	 * @return string
 	 */
 	public static function client_fingerprint() {
+		$fingerprint = (isset($_COOKIE['fingerprint'])) ? $_COOKIE['fingerprint'] : hash('sha256', $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
 		if (!isset($_COOKIE['fingerprint'])) {
-			$fingerprint = hash('sha256', $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
 			setcookie('fingerprint', $fingerprint, time() + 365 * 24 * 60 * 60, "/");
 		}
 
-		return $_COOKIE['fingerprint'];
+		return $fingerprint;
 	}
 }

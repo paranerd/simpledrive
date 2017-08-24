@@ -14,6 +14,7 @@ var List = (function() {
 		this.filterNeedle = '';
 		this.filterKeys = null;
 		this.defaultFilterKeys = null;
+		this.sortKey = null;
 		this.sortOrder = 1; // 1: asc, -1: desc
 
 		// Selection
@@ -29,7 +30,7 @@ var List = (function() {
 		this.init();
 	}
 
-	// Methods
+	// Add methods to prototype
 	List.prototype = {
 		init: function() {
 			$(document).on('keydown', function(e) {
@@ -85,11 +86,9 @@ var List = (function() {
 
 			this.filterRemove();
 
-			if (orderBy) {
-				this.order(orderBy, 1);
+			if (orderBy || this.sortKey) {
+				this.order(orderBy, this.sortOrder);
 			}
-
-			this.display();
 		},
 
 		setComparator: function(comparator) {
@@ -283,7 +282,6 @@ var List = (function() {
 			this.filterNeedle = needle;
 			this.filterKeys = (keys) ? keys : this.defaultFilterKeys;
 			this.filtered = Util.filter(this.masterFiltered, needle, this.filterKeys);
-
 			this.display();
 
 			if (needle) {
@@ -310,8 +308,9 @@ var List = (function() {
 		},
 
 		order: function(key, order) {
+			this.sortKey = key;
 			this.sortOrder = (order) ? order : this.sortOrder *= -1;
-			this.data = this.data.sort(this.compare(key, this.sortOrder));
+			this.data = this.data.sort(this.compare(this.sortKey, this.sortOrder));
 
 			var text = (this.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
 			$(".order-direction").text('');
