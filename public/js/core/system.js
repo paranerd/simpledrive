@@ -567,6 +567,7 @@ var UsersModel = new function() {
 	}
 
 	this.fetch = function(pushState) {
+		self.calledForQuota = false;
 		if (pushState) {
 			window.history.pushState(null, '', 'system/users');
 		}
