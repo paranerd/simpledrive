@@ -18,6 +18,7 @@ class Twofactor_Controller {
 		'unregister' => array('client'),
 		'update'     => array('client_old', 'client_new'),
 		'unlock'     => array('code'),
+		'invalidate' => array('fingerprint'),
 	);
 
 	public function __construct($token) {
@@ -52,5 +53,9 @@ class Twofactor_Controller {
 		$remember = (isset($_REQUEST['remember'])) ? filter_var($_REQUEST['remember'], FILTER_VALIDATE_BOOLEAN) : false;
 		$fingerprint = (isset($_REQUEST['fingerprint'])) ? $_REQUEST['fingerprint'] : Util::client_fingerprint();
 		return $this->model->unlock($_REQUEST['code'], $fingerprint, $remember);
+	}
+
+	public function invalidate() {
+		return $this->model->invalidate($_REQUEST['fingerprint']);
 	}
 }

@@ -152,6 +152,14 @@ class Twofactor_Model {
 	}
 
 	/**
+	 * Remove TFA-code to invalidate the request
+	 */
+	public static function invalidate($fingerprint) {
+		$db = Database::getInstance();
+		return $db->two_factor_invalidate($fingerprint);
+	}
+
+	/**
 	 * Try to unlock TFA, send code otherwise
 	 * @param int $code
 	 * @param string $fingerprint

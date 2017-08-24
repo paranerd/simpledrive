@@ -929,6 +929,24 @@ class Database {
 	}
 
 	/**
+	 * Remove TFA-code to invalidate the request
+	 * @param string $fingerprint
+	 * @return boolean
+	 */
+	public function two_factor_invalidate($fingerprint) {
+		$stmt = $this->link->prepare(
+			'DELETE
+			FROM sd_two_factor_codes
+			WHERE fingerprint = ?
+			AND unlocked = 0'
+		);
+		$stmt->bind_param('s', $fingerprint);
+		$stmt->execute();
+
+		return ($stmt->affected_rows > 0);
+	}
+
+	/**
 	 * Unlock TFA-code
 	 * @param int $uid
 	 * @param string $code

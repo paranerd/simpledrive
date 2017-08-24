@@ -337,6 +337,11 @@ class Util {
 
 	/**
 	 * Get fingerprint for current client from cookie (set if none)
+	 * Could be random, but depending on IP and User-Agent helps with blocking
+	 * Clients from TFA-Requests:
+	 * When random, an attacker would only need to clear his cache
+	 * to obtain a new fingerprint
+	 * With IP and User-Agent, these factors would need to be changed or spoofed
 	 * @return string
 	 */
 	public static function client_fingerprint() {
