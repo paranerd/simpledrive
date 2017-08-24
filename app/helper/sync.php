@@ -7,24 +7,24 @@
  * @link		http://simpledrive.org
  */
 
- /**
-  * Sync-Process
-  *
-  * Client sends a list of all its files
-  * Server gets a list of all its files
-  *
-  * Handle files that exist on both client and server
-  * 		If they've got matching checksums, remove them from both lists (no need to further process them)
-  * 		Otherwise compare edit-dates, keep the most recent and delete or mark-for-delete the other one
-  *
-  * For the remaining client-files check if there is an entry in server-history
-  * 		If there is, it is for deletion and it is more recent than the file's last edit-date, mark the client-file for deletion
-  * 		Otherwise mark it for upload (but do not upload folders from client!)
-  *
-  * For the remaining server-files check the last history-entry
-  * 		If none exists or it is not for deletion, add it to client-list for download
-  * 		Otherwise delete from server
-  */
+/*
+ * Sync-Process
+ *
+ * Client sends a list of all its files
+ * Server gets a list of all its files
+ *
+ * Handle files that exist on both client and server
+ * 		If they've got matching checksums, remove them from both lists (no need to further process them)
+ * 		Otherwise compare edit-dates, keep the most recent and delete or mark-for-delete the other one
+ *
+ * For the remaining client-files check if there is an entry in server-history
+ * 		If there is, it is for deletion and it is more recent than the file's last edit-date, mark the client-file for deletion
+ * 		Otherwise mark it for upload (but do not upload folders from client!)
+ *
+ * For the remaining server-files check the last history-entry
+ * 		If none exists or it is not for deletion, add it to client-list for download
+ * 		Otherwise delete from server
+ */
 class Sync {
 	/**
 	 * Constructor

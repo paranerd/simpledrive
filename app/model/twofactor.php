@@ -7,6 +7,21 @@
  * @link		https://simpledrive.org
  */
 
+/*
+ * Two-Factor-Authentication-Process
+ *
+ * User tries to login
+ * If TFA is enabled (there is a mobile client registered in the db)
+ * user gets an Error 403 and an unlock-code will be sent
+ * (max. once every TFA_EXPIRATION seconds)
+ * User calls login again with user, pass and this time a parameter "callback"
+ * set to true
+ * This establishes a connection for a maximum of TFA_EXPIRATION seconds
+ * in which the the user can by entering the code in his client or
+ * confirming in the app
+ * Once the code has been unlocked, the connection returns with the token
+ * If the code is not unlocked within TFA_EXPIRATION seconds, the TFA fails
+ */
 class Twofactor_Model {
 	static $FIREBASE_API_KEY = "AAAAQpBzHQY:APA91bGBXIzXD5-Ycc78zWDLhUB589ky-Ck-R45maLyfjOvZAfScaUb6qSDZJy9fAL--YWIryu0X4u07YtINUk9vU9GBZRXalon8xENm35TVSWpMSuPHgrVqSpWE-Onwi1JtHR1x37rG";
 
