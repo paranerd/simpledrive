@@ -1391,7 +1391,7 @@ class Database {
 			'INSERT into sd_log (user, type, source, msg, date)
 			VALUES (?, ?, ?, ?, ?)'
 		);
-		$stmt->bind_param('issss', $uid, $type, $source, $msg, $date);
+		$stmt->bind_param('iisss', $uid, $type, $source, $msg, $date);
 		$stmt->execute();
 	}
 
@@ -1422,14 +1422,16 @@ class Database {
 
 		$log = array();
 		while ($stmt->fetch()) {
+			$type_string = ($type > INFO) ? (($type > WARNING) ? "error" : "warning") : "info";
 			array_push($log, array(
 				'user'		=> $username,
-				'type'		=> $type,
+				'type'		=> $type_string,
 				'source'	=> $source,
 				'msg'		=> $msg,
 				'date'		=> $date,
 			));
 		}
+
 		return array('total' => $count, 'log' => $log);
 	}
 

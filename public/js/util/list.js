@@ -216,6 +216,15 @@ var List = (function() {
 			return (id >= 0 && id < this.filtered.length) ? this.filtered[id] : null;
 		},
 
+		getByKey: function(key, value) {
+			for (var i in this.filtered) {
+				var item = this.filtered[i];
+				if (item[key] == value) {
+					return item;
+				}
+			}
+		},
+
 		getAllFiltered: function() {
 			return this.filtered;
 		},

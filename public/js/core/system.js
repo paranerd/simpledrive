@@ -578,7 +578,7 @@ var UsersModel = new function() {
 			data: {},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.list.setData(data.msg, 'username');
+			self.list.setData(data.msg, 'id');
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -591,7 +591,7 @@ var UsersModel = new function() {
 			data: {user: username},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			var user = self.list.get(id);
+			var user = self.list.getByKey("username", username);
 			user['quotaused'] = data.msg.used;
 			user['quotamax'] = data.msg.max;
 			self.list.update(id, user);

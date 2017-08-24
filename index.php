@@ -18,10 +18,13 @@ define('FILES', '/files');
 define('LOCK', '/lock/');
 define('VAULT', '/vault/');
 define('VAULT_FILE', 'vault');
+define('PUBLIC_USER_ID', 1);
 define('PERMISSION_NONE', 0);
 define('PERMISSION_READ', 1);
 define('PERMISSION_WRITE', 2);
-define('PUBLIC_USER_ID', 1);
+define('INFO', 0);
+define('WARNING', 1);
+define('ERROR', 2);
 define('TOKEN_EXPIRATION', 60 * 60 * 24 * 7); // 1 week
 define('TFA_EXPIRATION', 30);
 define('TFA_MAX_ATTEMPTS', 3);
