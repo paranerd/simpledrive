@@ -231,12 +231,13 @@
 	</div>
 
 	<!-- Confirm -->
-	<div id="confirm" class="popup center hidden">
-		<div id="confirm-title" class="title">Confirm</div>
-		<button id="confirm-no" class="btn btn-inverted">Cancel</button>
-		<button id="confirm-yes" class="btn">OK</button>
+	<form id="confirm" class="popup center hidden" action="#">
 		<span class="close">&times;</span>
-	</div>
+		<div id="confirm-title" class="title">Confirm</div>
+
+		<button id="confirm-no" class="btn btn-inverted cancel" tabindex=2>Cancel</button>
+		<button id="confirm-yes" class="btn" tabindex=1>OK</button>
+	</form>
 
 	<!-- Progress circle -->
 	<div id="busy" class="hidden">
