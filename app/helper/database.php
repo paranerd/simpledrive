@@ -142,7 +142,7 @@ class Database {
 				id int(11) AUTO_INCREMENT,
 				PRIMARY KEY (id),
 				user int(11),
-				type int(11),
+				level int(11),
 				source varchar(30),
 				msg text,
 				date varchar(20)
@@ -1406,10 +1406,11 @@ class Database {
 			'SELECT COUNT(*)
 			FROM sd_log'
 		);
-		$count = ceil($stmt0->fetch_row()[0] / 10);
+		// Count pages with $size entries on each page
+		$count = ceil($stmt0->fetch_row()[0] / $size);
 
 		$stmt = $this->link->prepare(
-			'SELECT sd_users.user, type, source, msg, date
+			'SELECT sd_users.user, level, source, msg, date
 			FROM sd_log
 			LEFT JOIN sd_users ON sd_users.id = sd_log.user
 			ORDER BY sd_log.id
@@ -1418,14 +1419,15 @@ class Database {
 		$stmt->bind_param('ii', $from, $size);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($username, $type, $source, $msg, $date);
+		$stmt->bind_result($username, $level, $source, $msg, $date);
 
 		$log = array();
 		while ($stmt->fetch()) {
-			$type_string = ($type > INFO) ? (($type > WARNING) ? "error" : "warning") : "info";
+			$type = ($level > INFO) ? (($level > WARNING) ? "error" : "warning") : "info";
 			array_push($log, array(
 				'user'		=> $username,
-				'type'		=> $type_string,
+				'level'		=> $level,
+				'type'		=> $type,
 				'source'	=> $source,
 				'msg'		=> $msg,
 				'date'		=> $date,
