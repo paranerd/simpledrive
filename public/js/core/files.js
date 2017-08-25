@@ -669,7 +669,6 @@ var FileView = new function() {
 	this.showRename = function(e) {
 		var elem = FileModel.list.getFirstSelected();
 		var filename = elem.item.filename
-		var newfilename = (filename.lastIndexOf('.') != -1) ? filename.substr(0, filename.lastIndexOf('.')) : filename;
 
 		var form = document.createElement('form');
 		form.id = "renameform";
@@ -681,7 +680,11 @@ var FileView = new function() {
 		input.autocomplete = "off";
 		form.appendChild(input);
 
-		$(input).val(newfilename).focus().select();
+		// Show filename and select (but not after the last dot);
+		var selectionEnd = (filename.lastIndexOf('.') != -1) ? filename.lastIndexOf('.') : filename.length;
+		$(input).val(filename).focus();
+		$(input)[0].setSelectionRange(0, selectionEnd);
+
 		$(form).on('submit', function(e) {
 			e.preventDefault();
 			FileModel.rename();

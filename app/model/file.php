@@ -459,11 +459,6 @@ class File_Model {
 		$oldpath = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
 		$newpath = dirname($oldpath) . "/" . $newname;
 
-		if (is_file($oldpath) && !strrpos($newpath, '.') && strrpos($oldpath, '.')) {
-			$newpath = $newpath . substr($oldpath, strrpos($oldpath, '.'));
-			$newname = $newname . substr($oldpath, strrpos($oldpath, '.'));
-		}
-
 		if (file_exists($newpath)) {
 			throw new Exception('File already exists', '403');
 		}
