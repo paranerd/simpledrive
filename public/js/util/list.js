@@ -299,7 +299,9 @@ var List = (function() {
 			else {
 				this.unselectAll();
 				$("#" + this.id + "-filter").addClass("hidden");
-				document.activeElement.blur();
+				if (document.activeElement) {
+					document.activeElement.blur();
+				}
 			}
 
 			return this.filtered;

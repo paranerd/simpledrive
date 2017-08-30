@@ -1388,7 +1388,7 @@ class Database {
 	public function log_write($uid, $type, $source, $msg) {
 		$date = date('d.m.Y-H:i:s');
 		$stmt = $this->link->prepare(
-			'INSERT into sd_log (user, type, source, msg, date)
+			'INSERT into sd_log (user, level, source, msg, date)
 			VALUES (?, ?, ?, ?, ?)'
 		);
 		$stmt->bind_param('iisss', $uid, $type, $source, $msg, $date);
