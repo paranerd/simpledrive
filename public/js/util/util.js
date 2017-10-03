@@ -329,7 +329,8 @@ var Util = new function() {
 
 	this.showContextmenu = function(e) {
 		// Position context menu at mouse
-		var top = (e.clientY + $("#contextmenu").height() < window.innerHeight) ? e.clientY : e.clientY - $("#contextmenu").height();
+		var menuHeight = document.getElementById("contextmenu").scrollHeight;
+		var top = (e.clientY + menuHeight < window.innerHeight) ? e.clientY : e.clientY - menuHeight;
 		$("#contextmenu").css({
 			'left' : (e.clientX + 5),
 			'top' : (top + 5)
@@ -478,8 +479,8 @@ var Util = new function() {
 	this.timestampToDate = function(timestamp) {
 		timestamp = (timestamp.toString().length > 10) ? timestamp / 1000 : timestamp;
 		var date = new Date(timestamp * 1000);
-		var day = (date.getDate() < 10) ? "0" + date.getDate() : date.getDate();
-		var month = (date.getMonth() < 10) ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+		var day = (date.getDate() < 9) ? "0" + date.getDate() : date.getDate();
+		var month = (date.getMonth() < 9) ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
 		var year = date.getFullYear();
 		return day + "." + month + "." + year;
 	}

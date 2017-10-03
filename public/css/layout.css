@@ -286,8 +286,6 @@ div.hidden:not(.popup):not(.popup-menu) {
 }
 
 .popup-menu.hidden {
-	/*-moz-opacity: 0;
-	opacity: 0;*/
 	visibility: hidden;
 
 	max-height: 0;
