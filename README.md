@@ -15,7 +15,7 @@ It puts you in charge of your data - the way it's meant to be.
 
 The following packages are required to run simpleDrive (for Debian-based machines):
 
-	$ sudo apt install apache2 php7.0 php7.0 php7.0-gd php7.0-mysql mysql-server
+	$ sudo apt install apache2 php7.0 php7.0 php7.0-gd php7.0-mysql php7.0-zip mysql-server
 
 Note: simpleDrive also runs on nginx. Simply replace "apache2" with "nginx"
 
