@@ -92,17 +92,16 @@ class Response {
 		$client_accept_encoding = isset($_SERVER['HTTP_ACCEPT_ENCODING']) ? $_SERVER['HTTP_ACCEPT_ENCODING'] : '';
 
 		// Calculate current/new header values
+		$server_etag = md5($timestamp . $client_accept_encoding . $identifier);
 		$server_last_modified = gmdate('D, d M Y H:i:s', $timestamp) . ' GMT';
-		$server_etag_raw = md5($timestamp . $client_accept_encoding . $identifier);
-		$server_etag = '"' . $server_etag_raw . '"';
 
 		// Do client and server tags match?
+		$matching_etag = ($client_etag && strpos($client_etag, $server_etag) !== false);
 		$matching_last_modified = $client_last_modified == $server_last_modified;
-		$matching_etag = ($client_etag && strpos($client_etag, $server_etag_raw) !== false);
 
 		// Set new headers for cache recognition
 		header('Last-Modified: ' . $server_last_modified);
-		header('ETag: ' . $server_etag);
+		header('ETag: "' . $server_etag . '"');
 
 		// Are client and server headers identical (no changes)?
 		if (($client_last_modified && $client_etag) || $strict

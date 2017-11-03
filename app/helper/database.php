@@ -2305,7 +2305,7 @@ class Database {
 				$this->history_add($child_id, $path_backup . "/" . $filename, $oid, $timestamp, $deleted, false);
 			}
 			else {
-				$this->history_add_file($path_backup . "/" . $filename, $oid, $timestamp, $delete);
+				$this->history_add_file($path_backup . "/" . $filename, $oid, $timestamp, $deleted);
 			}
 		}
 	}

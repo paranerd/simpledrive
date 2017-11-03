@@ -36,7 +36,6 @@ class Twofactor_Model {
 		$this->db     = Database::getInstance();
 		$this->user   = ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid    = ($this->user) ? $this->user['id'] : null;
-		$this->config = json_decode(file_get_contents(CONFIG), true);
 	}
 
 	/**
@@ -252,8 +251,7 @@ class Twofactor_Model {
 			'data' => array(
 				'title'       => "Access code",
 				'code'        => $message,
-				'fingerprint' => Util::client_fingerprint(),
-				//'server'      => $this->config['protocol'] . $this->config['protocol'] . $this->config['installdir']
+				'fingerprint' => Util::client_fingerprint()
 			)
 		);
 

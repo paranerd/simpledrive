@@ -1092,6 +1092,8 @@ class File_Model {
 			$destination = $path;
 		}
 
+		Util::log($_SERVER);
+
 		if (file_exists($destination) && is_file($destination)) {
 			if (!Response::set_cache_header(filemtime($destination))) {
 				Response::set_download($destination, $delete_flag);
@@ -1338,6 +1340,6 @@ class File_Model {
 	 * @return boolean
 	 */
 	private function filename_valid($filename) {
-		return !preg_match('/[^A-Za-z0-9\!\"\§\$\%\&\(\)\{\}\[\]\=\*\'\#\-\_\.\,\;\²\³]/', $filename);
+		return !preg_match('/[^A-Za-z0-9\!\"\ \§\$\%\&\(\)\{\}\[\]\=\*\'\#\-\_\.\,\;\²\³]/', $filename);
 	}
 }

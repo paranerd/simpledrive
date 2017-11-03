@@ -104,7 +104,7 @@
 				<hr>
 				<span id="toggle-sidebar" class="icon icon-menu"></span>
 				<span id="scan" class="icon icon-sync"></span>
-				<span id="change-fileview" class="icon icon-list"></span>
+				<span id="change-fileview" class="icon icon-grid"></span>
 				<span id="show-info" class="icon icon-search popup-trigger" data-target="search"></span>
 
 			</div>

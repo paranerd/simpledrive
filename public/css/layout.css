@@ -886,6 +886,7 @@ label {
 	font-size: 1.25rem;
 	text-align: center;
 	z-index: 1;
+	text-shadow: 1px 1px 5px #222, 1px -1px 5px #222, -1px 1px 5px #222, -1px -1px 5px #222;
 }
 
 .img-title {
