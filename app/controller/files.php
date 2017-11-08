@@ -51,7 +51,8 @@ class Files_Controller {
 		$section = ($section) ? $section : $this->default_section;
 		if (in_array($section, $this->valid_sections)) {
 			$view = ($section == "files" || $section == "sharein" || $section == "shareout" || $section == "trash" || $section == "pub") ? $this->default_view : $section;
-			return Response::success($view, true, $this->token, $section, $args);
+			$need_user = (ACTION != "webdav");
+			return Response::success($view, true, $this->token, $section, $args, $need_user);
 		}
 		else {
 			return Response::error('404', 'The requested site could not be found...', true);

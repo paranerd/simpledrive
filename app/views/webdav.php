@@ -8,17 +8,17 @@
  */
 
 // Check if sabredav plugin is installed
-if (!file_exists('plugins/sabredav') || true) {
-	exit (Response::error('404', 'The requested site could not be found...', true));
+if (!file_exists('plugins/sabredav')) {
+	exit (Response::error('404', 'Missing plugin.', true));
 }
 
 require_once 'app/model/core.php';
 require_once 'plugins/sabredav/vendor/autoload.php';
 
 use
-    Sabre\HTTP\Sapi,
-    Sabre\HTTP\Response,
-    Sabre\HTTP\Auth;
+	Sabre\HTTP\Sapi,
+	Sabre\HTTP\Response,
+	Sabre\HTTP\Auth;
 
 $request	= Sapi::getRequest();
 $response	= new Response();
@@ -29,8 +29,7 @@ $basicAuth->requireLogin();
 
 $user = $basicAuth->getCredentials();
 
-$dataDir = $CONFIG['datadir'];
-$path = $dataDir . $user[0];
+$path = $CONFIG['datadir'] . $user[0] . FILES;
 
 $tmpDir = 'plugins/sabredav/tmpdata';
 $realm = 'SabreDAV';

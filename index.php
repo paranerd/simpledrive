@@ -10,6 +10,22 @@
 date_default_timezone_set('Europe/Berlin');
 header('Content-Type: text/html; charset=UTF-8');
 
+// Include helpers
+require_once 'app/helper/database.php';
+require_once 'app/helper/util.php';
+require_once 'app/helper/crypto.php';
+require_once 'app/helper/response.php';
+
+// Differentiate between api- and render-calls
+// Extract controller and action
+$render       = (!isset($_REQUEST['api']) && !(isset($_REQUEST['request']) && $_REQUEST['request'] == 'api'));
+$token_source = ($render) ? $_COOKIE : $_REQUEST;
+$request      = (isset($_REQUEST['request'])) ? $_REQUEST['request'] : null;
+$args         = ($request) ? explode('/', rtrim($request, '/')) : array();
+$controller   = (sizeof($args) > 0) ? array_shift($args) : 'files';
+$action       = (sizeof($args) > 0) ? array_shift($args) : '';
+$name         = ucfirst($controller) . "_Controller";
+
 // Define Constants
 define('LOG', (__DIR__) . '/logs/status.log');
 define('CACHE', '/cache/');
@@ -31,22 +47,7 @@ define('TFA_MAX_ATTEMPTS', 3);
 define('LOGIN_MAX_ATTEMPTS', 3);
 define('CONFIG', 'config/config.json');
 define('VERSION', 'config/version.json');
-
-// Include helpers
-require_once 'app/helper/database.php';
-require_once 'app/helper/util.php';
-require_once 'app/helper/crypto.php';
-require_once 'app/helper/response.php';
-
-// Differentiate between api- and render-calls
-// Extract controller and action
-$render       = (!isset($_REQUEST['api']) && !(isset($_REQUEST['request']) && $_REQUEST['request'] == 'api'));
-$token_source = ($render) ? $_COOKIE : $_REQUEST;
-$request      = (isset($_REQUEST['request'])) ? $_REQUEST['request'] : null;
-$args         = ($request) ? explode('/', rtrim($request, '/')) : array();
-$controller   = (sizeof($args) > 0) ? array_shift($args) : 'files';
-$action       = (sizeof($args) > 0) ? array_shift($args) : '';
-$name         = ucfirst($controller) . "_Controller";
+define('ACTION', $action);
 
 // Not installed - redirect to setup
 if (!file_exists(CONFIG) && ($controller != 'core' || $action != 'setup')) {

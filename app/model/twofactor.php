@@ -145,7 +145,7 @@ class Twofactor_Model {
 		}
 
 		$db = Database::getInstance();
-		$required = $db->two_factor_required($uid);
+		$required = ($db->two_factor_required($uid) && (ACTION != "webdav"));
 
 		if ($required) {
 			self::send_code($uid, Util::client_fingerprint());
