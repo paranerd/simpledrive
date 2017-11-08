@@ -201,12 +201,12 @@ class System_Model {
 		// Write data to file
 		$zip_target = $plugin_path . "/" . $name . ".zip";
 		$file = fopen($zip_target, "w+");
-		fputs($file, $response['data']);
+		fputs($file, $response['body']);
 		fclose($file);
 
 		// Integrity-check
 		if (md5_file($zip_target) != $plugins[$name]) {
-			unlink($zip_target);
+			//unlink($zip_target);
 			throw new Exception('Plugin integrity check failed', '500');
 		}
 		// Extract file
