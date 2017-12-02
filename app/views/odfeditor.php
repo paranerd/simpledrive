@@ -12,8 +12,9 @@
 <!DOCTYPE HTML>
 <html xml:lang="en" lang="en">
 <head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-id="<?php echo $id; ?>">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<title>ODF-Editor | simpleDrive</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1">
 
     <base href="<?php echo $base; ?>">
 

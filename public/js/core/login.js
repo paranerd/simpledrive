@@ -5,10 +5,12 @@
  * @link		http://simpledrive.org
  */
 
-var base;
+var base,
+	target;
 
 $(document).ready(function() {
 	base = $('head').data('base');
+	target = $('head').data('target');
 
 	$(window).resize();
 
@@ -50,7 +52,8 @@ function login(user, pass, callback) {
 			data: {user: user, pass: pass, callback: callback},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			window.location.href = base + "files";
+			//window.location.href = base + "files";
+			window.location.href = base + target;
 		}).fail(function(xhr, statusText, error) {
 			// TFA required
 			if (xhr.status == 403) {

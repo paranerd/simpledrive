@@ -47,6 +47,7 @@ define('TFA_MAX_ATTEMPTS', 3);
 define('LOGIN_MAX_ATTEMPTS', 3);
 define('CONFIG', 'config/config.json');
 define('VERSION', 'config/version.json');
+define('CONTROLLER', $controller);
 define('ACTION', $action);
 
 // Not installed - redirect to setup
@@ -63,7 +64,7 @@ else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/'
 		require_once 'app/controller/' . $controller . '.php';
 		// Extract token
 		$token = (isset($token_source['token'])) ? Crypto::validate_token($token_source['token']) : '';
-		$c     = new $name($token);
+		$c     = new $name($token, $render);
 
 		// Call to render
 		if ($render && method_exists($name, 'render')) {

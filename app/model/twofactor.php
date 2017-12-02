@@ -171,14 +171,12 @@ class Twofactor_Model {
 	 * @return null
 	 */
 	public static function unlock($code, $fingerprint, $remember) {
-		Util::log("unlock");
 		$db = Database::getInstance();
 
 		// Get uid for pending code if exists
 		$uid = $db->two_factor_get_user($fingerprint);
 
 		if (!$uid) {
-			Util::log("unlock | failed");
 			throw new Exception('Two-Factor-Authentication failed', '400');
 		}
 
@@ -212,7 +210,6 @@ class Twofactor_Model {
 			sleep(1);
 		}
 
-		Util::log("is_unlocked | failed");
 		throw new Exception('Two-Factor-Authentication failed', '400');
 	}
 

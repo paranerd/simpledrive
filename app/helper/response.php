@@ -58,7 +58,10 @@ class Response {
 			$lang		= self::lang();
 
 			if ($need_user && !$public && !$user) {
-				header('Location: ' . $base . 'core/login');
+				$location = $base . 'core/login';
+				$location .= ((CONTROLLER . "/" . ACTION) !== ('files/files')) ? "?target=" . CONTROLLER . "/" . ACTION : "";
+				header('Location: ' . $location);
+
 				exit();
 			}
 

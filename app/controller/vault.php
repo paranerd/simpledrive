@@ -20,9 +20,9 @@ class Vault_Controller {
 		'save'			=> array('vault'),
 	);
 
-	public function __construct($token) {
+	public function __construct($token, $render) {
 		$this->token	= $token;
-		$this->model	= new Vault_Model($token);
+		$this->model	= ($render) ? null : new Vault_Model($token);
 	}
 
 	public function render($section, $args) {

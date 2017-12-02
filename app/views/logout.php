@@ -12,8 +12,9 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
 <head data-token="<?php echo $token; ?>" data-base="<?php echo $base; ?>">
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<title>Logout | simpleDrive</title>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1">
 
 	<base href="<?php echo $base; ?>">
 
@@ -28,7 +29,7 @@
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util/util.js"></script>
-	
+
 	<script type="text/javascript" src="public/js/core/logout.js"></script>
 </body>
 </html>

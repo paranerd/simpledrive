@@ -24,9 +24,9 @@ class System_Controller {
 		'setdomain'		=> array('domain')
 	);
 
-	public function __construct($token) {
+	public function __construct($token, $render) {
 		$this->token	= $token;
-		$this->model	= new System_Model($token);
+		$this->model	= ($render) ? null : new System_Model($token);
 	}
 
 	public function render($section, $args) {

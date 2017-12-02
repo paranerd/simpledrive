@@ -42,9 +42,9 @@ class Files_Controller {
 		'zip'		=> array('target', 'source'),
 	);
 
-	public function __construct($token) {
+	public function __construct($token, $render) {
 		$this->token	= $token;
-		$this->model	= new File_Model($token);
+		$this->model	= ($render) ? null : new File_Model($token);
 	}
 
 	public function render($section, $args) {

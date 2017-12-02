@@ -12,8 +12,9 @@
 <!DOCTYPE html>
 <html>
 <head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>">
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<title>Vault | simpleDrive</title>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1">
 
 	<base href="<?php echo $base; ?>">
 
