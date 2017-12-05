@@ -15,17 +15,27 @@ class System_Model {
 	public function __construct($token) {
 		$this->config = json_decode(file_get_contents(CONFIG), true);
 		$this->db     = Database::getInstance();
+	}
 
-		if (!$this->db->user_is_admin($token)) {
+	/**
+	 * Checks if user is admin and otherwise throws an Exception
+	 *
+	 * @throws Exception
+	 */
+	private function check_if_admin() {
+		if (!$this->db->user_check_if_admin($token)) {
 			throw new Exception('Permission denied', '403');
 		}
 	}
 
 	/**
 	 * Get server status info
+	 *
 	 * @return array
 	 */
 	public function status() {
+		$this->check_if_admin();
+
 		$disktotal	= (disk_total_space(dirname(__FILE__)) != "") ? disk_total_space(dirname(__FILE__)) : disk_total_space('/');
 		$diskfree	= (disk_free_space(dirname(__FILE__)) != "") ? disk_free_space(dirname(__FILE__)) : disk_free_space('/');
 		$ssl		= (strpos(file_get_contents('.htaccess'), '#RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [QSA,NC,L]') === false);
@@ -52,11 +62,14 @@ class System_Model {
 
 	/**
 	 * Set upload-limit
+	 *
 	 * @param $limit
 	 * @throws Exception
 	 * @return null
 	 */
 	public function set_upload_limit($limit) {
+		$this->check_if_admin();
+
 		if (!ctype_digit($limit) || (ctype_digit($limit) && $limit < 1024)) {
 			throw new Exception('Illegal value for upload size', '400');
 		}
@@ -85,10 +98,13 @@ class System_Model {
 
 	/**
 	 * Set domain (used for public shares)
+	 *
 	 * @throws Exception
 	 * @return null
 	 */
 	public function set_domain($domain) {
+		$this->check_if_admin();
+
 		$this->config['domain'] = ($domain != "") ? $domain : $this->config['domain'];
 
 		// Write config file
@@ -101,11 +117,14 @@ class System_Model {
 
 	/**
 	 * Update .htaccess to enforce SSL or not
+	 *
 	 * @param boolean $ssl
 	 * @throws Exception
 	 * @return null
 	 */
 	public function use_ssl($ssl) {
+		$this->check_if_admin();
+
 		$ssl						= ($ssl == "1") ? 1 : 0;
 		$ssl_comm					= ($ssl == "1") ? '' : '#';
 		$backup						= $this->config['protocol'];
@@ -149,28 +168,37 @@ class System_Model {
 
 	/**
 	 * Get 10 log entries
+	 *
 	 * @param int $page Indicates at which entry to start
 	 * @return array Log entries
 	 */
 	public function get_log($page) {
+		$this->check_if_admin();
+
 		$page_size = 10;
 		return $this->db->log_get(($page) * $page_size, $page_size);
 	}
 
 	/**
 	 * Delete all log entries from database
+	 *
 	 * @return boolean
 	 */
 	public function clear_log() {
+		$this->check_if_admin();
+
 		return $this->db->log_clear();
 	}
 
 	/**
 	 * Download and extract a plugin
+	 *
 	 * @param string $name (of the plugin)
 	 * @return null
 	 */
 	public function get_plugin($name) {
+		$this->check_if_admin();
+
 		// MD5-Hashes for integrity-check
 		$plugins = array(
 			'webodf'	=> '058d00aaaa62763be63c328844083d49',
@@ -226,10 +254,13 @@ class System_Model {
 
 	/**
 	 * Remove plugin directory
+	 *
 	 * @param string $plugin_name
 	 * @return null
 	 */
 	public function remove_plugin($plugin_name) {
+		$this->check_if_admin();
+
 		if (Util::delete_dir('plugins/' . $plugin_name)) {
 			return null;
 		}

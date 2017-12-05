@@ -37,6 +37,17 @@ class Backup_Model {
 	}
 
 	/**
+	 * Checks if user is logged in
+	 *
+	 * @throws Exception
+	 */
+	private function check_if_logged_in() {
+		if (!$this->uid) {
+			throw new Exception('Permission denied', '403');
+		}
+	}
+
+	/**
 	 * Check if backup is enabled and running
 	 * @return boolean
 	 */
@@ -46,6 +57,7 @@ class Backup_Model {
 
 	/**
 	 * Set backup-info and generate authentication-url
+	 *
 	 * @param string $pass To encrypt files
 	 * @param boolean $enc_filename Whether or not to encrypt filenames
 	 * @throws Exception
@@ -67,6 +79,7 @@ class Backup_Model {
 
 	/**
 	 * Remove backup-lock
+	 *
 	 * @throws Exception
 	 * @return null
 	 */
@@ -80,6 +93,7 @@ class Backup_Model {
 
 	/**
 	 * Disable backup
+	 *
 	 * @throws Exception
 	 * @return null
 	 */
@@ -93,6 +107,7 @@ class Backup_Model {
 
 	/**
 	 * Set auth token
+	 *
 	 * @return boolean
 	 */
 	public function set_token($code) {
@@ -101,6 +116,7 @@ class Backup_Model {
 
 	/**
 	 * Start backup
+	 *
 	 * @throws Exception
 	 * @return null
 	 */
@@ -138,6 +154,7 @@ class Backup_Model {
 
 	/**
 	 * Set backup-lock
+	 *
 	 * @throws Exception
 	 */
 	private function set_lock() {
@@ -162,6 +179,7 @@ class Backup_Model {
 
 	/**
 	 * Walk recursively over $path and upload/delete if necessary
+	 *
 	 * @param string $path
 	 * @param string $parent_id
 	 * @return null

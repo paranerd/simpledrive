@@ -29,9 +29,9 @@ class User_Controller {
 		'tfaregistered' => array('client'),
 	);
 
-	public function __construct($token, $render) {
+	public function __construct($token) {
 		$this->token	= $token;
-		$this->model	= ($render) ? null : new User_Model($token);
+		$this->model	= new User_Model($token);
 	}
 
 	public function render($section, $args) {

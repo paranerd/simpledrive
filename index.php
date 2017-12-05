@@ -64,7 +64,7 @@ else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/'
 		require_once 'app/controller/' . $controller . '.php';
 		// Extract token
 		$token = (isset($token_source['token'])) ? Crypto::validate_token($token_source['token']) : '';
-		$c     = new $name($token, $render);
+		$c     = new $name($token);
 
 		// Call to render
 		if ($render && method_exists($name, 'render')) {

@@ -20,6 +20,7 @@ class Core_Model {
 
 	/**
 	 * Initiate database setup, create docs- and user-folder, write config, update htaccess and create user
+	 *
 	 * @param string $username
 	 * @param string $pass
 	 * @param string $mail
@@ -81,6 +82,7 @@ class Core_Model {
 
 	/**
 	 * Write setup info to config
+	 *
 	 * @param string $datadir Location of the docs-folder
 	 * @param string $db_server
 	 * @param string $db_name
@@ -111,6 +113,7 @@ class Core_Model {
 
 	/**
 	 * Update log-location in htaccess
+	 *
 	 * @return boolean
 	 */
 	private function update_main_htaccess() {
@@ -148,6 +151,7 @@ class Core_Model {
 	 * Initiate token generation
 	 * After 3 failed login attempts add a 30s cooldown for every further attempt
 	 * to slow down bruteforce attacks
+	 *
 	 * @param string $username
 	 * @param string $pass
 	 * @param boolean $callback
@@ -194,6 +198,7 @@ class Core_Model {
 
 	/**
 	 * End session and remove cookie
+	 *
 	 * @param string $token
 	 */
 	public function logout($token) {
@@ -206,6 +211,7 @@ class Core_Model {
 
 	/**
 	 * Get current installed version and recent version (from demo server)
+	 *
 	 * @param string $token
 	 * @throws Exception
 	 * @return array Containing current and version

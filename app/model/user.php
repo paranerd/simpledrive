@@ -10,6 +10,7 @@
 class User_Model {
 	/**
 	 * Constructor
+	 *
 	 * @param string $token
 	 * @throws Exception
 	 */
@@ -21,19 +22,40 @@ class User_Model {
 		$this->uid       = ($this->user) ? $this->user['id'] : null;
 		$this->username  = ($this->user) ? $this->user['username'] : "";
 		$this->installed = count($this->db->user_get_all()) > 1;
+	}
 
+	/**
+	 * Checks if user is logged in
+	 *
+	 * @throws Exception
+	 */
+	private function check_if_logged_in() {
 		if ($this->installed && !$this->uid) {
 			throw new Exception('Permission denied', '403');
 		}
 	}
 
 	/**
+	 * Checks if user is admin and otherwise throws an Exception
+	 *
+	 * @throws Exception
+	 */
+	private function check_if_admin() {
+		if (!$this->user || !$this->user['admin']) {
+			throw new Exception('Permission denied', '403');
+		}
+	}
+
+	/**
 	 * Get user by name
+	 *
 	 * @param string $username
 	 * @throws Exception
 	 * @return array
 	 */
 	public function get($username) {
+		$this->check_if_logged_in();
+
 		$username = ($username) ? $username : $this->username;
 		if ($username == $this->username || $this->user['admin']) {
 			return $this->db->user_get_by_name($username);
@@ -45,19 +67,20 @@ class User_Model {
 
 	/**
 	 * Get all users (admin required)
+	 *
 	 * @throws Exception
 	 * @return array
 	 */
 	public function get_all() {
-		if (!$this->user['admin']) {
-			throw new Exception('Permission denied', '403');
-		}
+		$this->check_if_logged_in();
+		$this->check_if_admin();
 
 		return $this->db->user_get_all();
 	}
 
 	/**
 	 * Create new user
+	 *
 	 * @param string $username
 	 * @param string $pass
 	 * @param string $admin
@@ -66,9 +89,7 @@ class User_Model {
 	 * @return int UserID
 	 */
 	public function create($username, $pass, $admin, $mail) {
-		if ($this->installed && !$this->user['admin']) {
-			throw new Exception('Permission denied', '403');
-		}
+		$this->check_if_admin();
 
 		// Check if username contains certain special characters
 		if (preg_match('/(\/|\.|\<|\>|%)/', $username) || strlen($username) > 32) {
@@ -100,6 +121,7 @@ class User_Model {
 
 	/**
 	 * Set fileview
+	 *
 	 * @param string $value
 	 * @throws Exception
 	 * @return null
@@ -117,6 +139,7 @@ class User_Model {
 
 	/**
 	 * Set theme color
+	 *
 	 * @param string $value
 	 * @throws Exception
 	 * @return null
@@ -140,21 +163,20 @@ class User_Model {
 	 * @return null
 	 */
 	public function set_quota_max($username, $max) {
-		$user = $this->db->user_get_by_name($username);
-		if (!$user || !$this->user['admin']) {
-			throw new Exception('Permission denied', '403');
-		}
+		$this->check_if_admin();
 
-		$max_storage = strval($max);
+		if ($user = $this->db->user_get_by_name($username)) {
+			$max_storage = strval($max);
 
-		$usedspace = Util::dir_size($this->config['datadir'] . $username);
+			$usedspace = Util::dir_size($this->config['datadir'] . $username);
 
-		if ($usedspace > $max_storage && $max_storage != 0) {
-			throw new Exception('Max storage < Used storage', '400');
-		}
+			if ($usedspace > $max_storage && $max_storage != 0) {
+				throw new Exception('Max storage < Used storage', '400');
+			}
 
-		if ($this->db->user_set_storage_max($user['id'], $max)) {
-			return null;
+			if ($this->db->user_set_storage_max($user['id'], $max)) {
+				return null;
+			}
 		}
 
 		throw new Exception('Error updating user', '500');
@@ -162,24 +184,24 @@ class User_Model {
 
 	/**
 	 * Grant/revoke admin privileges (admin required)
+	 *
 	 * @param string $username
 	 * @param boolean $admin
 	 * @throws Exception
 	 * @return null
 	 */
 	public function set_admin($username, $admin) {
+		$this->check_if_admin();
+
 		$be_admin = ($admin == "1") ? 1 : 0;
-		$user = $this->db->user_get_by_name($username);
-		if (!$user || !$this->user['admin']) {
-			throw new Exception('Permission denied', '403');
-		}
+		if ($user = $this->db->user_get_by_name($username)) {
+			if ($username == $this->username && !$be_admin) {
+				throw new Exception('Can not revoke your own admin rights', '400');
+			}
 
-		if ($username == $this->username && !$be_admin) {
-			throw new Exception('Can not revoke your own admin rights', '400');
-		}
-
-		if ($this->db->user_set_admin($user['id'], $be_admin)) {
-			return null;
+			if ($this->db->user_set_admin($user['id'], $be_admin)) {
+				return null;
+			}
 		}
 
 		throw new Exception('Error updating user', '500');
@@ -187,6 +209,7 @@ class User_Model {
 
 	/**
 	 * Enable/disable autoscan
+	 *
 	 * @param boolean $enable
 	 * @throws Exception
 	 * @return null
@@ -208,10 +231,9 @@ class User_Model {
 	 * @return null
 	 */
 	public function delete($username) {
+		$this->check_if_admin();
+
 		$user = $this->db->user_get_by_name($username);
-		if (!$this->user['admin']) {
-			throw new Exception('Permission denied', '403');
-		}
 
 		if ($username != $this->username) {
 			if ($this->db->user_remove($user['id'])) {
@@ -225,6 +247,7 @@ class User_Model {
 
 	/**
 	 * Check user's quota (queried by File_Model)
+	 *
 	 * @param string $uid
 	 * @param int $add Additional required space
 	 * @return boolean
@@ -242,6 +265,7 @@ class User_Model {
 
 	/**
 	 * Get user's quota
+	 *
 	 * @param string $username
 	 * @throws Exception
 	 * @return array
@@ -278,6 +302,7 @@ class User_Model {
 
 	/**
 	 * Change password
+	 *
 	 * @param string $currpass
 	 * @param string $newpass
 	 * @throws Exception
@@ -306,6 +331,7 @@ class User_Model {
 
 	/**
 	 * Remove cache directory
+	 *
 	 * @throws Exception
 	 * @return null
 	 */
@@ -319,6 +345,7 @@ class User_Model {
 
 	/**
 	 * Remove trash directory
+	 *
 	 * @throws Exception
 	 * @return null
 	 */
@@ -334,6 +361,7 @@ class User_Model {
 
 	/**
 	 * Get number of active tokens
+	 *
 	 * @return int
 	 */
 	public function active_token() {
@@ -342,6 +370,7 @@ class User_Model {
 
 	/**
 	 * Invalidate all tokens but the current one
+	 *
 	 * @return boolean
 	 */
 	public function invalidate_token() {
@@ -350,6 +379,7 @@ class User_Model {
 
 	/**
 	 * Check if current user is admin
+	 *
 	 * @return boolean
 	 */
 	public function is_admin() {

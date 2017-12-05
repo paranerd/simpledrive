@@ -14,6 +14,7 @@ require_once 'app/model/user.php';
 class File_Model {
 	/**
 	 * Constructor
+	 *
 	 * @param string $token
 	 */
 	public function __construct($token) {
@@ -50,6 +51,7 @@ class File_Model {
 
 	/**
 	 * Return type of path, e.g. "folder", "audio", "pdf"
+	 *
 	 * @param string $path
 	 * @return string
 	 */
@@ -94,6 +96,7 @@ class File_Model {
 
 	/**
 	 * Return filesize for files, filecount for directories
+	 *
 	 * @param string $path
 	 * @return string
 	 */
@@ -103,6 +106,7 @@ class File_Model {
 
 	/**
 	 * Remove all image-thumbnails (recursively if $file is a directory)
+	 *
 	 * @param array $file
 	 */
 	private function remove_thumbnail($file) {
@@ -137,6 +141,7 @@ class File_Model {
 
 	/**
 	 * Recursively delete directory
+	 *
 	 * @param int $oid
 	 * @param string $fid
 	 * @param string $path
@@ -167,6 +172,7 @@ class File_Model {
 
 	/**
 	 * Create cache-directory if not exists and return path
+	 *
 	 * @param array $file
 	 */
 	private function get_cache_dir($file) {
@@ -181,6 +187,7 @@ class File_Model {
 
 	/**
 	 * Create thumbnail from a pdf or scales an image so that its biggest size is smaller/equal to the biggest size of the target-dimensions while keeping the ratio
+	 *
 	 * @param array $file
 	 * @param int $target_width Width of the container
 	 * @param int $target_height Height of the container
@@ -284,6 +291,7 @@ class File_Model {
 
 	/**
 	 * Recursively add a directory to a zip-archive
+	 *
 	 * @param string $dir Directory-path to add
 	 * @param ZipArchive $zipArchive
 	 * @param string $zipdir
@@ -313,9 +321,11 @@ class File_Model {
 
 	/**
 	 * Synchronize files between server client
+	 *
 	 * @param string $target FileID
 	 * @param array $clientfiles
 	 * @param int $last_sync
+	 * @throws Exception
 	 */
 	public function sync($target, $clientfiles, $last_sync) {
 		$file = $this->get_cached($target, PERMISSION_WRITE);
@@ -333,7 +343,9 @@ class File_Model {
 
 	/**
 	 * Search for filename in cache
+	 *
 	 * @param string $needle
+	 * @throws Exception
 	 * @return array
 	 */
 	public function search($needle) {
@@ -351,8 +363,10 @@ class File_Model {
 
 	/**
 	 * Return children of a folder or shared or trashed files
+	 *
 	 * @param string $target FileID
 	 * @param string $mode ("sharein", "shareout", etc.)
+	 * @throws Exception
 	 * @return array
 	 */
 	public function children($target, $mode) {
@@ -397,9 +411,11 @@ class File_Model {
 	/**
 	 * Create file/folder
 	 * If no filename is specified it iterates over "Unknown file", "Unknown file (1)", etc.
+	 *
 	 * @param string $target FileID of the directory the element is created in
 	 * @param string $type Can be either "folder" or "file"
 	 * @param string $orig_filename Name of new element (optional)
+	 * @throws Exception
 	 * @return string FileID
 	 */
 	public function create($target, $type, $orig_filename = "") {
@@ -441,8 +457,10 @@ class File_Model {
 
 	/**
 	 * Rename a file/folder
+	 *
 	 * @param int $fid
 	 * @param string $newname
+	 * @throws Exception
 	 * @return null
 	 */
 	public function rename($fid, $newname) {
@@ -474,7 +492,9 @@ class File_Model {
 
 	/**
 	 * Delete file or move it to trash
+	 *
 	 * @param array $sources File-ID(s) to delete
+	 * @throws Exception
 	 * @return null
 	 */
 	public function delete($sources) {
@@ -528,12 +548,14 @@ class File_Model {
 
 	/**
 	 * Share a file
+	 *
 	 * @param string $target File-ID to be shared
 	 * @param string $userto User the file is shared with
 	 * @param string $mail Mail address to notify somebody about file sharing
 	 * @param boolean $write 1 for write access, 0 otherwise
 	 * @param boolean $public 1 for public access, 0 otherwise
-	 * @param string|null Link if $public
+	 * @throws Exception
+	 * @return string|null Link if $public
 	 */
 	public function share($target, $userto, $mail, $write, $public, $pass) {
 		$file = $this->get_cached($target, PERMISSION_WRITE);
@@ -577,6 +599,8 @@ class File_Model {
 
 	/**
 	 * Remove share-entry from DB
+	 *
+	 * @throws Exception
 	 * @param string $fid
 	 */
 	public function unshare($fid) {
@@ -595,7 +619,9 @@ class File_Model {
 
 	/**
 	 * Return the share-link if the file was shared to public
+	 *
 	 * @param string $fid
+	 * @throws Exception
 	 * @return string
 	 */
 	public function get_link($fid) {
@@ -616,8 +642,10 @@ class File_Model {
 
 	/**
 	 * Copy file(s) to specified directory
+	 *
 	 * @param string $target FileID of target-directory
 	 * @param array $sources FileID(s) to copy
+	 * @throws Exception
 	 * @return null
 	 */
 	public function copy($target, $sources) {
@@ -660,9 +688,11 @@ class File_Model {
 
 	/**
 	 * Zip file(s)
+	 *
 	 * @param string $target DirectoryID to save zip-file in
 	 * @param array $sources List of files to zip
 	 * @param boolean $for_download If file is supposed to be downloaded
+	 * @throws Exception
 	 * @return string Path to created zip-file
 	 */
 	public function zip($target, $sources, $for_download = false) {
@@ -734,8 +764,10 @@ class File_Model {
 
 	/**
 	 * Unzip file
+	 *
 	 * @param string $target FileID to extract to
 	 * @param string $source Path to file to extract
+	 * @throws Exception
 	 * @return null
 	 */
 	public function unzip($target, $source) {
@@ -763,7 +795,9 @@ class File_Model {
 
 	/**
 	 * Restore file(s) from trash
+	 *
 	 * @param array $sources FileIDs
+	 * @throws Exception
 	 * @return string Result info
 	 */
 	public function restore($sources) {
@@ -810,8 +844,10 @@ class File_Model {
 
 	/**
 	 * Move file(s) to specified target
+	 *
 	 * @param int $target Target-FolderID
 	 * @param array $sources FileID(s) to move
+	 * @throws Exception
 	 * @return string Result info
 	 */
 	public function move($target, $sources) {
@@ -861,7 +897,9 @@ class File_Model {
 
 	/**
 	 * Upload files in the $_FILES-array to the specified directory
+	 *
 	 * @param string $target FileID of target-directory to upload to
+	 * @throws Exception
 	 */
 	public function upload($target) {
 		if (isset($_FILES[0])) {
@@ -932,6 +970,7 @@ class File_Model {
 
 	/**
 	 * Update file-info
+	 *
 	 * @param string $fid
 	 */
 	private function update($fid) {
@@ -953,8 +992,10 @@ class File_Model {
 
 	/**
 	 * Get file-info for public share-id, check for access permissions and return if granted
+	 *
 	 * @param string $sid Public ShareID
 	 * @param string $pass
+	 * @throws Exception
 	 * @return array share-info
 	 */
 	public function get_public($sid, $pass) {
@@ -989,9 +1030,11 @@ class File_Model {
 
 	/**
 	 * Encrypt file
+	 *
 	 * @param string $target FileID
 	 * @param array $sources
 	 * @param string $secret
+	 * @throws Exception
 	 * @return null
 	 */
 	public function encrypt($target, $sources, $secret) {
@@ -1038,9 +1081,11 @@ class File_Model {
 
 	/**
 	 * Decrypt file
+	 *
 	 * @param string $target FileID
 	 * @param string $source
 	 * @param string $secret
+	 * @throws Exception
 	 * @return null
 	 */
 	public function decrypt($target, $source, $secret) {
@@ -1061,9 +1106,11 @@ class File_Model {
 
 	/**
 	 * Send file to client
+	 *
 	 * @param array $targets FileID(s) to return
 	 * @param int $width Screen width for scaling to save bandwidth
 	 * @param int $height Screen height for scaling to save bandwidth
+	 * @throws Exception
 	 * @return null
 	 */
 	public function get($targets, $width = null, $height = null, $thumb) {
@@ -1105,7 +1152,9 @@ class File_Model {
 
 	/**
 	 * Get ID3-Info for audio-file
+	 *
 	 * @param string $target FileID
+	 * @throws Exception
 	 * @return string filename
 	 */
 	public function get_id3($target) {
@@ -1120,7 +1169,9 @@ class File_Model {
 
 	/**
 	 * Save ODF to file
+	 *
 	 * @param string $target FileID
+	 * @throws Exception
 	 * @return null
 	 */
 	public function save_odf($target) {
@@ -1141,7 +1192,9 @@ class File_Model {
 
 	/**
 	 * Send text from file to client
+	 *
 	 * @param string $target FileID
+	 * @throws Exception
 	 * @return string
 	 */
 	public function load_text($target) {
@@ -1160,8 +1213,10 @@ class File_Model {
 
 	/**
 	 * Save text to file
+	 *
 	 * @param string $target FileID
 	 * @param string $data
+	 * @throws Exception
 	 */
 	public function save_text($target, $data) {
 		$file = $this->get_cached($target, PERMISSION_WRITE);
@@ -1181,6 +1236,7 @@ class File_Model {
 
 	/**
 	 * Get file-info from DB, check if user has permission to access and return if so
+	 *
 	 * @param int $fid FileID
 	 * @param int $access Required access-rights
 	 * @return array|null
@@ -1200,6 +1256,7 @@ class File_Model {
 
 	/**
 	 * Get file-info from DB and check if user has permission to access and return if so
+	 *
 	 * @param string $fid
 	 * @param boolean $update Whether or not to update file-info
 	 * @param boolean $include_childs Whether or not to go recursively
@@ -1241,6 +1298,7 @@ class File_Model {
 
 	/**
 	 * Scan folder and sync files to cache
+	 *
 	 * @param string $path Absolute path
 	 * @param string $rel_path Relative path
 	 * @param string $fid
@@ -1283,6 +1341,7 @@ class File_Model {
 
 	/**
 	 * Add file to db-cache
+	 *
 	 * @param string $path Absolute path
 	 * @param string $rel_path Relative path
 	 * @param string $parent_id FileID
@@ -1303,6 +1362,7 @@ class File_Model {
 
 	/**
 	 * Add folder to db-cache
+	 *
 	 * @param string $path Absolute path
 	 * @param string $rel_path Relative path
 	 * @param string $fid
@@ -1325,6 +1385,7 @@ class File_Model {
 
 	/**
 	 * Remove entries from trash if they don't exist on disk
+	 *
 	 * @param array $file
 	 */
 	public function scan_trash($file) {
@@ -1334,6 +1395,7 @@ class File_Model {
 
 	/**
 	 * Only allow certain characters in filenames
+	 *
 	 * @param string $filename
 	 * @return boolean
 	 */

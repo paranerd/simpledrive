@@ -14,6 +14,7 @@ class Response {
 
 	/**
 	 * Return error message to client
+	 *
 	 * @param int $code HTTP-Status-Code
 	 * @param string $msg Error message
 	 * @param boolean $render
@@ -34,6 +35,7 @@ class Response {
 	 * Return method-result to api or set parameters for rendering
 	 * If a user is required, client will be redirected to login/setup if none is found
 	 * Setup and login don't require a user
+	 *
 	 * @param string $info Result-message
 	 * @param boolean $render
 	 * @param string|null $token For authorization
@@ -78,6 +80,7 @@ class Response {
 	/**
 	 * Check whether a resource needs to be sent
 	 * or if the version in client-cache can be used
+	 *
 	 * @param int $timestamp
 	 * @param string $identifier
 	 * @param boolean $strict
@@ -118,6 +121,12 @@ class Response {
 		return false;
 	}
 
+	/**
+	 * Set path for download in response
+	 *
+	 * @param string $path
+	 * @param boolean $delete_flag
+	 */
 	public static function set_download($path, $delete_flag) {
 		self::$DOWNLOAD_PATH = $path;
 		self::$DOWNLOAD_DEL = $delete_flag;
@@ -125,6 +134,7 @@ class Response {
 
 	/**
 	 * Send file to client
+	 *
 	 * @param string $destination Filepath
 	 * @param boolean $delete_flag Whether or not the file should be deletet after download
 	 * @return null
@@ -158,6 +168,7 @@ class Response {
 
 	/**
 	 * Get interface language
+	 *
 	 * @return array Language array
 	 */
 	private static function lang() {
@@ -167,6 +178,7 @@ class Response {
 
 	/**
 	 * Determine base (for js, css, redirects, etc.)
+	 *
 	 * @return string Base-path
 	 */
 	private static function base() {

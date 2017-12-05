@@ -39,28 +39,37 @@ class Twofactor_Model {
 	}
 
 	/**
+	 * Checks if user is logged in
+	 *
+	 * @throws Exception
+	 */
+	private function check_if_logged_in() {
+		if (!$this->uid) {
+			throw new Exception('Permission denied', '403');
+		}
+	}
+
+	/**
 	 * Check if TFA is enabled for current user
+	 *
 	 * @throws Exception
 	 * @return boolean
 	 */
 	public function enabled() {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
+		$this->check_if_logged_in();
 
 		return (count($this->db->two_factor_get_clients($this->uid)) > 0);
 	}
 
 	/**
 	 * Register client for TFA
+	 *
 	 * @param string $client
 	 * @throws Exception
 	 * @return null
 	 */
 	public function register($client) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
+		$this->check_if_logged_in();
 
 		if ($this->db->two_factor_register($this->uid, $client)) {
 			return null;
@@ -71,28 +80,26 @@ class Twofactor_Model {
 
 	/**
 	 * Check if client is registered for TFA
+	 *
 	 * @param string $client
 	 * @throws Exception
 	 * @return boolean
 	 */
 	public function registered($client) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
+		$this->check_if_logged_in();
 
 		return $this->db->two_factor_is_registered($this->uid, $client);
 	}
 
 	/**
 	 * Remove registered TFA-client
+	 *
 	 * @param string $client
 	 * @throws Exception
 	 * @return null
 	 */
 	public function unregister($client) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
+		$this->check_if_logged_in();
 
 		if ($this->db->two_factor_unregister($this->uid, $client)) {
 			return null;
@@ -103,13 +110,12 @@ class Twofactor_Model {
 
 	/**
 	 * Disable TFA
+	 *
 	 * @throws Exception
 	 * @return null
 	 */
 	public function disable() {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
+		$this->check_if_logged_in();
 
 		if ($this->db->two_factor_disable($this->uid)) {
 			return null;
@@ -120,29 +126,27 @@ class Twofactor_Model {
 
 	/**
 	 * Update client registration token
+	 *
 	 * @param string $client_old
 	 * @param string $client_new
 	 * @throws Exception
 	 * @return boolean
 	 */
 	public function update($client_old, $client_new) {
-		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
-		}
+		$this->check_if_logged_in();
 
 		return $this->db->two_factor_update_client($this->uid, $client_old, $client_new);
 	}
 
 	/**
 	 * Check if TFA is required - send TFA token if so
+	 *
 	 * @param int $uid
 	 * @throws Exception
 	 * @return boolean
 	 */
 	public static function required($uid) {
-		if (!$uid) {
-			throw new Exception('Permission denied', '403');
-		}
+		$this->check_if_logged_in();
 
 		$db = Database::getInstance();
 		$required = ($db->two_factor_required($uid) && (ACTION != "webdav"));
@@ -156,6 +160,8 @@ class Twofactor_Model {
 
 	/**
 	 * Remove TFA-code to invalidate the request
+	 *
+	 * @return boolean
 	 */
 	public static function invalidate($fingerprint) {
 		$db = Database::getInstance();
@@ -164,6 +170,7 @@ class Twofactor_Model {
 
 	/**
 	 * Try to unlock TFA, send code otherwise
+	 *
 	 * @param int $code
 	 * @param string $fingerprint
 	 * @param boolean $remember
@@ -192,6 +199,7 @@ class Twofactor_Model {
 
 	/**
 	 * Check the db for up to 30s for a TFA-code to be unlocked
+	 *
 	 * @throws Exception
 	 * @return boolean
 	 */
@@ -215,7 +223,9 @@ class Twofactor_Model {
 
 	/**
 	 * Generate TFA code to be sent to the client
+	 *
 	 * @param int $uid
+	 * @param string $fingerprint
 	 * @return boolean
 	 */
 	private function send_code($uid, $fingerprint) {
@@ -232,6 +242,7 @@ class Twofactor_Model {
 
 	/**
 	 * Send TFA code to registered clients
+	 *
 	 * @param array $registration_ids
 	 * @param string $message
 	 * @return boolean

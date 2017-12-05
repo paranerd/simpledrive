@@ -21,9 +21,9 @@ class Core_Controller {
 		'setup'  => array('user', 'pass', 'dbuser', 'dbpass')
 	);
 
-	public function __construct($token, $render) {
+	public function __construct($token) {
 		$this->token	= $token;
-		$this->model	= ($render) ? null : new Core_Model();
+		$this->model	= new Core_Model();
 	}
 
 	public function render($section, $args) {
