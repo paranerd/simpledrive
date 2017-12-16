@@ -146,7 +146,9 @@ class Twofactor_Model {
 	 * @return boolean
 	 */
 	public static function required($uid) {
-		$this->check_if_logged_in();
+		if (!$uid) {
+			throw new Exception('Permission denied', '403');
+		}
 
 		$db = Database::getInstance();
 		$required = ($db->two_factor_required($uid) && (ACTION != "webdav"));
