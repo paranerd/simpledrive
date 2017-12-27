@@ -972,7 +972,7 @@ var FileModel = new function() {
 			self.hierarchy = data.msg.hierarchy;
 			self.currentFolder = data.msg.current;
 			FileView.setHierarchyTitle();
-			self.list.setData(data.msg.files, 'filename');
+			self.list.setItems(data.msg.files, 'filename');
 
 			if (!back) {
 				if (id.length > 1) {
@@ -1054,7 +1054,7 @@ var FileModel = new function() {
 				$("#pub-filename").removeClass("hidden").text(data.msg.share.filename);
 				$("#pubfile button").text("Download");
 				self.downloadPub = true;
-				self.list.setData(data.msg.share, 'filename');
+				self.list.setItems(data.msg.share, 'filename');
 			}
 			$(window).resize();
 		}).fail(function(xhr, statusText, error) {
@@ -1457,7 +1457,7 @@ var FileModel = new function() {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			FileView.setView('files', true);
-			self.list.setData(data.msg.files);
+			self.list.setItems(data.msg.files);
 			FileView.hideFileinfo();
 			FileView.setTitle("Search results: \"" + needle + "\"");
 			Util.closePopup('search');

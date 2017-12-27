@@ -465,7 +465,7 @@ var LogModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			self.pageCurrent = page;
 			self.pageTotal = data.msg.total;
-			self.list.setData(data.msg.log);
+			self.list.setItems(data.msg.log);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});
@@ -578,7 +578,7 @@ var UsersModel = new function() {
 			data: {},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.list.setData(data.msg, 'id');
+			self.list.setItems(data.msg, 'id');
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);
 		});

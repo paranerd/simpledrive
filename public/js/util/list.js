@@ -7,8 +7,8 @@ var List = (function() {
 		self = this;
 		this.id = id;
 
-		// Data
-		this.data = [];
+		// Items
+		this.items = [];
 		this.masterFiltered = [];
 		this.filtered = [];
 		this.filterNeedle = '';
@@ -77,10 +77,10 @@ var List = (function() {
 			simpleScroll.init(self.id);
 		},
 
-		setData: function(data, orderBy) {
-			this.data = data;
-			this.masterFiltered = data;
-			this.filtered = data;
+		setItems: function(items, orderBy) {
+			this.items = items;
+			this.masterFiltered = items;
+			this.filtered = items;
 			this.defaultFilterKeys = (orderBy) ? [orderBy] : [];
 			this.currentSelected = -1;
 
@@ -95,15 +95,48 @@ var List = (function() {
 			this.compare = comparator;
 		},
 
-		add: function(data) {
-			this.data.push(data);
+		/**
+		 * Add item to list
+		 *
+		 * @param Item item
+		 */
+		add: function(item) {
+			this.items.push(item);
+			this.filter(this.filterNeedle, this.filterKeys);
 			this.display();
 		},
 
-		update: function(id, data) {
-			if (this.data.length > id) {
-				this.data[id] = data;
+		/**
+		 * Update list item
+		 *
+		 * @param int id
+		 * @param Item item
+		 */
+		update: function(id, item) {
+			if (this.items.length > id) {
+				this.items[id] = item;
 				this.display();
+			}
+		},
+
+		/**
+		 * Remove item from list
+		 *
+		 * @param int id
+		 */
+		remove: function(id) {
+			if (this.filtered.length <= id) {
+				return;
+			}
+
+			// Map filtered to items
+			for (var d in this.items) {
+				if (this.filtered[id] == this.items[d]) {
+					this.items.splice(d, 1);
+					this.filter(this.filterNeedle, this.filterKeys);
+					this.display();
+					break;
+				}
 			}
 		},
 
@@ -230,7 +263,7 @@ var List = (function() {
 		},
 
 		getAll: function() {
-			return this.data;
+			return this.items;
 		},
 
 		/**
@@ -308,7 +341,7 @@ var List = (function() {
 		},
 
 		masterFilterRemove: function() {
-			this.masterFiltered = this.data;
+			this.masterFiltered = this.items;
 			this.filterRemove();
 		},
 
@@ -321,7 +354,7 @@ var List = (function() {
 		order: function(key, order) {
 			this.sortKey = key;
 			this.sortOrder = (order) ? order : this.sortOrder *= -1;
-			this.data = this.data.sort(this.compare(this.sortKey, this.sortOrder));
+			this.items = this.items.sort(this.compare(this.sortKey, this.sortOrder));
 
 			var text = (this.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
 			$(".order-direction").text('');

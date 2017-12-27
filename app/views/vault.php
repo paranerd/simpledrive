@@ -52,7 +52,7 @@
 
 		<!-- Entries -->
 		<div id="content-container" class="list">
-			<div id="files-filter" class="filter hidden">
+			<div id="entries-filter" class="filter hidden">
 				<input class="filter-input input-indent" placeholder="Filter..." value=""/>
 				<span class="close">&times;</span>
 			</div>
@@ -124,6 +124,11 @@
 			<span class="icon icon-visible"></span>
 		</div>
 
+		<label>Notes</label>
+		<div>
+			<textarea id="entry-website-notes" class="input-indent" placeholder="Notes"></textarea>
+		</div>
+
 		<div style="width: 100%; height: 50px; margin-top: 15px; margin-bottom: 15px;">
 			<div id="entry-website-copy-pass" class="btn">Copy Pass</div>
 			<div id="entry-website-copy-user" class="btn">Copy User</div>
@@ -147,7 +152,7 @@
 		<input id="entry-note-category" class="input-indent" type="text" placeholder="Category">
 
 		<label>Content</label>
-		<textarea id="entry-note-content"placeholder="Content"></textarea>
+		<textarea id="entry-note-content" placeholder="Content"></textarea>
 
 		<div class="error hidden"></div>
 		<button class="btn">Save</button>

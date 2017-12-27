@@ -265,6 +265,7 @@ var VaultView = new function() {
 			$("#entry-website-url").val(item.url);
 			$("#entry-website-user").val(item.user);
 			$("#entry-website-pass").val(item.pass);
+			$("#entry-website-notes").val(item.notes);
 			$("#entry-website-open-url a").attr("href", Util.generateFullURL(item.url));
 
 			if (item.url) {
@@ -378,6 +379,7 @@ var VaultModel = new function() {
 				item.url = Util.generateFullURL($("#entry-" + type + "-url").val());
 				item.user = $("#entry-" + type + "-user").val();
 				item.pass = $("#entry-" + type + "-pass").val();
+				item.notes = $("#entry-" + type + "-notes").val();
 		}
 		else if (item.type == 'note') {
 			item.content = $("#entry-" + type + "-content").val();
@@ -397,6 +399,17 @@ var VaultModel = new function() {
 
 		// Save
 		self.save();
+	}
+
+	this.remove = function() {
+		Util.showConfirm('Delete entry?', function() {
+			var selected = self.list.getAllSelected();
+			for (var s in selected) {
+				self.list.remove(s);
+			}
+
+			self.save();
+		});
 	}
 
 	this.save = function() {
@@ -432,22 +445,6 @@ var VaultModel = new function() {
 		}, 100);
 	}
 
-	this.remove = function() {
-		Util.showConfirm('Delete entry?', function() {
-			var all = self.list.getAll();
-			var selected = self.list.getAllSelected();
-			for (var s in selected) {
-				for (var i in all) {
-					if (all[i].title == selected[s].title) {
-						all.splice(i, 1);
-					}
-				}
-			}
-
-			self.save();
-		});
-	}
-
 	this.fetch = function() {
 		var bId = Util.startBusy("Loading...");
 
@@ -479,7 +476,7 @@ var VaultModel = new function() {
 				var dec = Crypto.decrypt(self.encrypted, passphrase);
 				self.passphrase = passphrase;
 				if (dec) {
-					self.list.setData(JSON.parse(dec), 'title');
+					self.list.setItems(JSON.parse(dec), 'title');
 				}
 
 				Util.closePopup("unlock", false, true);
