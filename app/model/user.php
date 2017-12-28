@@ -12,12 +12,11 @@ class User_Model {
 	 * Constructor
 	 *
 	 * @param string $token
-	 * @throws Exception
 	 */
 	public function __construct($token) {
 		$this->token     = $token;
 		$this->config    = json_decode(file_get_contents(CONFIG), true);
-		$this->db        = Database::getInstance();
+		$this->db        = Database::get_instance();
 		$this->user      = $this->db->user_get_by_token($token);
 		$this->uid       = ($this->user) ? $this->user['id'] : null;
 		$this->username  = ($this->user) ? $this->user['username'] : "";
@@ -31,7 +30,7 @@ class User_Model {
 	 */
 	private function check_if_logged_in() {
 		if ($this->installed && !$this->uid) {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Permission denied', 403);
 		}
 	}
 
@@ -42,7 +41,7 @@ class User_Model {
 	 */
 	private function check_if_admin() {
 		if (!$this->user || !$this->user['admin']) {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Permission denied', 403);
 		}
 	}
 
@@ -61,14 +60,13 @@ class User_Model {
 			return $this->db->user_get_by_name($username);
 		}
 		else {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Permission denied', 403);
 		}
 	}
 
 	/**
 	 * Get all users (admin required)
 	 *
-	 * @throws Exception
 	 * @return array
 	 */
 	public function get_all() {
@@ -93,7 +91,7 @@ class User_Model {
 
 		// Check if username contains certain special characters
 		if (preg_match('/(\/|\.|\<|\>|%)/', $username) || strlen($username) > 32) {
-			throw new Exception('Username not allowed', '400');
+			throw new Exception('Username not allowed', 400);
 		}
 
 		$username = strtolower(str_replace(' ', '', $username));
@@ -102,11 +100,11 @@ class User_Model {
 		if (!$this->db->user_get_by_name($username)) {
 			$uid = $this->db->user_create($username, Crypto::generate_password($pass), $admin, $mail);
 			if ($uid == null) {
-				throw new Exception('Error creating user', '500');
+				throw new Exception('Error creating user', 500);
 			}
 
 			if (!file_exists($this->config['datadir'] . $username) && !mkdir($this->config['datadir'] . $username, 0755, true)) {
-				throw new Exception('Error creating user directory', '403');
+				throw new Exception('Error creating user directory', 403);
 			}
 
 			if ($mail != '' && filter_var($mail, FILTER_VALIDATE_EMAIL)) {
@@ -116,7 +114,7 @@ class User_Model {
 			return $uid;
 		}
 
-		throw new Exception('User exists', '403');
+		throw new Exception('User exists', 403);
 	}
 
 	/**
@@ -134,7 +132,7 @@ class User_Model {
 			return null;
 		}
 
-		throw new Exception('Theme not found', '400');
+		throw new Exception('Theme not found', 400);
 	}
 
 	/**
@@ -152,7 +150,7 @@ class User_Model {
 			return null;
 		}
 
-		throw new Exception('Color not found', '400');
+		throw new Exception('Color not found', 400);
 	}
 
 	/**
@@ -171,7 +169,7 @@ class User_Model {
 			$usedspace = Util::dir_size($this->config['datadir'] . $username);
 
 			if ($usedspace > $max_storage && $max_storage != 0) {
-				throw new Exception('Max storage < Used storage', '400');
+				throw new Exception('Max storage < Used storage', 400);
 			}
 
 			if ($this->db->user_set_storage_max($user['id'], $max)) {
@@ -179,7 +177,7 @@ class User_Model {
 			}
 		}
 
-		throw new Exception('Error updating user', '500');
+		throw new Exception('Error updating user', 500);
 	}
 
 	/**
@@ -196,7 +194,7 @@ class User_Model {
 		$be_admin = ($admin == "1") ? 1 : 0;
 		if ($user = $this->db->user_get_by_name($username)) {
 			if ($username == $this->username && !$be_admin) {
-				throw new Exception('Can not revoke your own admin rights', '400');
+				throw new Exception('Can not revoke your own admin rights', 400);
 			}
 
 			if ($this->db->user_set_admin($user['id'], $be_admin)) {
@@ -204,7 +202,7 @@ class User_Model {
 			}
 		}
 
-		throw new Exception('Error updating user', '500');
+		throw new Exception('Error updating user', 500);
 	}
 
 	/**
@@ -221,7 +219,7 @@ class User_Model {
 			return null;
 		}
 
-		throw new Exception('Error updating user', '500');
+		throw new Exception('Error updating user', 500);
 	}
 
 	/**
@@ -242,7 +240,7 @@ class User_Model {
 			}
 		}
 
-		throw new Exception('Error deleting user', '500');
+		throw new Exception('Error deleting user', 500);
 	}
 
 	/**
@@ -275,7 +273,7 @@ class User_Model {
 		$user = $this->db->user_get_by_name($username);
 
 		if (!$user || ($username != $this->username && !$this->user['admin'])) {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Permission denied', 403);
 		}
 
 		// Get total, used and free diskspace
@@ -312,7 +310,7 @@ class User_Model {
 		$user = $this->db->user_get_by_name($this->username, true);
 
 		if (!$user || ($user['id'] != $this->uid && !$this->user['admin'])) {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Permission denied', 403);
 		}
 
 		if (Crypto::verify_password($currpass, $user['pass'])) {
@@ -322,11 +320,11 @@ class User_Model {
 				return $token;
 			}
 			else {
-				throw new Exception('Error updating password', '500');
+				throw new Exception('Error updating password', 500);
 			}
 		}
 
-		throw new Exception('Wrong password', '403');
+		throw new Exception('Wrong password', 403);
 	}
 
 	/**
@@ -340,7 +338,7 @@ class User_Model {
 			return null;
 		}
 
-		throw new Exception('Error clearing cache', '500');
+		throw new Exception('Error clearing cache', 500);
 	}
 
 	/**
@@ -356,7 +354,7 @@ class User_Model {
 			return null;
 		}
 
-		throw new Exception('Error clearing trash', '500');
+		throw new Exception('Error clearing trash', 500);
 	}
 
 	/**

@@ -232,7 +232,7 @@ class Crypto {
 	 */
 	public function validate_token($token) {
 		try {
-			$db = Database::getInstance();
+			$db = Database::get_instance();
 			return ($db && $db->session_validate_token($token)) ? $token : '';
 		} catch (Exception $e) {
 			return '';

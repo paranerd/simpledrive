@@ -45,6 +45,7 @@
 class Sync {
 	/**
 	 * Constructor
+	 *
 	 * @param File_Model $file To access the delete-function
 	 */
 	public function __construct($file) {
@@ -53,6 +54,7 @@ class Sync {
 
 	/**
 	 * Start sync-process
+	 *
 	 * @param array $clientfiles
 	 * @param array $serverfiles
 	 * @param array $history
@@ -76,6 +78,7 @@ class Sync {
 
 	/**
 	 * Remove exact matches (same md5) from both arrays
+	 *
 	 * @param array $clientfiles
 	 * @param array $serverfiles
 	 * @return array Containing both client- and server-files separately
@@ -113,6 +116,7 @@ class Sync {
 	 * Delete if there is a newer version on the server
 	 * Upload if there is an older or no version on the server
 	 * and the server hasn't deleted the file after last client-edit
+	 *
 	 * @param array $clientfiles
 	 * @param array $history
 	 * @return array
@@ -139,6 +143,7 @@ class Sync {
 	 * Process the remaining serverfiles that don't have an exact match on the client
 	 * Add serverfile to client-array for download
 	 * if no history entry exists or it is not for deletion
+	 *
 	 * @param array $clientfiles
 	 * @param array $serverfiles
 	 * @param array $history
@@ -164,6 +169,7 @@ class Sync {
 
 	/**
 	 * Mark client-folder and all its children for deletion
+	 *
 	 * @param array $clientfiles
 	 * @param string $path
 	 * @return array

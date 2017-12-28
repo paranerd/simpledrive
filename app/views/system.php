@@ -147,8 +147,7 @@
 			<div id="log-header" class="content-header">
 				<span class="col0">&nbsp;</span>
 				<span class="col1">Message</span>
-				<span class="col2">Type</span>
-				<span class="col3">Source</span>
+				<span class="col3">Type</span>
 				<span class="col4">User</span>
 				<span class="col5">Timestamp</span>
 			</div>

@@ -33,7 +33,7 @@ class Twofactor_Model {
 	 * @param string $token
 	 */
 	public function __construct($token) {
-		$this->db     = Database::getInstance();
+		$this->db     = Database::get_instance();
 		$this->user   = ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid    = ($this->user) ? $this->user['id'] : null;
 	}
@@ -45,7 +45,7 @@ class Twofactor_Model {
 	 */
 	private function check_if_logged_in() {
 		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Permission denied', 403);
 		}
 	}
 
@@ -75,14 +75,13 @@ class Twofactor_Model {
 			return null;
 		}
 
-		throw new Exception('Error registering for Two-Factor-Authentication', '500');
+		throw new Exception('Error registering for Two-Factor-Authentication', 500);
 	}
 
 	/**
 	 * Check if client is registered for TFA
 	 *
 	 * @param string $client
-	 * @throws Exception
 	 * @return boolean
 	 */
 	public function registered($client) {
@@ -105,7 +104,7 @@ class Twofactor_Model {
 			return null;
 		}
 
-		throw new Exception('Error unregistering from Two-Factor-Authentication', '500');
+		throw new Exception('Error unregistering from Two-Factor-Authentication', 500);
 	}
 
 	/**
@@ -121,7 +120,7 @@ class Twofactor_Model {
 			return null;
 		}
 
-		throw new Exception('Error disabling Two-Factor-Authentication', '500');
+		throw new Exception('Error disabling Two-Factor-Authentication', 500);
 	}
 
 	/**
@@ -129,7 +128,6 @@ class Twofactor_Model {
 	 *
 	 * @param string $client_old
 	 * @param string $client_new
-	 * @throws Exception
 	 * @return boolean
 	 */
 	public function update($client_old, $client_new) {
@@ -147,10 +145,10 @@ class Twofactor_Model {
 	 */
 	public static function required($uid) {
 		if (!$uid) {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Permission denied', 403);
 		}
 
-		$db = Database::getInstance();
+		$db = Database::get_instance();
 		$required = ($db->two_factor_required($uid) && (ACTION != "webdav"));
 
 		if ($required) {
@@ -166,7 +164,7 @@ class Twofactor_Model {
 	 * @return boolean
 	 */
 	public static function invalidate($fingerprint) {
-		$db = Database::getInstance();
+		$db = Database::get_instance();
 		return $db->two_factor_invalidate($fingerprint);
 	}
 
@@ -180,13 +178,13 @@ class Twofactor_Model {
 	 * @return null
 	 */
 	public static function unlock($code, $fingerprint, $remember) {
-		$db = Database::getInstance();
+		$db = Database::get_instance();
 
 		// Get uid for pending code if exists
 		$uid = $db->two_factor_get_user($fingerprint);
 
 		if (!$uid) {
-			throw new Exception('Two-Factor-Authentication failed', '400');
+			throw new Exception('Two-Factor-Authentication failed', 400);
 		}
 
 		// Try Unlock or send code
@@ -196,7 +194,7 @@ class Twofactor_Model {
 			return null;
 		}
 
-		throw new Exception('Wrong access code', '403');
+		throw new Exception('Wrong access code', 403);
 	}
 
 	/**
@@ -206,7 +204,7 @@ class Twofactor_Model {
 	 * @return boolean
 	 */
 	public static function is_unlocked() {
-		$db = Database::getInstance();
+		$db = Database::get_instance();
 
 		for ($i = 0; $i < TFA_EXPIRATION; $i++) {
 			$unlocked = $db->two_factor_unlocked();
@@ -220,7 +218,7 @@ class Twofactor_Model {
 			sleep(1);
 		}
 
-		throw new Exception('Two-Factor-Authentication failed', '400');
+		throw new Exception('Two-Factor-Authentication failed', 400);
 	}
 
 	/**
@@ -231,7 +229,7 @@ class Twofactor_Model {
 	 * @return boolean
 	 */
 	private function send_code($uid, $fingerprint) {
-		$db = Database::getInstance();
+		$db = Database::get_instance();
 
 		if ($code = $db->two_factor_generate_code($uid, $fingerprint)) {
 			$clients = $db->two_factor_get_clients($uid);

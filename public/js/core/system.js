@@ -249,12 +249,6 @@ var SystemView = new function() {
 			logType.innerHTML = Util.escape(entry.type);
 			$("#item" + i).append(logType);
 
-			// Source
-			var logSource = document.createElement("span");
-			logSource.className = "item-elem col3";
-			logSource.innerHTML = Util.escape(entry.source);
-			$("#item" + i).append(logSource);
-
 			// User
 			var logUser = document.createElement("span");
 			logUser.className = "item-elem col4";

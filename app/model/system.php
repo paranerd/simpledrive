@@ -13,8 +13,9 @@ class System_Model {
 	 * @param string $token
 	 */
 	public function __construct($token) {
+		$this->token  = $token;
 		$this->config = json_decode(file_get_contents(CONFIG), true);
-		$this->db     = Database::getInstance();
+		$this->db     = Database::get_instance();
 	}
 
 	/**
@@ -23,8 +24,8 @@ class System_Model {
 	 * @throws Exception
 	 */
 	private function check_if_admin() {
-		if (!$this->db->user_check_if_admin($token)) {
-			throw new Exception('Permission denied', '403');
+		if (!$this->db->user_is_admin($this->token)) {
+			throw new Exception('Permission denied', 403);
 		}
 	}
 
@@ -71,7 +72,7 @@ class System_Model {
 		$this->check_if_admin();
 
 		if (!ctype_digit($limit) || (ctype_digit($limit) && $limit < 1024)) {
-			throw new Exception('Illegal value for upload size', '400');
+			throw new Exception('Illegal value for upload size', 400);
 		}
 
 		$write = '';
@@ -93,7 +94,7 @@ class System_Model {
 			return null;
 		}
 
-		throw new Exception('Error updating htaccess', '500');
+		throw new Exception('Error updating htaccess', 500);
 	}
 
 	/**
@@ -112,7 +113,7 @@ class System_Model {
 			return null;
 		}
 
-		throw new Exception('Error writing config', '500');
+		throw new Exception('Error writing config', 500);
 	}
 
 	/**
@@ -134,7 +135,7 @@ class System_Model {
 
 		// Write config file
 		if (!file_put_contents(CONFIG, json_encode($this->config, JSON_PRETTY_PRINT))) {
-			throw new Exception('Error writing config', '500');
+			throw new Exception('Error writing config', 500);
 		}
 
 		foreach ($htaccess as $line) {
@@ -163,7 +164,7 @@ class System_Model {
 			return null;
 		}
 
-		throw new Exception('Error updating htaccess', '500');
+		throw new Exception('Error updating htaccess', 500);
 	}
 
 	/**
@@ -207,13 +208,13 @@ class System_Model {
 		);
 
 		if (!array_key_exists($name, $plugins)) {
-			throw new Exception('Plugin ' . $name . ' does not exist', '400');
+			throw new Exception('Plugin ' . $name . ' does not exist', 400);
 		}
 
 		$plugin_path = $_SERVER['DOCUMENT_ROOT'] . $this->config['installdir'] . "plugins";
 
 		if (is_dir($plugin_path . "/" . $name)) {
-			throw new Exception('Plugin already installed', '400');
+			throw new Exception('Plugin already installed', 400);
 		}
 
 		if (!is_dir($plugin_path)) {
@@ -223,7 +224,7 @@ class System_Model {
 		$response = Util::execute_http_request("http://simpledrive.org/plugins/" . $name, null, null, "GET");
 
 		if ($response['code'] !== 200) {
-			throw new Exception('Error downloading plugin', '500');
+			throw new Exception('Error downloading plugin', 500);
 		}
 
 		// Write data to file
@@ -234,8 +235,8 @@ class System_Model {
 
 		// Integrity-check
 		if (md5_file($zip_target) != $plugins[$name]) {
-			//unlink($zip_target);
-			throw new Exception('Plugin integrity check failed', '500');
+			unlink($zip_target);
+			throw new Exception('Plugin integrity check failed', 500);
 		}
 		// Extract file
 		else if (file_exists($zip_target)) {
@@ -246,10 +247,10 @@ class System_Model {
 				unlink($zip_target);
 				return null;
 			}
-			throw new Exception('Error extracting plugin', '500');
+			throw new Exception('Error extracting plugin', 500);
 		}
 
-		throw new Exception('Error installing plugin', '500');
+		throw new Exception('Error installing plugin', 500);
 	}
 
 	/**
@@ -265,6 +266,6 @@ class System_Model {
 			return null;
 		}
 
-		throw new Exception('An error occurred', '500');
+		throw new Exception('An error occurred', 500);
 	}
 }

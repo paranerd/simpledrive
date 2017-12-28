@@ -16,7 +16,7 @@ class Backup_Model {
 	 * @param string $token
 	 */
 	public function __construct($token) {
-		$this->db				= Database::getInstance();
+		$this->db				= Database::get_instance();
 		$this->user				= ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid				= ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
 		$this->username			= ($this->user) ? $this->user['username'] : "";
@@ -32,7 +32,7 @@ class Backup_Model {
 		$this->api				= new Google_Api($token);
 
 		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Permission denied', 403);
 		}
 	}
 
@@ -43,7 +43,7 @@ class Backup_Model {
 	 */
 	private function check_if_logged_in() {
 		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Permission denied', 403);
 		}
 	}
 
@@ -65,16 +65,16 @@ class Backup_Model {
 	 */
 	public function enable($pass, $enc_filename) {
 		if ($enc_filename && strlen($pass) == 0) {
-			throw new Exception('Password not set', '400');
+			throw new Exception('Password not set', 400);
 		}
 		else if ($pass && !$this->db->backup_enable($this->uid, $pass, intval($enc_filename))) {
-			throw new Exception('Could not set backup password', '500');
+			throw new Exception('Could not set backup password', 500);
 		}
 		else if ($auth_url = $this->api->create_auth_url()) {
 			return $auth_url;
 		}
 
-		throw new Exception('Unknown error occurred', '500');
+		throw new Exception('Unknown error occurred', 500);
 	}
 
 	/**
@@ -88,7 +88,7 @@ class Backup_Model {
 			return null;
 		}
 
-		throw new Exception('Could not remove lock', '500');
+		throw new Exception('Could not remove lock', 500);
 	}
 
 	/**
@@ -102,7 +102,7 @@ class Backup_Model {
 			return null;
 		}
 
-		throw new Exception('Could not disable backup', '500');
+		throw new Exception('Could not disable backup', 500);
 	}
 
 	/**
@@ -123,7 +123,7 @@ class Backup_Model {
 	public function start() {
 		// Check if connected to the internet
 		if (!Util::connection_available()) {
-			throw new Exception('No internet connection', '500');
+			throw new Exception('No internet connection', 500);
 		}
 
 		// Create backup folder if it does not exist
@@ -133,7 +133,7 @@ class Backup_Model {
 		$backup_info = $this->db->backup_info($this->uid);
 
 		if (!$backup_info || !$folder_id) {
-			throw new Exception('An error occurred', '500');
+			throw new Exception('An error occurred', 500);
 		}
 
 		$this->secret = $backup_info['pass'];
@@ -162,7 +162,7 @@ class Backup_Model {
 			mkdir(dirname($this->lock));
 		}
 		else if (file_exists($this->lock)) {
-			throw new Exception('Backup already running', '400');
+			throw new Exception('Backup already running', 400);
 		}
 
 		file_put_contents($this->lock, '', LOCK_EX);

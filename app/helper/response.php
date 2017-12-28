@@ -46,7 +46,7 @@ class Response {
 	 */
 	public static function success($info, $render = false, $token = null, $section = '', $args = null, $need_user = true) {
 		if ($render) {
-			$db			= ($need_user) ? Database::getInstance() : null;
+			$db			= ($need_user) ? Database::get_instance() : null;
 			$user		= ($db) ? $db->user_get_by_token($token) : null;
 			$username 	= ($user) ? $user['username'] : '';
 			$admin		= ($user) ? $user['admin'] : false;
@@ -187,6 +187,8 @@ class Response {
 
 	/**
 	 * Redirect client
+	 *
+	 * @param string $target
 	 */
 	public static function redirect($target) {
 		header('Location: ' . self::base() . $target);

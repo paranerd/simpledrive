@@ -10,13 +10,13 @@
 class Vault_Model {
 	/**
 	 * Constructor
+	 *
 	 * @param string $token
-	 * @throws Exception
 	 */
 	public function __construct($token) {
 		$this->token      = $token;
 		$this->config     = json_decode(file_get_contents(CONFIG), true);
-		$this->db         = Database::getInstance();
+		$this->db         = Database::get_instance();
 		$this->user       = $this->db->user_get_by_token($token);
 		$this->uid        = ($this->user) ? $this->user['id'] : 0;
 		$this->username   = ($this->user) ? $this->user['username'] : "";
@@ -32,7 +32,7 @@ class Vault_Model {
 	 */
 	private function check_if_logged_in() {
 		if (!$this->uid) {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Permission denied', 403);
 		}
 	}
 
@@ -62,7 +62,7 @@ class Vault_Model {
 		$this->check_if_logged_in();
 
 		if (!file_exists($this->vault_path)) {
-			throw new Exception('Vault does not exist', '404');
+			throw new Exception('Vault does not exist', 404);
 		}
 		else {
 			$vault = file_get_contents($this->vault_path);

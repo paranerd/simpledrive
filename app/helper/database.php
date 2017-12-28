@@ -12,24 +12,25 @@ class Database {
 
 	/**
 	 * Establish database connection and set fingerprint
+	 *
 	 * @throws Exception
 	 */
 	private function __construct() {
 		if (!function_exists('mysqli_connect')) {
-			throw new Exception('MySQLi is not installed', '500');
+			throw new Exception('MySQLi is not installed', 500);
 		}
 		else if (is_readable(CONFIG)) {
 			$config = json_decode(file_get_contents(CONFIG), true);
 			$this->link = new mysqli($config['dbserver'], $config['dbuser'], $config['dbpass'], $config['dbname']);
 
 			if ($this->link->connect_error) {
-				throw new Exception('Could not connect to database', '500');
+				throw new Exception('Could not connect to database', 500);
 			}
 
 			$this->link->set_charset("utf8");
 		}
 		else {
-			throw new Exception('Could not access config', '500');
+			throw new Exception('Could not access config', 500);
 		}
 
 		$this->fingerprint = Util::client_fingerprint();
@@ -42,13 +43,15 @@ class Database {
 
 	/**
 	 * Return an instance of this class (to prevent multiple open connections)
+	 *
 	 * @return Database
 	 */
-	public static function getInstance() {
+	public static function get_instance() {
 		if (!isset(self::$instance)) {
 			try {
 				self::$instance = new self();
-			} catch (Exception $e) {
+			}
+			catch (Exception $e) {
 				self::$instance = null;
 				throw new Exception($e->getMessage(), $e->getCode());
 			}
@@ -59,6 +62,7 @@ class Database {
 
 	/**
 	 * Create database and tables
+	 *
 	 * @param string $username Admin user
 	 * @param string $pass Admin password
 	 * @param string $db_server Address of the database-server
@@ -70,14 +74,14 @@ class Database {
 	 */
 	public static function setup($username, $pass, $db_server, $db_name, $db_user, $db_pass) {
 		if (!function_exists('mysqli_connect')) {
-			throw new Exception('MySQLi is not installed', '500');
+			throw new Exception('MySQLi is not installed', 500);
 		}
 
 		// Establish database-link
 		$link = new mysqli($db_server, $db_user, $db_pass);
 
 		if ($link->connect_error) {
-			throw new Exception('Could not connect to database', '500');
+			throw new Exception('Could not connect to database', 500);
 		}
 
 		// Delete potentially existing database
@@ -88,7 +92,7 @@ class Database {
 			$stmt->execute();
 
 			if ($link->select_db($db_name)) {
-				throw new Exception('Could not remove existing database', '500');
+				throw new Exception('Could not remove existing database', 500);
 			}
 		}
 
@@ -100,7 +104,7 @@ class Database {
 			$stmt->execute();
 
 			if (!$link->select_db($db_name)) {
-				throw new Exception('Could not create database', '500');
+				throw new Exception('Could not create database', 500);
 			}
 		}
 
@@ -142,8 +146,10 @@ class Database {
 				id int(11) AUTO_INCREMENT,
 				PRIMARY KEY (id),
 				user int(11),
+				FOREIGN KEY (user)
+				REFERENCES sd_users (id)
+				ON DELETE CASCADE,
 				level int(11),
-				source varchar(30),
 				msg text,
 				date varchar(20)
 			)'
@@ -1382,16 +1388,14 @@ class Database {
 	 * Write log entry
 	 * @param int $uid
 	 * @param string $type E.g. ERROR, INFO, etc.
-	 * @param string $source Where did the error occurr?
 	 * @param string $msg Actual error message
 	 */
-	public function log_write($uid, $type, $source, $msg) {
-		$date = date('d.m.Y-H:i:s');
+	public function log_write($date, $uid, $level, $msg) {
 		$stmt = $this->link->prepare(
-			'INSERT into sd_log (user, level, source, msg, date)
-			VALUES (?, ?, ?, ?, ?)'
+			'INSERT into sd_log (user, level, msg, date)
+			VALUES (?, ?, ?, ?)'
 		);
-		$stmt->bind_param('iisss', $uid, $type, $source, $msg, $date);
+		$stmt->bind_param('iiss', $uid, $level, $msg, $date);
 		$stmt->execute();
 	}
 
@@ -1410,7 +1414,7 @@ class Database {
 		$count = ceil($stmt0->fetch_row()[0] / $size);
 
 		$stmt = $this->link->prepare(
-			'SELECT sd_users.user, level, source, msg, date
+			'SELECT sd_users.user, level, msg, date
 			FROM sd_log
 			LEFT JOIN sd_users ON sd_users.id = sd_log.user
 			ORDER BY sd_log.id
@@ -1419,16 +1423,14 @@ class Database {
 		$stmt->bind_param('ii', $from, $size);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($username, $level, $source, $msg, $date);
+		$stmt->bind_result($username, $level, $msg, $date);
 
 		$log = array();
 		while ($stmt->fetch()) {
-			$type = ($level > INFO) ? (($level > WARNING) ? "error" : "warning") : "info";
 			array_push($log, array(
 				'user'		=> $username,
 				'level'		=> $level,
-				'type'		=> $type,
-				'source'	=> $source,
+				'type'		=> Log::$LABELS[$level],
 				'msg'		=> $msg,
 				'date'		=> $date,
 			));

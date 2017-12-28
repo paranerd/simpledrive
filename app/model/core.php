@@ -15,7 +15,8 @@ class Core_Model {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->db = null;
+		$this->db  = null;
+		$this->log = new Log();
 	}
 
 	/**
@@ -41,17 +42,17 @@ class Core_Model {
 
 		// Check if datadir contains '.' or '../'
 		if (preg_match('/(\.\.\/|\.)/', $datadir)) {
-			throw new Exception('Path for data directory not allowed', '400');
+			throw new Exception('Path for data directory not allowed', 400);
 		}
 
 		// Check if username contains certain special characters
 		if (preg_match('/(\/|\.|\<|\>|%)/', $username)) {
-			throw new Exception('Username not allowed', '400');
+			throw new Exception('Username not allowed', 400);
 		}
 
 		// Check if already installed
 		if (file_exists(CONFIG)) {
-			throw new Exception('Already installed', '403');
+			throw new Exception('Already installed', 403);
 		}
 
 		try {
@@ -60,7 +61,7 @@ class Core_Model {
 
 			// Write config file
 			if (!$this->create_config($datadir, $db_server, $db_name, $db_setup['user'], $db_setup['pass'], $mail, $mail_pass)) {
-				throw new Exception('Could not write config file', '500');
+				throw new Exception('Could not write config file', 500);
 			}
 
 			// Set log path in htaccess
@@ -69,7 +70,7 @@ class Core_Model {
 			// Create user and token
 			$user = new User_Model(null);
 			if ($uid = $user->create($username, $pass, true, $mail)) {
-				$this->db = Database::getInstance();
+				$this->db = Database::get_instance();
 				return $this->db->session_start($uid);
 			}
 		} catch (Exception $e) {
@@ -159,18 +160,18 @@ class Core_Model {
 	 * @return string Authorization token
 	 */
 	public function login($username, $pass, $callback = false) {
-		$this->db	= Database::getInstance();
+		$this->db	= Database::get_instance();
 		$username	= strtolower($username);
 		$user		= $this->db->user_get_by_name($username, true);
 
 		// User unknown
 		if (!$user) {
-			$this->db->log_write(PUBLIC_USER_ID, WARNING, "Login", "Unknown login attempt: " . $username);
+			$this->log->warn(PUBLIC_USER_ID, "Unknown login attempt: " . $username);
 		}
 		// User is on lockdown
 		else if ((time() - ($user['login_attempts'] - (LOGIN_MAX_ATTEMPTS - 1)) * 30) - $user['last_login_attempt'] < 0) {
 			$lockdown_time = (time() - ($user['login_attempts'] + 1 - (LOGIN_MAX_ATTEMPTS - 1)) * 30) - $user['last_login_attempt'];
-			throw new Exception('Locked for ' . abs($lockdown_time) . 's', '500');
+			throw new Exception('Locked for ' . abs($lockdown_time) . 's', 500);
 		}
 		// Correct
 		else if (Crypto::verify_password($pass, $user['pass'])) {
@@ -184,16 +185,16 @@ class Core_Model {
 				return $this->db->session_start($user['id']);
 			}
 
-			throw new Exception('Two-Factor-Authentication required', '403');
+			throw new Exception('Two-Factor-Authentication required', 403);
 		}
 		// Wrong password
 		else {
 			$this->db->user_increase_login_counter($user['id']);
-			$this->db->log_write($user['id'], WARNING, "Login", "Login failed");
+			$this->log->warn($user['id'], "Login failed");
 		}
 
 		header('WWW-Authenticate: BasicCustom realm="simpleDrive"');
-		throw new Exception('Wrong username/password', '401');
+		throw new Exception('Wrong username/password', 401);
 	}
 
 	/**
@@ -202,7 +203,7 @@ class Core_Model {
 	 * @param string $token
 	 */
 	public function logout($token) {
-		$this->db = Database::getInstance();
+		$this->db = Database::get_nstance();
 		$this->db->session_end($token);
 
 		unset($_COOKIE['token']);
@@ -217,9 +218,9 @@ class Core_Model {
 	 * @return array Containing current and version
 	 */
 	public function get_version($token) {
-		$this->db = Database::getInstance();
+		$this->db = Database::get_instance();
 		if (!$this->db->user_get_by_token($token)) {
-			throw new Exception('Permission denied', '403');
+			throw new Exception('Permission denied', 403);
 		}
 
 		$version		= json_decode(file_get_contents(VERSION), true);

@@ -19,7 +19,7 @@ class Google_Api {
 	 * @param string $user_token
 	 */
 	public function __construct($user_token) {
-		$this->db          = Database::getInstance();
+		$this->db          = Database::get_instance();
 		$this->user        = ($this->db) ? $this->db->user_get_by_token($user_token) : null;
 		$this->username    = ($this->user) ? $this->user['username'] : "";
 		$this->config      = json_decode(file_get_contents(CONFIG), true);
@@ -89,7 +89,7 @@ class Google_Api {
 	 */
 	public function set_token($code) {
 		if (!$this->credentials) {
-			throw new Exception('Could not read credentials', '500');
+			throw new Exception('Could not read credentials', 500);
 		}
 
 		$header = array('Content-Type: application/x-www-form-urlencoded');
@@ -120,7 +120,7 @@ class Google_Api {
 	 */
 	public function refresh_token() {
 		if (!$this->credentials) {
-			throw new Exception('Could not read credentials', '500');
+			throw new Exception('Could not read credentials', 500);
 		}
 
 		if (!$this->token) {
@@ -160,7 +160,7 @@ class Google_Api {
 	 */
 	public function children($id) {
 		if (!$this->token) {
-			throw new Exception('Missing or illegal token', '500');
+			throw new Exception('Missing or illegal token', 500);
 		}
 
 		$header = array(
@@ -187,7 +187,7 @@ class Google_Api {
 	 */
 	public function search($name, $parent_id = "root", $exactly = false) {
 		if (!$this->token) {
-			throw new Exception('Missing or illegal token', '500');
+			throw new Exception('Missing or illegal token', 500);
 		}
 
 		$header = array(
@@ -234,7 +234,7 @@ class Google_Api {
 	 */
 	public function create_auth_url() {
 		if (!$this->credentials) {
-			throw new Exception('Could not read credentials', '500');
+			throw new Exception('Could not read credentials', 500);
 		}
 
 		return $this->credentials['auth_uri']
@@ -254,7 +254,7 @@ class Google_Api {
 	 */
 	public function create_folder($name, $parent_id = "root") {
 		if (!$this->token) {
-			throw new Exception('Missing or illegal token', '500');
+			throw new Exception('Missing or illegal token', 500);
 		}
 
 		$params = array(
@@ -295,7 +295,7 @@ class Google_Api {
 	 */
 	public function create_file($path, $filename, $parent_id, $description) {
 		if (!$this->token) {
-			throw new Exception('Missing or illegal token', '500');
+			throw new Exception('Missing or illegal token', 500);
 		}
 
 		$mime_type = mime_content_type($path);
@@ -340,7 +340,7 @@ class Google_Api {
 	 */
 	public function delete($id) {
 		if (!$this->token) {
-			throw new Exception('Missing or illegal token', '500');
+			throw new Exception('Missing or illegal token', 500);
 		}
 
 		$header = array(
@@ -369,7 +369,7 @@ class Google_Api {
 	 */
 	public function upload($path, $filename, $parent_id = "root", $description = "") {
 		if (!$this->token) {
-			throw new Exception('Missing or illegal token', '500');
+			throw new Exception('Missing or illegal token', 500);
 		}
 
 		$location               = $this->create_file($path, $filename, $parent_id, $description);

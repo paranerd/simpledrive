@@ -50,7 +50,7 @@ class Util {
 			return null;
 		}
 
-		throw new Exception($mail->ErrorInfo, '500');
+		throw new Exception($mail->ErrorInfo, 500);
 	}
 
 	/**
@@ -215,14 +215,6 @@ class Util {
 	 */
 	public static function connection_available() {
 		return @fopen('http://google.com', 'r');
-	}
-
-	/**
-	 * Write to log file
-	 * @param string $msg
-	 */
-	public static function log($msg) {
-		file_put_contents(LOG, print_r($msg, true) . "\n", FILE_APPEND);
 	}
 
 	/**
