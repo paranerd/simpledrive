@@ -30,10 +30,12 @@ class Twofactor_Model {
 
 	/**
 	 * Constructor
+	 *
 	 * @param string $token
 	 */
 	public function __construct($token) {
 		$this->db     = Database::get_instance();
+		$this->log    = new Log();
 		$this->user   = ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid    = ($this->user) ? $this->user['id'] : null;
 	}
@@ -184,6 +186,7 @@ class Twofactor_Model {
 		$uid = $db->two_factor_get_user($fingerprint);
 
 		if (!$uid) {
+			$this->log->error("Two-Factor-Authentication failed (" . $fingerprint . ")");
 			throw new Exception('Two-Factor-Authentication failed', 400);
 		}
 
@@ -194,11 +197,12 @@ class Twofactor_Model {
 			return null;
 		}
 
+		$this->log->error("Wrong TFA access code", $uid);
 		throw new Exception('Wrong access code', 403);
 	}
 
 	/**
-	 * Check the db for up to 30s for a TFA-code to be unlocked
+	 * Check the db for up to {TFA_EXPIRATION} seconds for a TFA-code to be unlocked
 	 *
 	 * @throws Exception
 	 * @return boolean

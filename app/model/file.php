@@ -706,7 +706,7 @@ class File_Model {
 		}
 
 		if (!extension_loaded("zip")) {
-			$this->log->error($this->uid, "Zip extension not installed");
+			$this->log->error("Zip extension not installed", $this->uid);
 			throw new Exception('Zip extension not installed', 500);
 		}
 
@@ -879,7 +879,6 @@ class File_Model {
 				strpos($targetpath, $sourcepath . "/") === 0 ||
 				!rename($sourcepath, $targetpath . "/" . $sourcefile['filename']))
 			{
-				$this->log->error($this->uid, "Error moving");
 				$errors++;
 				continue;
 			}
@@ -893,6 +892,7 @@ class File_Model {
 			return $msg;
 		}
 
+		$this->log->error("Error moving " . $errors . " file(s)", $this->uid);
 		throw new Exception('Error moving ' . $errors . ' file(s)', 500);
 	}
 

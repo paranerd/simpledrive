@@ -166,7 +166,7 @@ class Core_Model {
 
 		// User unknown
 		if (!$user) {
-			$this->log->warn(PUBLIC_USER_ID, "Unknown login attempt: " . $username);
+			$this->log->warn("Unknown login attempt: " . $username);
 		}
 		// User is on lockdown
 		else if ((time() - ($user['login_attempts'] - (LOGIN_MAX_ATTEMPTS - 1)) * 30) - $user['last_login_attempt'] < 0) {
@@ -190,7 +190,7 @@ class Core_Model {
 		// Wrong password
 		else {
 			$this->db->user_increase_login_counter($user['id']);
-			$this->log->warn($user['id'], "Login failed");
+			$this->log->warn("Login failed", $user['id']);
 		}
 
 		header('WWW-Authenticate: BasicCustom realm="simpleDrive"');
