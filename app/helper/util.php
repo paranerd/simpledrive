@@ -24,7 +24,7 @@ class Util {
 		}
 
 		require_once 'plugins/phpmailer/PHPMailerAutoload.php';
-		$config = CONFIG;
+		$config = json_decode(file_get_contents(CONFIG), true);
 		$mail = new PHPMailer;
 
 		$mail->SMTPDebug = 0;
