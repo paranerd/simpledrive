@@ -16,6 +16,7 @@ class Google_Api {
 
 	/**
 	 * Constructor
+	 *
 	 * @param string $user_token
 	 */
 	public function __construct($user_token) {
@@ -33,6 +34,7 @@ class Google_Api {
 
 	/**
 	 * Check if google-token exists
+	 *
 	 * @return boolean
 	 */
 	public function enabled() {
@@ -41,6 +43,7 @@ class Google_Api {
 
 	/**
 	 * Remove google-token if exists
+	 *
 	 * @return boolean
 	 */
 	public function disable() {
@@ -49,6 +52,7 @@ class Google_Api {
 
 	/**
 	 * Read credentials from file
+	 *
 	 * @return string|null
 	 */
 	private function read_credentials() {
@@ -66,6 +70,7 @@ class Google_Api {
 
 	/**
 	 * Read google-token from file
+	 *
 	 * @return string|null
 	 */
 	private function read_token() {
@@ -83,6 +88,7 @@ class Google_Api {
 
 	/**
 	 * Write google-token
+	 *
 	 * @param string $code Google-Auth-Code
 	 * @throws Exception
 	 * @return boolean
@@ -115,6 +121,7 @@ class Google_Api {
 
 	/**
 	 * Request a new token from Google
+	 *
 	 * @throws Exception
 	 * @return boolean
 	 */
@@ -154,6 +161,7 @@ class Google_Api {
 
 	/**
 	 * Get files in folder
+	 *
 	 * @param string $id
 	 * @throws Exception
 	 * @return array
@@ -173,12 +181,11 @@ class Google_Api {
 				. "id%2CmimeType%2Cname%2Cowners%2FdisplayName%2Cparents%2Cshared%2Ctrashed)";
 
 		$response = $this->execute_request($url, $header, null, 'GET');
-
-		//file_put_contents(LOG, "children: " . print_r($response, true) . "\n", FILE_APPEND);
 	}
 
 	/**
 	 * Search for filename in folder
+	 *
 	 * @param string $name Search-needle
 	 * @param string $parent_id Folder to search in
 	 * @param boolean $exactly Should $name match the filename exactly or just occur in it?
@@ -229,6 +236,7 @@ class Google_Api {
 
 	/**
 	 * Generate a Google-Auth-URL
+	 *
 	 * @throws Exception
 	 * @return string
 	 */
@@ -247,6 +255,7 @@ class Google_Api {
 
 	/**
 	 * Create Google-Folder
+	 *
 	 * @param string $name
 	 * @param string $parent_id
 	 * @throws Exception
@@ -286,6 +295,7 @@ class Google_Api {
 
 	/**
 	 * Create Google-File
+	 *
 	 * @param string $path
 	 * @param string $filename
 	 * @param string $parent_id
@@ -335,6 +345,7 @@ class Google_Api {
 
 	/**
 	 * Delete Google-File
+	 *
 	 * @param string $id
 	 * @throws Exception
 	 */
@@ -360,6 +371,7 @@ class Google_Api {
 
 	/**
 	 * Upload file to Google
+	 *
 	 * @param string $path
 	 * @param string $filename
 	 * @param string $parent_id
@@ -451,6 +463,7 @@ class Google_Api {
 
 	/**
 	 * Execute the http request
+	 *
 	 * @param string $url
 	 * @param array $header
 	 * @param array $params

@@ -10,6 +10,7 @@
 class System_Model {
 	/**
 	 * Constructor
+	 *
 	 * @param string $token
 	 */
 	public function __construct($token) {
@@ -37,27 +38,27 @@ class System_Model {
 	public function status() {
 		$this->check_if_admin();
 
-		$disktotal	= (disk_total_space(dirname(__FILE__)) != "") ? disk_total_space(dirname(__FILE__)) : disk_total_space('/');
-		$diskfree	= (disk_free_space(dirname(__FILE__)) != "") ? disk_free_space(dirname(__FILE__)) : disk_free_space('/');
-		$ssl		= (strpos(file_get_contents('.htaccess'), '#RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [QSA,NC,L]') === false);
+		$disktotal = (disk_total_space(dirname(__FILE__)) != "") ? disk_total_space(dirname(__FILE__)) : disk_total_space('/');
+		$diskfree  = (disk_free_space(dirname(__FILE__)) != "") ? disk_free_space(dirname(__FILE__)) : disk_free_space('/');
+		$ssl       = (strpos(file_get_contents('.htaccess'), '#RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [QSA,NC,L]') === false);
 
 		$plugins = array(
-			'webodf'		=> is_dir('plugins/webodf'),
-			'sabredav'		=> is_dir('plugins/sabredav'),
-			'phpmailer'		=> is_dir('plugins/phpmailer')
+			'webodf'    => is_dir('plugins/webodf'),
+			'sabredav'  => is_dir('plugins/sabredav'),
+			'phpmailer' => is_dir('plugins/phpmailer')
 		);
 
 		$version = json_decode(file_get_contents(VERSION), true);
 
 		return array(
-			'users'			=> count($this->db->user_get_all()),
-			'upload_max'	=> Util::convert_size(ini_get('upload_max_filesize')),
-			'storage_total'	=> $disktotal,
-			'storage_used'	=> $disktotal - $diskfree,
-			'ssl'			=> $ssl,
-			'domain'		=> $this->config['domain'],
-			'plugins'		=> $plugins,
-			'version'		=> $version['version']
+			'users'         => count($this->db->user_get_all()),
+			'upload_max'    => Util::convert_size(ini_get('upload_max_filesize')),
+			'storage_total' => $disktotal,
+			'storage_used'  => $disktotal - $diskfree,
+			'ssl'           => $ssl,
+			'domain'        => $this->config['domain'],
+			'plugins'       => $plugins,
+			'version'       => $version['version']
 		);
 	}
 

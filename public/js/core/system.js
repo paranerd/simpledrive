@@ -222,6 +222,7 @@ var SystemView = new function() {
 
 		for (var i in log) {
 			var entry = log[i];
+			console.log(entry);
 
 			var listItem = document.createElement("div");
 			listItem.id = "item" + i;

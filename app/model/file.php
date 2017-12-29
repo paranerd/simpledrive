@@ -21,7 +21,6 @@ class File_Model {
 		$this->token    = $token;
 		$this->config   = json_decode(file_get_contents(CONFIG), true);
 		$this->db       = Database::get_instance();
-		$this->log      = new Log();
 		$this->user     = ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid      = ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
 		$this->username = ($this->user) ? $this->user['username'] : "";
@@ -450,7 +449,16 @@ class File_Model {
 			($type == 'folder' && mkdir($path . "/" . $filename, 0777, true)))
 		{
 			$md5 = (is_dir($path . "/" . $filename)) ? "0" : md5_file($path . "/" . $filename);
-			return $this->db->cache_add($filename, $parent['id'], self::type($path . "/" . $filename), self::info($path . "/" . $filename), $parent['ownerid'], filemtime($path . "/" . $filename), $md5, $parent['path'] . "/" . $filename);
+			return $this->db->cache_add(
+				$filename,
+				$parent['id'],
+				self::type($path . "/" . $filename),
+				self::info($path . "/" . $filename),
+				$parent['ownerid'],
+				filemtime($path . "/" . $filename),
+				$md5,
+				$parent['path'] . "/" . $filename
+			);
 		}
 
 		throw new Exception('Error creating file', 403);
@@ -528,15 +536,12 @@ class File_Model {
 					continue;
 				}
 			}
-
 			// Move to trash
-			else {
-				if (rename($this->config['datadir'] . $file['owner'] . FILES . $file['path'], $trashdir . $file['id'])) {
-					$restorepath = (dirname($file['path']) == 1) ? "/" : dirname($file['path']);
-					$this->db->cache_trash($file['id'], $file['ownerid'], $file['path'], $restorepath);
-					$this->db->share_remove($file['id']);
-					continue;
-				}
+			else if (rename($this->config['datadir'] . $file['owner'] . FILES . $file['path'], $trashdir . $file['id'])) {
+				$restorepath = (dirname($file['path']) == 1) ? "/" : dirname($file['path']);
+				$this->db->cache_trash($file['id'], $file['ownerid'], $file['path'], $restorepath);
+				$this->db->share_remove($file['id']);
+				continue;
 			}
 			$errors++;
 		}
@@ -706,7 +711,7 @@ class File_Model {
 		}
 
 		if (!extension_loaded("zip")) {
-			$this->log->error("Zip extension not installed", $this->uid);
+			Log::error("Zip extension not installed", $this->uid);
 			throw new Exception('Zip extension not installed', 500);
 		}
 
@@ -892,7 +897,6 @@ class File_Model {
 			return $msg;
 		}
 
-		$this->log->error("Error moving " . $errors . " file(s)", $this->uid);
 		throw new Exception('Error moving ' . $errors . ' file(s)', 500);
 	}
 
@@ -1013,16 +1017,24 @@ class File_Model {
 		if (!$file) {
 			throw new Exception('File not found', 500);
 		}
-
 		// Incorrect password
-		else if (!Crypto::verify_password($pass, $share['pass']) && !$this->db->share_is_unlocked($share['file'], PERMISSION_READ, $this->token)) {
+		else if (!Crypto::verify_password($pass, $share['pass']) &&
+			!$this->db->share_is_unlocked($share['file'], PERMISSION_READ, $this->token))
+		{
 			throw new Exception('Wrong password', 403);
 		}
 		else {
 			$token = ($this->token) ? $this->token : $this->db->session_start(PUBLIC_USER_ID);
 
 			if ($token && $this->db->share_unlock($token, $sid)) {
-				return array('share' => array('id' => $file['id'], 'filename' => $file['filename'], 'type' => $file['type']), 'token' => $token);
+				return array(
+					'share' => array(
+						'id' => $file['id'],
+						'filename' => $file['filename'],
+						'type' => $file['type']
+					),
+					'token' => $token
+				);
 			}
 		}
 
@@ -1276,6 +1288,7 @@ class File_Model {
 		if (!file_exists(dirname($scan_lock))) {
 			mkdir(dirname($scan_lock));
 		}
+
 		file_put_contents($scan_lock, '', LOCK_EX);
 
 		$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'] . "/";
@@ -1298,7 +1311,7 @@ class File_Model {
 	}
 
 	/**
-	 * Scan folder and sync files to cache
+	 * Scan folder and add files to cache
 	 *
 	 * @param string $path Absolute path
 	 * @param string $rel_path Relative path
@@ -1337,6 +1350,7 @@ class File_Model {
 		if (!$update) {
 			$this->db->cache_refresh_array($ids);
 		}
+
 		$this->db->cache_update_size($fid, $size);
 	}
 
@@ -1352,7 +1366,16 @@ class File_Model {
 	 */
 	public function add($path, $rel_path, $parent_id, $oid, $include_childs = false) {
 		$md5 = (is_dir($path)) ? "0" : md5_file($path);
-		$child_id = $this->db->cache_add(basename($path), $parent_id, self::type($path), self::info($path), $oid, filemtime($path), $md5, $rel_path);
+		$child_id = $this->db->cache_add(
+			basename($path),
+			$parent_id,
+			self::type($path),
+			self::info($path),
+			$oid,
+			filemtime($path),
+			$md5,
+			$rel_path
+		);
 
 		if ($include_childs && is_dir($path)) {
 			$this->add_folder($path . "/", $rel_path . "/", $child_id, $oid);
@@ -1375,7 +1398,16 @@ class File_Model {
 		foreach ($files as $file) {
 			if (is_readable($path . $file) && substr($file, 0, 1) != ".") {
 				$md5 = (is_dir($path . $file)) ? "0" : md5_file($path . $file);
-				$child_id = $this->db->cache_add($file, $fid, self::type($path . $file), self::info($path . $file), $oid, filemtime($path . $file), $md5, $rel_path . $file);
+				$child_id = $this->db->cache_add(
+					$file,
+					$fid,
+					self::type($path . $file),
+					self::info($path . $file),
+					$oid,
+					filemtime($path . $file),
+					$md5,
+					$rel_path . $file
+				);
 
 				if (is_dir($path . $file)) {
 					$this->add_folder($path . $file . "/", $rel_path . $file . "/", $child_id, $oid);

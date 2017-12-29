@@ -279,6 +279,7 @@ class Database {
 
 	/**
 	 * Set backup password and whether or not to encrypt filenames for cloud backup
+	 *
 	 * @param int $uid
 	 * @param string $pass
 	 * @param boolean $encrypt_filename
@@ -296,6 +297,7 @@ class Database {
 
 	/**
 	 * Return details regarding cloud backup
+	 *
 	 * @param int $uid
 	 * @return null
 	 */
@@ -322,6 +324,7 @@ class Database {
 
 	/**
 	 * Get a user by name
+	 *
 	 * @param string $username
 	 * @param boolean $full To determine the level of detail
 	 * @return array
@@ -332,6 +335,7 @@ class Database {
 
 	/**
 	 * Get a user by id
+	 *
 	 * @param int $uid
 	 * @param boolean $full To determine the level of detail
 	 * @return array
@@ -342,6 +346,7 @@ class Database {
 
 	/**
 	 * Get a user by token
+	 *
 	 * @param string $token
 	 * @param boolean $full To determine the level of detail
 	 * @return array
@@ -355,6 +360,7 @@ class Database {
 
 	/**
 	 * Get a user
+	 *
 	 * @param string $column What attribute to filter for
 	 * @param string $value
 	 * @param boolean $full To determine the level of detail
@@ -407,6 +413,7 @@ class Database {
 
 	/**
 	 * Get info about all users
+	 *
 	 * @return array Containing info for all users
 	 */
 	public function user_get_all() {
@@ -436,6 +443,7 @@ class Database {
 
 	/**
 	 * Get UserID from authorization token
+	 *
 	 * @param string $token
 	 * @return int|null
 	 */
@@ -459,6 +467,7 @@ class Database {
 
 	/**
 	 * Check for admin privileges
+	 *
 	 * @param string $token
 	 * @return boolean
 	 */
@@ -469,6 +478,7 @@ class Database {
 
 	/**
 	 * Create new user
+	 *
 	 * @param string $username
 	 * @param string $pass
 	 * @param boolean $admin
@@ -492,6 +502,7 @@ class Database {
 
 	/**
 	 * Delete user
+	 *
 	 * @param int $uid
 	 * @return boolean
 	 */
@@ -510,6 +521,7 @@ class Database {
 
 	/**
 	 * Increase number of login attempts
+	 *
 	 * @param int $uid
 	 */
 	public function user_increase_login_counter($uid) {
@@ -525,6 +537,7 @@ class Database {
 
 	/**
 	 * Reset number of login attempts to 0
+	 *
 	 * @param int $uid
 	 */
 	public function user_set_login($uid) {
@@ -540,6 +553,7 @@ class Database {
 
 	/**
 	 * Update user access
+	 *
 	 * @param int $uid
 	 * @param boolean $admin
 	 * @return boolean
@@ -556,6 +570,7 @@ class Database {
 
 	/**
 	 * Enable/disable autoscan
+	 *
 	 * @param int $uid
 	 * @param boolean $enable
 	 * @return boolean
@@ -572,6 +587,7 @@ class Database {
 
 	/**
 	 * Update user quota
+	 *
 	 * @param int $uid
 	 * @param int $max_storage
 	 * @return boolean
@@ -588,6 +604,7 @@ class Database {
 
 	/**
 	 * Change user password
+	 *
 	 * @param int $uid
 	 * @param string $pass
 	 * @return boolean
@@ -608,6 +625,7 @@ class Database {
 
 	/**
 	 * Set fileview
+	 *
 	 * @param int $uid
 	 * @param string $fileview
 	 */
@@ -623,6 +641,7 @@ class Database {
 
 	/**
 	 * Set theme color
+	 *
 	 * @param int $uid
 	 * @param string $color
 	 */
@@ -638,6 +657,7 @@ class Database {
 
 	/**
 	 * Save authorization token, expiration date and client's fingerprint
+	 *
 	 * @param int $uid
 	 * @return boolean
 	 */
@@ -669,6 +689,7 @@ class Database {
 
 	/**
 	 * Remove authorization token
+	 *
 	 * @param string $token
 	 * @return boolean
 	 */
@@ -685,6 +706,7 @@ class Database {
 
 	/**
 	 * Generate a new unique authentication token
+	 *
 	 * @return string
 	 */
 	public function session_get_unique_token() {
@@ -706,6 +728,7 @@ class Database {
 
 	/**
 	 * Check if token exists for the client
+	 *
 	 * @param string $token
 	 * @return boolean
 	 */
@@ -727,6 +750,7 @@ class Database {
 
 	/**
 	 * Count all active tokens for a user
+	 *
 	 * @param int $uid
 	 * @return int
 	 */
@@ -746,7 +770,8 @@ class Database {
 	}
 
 	/**
-	 * Ends all sessions for a user but the current active
+	 * Ends all sessions for a user except for the current active
+	 *
 	 * @param int $uid
 	 * @param string $token
 	 * @return boolean
@@ -767,7 +792,8 @@ class Database {
 	}
 
 	/**
-	 * End all sessions for a user on a specific client (but not the current)
+	 * End all sessions for a user on a specific client except for the current active
+	 *
 	 * @param int $uid
 	 * @param string $token
 	 * @return boolean
@@ -789,7 +815,8 @@ class Database {
 	}
 
 	/**
-	 * Register a client for TFA
+	 * Register a client for Two-Factor-Authentication
+	 *
 	 * @param int $uid
 	 * @param string $client Identification-Token for sending TFA-code
 	 * @return boolean
@@ -806,7 +833,8 @@ class Database {
 	}
 
 	/**
-	 * Unregister a client for TFA
+	 * Unregister a client from Two-Factor-Authentication
+	 *
 	 * @param int $uid
 	 * @param string $client Identification-Token
 	 * @return boolean
@@ -826,7 +854,8 @@ class Database {
 	}
 
 	/**
-	 * Disable TFA for user
+	 * Disable Two-Factor-Authentication for user
+	 *
 	 * @param int $uid
 	 * @return boolean
 	 */
@@ -844,6 +873,7 @@ class Database {
 
 	/**
 	 * Check if a client is registered for a user
+	 *
 	 * @param int $uid
 	 * @param string $client
 	 * @return boolean
@@ -866,6 +896,7 @@ class Database {
 
 	/**
 	 * Get UserID by fingerprint
+	 *
 	 * @param string $fingerprint
 	 * @return int
 	 */
@@ -886,6 +917,7 @@ class Database {
 
 	/**
 	 * Get all clients registered for a user
+	 *
 	 * @param int $uid
 	 * @return array
 	 */
@@ -913,6 +945,7 @@ class Database {
 	/**
 	 * Check if there are clients registered for a user
 	 * and the current fingerprint matches none of them
+	 *
 	 * @param int $uid
 	 * @return boolean
 	 */
@@ -935,7 +968,8 @@ class Database {
 	}
 
 	/**
-	 * Remove TFA-code to invalidate the request
+	 * Remove Two-Factor-Authentication-code to invalidate the request
+	 *
 	 * @param string $fingerprint
 	 * @return boolean
 	 */
@@ -953,7 +987,8 @@ class Database {
 	}
 
 	/**
-	 * Unlock TFA-code
+	 * Unlock Two-Factor-Authentication-code
+	 *
 	 * @param int $uid
 	 * @param string $code
 	 * @param string $fingerprint
@@ -985,7 +1020,8 @@ class Database {
 	}
 
 	/**
-	 * Check if TFA-code has been unlocked
+	 * Check if Two-Factor-Authentication-code has been unlocked
+	 *
 	 * @return boolean|null
 	 */
 	public function two_factor_unlocked() {
@@ -1007,7 +1043,8 @@ class Database {
 	}
 
 	/**
-	 * Increment number of TFA-unlock-attempts
+	 * Increment number of Two-Factor-Authentication-unlock-attempts
+	 *
 	 * @return boolean
 	 */
 	public function two_factor_increment_attempts() {
@@ -1024,7 +1061,9 @@ class Database {
 	}
 
 	/**
-	 * Remove TFA-codes that are expired, unlocked and/or have exceeded their max attempts
+	 * Remove Two-Factor-Authentication-codes that are expired,
+	 * unlocked and/or have exceeded their max attempts
+	 *
 	 * @return boolean
 	 */
 	public function two_factor_cleanup_codes() {
@@ -1043,7 +1082,8 @@ class Database {
 	}
 
 	/**
-	 * Check if there is a TFA-code for client
+	 * Check if there is a Two-Factor-Authentication-code for client
+	 *
 	 * @param string $fingerprint
 	 * @return boolean|null
 	 */
@@ -1063,7 +1103,8 @@ class Database {
 	}
 
 	/**
-	 * Generate TFA-code
+	 * Generate code for Two-Factor-Authentication
+	 *
 	 * @param int $uid
 	 * @param string $fingerprint
 	 * @return string|null
@@ -1093,7 +1134,8 @@ class Database {
 	}
 
 	/**
-	 * Update Identification-Token for sending TFA-code
+	 * Update Identification-Token for sending Two-Factor-Authentication-code
+	 *
 	 * @param int $uid
 	 * @param string $client_old
 	 * @param string $client_new
@@ -1119,6 +1161,7 @@ class Database {
 
 	/**
 	 * Check if accessing user is allowed to access a shared file
+	 *
 	 * @param string $fid
 	 * @param int $access
 	 * @param string $token
@@ -1154,6 +1197,7 @@ class Database {
 
 	/**
 	 * Generate a unique 8-hex id that is used in public share-links
+	 *
 	 * @return string ShareID
 	 */
 	private function share_get_unique_id() {
@@ -1175,6 +1219,7 @@ class Database {
 
 	/**
 	 * Add new share
+	 *
 	 * @param string $fid
 	 * @param int $userto UserID to share with (optional)
 	 * @param string $pass Password (optional)
@@ -1195,6 +1240,7 @@ class Database {
 
 	/**
 	 * Grant access to share
+	 *
 	 * @param string $token
 	 * @param int $sid
 	 * @return string|null
@@ -1214,6 +1260,7 @@ class Database {
 
 	/**
 	 * Get share info
+	 *
 	 * @param string $fid
 	 * @return array
 	 */
@@ -1241,6 +1288,7 @@ class Database {
 
 	/**
 	 * Get share info
+	 *
 	 * @param int $sid ShareID
 	 * @return array Share info
 	 */
@@ -1267,7 +1315,8 @@ class Database {
 	}
 
 	/**
-	 * Get all files a user shared
+	 * Get all files a user has shared
+	 *
 	 * @param int $uid
 	 * @return array
 	 */
@@ -1304,6 +1353,7 @@ class Database {
 
 	/**
 	 * Get all files shared with a user
+	 *
 	 * @param int $uid
 	 * @return array
 	 */
@@ -1340,6 +1390,7 @@ class Database {
 
 	/**
 	 * Remove share
+	 *
 	 * @param string $fid
 	 * @return boolean
 	 */
@@ -1356,6 +1407,7 @@ class Database {
 
 	/**
 	 * Get closest shared parent (root if none)
+	 *
 	 * @param string $fid
 	 * @param int $uid
 	 * @return string
@@ -1386,6 +1438,8 @@ class Database {
 
 	/**
 	 * Write log entry
+	 *
+	 * @param string $date
 	 * @param int $uid
 	 * @param string $type E.g. ERROR, INFO, etc.
 	 * @param string $msg Actual error message
@@ -1401,6 +1455,7 @@ class Database {
 
 	/**
 	 * Get log entries
+	 *
 	 * @param int $from Start with nth entry
 	 * @param int $size How many to return
 	 * @return array Containing log size and log entries
@@ -1441,6 +1496,7 @@ class Database {
 
 	/**
 	 * Delete log
+	 *
 	 * @return boolean
 	 */
 	public function log_clear() {
@@ -1453,7 +1509,8 @@ class Database {
 
 	/**
 	 * Trash file
-	 * Remember original path for trashed items
+	 * Remember original path for restoring
+	 *
 	 * @param string $fid
 	 * @param int $oid
 	 * @param string $path
@@ -1474,6 +1531,7 @@ class Database {
 
 	/**
 	 * Get size of a file or folder
+	 *
 	 * @param string $fid
 	 * @param int $uid
 	 * @param int $access
@@ -1485,6 +1543,7 @@ class Database {
 
 	/**
 	 * Get size of a file or folder (recursively if folder)
+	 *
 	 * @param string $fid
 	 * @param int $uid
 	 * @param int $access
@@ -1518,6 +1577,7 @@ class Database {
 
 	/**
 	 * Set the size of a directory
+	 *
 	 * @param string $fid
 	 * @param int $size Element count
 	 */
@@ -1533,6 +1593,7 @@ class Database {
 
 	/**
 	 * Generate new unique FileID
+	 *
 	 * @return int
 	 */
 	private function cache_get_unique_id() {
@@ -1554,6 +1615,7 @@ class Database {
 
 	/**
 	 * Add file to cache
+	 *
 	 * @param string $filename
 	 * @param string $parent FileID
 	 * @param string $type
@@ -1580,6 +1642,7 @@ class Database {
 
 	/**
 	 * Update last-scan-timestamp for a file
+	 *
 	 * @param string $fid
 	 * @return boolean
 	 */
@@ -1598,6 +1661,7 @@ class Database {
 
 	/**
 	 * Update last-scan-timestamp for multiple files
+	 *
 	 * @param array $fids
 	 * @return boolean
 	 */
@@ -1616,6 +1680,7 @@ class Database {
 
 	/**
 	 * Escape array to prevent SQL-Injection
+	 *
 	 * @param array $arr
 	 * @return array
 	 */
@@ -1628,6 +1693,7 @@ class Database {
 
 	/**
 	 * Update file in cache
+	 *
 	 * @param string $fid
 	 * @param string $type
 	 * @param int $size
@@ -1657,6 +1723,7 @@ class Database {
 
 	/**
 	 * Get all trashed files for user
+	 *
 	 * @param int $uid
 	 * @return array
 	 */
@@ -1692,6 +1759,7 @@ class Database {
 
 	/**
 	 * Get root-directory-id for user
+	 *
 	 * @param int $uid
 	 * @return int|null
 	 */
@@ -1713,6 +1781,7 @@ class Database {
 
 	/**
 	 * Search for filename in cache
+	 *
 	 * @param int $uid
 	 * @param string $needle
 	 * @return array
@@ -1739,6 +1808,7 @@ class Database {
 
 	/**
 	 * Get file from cache
+	 *
 	 * @param string $fid
 	 * @param int $uid
 	 * @return array|null
@@ -1782,6 +1852,7 @@ class Database {
 	/**
 	 * Return all files in a directory and its children
 	 * Path is relative to the given "root"
+	 *
 	 * @param int $oid
 	 * @param string $fid
 	 * @return array
@@ -1822,6 +1893,7 @@ class Database {
 
 	/**
 	 * Return FileID if parent has a file with $filename that is not trashed
+	 *
 	 * @param int $oid
 	 * @param string $parent
 	 * @param string $filename
@@ -1848,6 +1920,7 @@ class Database {
 
 	/**
 	 * Get all direct children in folder
+	 *
 	 * @param string $fid
 	 * @param int $uid
 	 * @param int $oid
@@ -1899,6 +1972,7 @@ class Database {
 
 	/**
 	 * Get all children in folder (including sub-folders)
+	 *
 	 * @param string $fid
 	 * @param int $uid
 	 * @param int $oid
@@ -1918,6 +1992,7 @@ class Database {
 
 	/**
 	 * Get restore path for trashed file
+	 *
 	 * @param string $fid
 	 * @return string|null
 	 */
@@ -1938,6 +2013,7 @@ class Database {
 
 	/**
 	 * Get FileID for path from cache
+	 *
 	 * @param int $uid
 	 * @param string $path (must start and not end with "/")
 	 * @return string|null
@@ -1974,6 +2050,7 @@ class Database {
 
 	/**
 	 * Build relative path for file
+	 *
 	 * @param string $fid
 	 * @return string
 	 */
@@ -2001,6 +2078,7 @@ class Database {
 
 	/**
 	 * Get direct parent for file
+	 *
 	 * @param string $fid
 	 * @return string
 	 */
@@ -2021,6 +2099,7 @@ class Database {
 
 	/**
 	 * Get all parents for file
+	 *
 	 * @param string $fid
 	 * @param int $uid
 	 * @return array
@@ -2057,6 +2136,7 @@ class Database {
 
 	/**
 	 * Remove file from trash
+	 *
 	 * @param string $fid
 	 * @param string $to Destination path (for history)
 	 * @param int $oid
@@ -2076,6 +2156,7 @@ class Database {
 
 	/**
 	 * Move file to new parent
+	 *
 	 * @param string $fid
 	 * @param string $dest
 	 * @param string $oldpath (for history)
@@ -2103,6 +2184,7 @@ class Database {
 
 	/**
 	 * Rename file
+	 *
 	 * @param string $fid
 	 * @param string $oldpath
 	 * @param string $newpath
@@ -2128,6 +2210,7 @@ class Database {
 
 	/**
 	 * Remove file from cache
+	 *
 	 * @param string $fid
 	 * @return boolean
 	 */
@@ -2143,6 +2226,7 @@ class Database {
 
 	/**
 	 * Check if file is trashed
+	 *
 	 * @param string $fid
 	 * @return boolean
 	 */
@@ -2170,6 +2254,7 @@ class Database {
 
 	/**
 	 * Remove all files from trash that have not been updated since $start
+	 *
 	 * @param string $parent FileID
 	 * @param int $oid
 	 * @param int $start Timestamp from when the update started
@@ -2204,6 +2289,7 @@ class Database {
 
 	/**
 	 * Remove files from cache that don't exist on disk
+	 *
 	 * @param int $uid
 	 * @param array $existing_files
 	 */
@@ -2222,6 +2308,7 @@ class Database {
 
 	/**
 	 * Get change-history for user
+	 *
 	 * @param int $oid
 	 * @param int $timestamp Only get entries from after this time
 	 * @param boolean $only_deleted Only return entries about deletions
@@ -2256,6 +2343,7 @@ class Database {
 
 	/**
 	 * Add folder to history to mark time of deletion/renaming/moving
+	 *
 	 * @param int $fid
 	 * @param string $path
 	 * @param int $oid
@@ -2314,6 +2402,7 @@ class Database {
 
 	/**
 	 * Add file to history to mark time of deletion/renaming/moving
+	 *
 	 * @param string $path
 	 * @param int $oid
 	 * @param int $timestamp
@@ -2330,4 +2419,3 @@ class Database {
 		return true;
 	}
 }
-?>

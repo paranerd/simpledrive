@@ -21,17 +21,20 @@ class Log {
 	 * @param int $uid
 	 * @param int $level
 	 */
-	private function write($msg, $uid, $level) {
-		$date = date('Y-m-d H:i:s');
+	 private static function write($msg, $uid, $level) {
+		$now = DateTime::createFromFormat('U.u', microtime(true));
+		$config = @json_decode(file_get_contents(CONFIG), true);
 
-		if ($level == self::$LEVEL_DEBUG || !$this->db) {
-			file_put_contents(LOG, $date . " | " . self::$LABELS[$level] . " | " . json_encode($msg) . "\n", FILE_APPEND);
-		}
-		else {
-			$db = Database::get_instance();
-			$db->log_write($date, $uid, $level, $msg);
-		}
-	}
+ 		if ($level == self::$LEVEL_DEBUG) {
+			if (!$config || $config['debug']) {
+				file_put_contents(LOG, $now->format("Y-m-d H:i:s.u") . " | " . self::$LABELS[$level] . " | " . json_encode($msg) . "\n", FILE_APPEND);
+			}
+ 		}
+ 		else {
+ 			$db = Database::get_instance();
+ 			$db->log_write($now->format("Y-m-d H:i:s"), $uid, $level, $msg);
+ 		}
+ 	}
 
 	/**
 	 * Write info message to log
@@ -39,7 +42,7 @@ class Log {
 	 * @param string $msg
 	 * @param int $uid
 	 */
-	public function info($msg, $uid = PUBLIC_USER_ID) {
+	public static function info($msg, $uid = PUBLIC_USER_ID) {
 		self::write($msg, $uid, self::$LEVEL_INFO);
 	}
 
@@ -49,7 +52,7 @@ class Log {
 	 * @param string $msg
 	 * @param int $uid
 	 */
-	public function warn($msg, $uid = PUBLIC_USER_ID) {
+	public static function warn($msg, $uid = PUBLIC_USER_ID) {
 		self::write($msg, $uid, self::$LEVEL_WARN);
 	}
 
@@ -59,7 +62,7 @@ class Log {
 	 * @param string $msg
 	 * @param int $uid
 	 */
-	public function error($msg, $uid = PUBLIC_USER_ID) {
+	public static function error($msg, $uid = PUBLIC_USER_ID) {
 		self::write($msg, $uid, self::$LEVEL_ERROR);
 	}
 
@@ -69,7 +72,7 @@ class Log {
 	 * @param string $msg
 	 * @param int $uid
 	 */
-	public function debug($msg, $uid = PUBLIC_USER_ID) {
+	public static function debug($msg, $uid = PUBLIC_USER_ID) {
 		self::write($msg, null, self::$LEVEL_DEBUG);
 	}
 }

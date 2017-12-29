@@ -155,6 +155,7 @@ class User_Model {
 
 	/**
 	 * Set max quota (admin required)
+	 *
 	 * @param string $username
 	 * @param int $max
 	 * @throws Exception
@@ -224,6 +225,7 @@ class User_Model {
 
 	/**
 	 * Delete user by name
+	 *
 	 * @param string $username
 	 * @throws Exception
 	 * @return null

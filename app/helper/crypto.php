@@ -14,6 +14,7 @@ class Crypto {
 
 	/**
 	 * Encrypt string
+	 *
 	 * @param string $plaintext to be encrypted
 	 * @param string $secret passphrase
 	 * @param boolean $sign whether or not to prepend hmac-hash for integrity
@@ -45,6 +46,7 @@ class Crypto {
 
 	/**
 	 * Encode string as base64
+	 *
 	 * @param string $str
 	 * @return string
 	 */
@@ -54,6 +56,7 @@ class Crypto {
 
 	/**
 	 * Decode base64-encoded string
+	 *
 	 * @param string $str
 	 * @return string
 	 */
@@ -63,6 +66,7 @@ class Crypto {
 
 	/**
 	 * Encrypt file
+	 *
 	 * @param string $path Absolute path to file
 	 * @param string $secret Passphrase
 	 * @param boolean $sign Whether or not to prepend hmac-hash for integrity
@@ -91,6 +95,7 @@ class Crypto {
 
 	/**
 	 * Decrypt string
+	 *
 	 * @param string $data64 Base64-encoded encrypted
 	 * @param string $secret Passphrase
 	 * @return string Decrypted string
@@ -132,6 +137,7 @@ class Crypto {
 
 	/**
 	 * Decrypt file
+	 *
 	 * @param string $path Absolute path to file
 	 * @param string $secret Passphrase
 	 * @param boolean $filename_encrypted Whether or not the filename is encrypted
@@ -163,6 +169,7 @@ class Crypto {
 
 	/**
 	 * Add PKCS5-Padding
+	 *
 	 * @param string $text plaintext
 	 * @param int $blocksize
 	 * @return string Padded plaintext
@@ -174,6 +181,7 @@ class Crypto {
 
 	/**
 	 * Remove PKCS5-Padding
+	 *
 	 * @param string $text Plaintext
 	 * @return string Unpadded plaintext
 	 */
@@ -186,6 +194,7 @@ class Crypto {
 
 	/**
 	 * Generate an HMAC-Signature
+	 *
 	 * @param string $data String to be signed
 	 * @param string $key Secret passphrase
 	 * @return string HMAC
@@ -196,6 +205,7 @@ class Crypto {
 
 	/**
 	 * Generate a PBKDF2-Key
+	 *
 	 * @param string $secret
 	 * @param string $salt
 	 * @return string
@@ -206,6 +216,7 @@ class Crypto {
 
 	/**
 	 * Generate a cryptographically secure password-hash
+	 *
 	 * @param string $pass
 	 * @return string Password-hash
 	 */
@@ -217,6 +228,7 @@ class Crypto {
 
 	/**
 	 * Check if a password matches a given hash
+	 *
 	 * @param string $pass
 	 * @param string $hash
 	 * @return boolean
@@ -227,6 +239,7 @@ class Crypto {
 
 	/**
 	 * Validate authorization token
+	 *
 	 * @param string $token
 	 * @return string|null Authorization token
 	 */
@@ -241,6 +254,7 @@ class Crypto {
 
 	/**
 	* Generate a random byte-sequence
+	*
 	* @param int $length
 	* @return string
 	*/
@@ -250,6 +264,7 @@ class Crypto {
 
 	/**
 	* Generate a random string
+	*
 	* @param int $length
 	* @return string
 	*/
@@ -259,6 +274,7 @@ class Crypto {
 
 	/**
 	* Generate a random number
+	*
 	* @param int $length
 	* @return int
 	*/

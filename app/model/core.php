@@ -16,7 +16,6 @@ class Core_Model {
 	 */
 	public function __construct() {
 		$this->db  = null;
-		$this->log = new Log();
 	}
 
 	/**
@@ -95,17 +94,18 @@ class Core_Model {
 	 */
 	private function create_config($datadir, $db_server, $db_name, $db_user, $db_pass, $mail, $mail_pass) {
 		$config = array(
-			'salt'			=> Crypto::random_string(64),
-			'installdir'	=> dirname($_SERVER['PHP_SELF']) . "/",
-			'datadir'		=> $datadir,
-			'dbserver'		=> $db_server,
-			'dbname'		=> $db_name,
-			'dbuser'		=> $db_user,
-			'dbpass'		=> $db_pass,
-			'mail'			=> $mail,
-			'mailpass'		=> $mail_pass,
-			'domain'		=> $_SERVER['HTTP_HOST'],
-			'protocol'		=> 'http://'
+			'salt'       => Crypto::random_string(64),
+			'installdir' => dirname($_SERVER['PHP_SELF']) . "/",
+			'datadir'   => $datadir,
+			'dbserver'  => $db_server,
+			'dbname'    => $db_name,
+			'dbuser'    => $db_user,
+			'dbpass'    => $db_pass,
+			'mail'      => $mail,
+			'mailpass'  => $mail_pass,
+			'domain'    => $_SERVER['HTTP_HOST'],
+			'protocol'  => 'http://',
+			'debug'     => 0
 		);
 
 		// Write config file
@@ -161,16 +161,16 @@ class Core_Model {
 	 */
 	public function login($username, $pass, $callback = false) {
 		$this->db	= Database::get_instance();
-		$username	= strtolower($username);
-		$user		= $this->db->user_get_by_name($username, true);
+		$user		= $this->db->user_get_by_name(strtolower($username), true);
 
 		// User unknown
 		if (!$user) {
-			$this->log->warn("Unknown login attempt: " . $username);
+			Log::warn("Unknown login attempt: " . $username);
 		}
 		// User is on lockdown
 		else if ((time() - ($user['login_attempts'] - (LOGIN_MAX_ATTEMPTS - 1)) * 30) - $user['last_login_attempt'] < 0) {
 			$lockdown_time = (time() - ($user['login_attempts'] + 1 - (LOGIN_MAX_ATTEMPTS - 1)) * 30) - $user['last_login_attempt'];
+			Log::warn("User " . $user['user'] . " is locked for " . abs($lockdown_time) . "s");
 			throw new Exception('Locked for ' . abs($lockdown_time) . 's', 500);
 		}
 		// Correct
@@ -189,8 +189,8 @@ class Core_Model {
 		}
 		// Wrong password
 		else {
+			Log::warn("Login failed", $user['id']);
 			$this->db->user_increase_login_counter($user['id']);
-			$this->log->warn("Login failed", $user['id']);
 		}
 
 		header('WWW-Authenticate: BasicCustom realm="simpleDrive"');
@@ -223,8 +223,8 @@ class Core_Model {
 			throw new Exception('Permission denied', 403);
 		}
 
-		$version		= json_decode(file_get_contents(VERSION), true);
-		$url			= 'http://simpledrive.org/version';
+		$version = json_decode(file_get_contents(VERSION), true);
+		$url = 'http://simpledrive.org/version';
 		$recent_version	= null;
 
 		// Get current version from demo server if connection is available

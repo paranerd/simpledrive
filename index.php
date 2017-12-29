@@ -28,7 +28,7 @@ $action       = (sizeof($args) > 0) ? array_shift($args) : '';
 $name         = ucfirst($controller) . "_Controller";
 
 // Define Constants
-define('LOG', (__DIR__) . '/logs/status.log');
+define('LOG', (__DIR__) . '/logs/debug.log');
 define('CACHE', '/cache/');
 define('TRASH', '/trash/');
 define('FILES', '/files');

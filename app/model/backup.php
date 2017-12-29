@@ -12,6 +12,7 @@ require_once 'app/helper/googleapi.php';
 class Backup_Model {
 	/**
 	 * Constructor
+	 *
 	 * @throws Exception
 	 * @param string $token
 	 */
@@ -49,6 +50,7 @@ class Backup_Model {
 
 	/**
 	 * Check if backup is enabled and running
+	 *
 	 * @return boolean
 	 */
 	public function status() {

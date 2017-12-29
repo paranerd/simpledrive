@@ -10,6 +10,7 @@
 class Util {
 	/**
 	 * Send mail using smtp
+	 *
 	 * @param string $subject
 	 * @param string $recipient
 	 * @param string $msg
@@ -27,20 +28,30 @@ class Util {
 		$mail = new PHPMailer;
 
 		$mail->SMTPDebug = 0;
-		$mail->isSMTP();										// Set mailer to use SMTP
-		$mail->Host = 'smtp.gmail.com';							// Specify main and backup SMTP servers
-		$mail->SMTPAuth = true;									// Enable SMTP authentication
-		$mail->Username = $config['mailuser'];					// SMTP username
-		$mail->Password = $config['mailpass'];					// SMTP password
-		$mail->SMTPSecure = 'tls';								// Enable TLS encryption, `ssl` also accepted
-		$mail->Port = 587;										// TCP port to connect to
-
+		// Set mailer to use SMTP
+		$mail->isSMTP();
+		// Specify main and backup SMTP servers
+		$mail->Host = 'smtp.gmail.com';
+		// Enable SMTP authentication
+		$mail->SMTPAuth = true;
+		// SMTP username
+		$mail->Username = $config['mailuser'];
+		// SMTP password
+		$mail->Password = $config['mailpass'];
+		// Enable TLS encryption, 'ssl' also accepted
+		$mail->SMTPSecure = 'tls';
+		// TCP port to connect to
+		$mail->Port = 587;
+		// Set from address and info
 		$mail->setFrom($config['mailuser'], 'simpleDrive');
-		$mail->addAddress($recipient);							// Add a recipient
+		// Add a recipient
+		$mail->addAddress($recipient);
+		// Set reply-to address and info
 		$mail->addReplyTo($config['mailuser'], 'simpleDrive');
-
-		//$mail->addAttachment('/var/tmp/file.tar.gz');			// Add attachments
-		$mail->isHTML(true);									// Set email format to HTML
+		// Set email format to HTML
+		$mail->isHTML(true);
+		// Add attachments
+		//$mail->addAttachment('/var/tmp/file.tar.gz');
 
 		$mail->Subject = $subject;
 		$mail->Body    = $msg;
@@ -55,6 +66,7 @@ class Util {
 
 	/**
 	 * Recursively deletes directory
+	 *
 	 * @param string $path
 	 * @return boolean
 	 */
@@ -77,6 +89,7 @@ class Util {
 
 	/**
 	 * Recursively copies a directory to the specified target
+	 *
 	 * @param string $sourcepath
 	 * @param string $targetpath
 	 * @return boolean
@@ -102,6 +115,7 @@ class Util {
 
 	/**
 	 * Takes a size string with optional "G", "M" or "K" suffix and converts it into the byte-size
+	 *
 	 * @param string $size_string
 	 * @return int
 	 */
@@ -120,6 +134,7 @@ class Util {
 
 	/**
 	 * Convert byte-size to string containing "GB", etc.
+	 *
 	 * @param int $byte_string
 	 * @return string
 	 */
@@ -141,6 +156,7 @@ class Util {
 
 	/**
 	 * Searches an array of files for a specified path
+	 *
 	 * @param array $array Haystack
 	 * @param string $key
 	 * @param string $value
@@ -158,6 +174,7 @@ class Util {
 
 	/**
 	 * Searches an array of files for a specified path
+	 *
 	 * @param array $array Haystack
 	 * @param string $value
 	 * @return int|null index
@@ -174,6 +191,7 @@ class Util {
 
 	/**
 	 * Remove keys from array
+	 *
 	 * @param array $arr
 	 * @param array $bad_keys Keys to remove
 	 * @return array
@@ -184,6 +202,7 @@ class Util {
 
 	/**
 	 * Check if keys exists in array
+	 *
 	 * @param array $arr
 	 * @param array $keys
 	 */
@@ -197,6 +216,7 @@ class Util {
 
 	/**
 	 * Get size of a directory
+	 *
 	 * @param string $path
 	 * @return int
 	 */
@@ -211,6 +231,7 @@ class Util {
 
 	/**
 	 * Checks for internet connection by trying to connect to google
+	 *
 	 * @return boolean
 	 */
 	public static function connection_available() {
@@ -219,6 +240,7 @@ class Util {
 
 	/**
 	 * Get all files in directory (first level)
+	 *
 	 * @param string $path
 	 * @return array
 	 */
@@ -242,6 +264,7 @@ class Util {
 
 	/**
 	 * Execute an HTTP-Request
+	 *
 	 * @param string $url
 	 * @param array $header
 	 * @param array $params
@@ -291,6 +314,7 @@ class Util {
 
 	/**
 	 * Extract code, headers and body from response and format
+	 *
 	 * @param string $response
 	 * @param int $code
 	 * @param int $header_size
@@ -329,11 +353,12 @@ class Util {
 
 	/**
 	 * Get fingerprint for current client from cookie (set if none)
-	 * Could be random, but depending on IP and User-Agent helps with blocking
-	 * Clients from TFA-Requests:
-	 * When random, an attacker would only need to clear his cache
-	 * to obtain a new fingerprint
+	 * The fingerprint is a hash of IP and User-Agent
+	 * It could be random, but having it based on IP and UA helps with blocking unwanted connections
+	 * E.g. for Two-Factor-Authentication-Requests, with a randomly generated fingerprint
+	 * an attacker would only need to clear his cache to obtain a new fingerprint
 	 * With IP and User-Agent, these factors would need to be changed or spoofed
+	 *
 	 * @return string
 	 */
 	public static function client_fingerprint() {
