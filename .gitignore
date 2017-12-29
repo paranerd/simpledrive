@@ -46,4 +46,4 @@ Temporary Items
 /docs/
 /plugins/
 /logs/error.log
-/logs/status.log
+/logs/debug.log
