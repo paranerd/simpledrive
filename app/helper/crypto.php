@@ -20,7 +20,7 @@ class Crypto {
 	 * @param boolean $sign whether or not to prepend hmac-hash for integrity
 	 * @return string encrypted string
 	 */
-	public function encrypt($plaintext, $secret, $sign = false) {
+	public static function encrypt($plaintext, $secret, $sign = false) {
 		// Generate IV - on error try random_tring(self::$block_size)
 		$iv = self::random_bytes(self::$block_size);
 
@@ -50,7 +50,7 @@ class Crypto {
 	 * @param string $str
 	 * @return string
 	 */
-	private function base64_url_encode($str) {
+	private static function base64_url_encode($str) {
 		return strtr(base64_encode($str), '+/', '-_');
 	}
 
@@ -60,7 +60,7 @@ class Crypto {
 	 * @param string $str
 	 * @return string
 	 */
-	private function base64_url_decode($str) {
+	private static function base64_url_decode($str) {
 		return base64_decode(strtr($str, '-_', '+/'));
 	}
 
@@ -74,7 +74,7 @@ class Crypto {
 	 * @param string $destination Directory to create encrypted file in (with trailing slash!)
 	 * @return string Absolute path to encrypted file
 	 */
-	public function encrypt_file($path, $secret, $sign = false, $encrypt_filename = false, $destination = "") {
+	public static function encrypt_file($path, $secret, $sign = false, $encrypt_filename = false, $destination = "") {
 		// Read plaintext from file
 		$data = file_get_contents($path);
 
@@ -100,7 +100,7 @@ class Crypto {
 	 * @param string $secret Passphrase
 	 * @return string Decrypted string
 	 */
-	public function decrypt($data64, $secret) {
+	public static function decrypt($data64, $secret) {
 		if (!$data64) {
 			return "";
 		}
@@ -144,7 +144,7 @@ class Crypto {
 	 * @param string $destination directory To create decrypted file in (with trailing slash!)
 	 * @return string Absolute path to decrypted file
 	 */
-	public function decrypt_file($path, $secret, $filename_encrypted = false, $destination = "") {
+	public static function decrypt_file($path, $secret, $filename_encrypted = false, $destination = "") {
 		// Read ciphertext from file
 		$ciphertext = file_get_contents($path);
 
@@ -174,7 +174,7 @@ class Crypto {
 	 * @param int $blocksize
 	 * @return string Padded plaintext
 	 */
-	public function pkcs5_pad($text, $blocksize) {
+	public static function pkcs5_pad($text, $blocksize) {
 		$pad = $blocksize - (strlen($text) % $blocksize);
 		return $text . str_repeat(chr($pad), $pad);
 	}
@@ -185,7 +185,7 @@ class Crypto {
 	 * @param string $text Plaintext
 	 * @return string Unpadded plaintext
 	 */
-	public function pkcs5_unpad($text) {
+	public static function pkcs5_unpad($text) {
 		$pad = ord($text{strlen($text)-1});
 		if ($pad > strlen($text)) return false;
 		if (strspn($text, chr($pad), strlen($text) - $pad) != $pad) return false;
@@ -199,7 +199,7 @@ class Crypto {
 	 * @param string $key Secret passphrase
 	 * @return string HMAC
 	 */
-	public function sign($data, $key) {
+	public static function sign($data, $key) {
 		return hash_hmac('sha256', $data, $key);
 	}
 
@@ -210,7 +210,7 @@ class Crypto {
 	 * @param string $salt
 	 * @return string
 	 */
-	private function generate_key($secret, $salt) {
+	private static function generate_key($secret, $salt) {
 		return hash_pbkdf2('sha1', $secret, $salt, 2048, self::$key_size, true);
 	}
 
@@ -220,7 +220,7 @@ class Crypto {
 	 * @param string $pass
 	 * @return string Password-hash
 	 */
-	public function generate_password($pass) {
+	public static function generate_password($pass) {
 		$options = ['cost' => 11];
 
 		return password_hash($pass, PASSWORD_DEFAULT, $options);
@@ -233,7 +233,7 @@ class Crypto {
 	 * @param string $hash
 	 * @return boolean
 	 */
-	public function verify_password($pass, $hash) {
+	public static function verify_password($pass, $hash) {
 		return password_verify($pass, $hash);
 	}
 
@@ -243,7 +243,7 @@ class Crypto {
 	 * @param string $token
 	 * @return string|null Authorization token
 	 */
-	public function validate_token($token) {
+	public static function validate_token($token) {
 		try {
 			$db = Database::get_instance();
 			return ($db && $db->session_validate_token($token)) ? $token : '';
@@ -258,7 +258,7 @@ class Crypto {
 	* @param int $length
 	* @return string
 	*/
-	public function random_bytes($length) {
+	public static function random_bytes($length) {
 		return openssl_random_pseudo_bytes($length);
 	}
 
@@ -268,7 +268,7 @@ class Crypto {
 	* @param int $length
 	* @return string
 	*/
-	public function random_string($length) {
+	public static function random_string($length) {
 		return bin2hex(openssl_random_pseudo_bytes($length / 2));
 	}
 
@@ -278,7 +278,7 @@ class Crypto {
 	* @param int $length
 	* @return int
 	*/
-	public function random_number($length) {
+	public static function random_number($length) {
 		$res = '';
 
 		for ($i = 0; $i < $length; $i++) {

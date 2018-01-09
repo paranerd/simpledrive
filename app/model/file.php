@@ -20,6 +20,7 @@ class File_Model {
 	public function __construct($token) {
 		$this->token    = $token;
 		$this->config   = json_decode(file_get_contents(CONFIG), true);
+		$this->log      = new Log(get_class());
 		$this->db       = Database::get_instance();
 		$this->user     = ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid      = ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
@@ -711,7 +712,7 @@ class File_Model {
 		}
 
 		if (!extension_loaded("zip")) {
-			Log::error("Zip extension not installed", $this->uid);
+			$this->log->error("Zip extension not installed", $this->uid);
 			throw new Exception('Zip extension not installed', 500);
 		}
 

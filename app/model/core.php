@@ -15,6 +15,7 @@ class Core_Model {
 	 * Constructor
 	 */
 	public function __construct() {
+		$this->log = new Log(get_class());
 		$this->db  = null;
 	}
 
@@ -165,12 +166,12 @@ class Core_Model {
 
 		// User unknown
 		if (!$user) {
-			Log::warn("Unknown login attempt: " . $username);
+			$this->log->warn("Unknown login attempt: " . $username);
 		}
 		// User is on lockdown
 		else if ((time() - ($user['login_attempts'] - (LOGIN_MAX_ATTEMPTS - 1)) * 30) - $user['last_login_attempt'] < 0) {
 			$lockdown_time = (time() - ($user['login_attempts'] + 1 - (LOGIN_MAX_ATTEMPTS - 1)) * 30) - $user['last_login_attempt'];
-			Log::warn("User " . $user['user'] . " is locked for " . abs($lockdown_time) . "s");
+			$this->log->warn("User " . $user['user'] . " is locked for " . abs($lockdown_time) . "s");
 			throw new Exception('Locked for ' . abs($lockdown_time) . 's', 500);
 		}
 		// Correct
@@ -189,7 +190,7 @@ class Core_Model {
 		}
 		// Wrong password
 		else {
-			Log::warn("Login failed", $user['id']);
+			$this->log->warn("Login failed", $user['id']);
 			$this->db->user_increase_login_counter($user['id']);
 		}
 

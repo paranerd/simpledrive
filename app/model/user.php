@@ -30,7 +30,7 @@ class User_Model {
 	 */
 	private function check_if_logged_in() {
 		if ($this->installed && !$this->uid) {
-			throw new Exception('Permission denied', 403);
+			throw new Exception('Permission denied (Not logged in)', 403);
 		}
 	}
 
@@ -40,8 +40,8 @@ class User_Model {
 	 * @throws Exception
 	 */
 	private function check_if_admin() {
-		if (!$this->user || !$this->user['admin']) {
-			throw new Exception('Permission denied', 403);
+		if ((!$this->user || !$this->user['admin']) && $this->installed) {
+			throw new Exception('Permission denied (Admin required)', 403);
 		}
 	}
 
