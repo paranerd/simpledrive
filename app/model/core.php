@@ -204,7 +204,7 @@ class Core_Model {
 	 * @param string $token
 	 */
 	public function logout($token) {
-		$this->db = Database::get_nstance();
+		$this->db = Database::get_instance();
 		$this->db->session_end($token);
 
 		unset($_COOKIE['token']);
