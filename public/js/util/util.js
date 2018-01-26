@@ -396,9 +396,8 @@ var Util = new function() {
 	this.getVersion = function() {
 		$.ajax({
 			url: 'api/core/version',
-			type: 'post',
-			data: {},
-			dataType: "json"
+			type: 'get',
+			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			if (data.msg.recent) {
 				self.notify("Update available! Get " + data.msg.recent + " from simpledrive.org", false, false);

@@ -7,13 +7,27 @@
 
 var	username;
 
-$(document).ready(function() {
+/*$(document).ready(function() {
 	username = $('head').data('username');
 	Util.getVersion();
 
 	FileView.init($('head').data('view'));
 	FileModel.init($('head').data('id'), $('head').data('public'));
 	FileController.init();
+});*/
+
+$(document).ready(function() {
+	navigator.serviceWorker
+	.register('./service-worker.js')
+	.then(function(reg) {
+		console.log('Service Worker Registered');
+		username = $('head').data('username');
+		Util.getVersion();
+
+		FileView.init($('head').data('view'));
+		FileModel.init($('head').data('id'), $('head').data('public'));
+		FileController.init();
+	});
 });
 
 var FileController = new function() {
@@ -842,6 +856,7 @@ var FileModel = new function() {
 	this.id = '0';
 	this.public = false;
 
+	this.current = null;
 	this.list = new List("files", FileView.displayFiles, true, FileView.updateStats);
 	this.hierarchy = [];
 	this.clipboard = {};
@@ -929,7 +944,7 @@ var FileModel = new function() {
 
 		$.ajax({
 			url: 'api/files/get',
-			type: 'post',
+			type: 'get',
 			data: {target: JSON.stringify(self.list.getAllSelectedIDs())}
 		}).done(function(data, statusText, xhr) {
 			$('<form id="download-form" class="hidden" action="api/files/get" method="post"><input name="token"></input><input name="target"></input></form>').appendTo('body');
@@ -958,29 +973,28 @@ var FileModel = new function() {
 		var id = (id == null) ? self.id : id;
 		var back = back || false;
 		var bId = Util.startBusy();
+		var networkDataReceived = false;
 		//AudioManager.stopAudio();
 
 		self.requestID = new Date().getTime();
 
 		$.ajax({
 			url: 'api/files/children',
-			type: 'post',
+			type: 'get',
 			data: {target: id, mode: FileView.view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.id = id;
+			console.log("Updating from network");
+			networkDataReceived = true;
+
+			self.id = data.msg.current.id;
 			self.hierarchy = data.msg.hierarchy;
 			self.currentFolder = data.msg.current;
 			FileView.setHierarchyTitle();
 			self.list.setItems(data.msg.files, 'filename');
 
 			if (!back) {
-				if (id.length > 1) {
-					window.history.pushState({id: id}, '', 'files/' + FileView.view + '/' + id);
-				}
-				else {
-					window.history.pushState({id: id}, '', 'files/' + FileView.view);
-				}
+				window.history.pushState({id: self.id}, '', 'files/' + FileView.view + '/' + self.id);
 			}
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(Util.getError(xhr), true, true);

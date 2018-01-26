@@ -140,7 +140,7 @@ var ImageManager = new function() {
 	this.setThumbnailAsBackground = function(filename, id) {
 		// Extract background-url between (including) 'api/ and (excluding) '"'
 		var url = $("#item" + id + " .thumbnail").css('background-image').match(/api\/(.*?)(?=\")/);
-		if (url[0]) {
+		if (url && url[0]) {
 			self.display(filename, id, url[0], true);
 		}
 	}

@@ -763,7 +763,20 @@ class File_Model {
 		$zip->close();
 
 		if (file_exists($destination)) {
-			return $destination;
+			if ($for_download) {
+				return $destination;
+			}
+
+			return $this->db->cache_add(
+				basename($destination),
+				$targetfile['id'],
+				self::type($destination),
+				self::info($destination),
+				$targetfile['ownerid'],
+				filemtime($destination),
+				md5_file($destination),
+				$targetfile['path'] . "/" . basename($destination)
+			);
 		}
 
 		throw new Exception('Error creating zip file', 500);
