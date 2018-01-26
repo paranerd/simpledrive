@@ -7,7 +7,7 @@ var dataCacheName = 'simpleDriveData-v1';
 // List of files to cache
 var filesToCache = [
   '/simpledrive/',
-  /*'public/js/util/jquery-1.11.3.min.js',
+  'public/js/util/jquery-1.11.3.min.js',
   'public/js/util/list.js',
   'public/js/util/util.js',
   'public/js/util/simplescroll.js',
@@ -18,7 +18,7 @@ var filesToCache = [
   'public/css/icons.css',
   'public/css/layout.css',
   'app/views/files.php',
-  'app/views/login.php',*/
+  'app/views/login.php',
 ];
 
 self.addEventListener('install', function(e) {
