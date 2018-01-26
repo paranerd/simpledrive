@@ -18,6 +18,8 @@
 
 	<base href="<?php echo $base; ?>">
 
+	<link rel="manifest" href="manifest.json">
+
 	<link rel="stylesheet" href="public/css/icons.css" />
 	<link rel="stylesheet" href="public/css/layout.css" />
 	<link rel="stylesheet" href="public/css/colors.css" />
