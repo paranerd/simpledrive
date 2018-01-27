@@ -1,6 +1,6 @@
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		https://simpledrive.org
  */
@@ -141,7 +141,7 @@ var Backup = new function() {
 		}).done(function(data, statusText, xhr) {
 			window.location = 'user';
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -169,7 +169,7 @@ var Backup = new function() {
 			}).done(function(data, statusText, xhr) {
 				window.location = data.msg;
 			}).fail(function(xhr, statusText, error) {
-				Util.notify(Util.getError(xhr), true, true);
+				Util.notify(xhr.statusText, true, true);
 			});
 		}
 	}
@@ -186,7 +186,7 @@ var Backup = new function() {
 			Util.notify("Backup started", true, false);
 			$("#backup-toggle-button").prop('disabled', false).text("Start");
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 			$("#backup-toggle-button").prop('disabled', false).text("Start");
 		});
 
@@ -203,7 +203,7 @@ var Backup = new function() {
 			self.running = false;
 			$("#backup-toggle-button").text("Start");
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -216,7 +216,7 @@ var Backup = new function() {
 		}).done(function(data, statusText, xhr) {
 			location.reload(true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -240,7 +240,7 @@ var Backup = new function() {
 				$("#backup-enable-button").text("Enable");
 			}
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 }
@@ -257,7 +257,7 @@ var TwoFactor = new function() {
 		}).done(function(data, statusText, xhr) {
 			$("#twofactor").prop('disabled', !data.msg);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -270,7 +270,7 @@ var TwoFactor = new function() {
 		}).done(function(data, statusText, xhr) {
 			$("#twofactor").prop('disabled', true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 }
@@ -294,7 +294,7 @@ var UserModel = new function() {
 			Util.notify("Tokens invalidated", true, false);
 			self.activeToken();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -307,7 +307,7 @@ var UserModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			$("#active-token").text(data.msg);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -328,7 +328,7 @@ var UserModel = new function() {
 			$("#color").val(data.msg.color);
 			if (data.msg.autoscan) { $("#autoscan").addClass("checkbox-checked"); }
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -343,7 +343,7 @@ var UserModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -356,7 +356,7 @@ var UserModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -369,7 +369,7 @@ var UserModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Saved changes", true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -386,7 +386,7 @@ var UserModel = new function() {
 			$("#cache-size").text(Util.byteToString(data.msg.cache));
 			$("#trash-size").text(Util.byteToString(data.msg.trash));
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	},
 
@@ -400,7 +400,7 @@ var UserModel = new function() {
 			self.getQuota();
 			Util.notify("Cache cleared", true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	},
 
@@ -414,7 +414,7 @@ var UserModel = new function() {
 			self.getQuota();
 			Util.notify("Trash cleared", true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	},
 
@@ -444,7 +444,7 @@ var UserModel = new function() {
 			$("#change-password-pass0, #change-password-pass1, #change-password-pass2").val('');
 			Util.closePopup('change-password');
 		}).fail(function(xhr, statusText, error) {
-			Util.showFormError('change-password', Util.getError(xhr));
+			Util.showFormError('change-password', xhr.statusText);
 		});
 	}
 }

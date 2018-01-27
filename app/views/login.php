@@ -2,7 +2,7 @@
 
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		https://simpledrive.org
  */
@@ -53,7 +53,7 @@
 		<button class="btn btn-large center-hor">Unlock</button>
 	</form>
 
-	<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
+	<div class="footer">simpleDrive by paranerd | 2013-2018</div>
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util/util.js"></script>

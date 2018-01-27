@@ -1,6 +1,6 @@
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		http://simpledrive.org
  */
@@ -383,7 +383,7 @@ var Status = new function() {
 		}).done(function(data, statusText, xhr) {
 			SystemView.displayStatus(data);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -408,7 +408,7 @@ var Status = new function() {
 			Util.notify("Saved changes", true);
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -422,7 +422,7 @@ var Status = new function() {
 			Util.notify("Saved changes", true);
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	},
 
@@ -436,7 +436,7 @@ var Status = new function() {
 			Util.notify("Saved changes", true);
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 }
@@ -462,7 +462,7 @@ var LogModel = new function() {
 			self.pageTotal = data.msg.total;
 			self.list.setItems(data.msg.log);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	};
 
@@ -476,7 +476,7 @@ var LogModel = new function() {
 			}).done(function(data, statusText, xhr) {
 				self.fetch(false, 0);
 			}).fail(function(xhr, statusText, error) {
-				Util.notify(Util.getError(xhr), true, true);
+				Util.notify(xhr.statusText, true, true);
 			});
 		});
 	}
@@ -498,7 +498,7 @@ var PluginsModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			SystemView.displayPlugins(data.msg.plugins);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -515,7 +515,7 @@ var PluginsModel = new function() {
 			Util.notify("Installation complete", true);
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 			self.fetch();
 		});
 	}
@@ -530,7 +530,7 @@ var PluginsModel = new function() {
 			Util.notify("Plugin " + name + " removed", true);
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 }
@@ -575,7 +575,7 @@ var UsersModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			self.list.setItems(data.msg, 'id');
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -591,7 +591,7 @@ var UsersModel = new function() {
 			user['quotamax'] = data.msg.max;
 			self.list.update(id, user);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -605,7 +605,7 @@ var UsersModel = new function() {
 			}).done(function(data, statusText, xhr) {
 				self.fetch();
 			}).fail(function(xhr, statusText, error) {
-				Util.notify(Util.getError(xhr), true, true);
+				Util.notify(xhr.statusText, true, true);
 			});
 		});
 	}
@@ -623,7 +623,7 @@ var UsersModel = new function() {
 			Util.notify("Saved changes", true, false);
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 			self.fetch();
 		});
 
@@ -650,7 +650,7 @@ var UsersModel = new function() {
 			Util.notify("Saved changes", true, false);
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 			self.fetch();
 		});
 
@@ -673,7 +673,7 @@ var UsersModel = new function() {
 				Util.closePopup('createuser');
 				self.fetch();
 			}).fail(function(xhr, statusText, error) {
-				Util.notify(Util.getError(xhr), true, true);
+				Util.notify(xhr.statusText, true, true);
 				$("#createuser-pass1, #createuser-pass2").val("");
 			});
 		}

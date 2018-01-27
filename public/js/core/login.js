@@ -1,6 +1,6 @@
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		http://simpledrive.org
  */
@@ -66,7 +66,7 @@ function login(user, pass, callback) {
 			else {
 				$("#login").removeClass("hidden");
 				$("#tfa").addClass("hidden");
-				Util.showFormError('login', Util.getError(xhr));
+				Util.showFormError('login', xhr.statusText);
 			}
 		}).always(function() {
 			$("#login :submit").prop('disabled', false);
@@ -89,7 +89,7 @@ function submitTFA(code) {
 		}).done(function(data, statusText, xhr) {
 			// Maybe show progress
 		}).fail(function(xhr, statusText, error) {
-			Util.showFormError('tfa', Util.getError(xhr));
+			Util.showFormError('tfa', xhr.statusText);
 		}).always(function() {
 			$("#tfa :submit").prop('disabled', false);
 			$("#code").val('');

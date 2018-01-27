@@ -1,6 +1,6 @@
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		http://simpledrive.org
  */
@@ -40,7 +40,7 @@ function setup() {
 			window.location.replace("files");
 		}).fail(function(xhr, statusText, error) {
 			$("#submit").prop('disabled', false);
-			Util.showFormError('setup', Util.getError(xhr));
+			Util.showFormError('setup', xhr.statusText);
 		});
 	}
 }

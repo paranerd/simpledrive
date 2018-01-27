@@ -2,7 +2,7 @@
 
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		https://simpledrive.org
  */
@@ -17,8 +17,6 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 
 	<base href="<?php echo $base; ?>">
-
-	<link rel="manifest" href="manifest.json">
 
 	<link rel="stylesheet" href="public/css/icons.css" />
 	<link rel="stylesheet" href="public/css/layout.css" />
@@ -315,7 +313,7 @@
 		<div id="info-title" class="title title-large">simpleDrive</div>
 		<div class="subtitle">Private. Secure. Simple.</div>
 		<hr>
-		<div id="info-footer">paranerd 2013-2017 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
 	</div>
 
 	<!-- Video player -->
@@ -358,7 +356,7 @@
 			<button class="btn btn-large center-hor">Unlock</button>
 		</form>
 
-		<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
+		<div class="footer">simpleDrive by paranerd | 2013-2018</div>
 	</div>
 	<?php endif; ?>
 

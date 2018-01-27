@@ -2,7 +2,7 @@
 
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		http://simpledrive.org
  */
@@ -25,7 +25,7 @@
 <body class="dark">
 	<div class="brand" title="simpleDrive"><div>simpleDrive</div></div>
 	<div class="error-page-text">Logging out...<br>If you're not being redirected, click <a href="<?php echo $base; ?>core/login">here</a></div>
-	<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
+	<div class="footer">simpleDrive by paranerd | 2013-2018</div>
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util/util.js"></script>

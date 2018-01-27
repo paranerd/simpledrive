@@ -1,6 +1,6 @@
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		https://simpledrive.org
  */
@@ -433,7 +433,7 @@ var VaultModel = new function() {
 				}).done(function(data, statusText, xhr) {
 					Util.notify("Saved.", true, false);
 				}).fail(function(xhr, statusText, error) {
-					Util.notify(Util.getError(xhr), true, true);
+					Util.notify(xhr.statusText, true, true);
 				}).always(function() {
 					Util.endBusy(bId);
 				});
@@ -462,7 +462,7 @@ var VaultModel = new function() {
 				VaultView.showSetPassphrase();
 			}
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 		});

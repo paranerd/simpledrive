@@ -1,6 +1,6 @@
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		http://simpledrive.org
  */
@@ -117,7 +117,7 @@ var EditorModel = new function() {
 			}).done(function(data, statusText, xhr) {
 				$(".title-element-current").text(self.filename);
 			}).fail(function(xhr, statusText, error) {
-				Util.notify(Util.getError(xhr), true, true);
+				Util.notify(xhr.statusText, true, true);
 			});
 		}
 	}
@@ -137,7 +137,7 @@ var EditorModel = new function() {
 			self.autosave();
 			window.onbeforeunload = Util.unsavedWarning();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -158,7 +158,7 @@ var EditorModel = new function() {
 				Util.closePopup('rename');
 				self.load();
 			}).fail(function(xhr, statusText, error) {
-				Util.showFormError('rename', Util.getError(xhr));
+				Util.showFormError('rename', xhr.statusText);
 			});
 		}
 		else {

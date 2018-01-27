@@ -2,7 +2,7 @@
 
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		http://simpledrive.org
  */
@@ -28,7 +28,6 @@ class Response {
 		else {
 			header($_SERVER['SERVER_PROTOCOL'] . ' ' . $code . ' ' . $msg);
 			return null;
-			//return json_encode(array('msg' => $msg . " - json"));
 		}
 	}
 

@@ -2,7 +2,7 @@
 
 /**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2017, Kevin Schulz. All Rights Reserved
+ * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
  * @link		http://simpledrive.org
  */
@@ -30,6 +30,6 @@
 		<?php echo $msg; ?><br>
 		Return to <a href="<?php echo $base; ?>core/login">Login</a>
 	</div>
-	<div class="footer">simpleDrive by paranerd | 2013 - 2017</div>
+	<div class="footer">simpleDrive by paranerd | 2013-2018</div>
 </body>
 </html>
