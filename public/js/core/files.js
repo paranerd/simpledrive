@@ -7,16 +7,16 @@
 
 var	username;
 
-$(document).ready(function() {
+/*$(document).ready(function() {
 	username = $('head').data('username');
 	Util.getVersion();
 
 	FileView.init($('head').data('view'));
 	FileModel.init($('head').data('id'), $('head').data('public'));
 	FileController.init();
-});
+});*/
 
-/*$(document).ready(function() {
+$(document).ready(function() {
 	navigator.serviceWorker
 	.register('./service-worker.js')
 	.then(function(reg) {
@@ -28,7 +28,7 @@ $(document).ready(function() {
 		FileModel.init($('head').data('id'), $('head').data('public'));
 		FileController.init();
 	});
-});*/
+});
 
 var FileController = new function() {
 	this.init = function() {
