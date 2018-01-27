@@ -7,16 +7,16 @@
 
 var	username;
 
-/*$(document).ready(function() {
+$(document).ready(function() {
 	username = $('head').data('username');
 	Util.getVersion();
 
 	FileView.init($('head').data('view'));
 	FileModel.init($('head').data('id'), $('head').data('public'));
 	FileController.init();
-});*/
+});
 
-$(document).ready(function() {
+/*$(document).ready(function() {
 	navigator.serviceWorker
 	.register('./service-worker.js')
 	.then(function(reg) {
@@ -28,7 +28,7 @@ $(document).ready(function() {
 		FileModel.init($('head').data('id'), $('head').data('public'));
 		FileController.init();
 	});
-});
+});*/
 
 var FileController = new function() {
 	this.init = function() {
@@ -551,7 +551,7 @@ var FileView = new function() {
 			data: {view: fileviewAfter},
 			dataType: "json"
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		});
 	}
 
@@ -898,7 +898,7 @@ var FileModel = new function() {
 			self.fetch();
 			Util.closePopup('create');
 		}).fail(function(xhr, statusText, error) {
-			Util.showFormError('create', Util.getError(xhr));
+			Util.showFormError('create', xhr.statusText);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -952,7 +952,7 @@ var FileModel = new function() {
 			$('[name="target"]').val(JSON.stringify(self.list.getAllSelectedIDs()));
 			$('#download-form').submit();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 			self.list.unselectAll();
@@ -997,7 +997,7 @@ var FileModel = new function() {
 				window.history.pushState({id: self.id}, '', 'files/' + FileView.view + '/' + self.id);
 			}
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -1017,7 +1017,7 @@ var FileModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			Util.notify(data.msg, false, false);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -1072,19 +1072,18 @@ var FileModel = new function() {
 			}
 			$(window).resize();
 		}).fail(function(xhr, statusText, error) {
-			var parsedError = Util.getError(xhr);
 			if (xhr.status == '403') {
 				$("#pubfile, #pub-key").removeClass("hidden");
 				$("#pub-key").focus();
 				if (self.publicLoginAttempt > 0) {
-					Util.showFormError('load-public', parsedError);
+					Util.showFormError('load-public', xhr.statusText);
 				}
 				self.publicLoginAttempt++;
 			}
 			else {
 				$("#pub-key, #pubfile button").addClass("hidden");
 				$("#pubfile").removeClass("hidden");
-				Util.showFormError('load-public', parsedError);
+				Util.showFormError('load-public', xhr.statusText);
 			}
 			$(window).resize();
 		});
@@ -1100,7 +1099,7 @@ var FileModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			Util.notify(data.msg, true);
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), false, true);
+			Util.notify(xhr.statusText, false, true);
 		}).always(function() {
 			Util.endBusy(bId);
 			self.fetch();
@@ -1184,7 +1183,7 @@ var FileModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			// Something
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 			self.clipboardClear();
@@ -1207,7 +1206,7 @@ var FileModel = new function() {
 				FileView.closeRename();
 				self.fetch();
 			}).fail(function(xhr, statusText, error) {
-				Util.notify(Util.getError(xhr), true, true);
+				Util.notify(xhr.statusText, true, true);
 			}).always(function() {
 				Util.endBusy(bId);
 			});
@@ -1227,7 +1226,7 @@ var FileModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -1244,7 +1243,7 @@ var FileModel = new function() {
 			}).done(function(data, statusText, xhr) {
 				Util.notify("Successfully removed", true, false);
 			}).fail(function(xhr, statusText, error) {
-				Util.notify(Util.getError(xhr), true, true);
+				Util.notify(xhr.statusText, true, true);
 			}).always(function() {
 				Util.endBusy(bId);
 				self.fetch();
@@ -1264,7 +1263,7 @@ var FileModel = new function() {
 			Util.notify(data.msg, true);
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -1294,7 +1293,7 @@ var FileModel = new function() {
 				Util.closePopup('share');
 				self.fetch();
 			}).fail(function(xhr, statusText, error) {
-				Util.showFormError('share', Util.getError(xhr));
+				Util.showFormError('share', xhr.statusText);
 			}).always(function() {
 				Util.endBusy(bId);
 			});
@@ -1311,7 +1310,7 @@ var FileModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -1359,7 +1358,7 @@ var FileModel = new function() {
 
 		xhr.onreadystatechange = function() {
 			if ((xhr.status == 403 || xhr.status == 500) && xhr.readyState == 4) {
-				Util.notify(Util.getError(xhr), true, true);
+				Util.notify(xhr.statusText, true, true);
 			}
 		}
 
@@ -1435,7 +1434,7 @@ var FileModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -1451,7 +1450,7 @@ var FileModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.notify(Util.getError(xhr), true, true);
+			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -1476,7 +1475,7 @@ var FileModel = new function() {
 			FileView.setTitle("Search results: \"" + needle + "\"");
 			Util.closePopup('search');
 		}).fail(function(xhr, statusText, error) {
-			Util.showFormError('search', Util.getError(xhr));
+			Util.showFormError('search', xhr.statusText);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -1498,7 +1497,7 @@ var FileModel = new function() {
 			Util.closePopup('encrypt');
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.showFormError('encrypt', Util.getError(xhr));
+			Util.showFormError('encrypt', xhr.statusText);
 		}).always(function() {
 			Util.endBusy(bId);
 		});
@@ -1520,7 +1519,7 @@ var FileModel = new function() {
 			Util.closePopup('decrypt');
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
-			Util.showFormError('decrypt', Util.getError(xhr));
+			Util.showFormError('decrypt', xhr.statusText);
 		}).always(function() {
 			Util.endBusy(bId);
 		});

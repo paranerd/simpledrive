@@ -13,6 +13,7 @@ class Log {
 	public static $LEVEL_ERROR = 2;
 	public static $LEVEL_DEBUG = 3;
 	public static $LABELS = array('Info', 'Warning', 'Error', 'Debug');
+
 	private $last_msg = "";
 	private $msg_count = 1;
 
@@ -45,7 +46,7 @@ class Log {
 	 * @param int $uid
 	 */
 	public function info($msg, $uid = PUBLIC_USER_ID) {
-		self::write($msg, $uid, self::$LEVEL_INFO);
+		$this->write($msg, $uid, self::$LEVEL_INFO);
 	}
 
 	/**
@@ -55,7 +56,7 @@ class Log {
 	 * @param int $uid
 	 */
 	public function warn($msg, $uid = PUBLIC_USER_ID) {
-		self::write($msg, $uid, self::$LEVEL_WARN);
+		$this->write($msg, $uid, self::$LEVEL_WARN);
 	}
 
 	/**
@@ -65,7 +66,7 @@ class Log {
 	 * @param int $uid
 	 */
 	public function error($msg, $uid = PUBLIC_USER_ID) {
-		self::write($msg, $uid, self::$LEVEL_ERROR);
+		$this->write($msg, $uid, self::$LEVEL_ERROR);
 	}
 
 	/**
@@ -75,6 +76,6 @@ class Log {
 	 * @param int $uid
 	 */
 	public function debug($msg, $uid = PUBLIC_USER_ID) {
-		self::write($msg, null, self::$LEVEL_DEBUG);
+		$this->write($msg, null, self::$LEVEL_DEBUG);
 	}
 }

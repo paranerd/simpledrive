@@ -404,7 +404,7 @@ var Util = new function() {
 			}
 			$("#info-title").append(" " + data.msg.current);
 		}).fail(function(xhr, statusText, error) {
-			self.notify(self.getError(xhr), true, true);
+			self.notify(xhr.statusText, true, true);
 		});
 	}
 

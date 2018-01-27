@@ -27,7 +27,8 @@ class Response {
 		}
 		else {
 			header($_SERVER['SERVER_PROTOCOL'] . ' ' . $code . ' ' . $msg);
-			return json_encode(array('msg' => $msg));
+			return null;
+			//return json_encode(array('msg' => $msg . " - json"));
 		}
 	}
 
