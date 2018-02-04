@@ -126,7 +126,7 @@ var EditorModel = new function() {
 		var bId = Util.startBusy();
 		$.ajax({
 			url: 'api/files/loadtext',
-			type: 'post',
+			type: 'get',
 			data: {target: self.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {

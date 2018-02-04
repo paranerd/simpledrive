@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
- * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @author    Kevin Schulz <paranerd.development@gmail.com>
+ * @copyright (c) 2018, Kevin Schulz. All Rights Reserved
+ * @license   Affero General Public License <http://www.gnu.org/licenses/agpl>
+ * @link      https://simpledrive.org
  */
 
 ?>
@@ -181,13 +181,6 @@
 		<div class="error hidden"></div>
 		<button class="btn">OK</button>
 	</form>
-
-	<!-- Notification -->
-	<div id="notification" class="popup center-hor hidden">
-		<span id="note-icon" class="icon icon-info"></span>
-		<span id="note-msg">Error</span>
-		<span class="close">&times;</span>
-	</div>
 
 	<!-- Progress circle -->
 	<div id="busy" class="hidden">

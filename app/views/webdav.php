@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
- * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @author    Kevin Schulz <paranerd.development@gmail.com>
+ * @copyright (c) 2018, Kevin Schulz. All Rights Reserved
+ * @license   Affero General Public License <http://www.gnu.org/licenses/agpl>
+ * @link      https://simpledrive.org
  */
 
 // Check if sabredav plugin is installed
@@ -20,9 +20,9 @@ use
 	Sabre\HTTP\Response,
 	Sabre\HTTP\Auth;
 
-$request	= Sapi::getRequest();
-$response	= new Response();
-$CONFIG		= json_decode(file_get_contents(CONFIG), true);
+$request  = Sapi::getRequest();
+$response = new Response();
+$CONFIG   = json_decode(file_get_contents(CONFIG), true);
 
 $basicAuth = new Auth\Basic("Locked down area", $request, $response);
 $basicAuth->requireLogin();

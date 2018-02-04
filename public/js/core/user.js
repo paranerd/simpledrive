@@ -180,7 +180,6 @@ var Backup = new function() {
 		$.ajax({
 			url: 'api/backup/start',
 			type: 'post',
-			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Backup started", true, false);
@@ -211,7 +210,6 @@ var Backup = new function() {
 		$.ajax({
 			url: 'api/backup/disable',
 			type: 'post',
-			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			location.reload(true);
@@ -223,8 +221,7 @@ var Backup = new function() {
 	this.getStatus = function() {
 		$.ajax({
 			url: 'api/backup/status',
-			type: 'post',
-			data: {},
+			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			self.enabled = data.msg.enabled;
@@ -251,8 +248,7 @@ var TwoFactor = new function() {
 	this.enabled = function() {
 		$.ajax({
 			url: 'api/twofactor/enabled',
-			type: 'post',
-			data: {},
+			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			$("#twofactor").prop('disabled', !data.msg);
@@ -265,7 +261,6 @@ var TwoFactor = new function() {
 		$.ajax({
 			url: 'api/twofactor/disable',
 			type: 'post',
-			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			$("#twofactor").prop('disabled', true);
@@ -288,7 +283,6 @@ var UserModel = new function() {
 		$.ajax({
 			url: 'api/user/invalidatetoken',
 			type: 'post',
-			data: {},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			Util.notify("Tokens invalidated", true, false);
@@ -301,8 +295,7 @@ var UserModel = new function() {
 	this.activeToken = function() {
 		$.ajax({
 			url: 'api/user/activetoken',
-			type: 'post',
-			data: {},
+			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			$("#active-token").text(data.msg);
@@ -320,8 +313,7 @@ var UserModel = new function() {
 
 		$.ajax({
 			url: 'api/user/get',
-			type: 'post',
-			data: {},
+			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			$("#fileview").val(data.msg.fileview);
@@ -376,7 +368,7 @@ var UserModel = new function() {
 	this.getQuota = function() {
 		$.ajax({
 			url: 'api/user/quota',
-			type: 'post',
+			type: 'get',
 			data: {value: 0},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {

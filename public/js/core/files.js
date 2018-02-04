@@ -382,18 +382,6 @@ var FileController = new function() {
 					}
 					break;
 
-				case 38: // Up
-					if ($(":focus").length == 0 || $(":focus").hasClass("filter-input")) {
-						FileModel.list.selectPrev();
-					}
-					break;
-
-				case 40: // Down
-					if ($(":focus").length == 0 || $(":focus").hasClass("filter-input")) {
-						FileModel.list.selectNext();
-					}
-					break;
-
 				case 70: // F
 					if (e.ctrlKey) {
 						e.preventDefault();
@@ -439,12 +427,6 @@ var FileController = new function() {
 				case 46: // Del
 					if (!$(e.target).is('input') && FileModel.list.getSelectedCount() > 0) {
 						FileModel.remove();
-					}
-					break;
-
-				case 65: // A
-					if (e.ctrlKey && !$(e.target).is('input')) {
-						FileModel.list.selectAll();
 					}
 					break;
 			}
@@ -569,7 +551,7 @@ var FileView = new function() {
 	}
 
 	/**
-	 * Displays the files
+	 * Display the files
 	 */
 	this.displayFiles = function(files) {
 		for (var i in files) {
@@ -636,7 +618,7 @@ var FileView = new function() {
 	}
 
 	/**
-	 * Retrieves and adds a thumbnail for images and pdfs
+	 * Retrieve and add a thumbnail for images and PDFs
 	 */
 	this.setImgthumbnail = function(index, requestID) {
 		var item = FileModel.list.get(index);
@@ -664,7 +646,7 @@ var FileView = new function() {
 	}
 
 	/**
-	 * Displays the rename input field
+	 * Display the rename input field
 	 */
 	this.showRename = function(e) {
 		var elem = FileModel.list.getFirstSelected();
@@ -741,7 +723,7 @@ var FileView = new function() {
 	}
 
 	/**
-	 * Displays the fileinfo-panel
+	 * Display the fileinfo-panel
 	 */
 	this.showFileInfo = function(id) {
 		if (self.blockInfopanel) {
@@ -772,7 +754,7 @@ var FileView = new function() {
 	}
 
 	/**
-	 * Hides the fileinfo-panel
+	 * Hide the fileinfo-panel
 	 */
 	this.hideFileinfo = function() {
 		$("#fileinfo").addClass("hidden");
@@ -787,7 +769,7 @@ var FileView = new function() {
 	}
 
 	/**
-	 * Displays the current title with independently clickable elements
+	 * Display the current title with independently clickable elements
 	 */
 	this.setHierarchyTitle = function() {
 		$("#title").empty();
@@ -834,7 +816,7 @@ var FileView = new function() {
 
 /**
  * FileModel
- * Contains logic regarding file-management
+ * Contains file-management-logic
  */
 var FileModel = new function() {
 	var self = this;
@@ -933,7 +915,7 @@ var FileModel = new function() {
 			type: 'get',
 			data: {target: JSON.stringify(self.list.getAllSelectedIDs())}
 		}).done(function(data, statusText, xhr) {
-			$('<form id="download-form" class="hidden" action="api/files/get" method="post"><input name="token"></input><input name="target"></input></form>').appendTo('body');
+			$('<form id="download-form" class="hidden" action="api/files/get" method="get"><input name="token"></input><input name="target"></input></form>').appendTo('body');
 			$('[name="token"]').val(Util.getToken());
 			$('[name="target"]').val(JSON.stringify(self.list.getAllSelectedIDs()));
 			$('#download-form').submit();
@@ -959,7 +941,6 @@ var FileModel = new function() {
 		var id = (id == null) ? self.id : id;
 		var back = back || false;
 		var bId = Util.startBusy();
-		var networkDataReceived = false;
 		//AudioManager.stopAudio();
 
 		self.requestID = new Date().getTime();
@@ -970,9 +951,6 @@ var FileModel = new function() {
 			data: {target: id, mode: FileView.view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			console.log("Updating from network");
-			networkDataReceived = true;
-
 			self.id = data.msg.current.id;
 			self.hierarchy = data.msg.hierarchy;
 			self.currentFolder = data.msg.current;
@@ -997,7 +975,7 @@ var FileModel = new function() {
 		var bId = Util.startBusy();
 		$.ajax({
 			url: 'api/files/getlink',
-			type: 'post',
+			type: 'get',
 			data: {target: elem.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
@@ -1037,7 +1015,7 @@ var FileModel = new function() {
 
 		$.ajax({
 			url: 'api/files/getpub',
-			type: 'post',
+			type: 'get',
 			data: {hash: hash, key: key},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
@@ -1139,7 +1117,7 @@ var FileModel = new function() {
 
 	this.openODT = function(id) {
 		$("#odt-form").remove();
-		$('<form id="odt-form" class="hidden" action="files/odfeditor/' + id + '" target="_blank" method="post"><input name="token"/></form>').appendTo('body');
+		$('<form id="odt-form" class="hidden" action="files/odfeditor/' + id + '" target="_blank" method="get"><input name="token"/></form>').appendTo('body');
 		$('[name="token"]').val(Util.getToken());
 		$('[name="public"]').val(self.public);
 		$('#odt-form').submit();
@@ -1151,7 +1129,7 @@ var FileModel = new function() {
 
 	this.openText = function(id) {
 		$("#text-form").remove();
-		$('<form id="text-form" class="hidden" action="files/texteditor/' + id + '" target="_blank" method="post"><input name="token"/><input name="public"/></form>').appendTo('body');
+		$('<form id="text-form" class="hidden" action="files/texteditor/' + id + '" target="_blank" method="get"><input name="token"/><input name="public"/></form>').appendTo('body');
 		$('[name="token"]').val(Util.getToken());
 		$('[name="public"]').val(self.public);
 		$('#text-form').submit();
@@ -1451,12 +1429,12 @@ var FileModel = new function() {
 		var bId = Util.startBusy("Searching...");
 		$.ajax({
 			url: 'api/files/search',
-			type: 'post',
+			type: 'get',
 			data: {needle: needle},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			FileView.setView('files', true);
-			self.list.setItems(data.msg.files);
+			self.list.setItems(data.msg.files, 'filename');
 			FileView.hideFileinfo();
 			FileView.setTitle("Search results: \"" + needle + "\"");
 			Util.closePopup('search');

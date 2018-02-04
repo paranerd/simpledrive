@@ -222,7 +222,6 @@ var SystemView = new function() {
 
 		for (var i in log) {
 			var entry = log[i];
-			console.log(entry);
 
 			var listItem = document.createElement("div");
 			listItem.id = "item" + i;
@@ -377,8 +376,7 @@ var Status = new function() {
 
 		$.ajax({
 			url: 'api/system/status',
-			type: 'post',
-			data: {},
+			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			SystemView.displayStatus(data);
@@ -454,7 +452,7 @@ var LogModel = new function() {
 
 		$.ajax({
 			url: 'api/system/log',
-			type: 'post',
+			type: 'get',
 			data: {page: page},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
@@ -471,7 +469,6 @@ var LogModel = new function() {
 			$.ajax({
 				url: 'api/system/clearlog',
 				type: 'post',
-				data: {},
 				dataType: 'json'
 			}).done(function(data, statusText, xhr) {
 				self.fetch(false, 0);
@@ -492,8 +489,7 @@ var PluginsModel = new function() {
 
 		$.ajax({
 			url: 'api/system/status',
-			type: 'post',
-			data: {},
+			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			SystemView.displayPlugins(data.msg.plugins);
@@ -569,8 +565,7 @@ var UsersModel = new function() {
 
 		$.ajax({
 			url: 'api/user/getall',
-			type: 'post',
-			data: {},
+			type: 'get',
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.list.setItems(data.msg, 'id');
@@ -582,7 +577,7 @@ var UsersModel = new function() {
 	this.getQuota = function(username, id) {
 		$.ajax({
 			url: 'api/user/quota',
-			type: 'post',
+			type: 'get',
 			data: {user: username},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {

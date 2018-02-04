@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
- * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @author    Kevin Schulz <paranerd.development@gmail.com>
+ * @copyright (c) 2018, Kevin Schulz. All Rights Reserved
+ * @license   Affero General Public License <http://www.gnu.org/licenses/agpl>
+ * @link      https://simpledrive.org
  */
 
 ?>
@@ -110,7 +110,8 @@
 		<input id="entry-website-title" class="input-indent" type="text" placeholder="Title">
 
 		<label>Category</label>
-		<input id="entry-website-category" class="input-indent" type="text" placeholder="Category">
+		<input id="entry-website-category" class="input-indent" type="text" placeholder="Category" list="categories">
+		<datalist id="categories"><option value="test">Test</option></datalist>
 
 		<label>URL</label>
 		<input id="entry-website-url" class="input-indent" type="text" placeholder="URL">
@@ -234,13 +235,6 @@
 
 	<!-- Shield -->
 	<div id="shield" class="overlay hidden"></div>
-
-	<!-- Notification -->
-	<div id="notification" class="popup center-hor hidden">
-		<span id="note-icon" class="icon icon-info"></span>
-		<span id="note-msg">Error</span>
-		<span class="close">&times;</span>
-	</div>
 
 	<!-- Progress circle -->
 	<div id="busy" class="hidden">

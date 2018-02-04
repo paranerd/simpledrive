@@ -4,7 +4,7 @@
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @link		https://simpledrive.org
  */
 
 class System_Model {
@@ -222,7 +222,7 @@ class System_Model {
 			mkdir($plugin_path, 0777, true);
 		}
 
-		$response = Util::execute_http_request("http://simpledrive.org/plugins/" . $name, null, null, "GET");
+		$response = Util::execute_http_request("https://simpledrive.org/plugins/" . $name, null, null, "GET");
 
 		if ($response['code'] !== 200) {
 			throw new Exception('Error downloading plugin', 500);

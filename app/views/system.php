@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
- * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @author    Kevin Schulz <paranerd.development@gmail.com>
+ * @copyright (c) 2018, Kevin Schulz. All Rights Reserved
+ * @license   Affero General Public License <http://www.gnu.org/licenses/agpl>
+ * @link      https://simpledrive.org
  */
 
 ?>
@@ -221,13 +221,6 @@
 		<div class="subtitle">Private. Secure. Simple.</div>
 		<hr>
 		<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
-	</div>
-
-	<!-- Notification -->
-	<div id="notification" class="popup center-hor hidden">
-		<span id="note-icon" class="icon icon-info"></span>
-		<span id="note-msg">Error</span>
-		<span class="close">&times;</span>
 	</div>
 
 	<!-- Confirm -->

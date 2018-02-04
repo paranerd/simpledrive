@@ -4,47 +4,47 @@
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @link		https://simpledrive.org
  */
 
 require_once 'app/model/file.php';
 
 class Files_Controller {
 	protected $model;
-	protected $default_section	= "files";
-	protected $default_view		= "files";
-	protected $valid_sections	= array('files', 'sharein', 'shareout', 'trash', 'pub', 'webdav', 'texteditor', 'odfeditor');
+	protected $default_section = "files";
+	protected $default_view    = "files";
+	protected $valid_sections  = array('files', 'sharein', 'shareout', 'trash', 'pub', 'webdav', 'texteditor', 'odfeditor');
 
 	public $required = array(
-		'audioinfo'	=> array('target'),
-		'children'	=> array('target', 'mode'),
-		'copy'		=> array('target', 'source'),
-		'create'	=> array('target', 'type'),
-		'decrypt'	=> array('target', 'source', 'secret'),
-		'delete'	=> array('target'),
-		'encrypt'	=> array('target', 'source', 'secret'),
-		'get'		=> array('target'),
-		'getlink'	=> array('target'),
-		'getpub'	=> array('hash', 'key'),
-		'loadtext'	=> array('target'),
-		'move'		=> array('target', 'source'),
-		'rename'	=> array('target', 'newFilename'),
-		'restore'	=> array('target'),
-		'saveodf'	=> array('target'),
-		'savetext'	=> array('target', 'data'),
-		'scan'		=> array('target'),
-		'search'	=> array('needle'),
-		'share'		=> array('target', 'userto', 'mail', 'write', 'pubAcc', 'key'),
-		'sync'		=> array('target', 'source', 'lastsync'),
-		'unshare'	=> array('target'),
-		'unzip'		=> array('target', 'source'),
-		'upload'	=> array('target'),
-		'zip'		=> array('target', 'source'),
+		'audioinfo' => array('target'),
+		'children'  => array('target', 'mode'),
+		'copy'      => array('target', 'source'),
+		'create'    => array('target', 'type'),
+		'decrypt'   => array('target', 'source', 'secret'),
+		'delete'    => array('target'),
+		'encrypt'   => array('target', 'source', 'secret'),
+		'get'       => array('target'),
+		'getlink'   => array('target'),
+		'getpub'    => array('hash', 'key'),
+		'loadtext'  => array('target'),
+		'move'      => array('target', 'source'),
+		'rename'    => array('target', 'newFilename'),
+		'restore'   => array('target'),
+		'saveodf'   => array('target'),
+		'savetext'  => array('target', 'data'),
+		'scan'      => array('target'),
+		'search'    => array('needle'),
+		'share'     => array('target', 'userto', 'mail', 'write', 'pubAcc', 'key'),
+		'sync'      => array('target', 'source', 'lastsync'),
+		'unshare'   => array('target'),
+		'unzip'     => array('target', 'source'),
+		'upload'    => array('target'),
+		'zip'       => array('target', 'source'),
 	);
 
 	public function __construct($token) {
-		$this->token	= $token;
-		$this->model	= new File_Model($token);
+		$this->token = $token;
+		$this->model = new File_Model($token);
 	}
 
 	public function render($section, $args) {

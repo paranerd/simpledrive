@@ -28,7 +28,7 @@ var Util = new function() {
 	this.setToken = function(token) {
 		self.token = token;
 		$.ajaxSetup({
-			//headers: {'X-CSRF-TOKEN': "WORX-TOKEN-WORX" },
+			//headers: {'X-CSRF-TOKEN': "WORX-TOKEN-WORX"},
 			data: {token: token}
 		});
 	}
@@ -62,11 +62,14 @@ var Util = new function() {
 		});
 
 		$(document).on('click', '.close, .cancel', function(e) {
-			if ($(this).parents('.popup').length || $(this).parents('.overlay').length) {
+			if ($(this).parents('.popup, .overlay').length) {
 				self.closePopup($(this).parent().attr('id'), false, true);
 			}
 			else if ($(this).parents('.widget').length) {
 				self.closeWidget($(this).parent().attr('id'));
+			}
+			else if ($(this).parents('.notification').length) {
+				self.removeNotification($(this).parent())
 			}
 		});
 
@@ -135,25 +138,32 @@ var Util = new function() {
 		});
 	}
 
+	this.getRealHeight = function(element) {
+		$(element).removeClass("hidden");
+		var height = $(element).outerHeight();
+		$(element).addClass("hidden");
+		return height;
+	}
+
 	this.addOtherEvents = function() {
 		$(window).resize(function() {
 			// Position centered divs
 			$('.center').each(function(i, obj) {
 				$(this).css({
-					top : ($(this).parent().height() - $(this).outerHeight()) / 2,
-					left : ($(this).parent().width() - $(this).outerWidth()) / 2
+					top: ($(this).outerHeight() < $(this).parent().height()) ? ($(this).parent().height() - $(this).outerHeight()) / 2 : 0,
+					left: ($(this).outerWidth() < $(this).parent().width()) ? ($(this).parent().width() - $(this).outerWidth()) / 2 : 0
 				});
 			});
 
 			$('.center-hor').each(function(i, obj) {
 				$(this).css({
-					left : ($(this).parent().width() - $(this).outerWidth()) / 2
+					left: ($(this).outerWidth() < $(this).parent().width()) ? ($(this).parent().width() - $(this).outerWidth()) / 2 : 0
 				});
 			});
 
 			$('.center-ver').each(function(i, obj) {
 				$(this).css({
-					top : ($(this).parent().height() - $(this).outerHeight()) / 2
+					top: ($(this).outerHeight() < $(this).parent().height()) ? ($(this).parent().height() - $(this).outerHeight()) / 2 : 0,
 				});
 			});
 
@@ -354,7 +364,7 @@ var Util = new function() {
 	}
 
 	/**
-	 * Sets the selection status for the current section
+	 * Set the selection status for the current section
 	 */
 	this.sidebarFocus = function(id) {
 		$(".focus").removeClass("focus");
@@ -413,15 +423,27 @@ var Util = new function() {
 		return ('webkitdirectory' in tmpInput || 'mozdirectory' in tmpInput || 'odirectory' in tmpInput || 'msdirectory' in tmpInput || 'directory' in tmpInput);
 	}
 
-	this.notify = function(msg, autohide, error) {
-		var type = (error) ? "warning" : "info";
-		$("#note-icon").removeClass().addClass("icon icon-" + type);
-		$("#note-msg").text(msg);
-		$("#notification").removeClass().addClass("popup center-hor notification-" + type);
+	this.notify = function(msg, autohide, warning) {
+		if (!$("#notification-area").length) {
+			var area = $('<div id="notification-area" class="notification-area"></div>');
+			$('body').append(area);
+		}
+		var type = (warning) ? "warning" : "info";
+		var note = $('<div class="notification notification-' + type + '"></div>');
+		var icon = $('<span class="icon icon-' + type + ' note-icon"></span>');
+		var text = $('<span class="note-msg">' + msg + '</span>');
+		var close = $('<span class="close">&times;</span>');
 
 		if (autohide) {
-			setTimeout(function() { self.closePopup('notification'); }, 3000);
+			$(note).delay(2000).queue(function() { $(this).remove(); });
 		}
+
+		$(note).append(icon, text, close);
+		$('#notification-area').append(note);
+	}
+
+	this.removeNotification = function(elem) {
+		elem.remove();
 	}
 
 	this.refreshWarning = function() {
@@ -516,7 +538,7 @@ var Util = new function() {
 	}
 
 	/**
-	 * Calculates if an element currently in the viewport
+	 * Calculate if an element currently in the viewport
 	 * Important not to use jQuery's offset().top (relative to document)!
 	 */
 	this.isVisible = function(elem) {
@@ -536,7 +558,7 @@ var Util = new function() {
 	}
 
 	/**
-	 * Searches an array for a value to a specific key
+	 * Search an array for a value to a specific key
 	 * @return int|null
 	 */
 	this.searchArrayForKey = function(arr, key, value) {
@@ -547,6 +569,22 @@ var Util = new function() {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Remove duplicate entries from array
+	 * @return array
+	 */
+	this.arrayRemoveDuplicates = function(arr) {
+		var unique = [];
+
+		for (var i in arr) {
+			if (!unique.includes(arr[i])) {
+				unique.push(arr[i]);
+			}
+		}
+
+		return unique;
 	}
 
 	this.autofill = function(id, value, callback) {

@@ -4,7 +4,7 @@
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @link		https://simpledrive.org
  */
 
 if (file_exists(CONFIG)) {
@@ -12,10 +12,9 @@ if (file_exists(CONFIG)) {
 	exit();
 }
 
-$enabled = isset($_SERVER['HTACCESS']);
 ?>
 
-<!doctype html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
 	<head>
 		<title>Setup | simpleDrive</title>

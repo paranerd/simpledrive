@@ -22,7 +22,7 @@ var VaultController = new function() {
 
 	this.addKeyEvents = function() {
 		$(document).on('keydown', function(e) {
-			switch(e.keyCode) {
+			switch (e.keyCode) {
 				case 27: // Esc
 					if (!VaultModel.preventClipboardClear) {
 						Util.copyToClipboard("");
@@ -41,18 +41,6 @@ var VaultController = new function() {
 				case 46: // Del
 					if (!$(e.target).is('input')) {
 						VaultModel.remove();
-					}
-					break;
-
-				case 38: // Up
-					if (!e.shiftKey) {
-						VaultModel.list.selectPrev();
-					}
-					break;
-
-				case 40: // Down
-					if (!e.shiftKey) {
-						VaultModel.list.selectNext();
 					}
 					break;
 			}
@@ -293,8 +281,18 @@ var VaultView = new function() {
 	}
 
 	this.display = function(entries) {
+		var datalist = $("#categories").empty();
+		var categories = [];
+
 		for (var i in entries) {
 			var item = entries[i];
+
+			if (!categories.includes(item.category)) {
+				var option = document.createElement('option');
+				option.value = item.category;
+				$("#categories").append(option);
+				categories.push(item.category)
+			}
 
 			var listItem = document.createElement("div");
 			listItem.id = "item" + i;
@@ -450,8 +448,7 @@ var VaultModel = new function() {
 
 		$.ajax({
 			url: 'api/vault/get',
-			type: 'post',
-			data: {},
+			type: 'get',
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			if (data.msg) {

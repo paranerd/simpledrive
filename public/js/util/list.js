@@ -34,7 +34,7 @@ var List = (function() {
 	List.prototype = {
 		init: function() {
 			$(document).on('keydown', function(e) {
-				if ($("#" + self.id).is(":visible")) {
+				if ($("#" + self.id).is(":visible") && $("#shield").hasClass("hidden")) {
 					// Filter
 					if (!e.shiftKey && !e.ctrlKey &&
 						$(":focus").length == 0 &&
@@ -48,6 +48,26 @@ var List = (function() {
 							// Place cursor behind text
 							$("#" + self.id + "-filter .filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
 						}, 10);
+					}
+
+					switch (e.keyCode) {
+						case 38: // Up
+							if (!e.shiftKey && ($(":focus").length == 0 || $(":focus").hasClass("filter-input"))) {
+								self.selectPrev();
+							}
+							break;
+
+						case 40: // Down
+							if (!e.shiftKey && ($(":focus").length == 0 || $(":focus").hasClass("filter-input"))) {
+								self.selectNext();
+							}
+							break;
+
+						case 65: // A
+							if (e.ctrlKey && !$(e.target).is('input')) {
+								self.selectAll();
+							}
+							break;
 					}
 				}
 			});
@@ -77,6 +97,12 @@ var List = (function() {
 			simpleScroll.init(self.id);
 		},
 
+		/**
+		 * Set list items
+		 *
+		 * @param array items
+		 * @param string orderBy
+		 */
 		setItems: function(items, orderBy) {
 			this.items = items;
 			this.masterFiltered = items;
@@ -91,6 +117,11 @@ var List = (function() {
 			}
 		},
 
+		/**
+		 * Set comparator method
+		 *
+		 * @param function comparator
+		 */
 		setComparator: function(comparator) {
 			this.compare = comparator;
 		},
@@ -140,6 +171,11 @@ var List = (function() {
 			}
 		},
 
+		/**
+		 * Select item
+		 *
+		 * @param int id
+		 */
 		select: function(id) {
 			if (this.filtered.length > id) {
 				if (!this.multiselect) {
@@ -156,6 +192,11 @@ var List = (function() {
 			}
 		},
 
+		/**
+		 * Unselect item
+		 *
+		 * @param int id
+		 */
 		unselect: function(id) {
 			delete this.selected[id];
 
@@ -165,6 +206,9 @@ var List = (function() {
 			}
 		},
 
+		/**
+		 * Select all items
+		 */
 		selectAll: function() {
 			if (this.multiselect) {
 				for (var i = 0; i < Object.keys(this.filtered).length; i++) {
@@ -178,6 +222,9 @@ var List = (function() {
 			}
 		},
 
+		/**
+		 * Unselect all items
+		 */
 		unselectAll: function() {
 			this.selected = {};
 
@@ -187,18 +234,31 @@ var List = (function() {
 			}
 		},
 
+		/**
+		 * Select next item
+		 *
+		 * @param int id
+		 */
 		selectNext: function() {
 			this.unselectAll();
 			this.currentSelected = (this.currentSelected < this.filtered.length - 1) ? this.currentSelected + 1 : this.filtered.length -1;
 			this.select(this.currentSelected);
 		},
 
+		/**
+		 * Select previous item
+		 *
+		 * @param int id
+		 */
 		selectPrev: function() {
 			this.unselectAll();
 			this.currentSelected = (this.currentSelected > 0) ? this.currentSelected - 1 : 0;
 			this.select(this.currentSelected);
 		},
 
+		/**
+		 * Get all selected item IDs
+		 */
 		getAllSelectedIDs: function() {
 			var ids = [];
 			for (var i in this.selected) {
@@ -208,19 +268,33 @@ var List = (function() {
 			return ids;
 		},
 
-		getAllSelected:function() {
+		/**
+		 * Get all selected items
+		 */
+		getAllSelected: function() {
 			return this.selected;
 		},
 
+		/**
+		 * Get first selected item
+		 */
 		getFirstSelected: function() {
 			for (var first in this.selected) break;
 			return {id: first, item: this.selected[first]};
 		},
 
+		/**
+		 * Get selected item at position
+		 *
+		 * @param int id
+		 */
 		getSelectedAt: function(id) {
 			return this.selected[id];
 		},
 
+		/**
+		 * Get count of selected items
+		 */
 		getSelectedCount: function() {
 			return Object.keys(this.selected).length;
 		},
@@ -236,6 +310,9 @@ var List = (function() {
 			}
 		},
 
+		/**
+		 * Toggle between select all and select none
+		 */
 		toggleAllSelection: function() {
 			if (Object.keys(this.selected).length > 0) {
 				this.unselectAll();
@@ -245,10 +322,21 @@ var List = (function() {
 			}
 		},
 
+		/**
+		 * Get item at position
+		 *
+		 * @param int id
+		 */
 		get: function(id) {
 			return (id >= 0 && id < this.filtered.length) ? this.filtered[id] : null;
 		},
 
+		/**
+		 * Get item by key and value
+		 *
+		 * @param string key
+		 * @param string value
+		 */
 		getByKey: function(key, value) {
 			for (var i in this.filtered) {
 				var item = this.filtered[i];
@@ -258,16 +346,24 @@ var List = (function() {
 			}
 		},
 
+		/**
+		 * Get all filtered items
+		 */
 		getAllFiltered: function() {
 			return this.filtered;
 		},
 
+		/**
+		 * Get all items
+		 */
 		getAll: function() {
 			return this.items;
 		},
 
 		/**
-		 * Adds a loading-placeholder or indicator of empty folder
+		 * Add a loading-placeholder or indicator of empty folder
+		 *
+		 * @param string msg
 		 */
 		setEmptyView: function(msg) {
 			simpleScroll.empty(self.id);
@@ -280,7 +376,9 @@ var List = (function() {
 		},
 
 		/**
-		 * Handles selection hightlighting
+		 * Handle selection hightlighting
+		 *
+		 * @param int id
 		 */
 		updateSelections: function(id) {
 			// Reset all selected status
@@ -301,14 +399,20 @@ var List = (function() {
 			}
 		},
 
-		/*
+		/**
 		 * A filter before the filter
 		 * e.g. for filtering in gallery mode
+		 *
+		 * @param string needle
+		 * @param array keys
 		 */
 		masterFilter: function(needle, keys) {
 			this.masterFiltered = this.filter(needle, keys);
 		},
 
+		/**
+		 * Set empty view or nvoke displayCallback
+		 */
 		display: function() {
 			if (!this.filtered || this.filtered.length == 0) {
 				this.setEmptyView();
@@ -320,6 +424,12 @@ var List = (function() {
 			}
 		},
 
+		/**
+		 * Filter items
+		 *
+		 * @param string needle
+		 * @param array keys
+		 */
 		filter: function(needle, keys) {
 			this.filterNeedle = needle;
 			this.filterKeys = (keys) ? keys : this.defaultFilterKeys;
@@ -340,17 +450,29 @@ var List = (function() {
 			return this.filtered;
 		},
 
+		/**
+		 * Remove master filter
+		 */
 		masterFilterRemove: function() {
 			this.masterFiltered = this.items;
 			this.filterRemove();
 		},
 
+		/**
+		 * Remove filter
+		 */
 		filterRemove: function() {
 			$("#" + this.id + "-filter").addClass("hidden");
 			$(".filter-input").val('');
 			return this.filter('');
 		},
 
+		/**
+		 * Order items
+		 *
+		 * @param string key
+		 * @param int order
+		 */
 		order: function(key, order) {
 			this.sortKey = key;
 			this.sortOrder = (order) ? order : this.sortOrder *= -1;
@@ -362,6 +484,12 @@ var List = (function() {
 			this.filter(this.filterNeedle, this.filterKeys);
 		},
 
+		/**
+		 * Compare items
+		 *
+		 * @param string key
+		 * @param int order
+		 */
 		compare: function(key, order) {
 			return function(a, b) {
 				if (a[key].toString().toLowerCase() > b[key].toString().toLowerCase()) return order * 1;

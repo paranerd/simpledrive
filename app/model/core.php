@@ -225,7 +225,7 @@ class Core_Model {
 		}
 
 		$version = json_decode(file_get_contents(VERSION), true);
-		$url = 'http://simpledrive.org/version';
+		$url = 'https://simpledrive.org/version';
 		$recent_version	= null;
 
 		// Get current version from demo server if connection is available

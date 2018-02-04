@@ -4,7 +4,7 @@
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @link		https://simpledrive.org
  */
 
 require_once 'app/model/vault.php';
@@ -16,13 +16,13 @@ class Vault_Controller {
 	protected $valid_sections	= array('status');
 
 	public $required = array(
-		'sync'			=> array('vault', 'lastedit'),
-		'save'			=> array('vault'),
+		'sync' => array('vault', 'lastedit'),
+		'save' => array('vault')
 	);
 
 	public function __construct($token) {
-		$this->token	= $token;
-		$this->model	= new Vault_Model($token);
+		$this->token = $token;
+		$this->model = new Vault_Model($token);
 	}
 
 	public function render($section, $args) {

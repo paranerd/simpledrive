@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
- * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		https://simpledrive.org
+ * @author    Kevin Schulz <paranerd.development@gmail.com>
+ * @copyright (c) 2018, Kevin Schulz. All Rights Reserved
+ * @license   Affero General Public License <http://www.gnu.org/licenses/agpl>
+ * @link      https://simpledrive.org
  */
 
 ?>
@@ -37,7 +37,6 @@
 		<!-- Username -->
 		<?php if ($section != 'pub') : ?>
 		<div id="username" class="popup-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
-		<!-- <div id="username"><?php echo htmlentities($username) . " &#x25BF"; ?></div> -->
 		<?php endif; ?>
 	</div>
 
@@ -106,7 +105,6 @@
 				<span id="scan" class="icon icon-sync"></span>
 				<span id="change-fileview" class="icon icon-grid"></span>
 				<span id="show-info" class="icon icon-search popup-trigger" data-target="search"></span>
-
 			</div>
 		</div>
 
@@ -299,13 +297,6 @@
 		<button id="img-prev" class="btn-circle btn-overlay overlay-nav"><span class="icon icon-prev"></span></button>
 		<button id="img-next" class="btn-circle btn-overlay overlay-nav"><span class="icon icon-next"></span></button>
 		<div id="img-title"></div>
-	</div>
-
-	<!-- Notification -->
-	<div id="notification" class="popup center-hor hidden">
-		<span id="note-icon" class="icon icon-info"></span>
-		<span id="note-msg">Error</span>
-		<span class="close">&times;</span>
 	</div>
 
 	<!-- Version info -->

@@ -52,7 +52,6 @@ function login(user, pass, callback) {
 			data: {user: user, pass: pass, callback: callback},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			//window.location.href = base + "files";
 			window.location.href = base + target;
 		}).fail(function(xhr, statusText, error) {
 			// TFA required

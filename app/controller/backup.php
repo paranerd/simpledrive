@@ -4,7 +4,7 @@
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @link		https://simpledrive.org
  */
 
 require_once 'app/model/backup.php';

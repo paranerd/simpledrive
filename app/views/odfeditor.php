@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @author		Kevin Schulz <paranerd.development@gmail.com>
- * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
- * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
- * @link		http://simpledrive.org
+ * @author    Kevin Schulz <paranerd.development@gmail.com>
+ * @copyright (c) 2018, Kevin Schulz. All Rights Reserved
+ * @license   Affero General Public License <http://www.gnu.org/licenses/agpl>
+ * @link      https://simpledrive.org
  */
 
 ?>
@@ -62,13 +62,6 @@
 		</ul>
 	</div>
 	<?php endif; ?>
-
-   	<!-- Notification -->
-	<div id="notification" class="center-hor notification-info hidden">
-		<div id="note-icon" class="icon-info"></div>
-		<div id="note-msg"></div>
-		<span class="close">&times;</span>
-	</div>
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
