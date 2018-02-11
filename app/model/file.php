@@ -387,25 +387,28 @@ class File_Model {
 		//$files_to_sync = $this->sync($target, $clientfiles, "0");
 
 		$files = array();
-		$parents = $this->db->cache_parents($file['id'], $this->uid);
+		$hierarchy = $this->db->cache_hierarchy($file['id'], $this->uid);
+		$current = array();
+		$root_id = $this->db->cache_get_root_id($file['ownerid']);
 
 		if ($mode == 'trash') {
 			$files = $this->db->cache_get_trash($this->uid);
 		}
-		else if ($mode == "shareout" && strlen($file['path']) == 0) {
+		else if ($mode == "shareout" && $file['id'] == $root_id) {
 			$files = $this->db->share_get_from($this->uid);
 		}
-		else if ($mode == "sharein" && strlen($file['path']) == 0) {
+		else if ($mode == "sharein" && $file['id'] == $root_id) {
 			$files = $this->db->share_get_with($this->uid);
 		}
 		else {
 			$files = $this->db->cache_children($file['id'], $this->uid, $file['ownerid']);
+			$current = Util::array_remove_keys($file, array('parent', 'path'));
 		}
 
 		return array(
 			'files'		=> $files,
-			'hierarchy'	=> $parents,
-			'current'	=> Util::array_remove_keys($file, array('parent', 'path'))
+			'hierarchy'	=> $hierarchy,
+			'current'	=> $current
 		);
 	}
 
@@ -874,7 +877,7 @@ class File_Model {
 		$targetfile = $this->get_cached($target, PERMISSION_WRITE);
 
 		if (!$targetfile) {
-			throw new Exception('Error accessing file', 403);
+			throw new Exception('Could not access target folder', 403);
 		}
 
 		$targetpath = $this->config['datadir'] . $targetfile['owner'] . FILES . $targetfile['path'];
@@ -1269,7 +1272,7 @@ class File_Model {
 	 * @return array|null
 	 */
 	public function get_cached($fid, $access) {
-		if (!$access) {
+		if ($fid == null || !$access) {
 			return;
 		}
 
@@ -1277,6 +1280,7 @@ class File_Model {
 		$fid = ($fid && $fid != "0") ? $fid : $this->db->cache_get_root_id($this->uid);
 		// Get file from database
 		$file = $this->db->cache_get($fid, $this->uid);
+
 		// Only return the file if owned or shared
 		return ($file && ($file['ownerid'] == $this->uid || $this->db->share_is_unlocked($file['id'], $access, $this->token))) ? $file : null;
 	}

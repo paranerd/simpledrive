@@ -403,13 +403,25 @@ label {
 
 /* General - Menu-item */
 
-.menu {
+.menu,
+.menu ul {
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
 }
 
+/* 2nd and more level menu items */
+.menu ul {
+	position: absolute;
+	top: 0;
+	left: 100%;
+	min-width: 200px;
+	z-index: 1003;
+	display: none;
+}
+
 .menu li {
+	position: relative;
 	height: 50px;
 	line-height: 50px;
 	font-family: robotolight, sans-serif;
@@ -418,6 +430,11 @@ label {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+/* Hover effect for menu */
+.menu li:hover > ul {
+	display: block;
 }
 
 .menu li .icon {
@@ -429,6 +446,10 @@ label {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.popup .menu li {
+	overflow: visible;
 }
 
 /* Header */
@@ -943,9 +964,12 @@ label {
 }
 
 .popup-menu {
-	overflow: hidden;
 	max-height: 500px;
 	transition: max-height 0.15s linear;
+}
+
+.popup-menu span {
+	overflow: hidden;
 }
 
 .popup .btn {

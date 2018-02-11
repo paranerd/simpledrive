@@ -49,6 +49,8 @@ var FileController = new function() {
 			$('[id^="context-"]').addClass("hidden");
 			$("#contextmenu hr").addClass("hidden");
 
+			$("#context-add, #context-file, #context-folder").removeClass("hidden");
+
 			// Paste
 			if (!FileModel.isClipboardEmpty()) {
 				$("#context-paste").removeClass("hidden");
@@ -110,9 +112,7 @@ var FileController = new function() {
 				}
 			}
 
-			if (!FileModel.isClipboardEmpty() || target) {
-				Util.showContextmenu(e);
-			}
+			Util.showContextmenu(e);
 		});
 
 		/**
@@ -123,6 +123,11 @@ var FileController = new function() {
 			var action = id.substr(id.indexOf('-') + 1);
 
 			switch (action) {
+				case 'file':
+				case 'folder':
+					Util.showPopup('create');
+					break;
+
 				case 'restore':
 					FileModel.restore();
 					break;
@@ -334,7 +339,7 @@ var FileController = new function() {
 			FileView.setFileview();
 		});
 
-		$("#create-menu li").on('click', function(e) {
+		$("#create-menu li, #context-file, #context-folder").on('click', function(e) {
 			$("#create-type").val($(this).data('type'))
 		});
 
@@ -472,6 +477,8 @@ var FileController = new function() {
 
 		window.onpopstate = function(e) {
 			var id = (history.state && history.state.id) ? history.state.id : '0';
+			var view = (history.state && history.state.view) ? history.state.view : 'files';
+			FileView.setView(view);
 			FileModel.fetch(id, true);
 		};
 	}
@@ -726,7 +733,7 @@ var FileView = new function() {
 	 * Display the fileinfo-panel
 	 */
 	this.showFileInfo = function(id) {
-		if (self.blockInfopanel) {
+		if (self.blockInfopanel || FileModel.getCurrentFolder().length == 0) {
 			self.hideFileinfo();
 			return;
 		}
@@ -769,7 +776,7 @@ var FileView = new function() {
 	}
 
 	/**
-	 * Display the current title with independently clickable elements
+	 * Build current path with independently clickable elements
 	 */
 	this.setHierarchyTitle = function() {
 		$("#title").empty();
@@ -791,13 +798,13 @@ var FileView = new function() {
 			if (filename) {
 				titleItem.innerHTML = Util.escape(filename);
 			}
-			else if (s == 0 && self.view == "trash") {
+			else if (self.view == "trash") {
 				titleItem.innerHTML = "Trash";
 			}
-			else if (s == 0 && self.view == "shareout") {
+			else if (self.view == "shareout") {
 				titleItem.innerHTML = "My Shares";
 			}
-			else if (s == 0 && self.view == "sharein") {
+			else if (self.view == "sharein") {
 				titleItem.innerHTML = "Shared";
 			}
 			else if (s == 0 && !filename) {
@@ -807,10 +814,10 @@ var FileView = new function() {
 				titleItem.innerHTML = Util.escape(filename);
 			}
 
-			document.title = titleItem.innerHTML + " | simpleDrive";
-
 			$("#title").append(titleItem);
 		}
+
+		document.title = titleItem.innerHTML + " | simpleDrive";
 	}
 }
 
@@ -951,14 +958,20 @@ var FileModel = new function() {
 			data: {target: id, mode: FileView.view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.id = data.msg.current.id;
+			self.id = (data.msg.current.id) ? data.msg.current.id : '';
 			self.hierarchy = data.msg.hierarchy;
 			self.currentFolder = data.msg.current;
+
+			// Set view to "files" when browsing own shares
+			if (FileView.view == "shareout" && self.hierarchy.length > 1) {
+				FileView.setView('files');
+			}
+
 			FileView.setHierarchyTitle();
 			self.list.setItems(data.msg.files, 'filename');
 
 			if (!back) {
-				window.history.pushState({id: self.id}, '', 'files/' + FileView.view + '/' + self.id);
+				window.history.pushState({id: self.id, view: FileView.view}, '', 'files/' + FileView.view + '/' + self.id);
 			}
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
@@ -990,14 +1003,13 @@ var FileModel = new function() {
 	this.init = function(id, pub) {
 		self.list.setComparator(self.compare);
 		self.public = pub;
+		self.id = id;
 
-		var isHash = (id.toString().length == 8);
-
-		if (isHash) {
-			self.loadPublic(id);
+		if (id.toString().length == 8) {
+			self.loadPublic();
 		}
 		else {
-			self.fetch(id);
+			self.fetch();
 		}
 	}
 
@@ -1005,7 +1017,7 @@ var FileModel = new function() {
 		return Object.keys(self.clipboard).length == 0;
 	}
 
-	this.loadPublic = function(hash) {
+	this.loadPublic = function() {
 		var key = $("#pub-key").val();
 
 		if (self.downloadPub) {
@@ -1016,7 +1028,7 @@ var FileModel = new function() {
 		$.ajax({
 			url: 'api/files/getpub',
 			type: 'get',
-			data: {hash: hash, key: key},
+			data: {hash: self.id, key: key},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.hierarchy = [];

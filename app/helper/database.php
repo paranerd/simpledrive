@@ -1178,7 +1178,7 @@ class Database {
 		$stmt = $this->link->prepare(
 			'SELECT COUNT(*) as total
 			FROM sd_shares sh
-			RIGHT JOIN sd_unlocked u ON sh.id = u.share_id
+			LEFT JOIN sd_unlocked u ON sh.id = u.share_id
 			WHERE sh.file = ?
 			AND sh.access >= ?
 			AND (
@@ -1186,6 +1186,7 @@ class Database {
 				OR (userto = ? AND u.token = ?)
 			)
 		');
+
 		$stmt->bind_param('siiiis', $share_base, $access, $public_uid, $uid, $public_uid, $token);
 		$stmt->execute();
 		$stmt->store_result();
@@ -2082,19 +2083,23 @@ class Database {
 	 * @param string $fid
 	 * @return string
 	 */
-	public function cache_parent($fid) {
+	private function cache_parent($fid) {
 		$stmt = $this->link->prepare(
-			'SELECT parent
+			'SELECT id, filename, owner
 			FROM sd_cache
-			WHERE id = ?'
+			WHERE id = (
+				SELECT parent
+				FROM sd_cache
+				WHERE id = ?
+			)'
 		);
+
 		$stmt->bind_param('s', $fid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($parent_id);
-		$stmt->fetch();
+		$stmt->bind_result($id, $filename, $owner);
 
-		return $parent_id;
+		return ($stmt->fetch()) ? array('id' => $id, 'filename' => $filename, 'owner' => $owner) : null;
 	}
 
 	/**
@@ -2104,34 +2109,20 @@ class Database {
 	 * @param int $uid
 	 * @return array
 	 */
-	public function cache_parents($fid, $uid) {
+	public function cache_hierarchy($fid, $uid) {
+		$file = $this->cache_get($fid, $uid);
 		$share_base = $this->share_get_base($fid, $uid);
-		$parents = array();
+		$hierarchy = array(array('id' => $file['id'], 'filename' => $file['filename']));
 
-		do {
-			$stmt = $this->link->prepare(
-				'SELECT parent, filename, owner
-				FROM sd_cache
-				WHERE id = ?'
-			);
-			$stmt->bind_param('s', $fid);
-			$stmt->execute();
-			$stmt->store_result();
-			$stmt->bind_result($parent, $filename, $oid);
-
-			if ($stmt->fetch()) {
-				array_unshift($parents, array('id' => $fid, 'filename' => $filename));
-				if ($fid == $share_base && $oid != $uid) {
-					break;
-				}
-				$fid = $parent;
+		while ($parent = $this->cache_parent($fid)) {
+			if ($fid == $share_base && $uid != $parent['owner']) {
+				break;
 			}
-			else if ($fid == "0") {
-				array_unshift($parents, array('id' => $fid, 'filename' => ""));
-			}
-		} while ($stmt->num_rows > 0);
+			array_unshift($hierarchy, $parent);
+			$fid = $parent['id'];
+		}
 
-		return $parents;
+		return $hierarchy;
 	}
 
 	/**

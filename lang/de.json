@@ -1,5 +1,7 @@
 {
     "new": "Neu",
+	"new file": "Neue Datei",
+	"new folder": "Neuer Ordner",
     "logout": "Abmelden",
     "settings": "Einstellungen",
     "yourshares": "Freigaben",
@@ -16,6 +18,7 @@
     "type": "Typ",
     "showsharelink": "Link abrufen",
     "gallery": "Galerie",
+	"close gallery": "Galerie schließen",
     "restore": "Wiederherstellen",
     "copy": "Kopieren",
     "cut": "Ausschneiden",

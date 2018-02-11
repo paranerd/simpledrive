@@ -1,5 +1,7 @@
 {
     "new": "New",
+	"new file": "New File",
+	"new folder": "New Folder",
     "logout": "Logout",
     "settings": "Settings",
     "yourshares": "Your shares",
@@ -16,6 +18,7 @@
     "type": "Type",
     "showsharelink": "Show share link",
     "gallery": "Gallery",
+	"close gallery": "Close Gallery",
     "restore": "Restore",
     "copy": "Copy",
     "cut": "Cut",

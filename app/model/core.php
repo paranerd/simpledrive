@@ -221,7 +221,7 @@ class Core_Model {
 	public function get_version($token) {
 		$this->db = Database::get_instance();
 		if (!$this->db->user_get_by_token($token)) {
-			throw new Exception('Permission denied', 403);
+			throw new Exception('No permission to read version info', 403);
 		}
 
 		$version = json_decode(file_get_contents(VERSION), true);

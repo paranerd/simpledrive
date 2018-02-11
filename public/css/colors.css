@@ -106,12 +106,14 @@ h2 {
 	background-color: #2e8b5e !important;
 }
 
-.popup .menu li {
+.popup .menu li,
+.menu ul li {
 	border-left: 4px solid transparent;
 }
 
-.popup .menu li:hover {
-	color: white;
+.popup .menu li:hover,
+.menu ul li:hover {
+	/*color: white;*/
 	border-left: 4px solid #2e8b5e;
 	background: rgba(0,0,0,0.1);
 }
@@ -306,12 +308,13 @@ body.light {
 }
 
 body.light,
-body.light a {
+body.light a,
+body.light .menu ul {
 	color: #555;
 }
 
-.light .menu li:hover,
-.light li a:hover {
+.light .menu li:hover > span,
+.light li a:hover > span {
 	/*background-color: #eee;*/
 	color: #2e8b5e;
 	font-family: robotoregular, Arial;
@@ -346,7 +349,8 @@ body.light a {
 }
 
 .light .popup,
-.light .notification {
+.light .notification,
+.light .menu ul {
 	background-color: white;
 	border: 1px solid #ccc;
 	box-shadow: 0px 0px 15px 3px rgba(0,0,0,0.2) !important;
@@ -525,19 +529,14 @@ body.light a {
 }
 
 .dark .popup,
-.dark .notification {
+.dark .notification,
+.dark .menu ul {
 	background-color: #444;
 	box-shadow: 0 3px 9px rgba(0,0,0,.5);
 }
 
-.dark .popup .menu li:hover,
-.dark .popup .menu li a:hover {
-	color: white;
-	background-color: #555;
-}
-
-.dark .menu li:hover,
-.dark li a:hover {
+.dark .menu li:hover > span,
+.dark li a:hover > span {
 	color: #2e8b5e;
 	font-family: robotoregular, Arial;
 }
