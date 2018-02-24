@@ -369,4 +369,14 @@ class Util {
 
 		return $fingerprint;
 	}
+
+	/**
+	 * Get interface language
+	 *
+	 * @return array Language array
+	 */
+	public static function get_browser_language() {
+		$lang_code = (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && file_exists('lang/' . substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) . '.json')) ? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en';
+		return json_decode(file_get_contents('lang/' . $lang_code . '.json'), true);
+	}
 }

@@ -31,10 +31,10 @@ var FileController = new function() {
 			var pos = parseInt(this.value);
 
 			if (!isNaN(pos) && FileModel.list.getSelectedCount() > 0) {
-				FileModel.move(FileModel.hierarchy[pos].id);
+				FileModel.move(FileModel.parents[pos].id);
 			}
 			else if (!isNaN(pos)) {
-				FileModel.fetch(FileModel.hierarchy[pos].id);
+				FileModel.fetch(FileModel.parents[pos].id);
 			}
 		});
 
@@ -76,11 +76,11 @@ var FileController = new function() {
 						$("#context-closegallery").removeClass("hidden");
 					}
 					// Share
-					if ((!target.selfshared) && target.owner == username && !multi) {
+					if ((target.sharestatus != 2) && target.owner == username && !multi) {
 						$("#context-share").removeClass("hidden");
 					}
 					// Unshare
-					else if (target.selfshared && !multi) {
+					else if (target.sharestatus == 2 && !multi) {
 						$("#context-unshare").removeClass("hidden");
 					}
 					// Rename
@@ -581,7 +581,8 @@ var FileView = new function() {
 			thumbnailWrapper.appendChild(thumbnail);
 
 			// Shared icon
-			if (item.shared) {
+			//if (item.shared) {
+			if (item.sharestatus != 0) {
 				var shareIcon = document.createElement("span");
 				shareIcon.className = "shared icon-users";
 				thumbnail.appendChild(shareIcon);
@@ -749,8 +750,8 @@ var FileView = new function() {
 		$("#fileinfo-type").text(elem.type);
 		$("#fileinfo-edit").text(Util.timestampToDate(elem.edit));
 
-		if (elem.selfshared) {
-			$("#fileinfo-link").on('click', function() {
+		if (elem.sharestatus == 2) {
+			$("#fileinfo-link").unbind().on('click', function() {
 				FileModel.getLink(elem);
 			}).removeClass("hidden");
 		}
@@ -768,22 +769,13 @@ var FileView = new function() {
 		$(window).resize();
 	}
 
-	this.setTitle = function(value) {
-		var titleItem = document.createElement("span");
-		titleItem.className = 'title-element title-element-current';
-		titleItem.innerHTML = value;
-		$("#title").empty().append(titleItem);
-	}
-
 	/**
-	 * Build current path with independently clickable elements
+	 * Build current title from array
 	 */
-	this.setHierarchyTitle = function() {
+	this.setTitle = function(arr) {
 		$("#title").empty();
-		var h = FileModel.hierarchy;
-		for (var s = 0; s < h.length; s++) {
-			var filename = h[s].filename;
 
+		for (var s = 0; s < arr.length; s++) {
 			if (s > 0) {
 				var titleSep = document.createElement("span");
 				titleSep.className = "title-element title-separator";
@@ -793,26 +785,8 @@ var FileView = new function() {
 
 			var titleItem = document.createElement("span");
 			titleItem.value = parseInt(s);
-			titleItem.className = (s == h.length - 1) ? 'title-element title-element-current' : 'title-element';
-
-			if (filename) {
-				titleItem.innerHTML = Util.escape(filename);
-			}
-			else if (self.view == "trash") {
-				titleItem.innerHTML = "Trash";
-			}
-			else if (self.view == "shareout") {
-				titleItem.innerHTML = "My Shares";
-			}
-			else if (self.view == "sharein") {
-				titleItem.innerHTML = "Shared";
-			}
-			else if (s == 0 && !filename) {
-				titleItem.innerHTML = "Homefolder";
-			}
-			else {
-				titleItem.innerHTML = Util.escape(filename);
-			}
+			titleItem.className = (s == arr.length - 1) ? 'title-element title-element-current' : 'title-element';
+			titleItem.innerHTML = Util.escape(arr[s]);
 
 			$("#title").append(titleItem);
 		}
@@ -833,7 +807,7 @@ var FileModel = new function() {
 
 	this.current = null;
 	this.list = new List("files", FileView.displayFiles, true, FileView.updateStats);
-	this.hierarchy = [];
+	this.parents = [];
 	this.clipboard = {};
 
 	this.downloadPub = false;
@@ -894,8 +868,8 @@ var FileModel = new function() {
 	}
 
 	this.dirUp = function() {
-		if (self.hierarchy.length > 1) {
-			self.fetch(self.hierarchy[self.hierarchy.length - 2].id);
+		if (self.parents.length > 1) {
+			self.fetch(self.parents[self.parents.length - 2].id);
 		}
 	}
 
@@ -959,15 +933,15 @@ var FileModel = new function() {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.id = (data.msg.current.id) ? data.msg.current.id : '';
-			self.hierarchy = data.msg.hierarchy;
+			self.parents = data.msg.parents;
 			self.currentFolder = data.msg.current;
 
 			// Set view to "files" when browsing own shares
-			if (FileView.view == "shareout" && self.hierarchy.length > 1) {
+			if (FileView.view == "shareout" && self.parents.length > 1) {
 				FileView.setView('files');
 			}
 
-			FileView.setHierarchyTitle();
+			FileView.setTitle(Util.arrayExtractKey(self.parents, 'filename'));
 			self.list.setItems(data.msg.files, 'filename');
 
 			if (!back) {
@@ -1031,7 +1005,7 @@ var FileModel = new function() {
 			data: {hash: self.id, key: key},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.hierarchy = [];
+			self.parents = [];
 			Util.setToken(data.msg.token);
 
 			if (data.msg.share.type == "folder") {
@@ -1448,7 +1422,7 @@ var FileModel = new function() {
 			FileView.setView('files', true);
 			self.list.setItems(data.msg.files, 'filename');
 			FileView.hideFileinfo();
-			FileView.setTitle("Search results: \"" + needle + "\"");
+			FileView.setTitle(['Search results: "' + needle + '"']);
 			Util.closePopup('search');
 		}).fail(function(xhr, statusText, error) {
 			Util.showFormError('search', xhr.statusText);

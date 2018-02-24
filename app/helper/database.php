@@ -368,7 +368,7 @@ class Database {
 	 */
 	private function user_get($column, $value, $full = false) {
 		$stmt = $this->link->prepare(
-			'SELECT id, user, pass, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan
+			'SELECT id, user, pass, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan, lang
 			FROM sd_users
 			WHERE ' . $column . ' = ?'
 		);
@@ -379,30 +379,32 @@ class Database {
 		else {
 			$stmt->bind_param('s', $value);
 		}
+
 		$stmt->store_result();
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($uid, $username, $pass, $admin, $max_storage, $color, $fileview, $login_attempts, $last_login_attempt, $last_login, $autoscan);
+		$stmt->bind_result($uid, $username, $pass, $admin, $max_storage, $color, $fileview, $login_attempts, $last_login_attempt, $last_login, $autoscan, $lang);
 
 		if ($stmt->fetch()) {
 			// Filter user data
 			$user = array(
-				'id'			=> $uid,
-				'username'		=> strtolower($username),
-				'admin'			=> $admin,
-				'max_storage'	=> $max_storage,
-				'color'			=> $color,
-				'fileview'		=> $fileview,
-				'last_login'	=> $last_login,
-				'autoscan'		=> $autoscan
+				'id'          => $uid,
+				'username'    => strtolower($username),
+				'admin'       => $admin,
+				'max_storage' => $max_storage,
+				'color'       => $color,
+				'fileview'    => $fileview,
+				'last_login'  => $last_login,
+				'autoscan'    => $autoscan,
+				'lang'        => $lang
 			);
 
 			if ($full) {
 				$user = array_merge($user, array(
-					'pass'					=> $pass,
-					'admin'					=> $admin,
-					'login_attempts'		=> $login_attempts,
-					'last_login_attempt'	=> $last_login_attempt
+					'pass'               => $pass,
+					'admin'              => $admin,
+					'login_attempts'     => $login_attempts,
+					'last_login_attempt' => $last_login_attempt
 				));
 			}
 			return $user;
@@ -1160,7 +1162,7 @@ class Database {
 	}
 
 	/**
-	 * Check if accessing user is allowed to access a shared file
+	 * Check if token grants access to file
 	 *
 	 * @param string $fid
 	 * @param int $access
@@ -1170,7 +1172,7 @@ class Database {
 	public function share_is_unlocked($fid, $access, $token) {
 		$uid = $this->user_get_id_by_token($token) | PUBLIC_USER_ID;
 		$public_uid = PUBLIC_USER_ID;
-		$share_base = $this->share_get_base($fid, $uid);
+		$share_root = $this->share_get_root($fid, $uid);
 
 		// Check if the share-base is shared with the user
 		// or is public and has been unlocked by the given token
@@ -1187,7 +1189,7 @@ class Database {
 			)
 		');
 
-		$stmt->bind_param('siiiis', $share_base, $access, $public_uid, $uid, $public_uid, $token);
+		$stmt->bind_param('siiiis', $share_root, $access, $public_uid, $uid, $public_uid, $token);
 		$stmt->execute();
 		$stmt->store_result();
 		$stmt->bind_result($total);
@@ -1323,7 +1325,7 @@ class Database {
 	 */
 	public function share_get_from($uid) {
 		$stmt = $this->link->prepare(
-			'SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.file
+			'SELECT sd_cache.id, filename, type, size, sd_users.user, edit, md5, sd_shares.file
 			FROM sd_shares
 			LEFT JOIN sd_cache ON sd_shares.file = sd_cache.id
 			LEFT JOIN sd_users ON sd_cache.owner = sd_users.id
@@ -1333,21 +1335,21 @@ class Database {
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $fid, $sid);
+		$stmt->bind_result($fid, $filename, $type, $size, $owner, $edit, $md5, $sid);
 
 		$files = array();
 		while ($stmt->fetch()) {
-			array_push($files, array(
-				'filename'		=> $filename,
-				'type'			=> $type,
-				'size'			=> $size,
-				'owner'			=> $owner,
-				'edit'			=> $edit,
-				'md5'			=> $md5,
-				'id'			=> $fid,
-				'shared'		=> true,
-				'selfshared'	=> true,
-			));
+			array_push($files, $this->cache_get($fid, $uid));
+			/*array_push($files, array(
+				'id'          => $fid,
+				'filename'    => $filename,
+				'type'        => $type,
+				'size'        => $size,
+				'owner'       => $owner,
+				'edit'        => $edit,
+				'md5'         => $md5,
+				'sharestatus' => SELF_SHARED
+			));*/
 		}
 		return $files;
 	}
@@ -1360,7 +1362,7 @@ class Database {
 	 */
 	public function share_get_with($uid) {
 		$stmt = $this->link->prepare(
-			'SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.file
+			'SELECT filename, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.file
 			FROM sd_cache
 			LEFT JOIN sd_shares ON sd_shares.file = sd_cache.id
 			LEFT JOIN sd_users ON sd_cache.owner = sd_users.id
@@ -1370,21 +1372,21 @@ class Database {
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $fid, $sid);
+		$stmt->bind_result($filename, $type, $size, $owner, $edit, $md5, $fid, $sid);
 
 		$files = array();
 		while ($stmt->fetch()) {
-			array_push($files, array(
-				'filename'		=> $filename,
-				'type'			=> $type,
-				'size'			=> $size,
-				'owner'			=> $owner,
-				'edit'			=> $edit,
-				'md5'			=> $md5,
-				'id'			=> $fid,
-				'shared'		=> true,
-				'selfshared'	=> true,
-			));
+			array_push($files, $this->cache_get($fid, $uid));
+			/*array_push($files, array(
+				'id'          => $fid,
+				'filename'    => $filename,
+				'type'        => $type,
+				'size'        => $size,
+				'owner'       => $owner,
+				'edit'        => $edit,
+				'md5'         => $md5,
+				'sharestatus' => SELF_SHARED
+			));*/
 		}
 		return $files;
 	}
@@ -1413,7 +1415,7 @@ class Database {
 	 * @param int $uid
 	 * @return string
 	 */
-	public function share_get_base($fid, $uid) {
+	public function share_get_root($fid, $uid) {
 		do {
 			$stmt = $this->link->prepare(
 				'SELECT sd_cache.id, sd_cache.parent, sd_cache.owner, sd_shares.access, sd_shares.userto
@@ -1434,7 +1436,7 @@ class Database {
 			$fid = $parent;
 		} while ($stmt->num_rows > 0);
 
-		return "0";
+		return null;
 	}
 
 	/**
@@ -1743,16 +1745,17 @@ class Database {
 
 		$files = array();
 		while ($stmt->fetch()) {
-			array_push($files, array(
-				'filename'				=> $filename,
-				'parent'				=> $parent,
-				'type'					=> $type,
-				'size'					=> $size,
-				'owner'					=> $owner,
-				'edit'					=> $edit,
-				'md5'					=> $md5,
-				'id'					=> $fid
-			));
+			array_push($files, $this->cache_get($fid, $uid));
+			/*array_push($files, array(
+				'id'       => $fid,
+				'filename' => $filename,
+				'parent'   => $parent,
+				'type'     => $type,
+				'size'     => $size,
+				'owner'    => $owner,
+				'edit'     => $edit,
+				'md5'      => $md5
+			));*/
 		}
 
 		return $files;
@@ -1814,11 +1817,11 @@ class Database {
 	 * @param int $uid
 	 * @return array|null
 	 */
-	public function cache_get($fid, $uid) {
-		$share_base = $this->share_get_base($fid, $uid);
+	public function cache_get($fid, $uid, $full = false) {
+		$share_root = $this->share_get_root($fid, $uid);
 
 		$stmt = $this->link->prepare(
-			'SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.id
+			'SELECT sd_cache.id, sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_cache.edit, sd_cache.md5, sd_cache.owner, sd_users.user, sd_trash.id, sd_shares.file
 			FROM sd_users
 			RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner
 			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.file
@@ -1828,24 +1831,30 @@ class Database {
 		$stmt->bind_param('s', $fid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($fid, $filename, $parent, $type, $size, $edit, $md5, $oid, $owner, $trash);
+		$stmt->bind_result($fid, $filename, $parent, $type, $size, $edit, $md5, $oid, $owner, $trash_id, $sid);
 
 		if ($stmt->fetch()) {
-			return array(
-				'id'			=> $fid,
-				'filename'		=> $filename,
-				'parent'		=> $parent,
-				'type'			=> $type,
-				'size'			=> $size,
-				'ownerid'		=> $oid,
-				'owner'			=> $owner,
-				'edit'			=> $edit,
-				'md5'			=> $md5,
-				'trash'			=> $trash,
-				'path'			=> $this->cache_relative_path($fid),
-				'shared'		=> ($share_base != "0"),
-				'selfshared'	=> ($share_base == $fid)
+			$file = array(
+				'id'          => $fid,
+				'filename'    => $filename,
+				'type'        => $type,
+				'size'        => $size,
+				'ownerid'     => $oid,
+				'owner'       => $owner,
+				'edit'        => $edit,
+				'sharestatus' => ($sid) ? SELF_SHARED : ($share_root ? SHARED : NOT_SHARED)
 			);
+
+			if ($full) {
+				$file = array_merge($file, array(
+					'parent' => $parent,
+					'md5'    => $md5,
+					'trash'  => $trash_id,
+					'path'   => $this->cache_relative_path($fid),
+				));
+			}
+
+			return $file;
 		}
 		return null;
 	}
@@ -1929,7 +1938,7 @@ class Database {
 	 * @return array
 	 */
 	public function cache_children($fid, $uid, $oid, $allow_trashed = false) {
-		$share_base = $this->share_get_base($fid, $uid);
+		$share_root = $this->share_get_root($fid, $uid);
 
 		if ($this->cache_trashed($fid) && !$allow_trashed) {
 			return array();
@@ -1954,18 +1963,18 @@ class Database {
 
 		$files = array();
 		while ($stmt->fetch()) {
-			array_push($files, array(
-				'id'			=> $fid,
-				'filename'		=> $filename,
-				'parent'		=> $parent,
-				'type'			=> $type,
-				'size'			=> $size,
-				'owner'			=> $owner,
-				'edit'			=> $edit,
-				'md5'			=> $md5,
-				'shared'		=> ($share_base != "0" || $sid),
-				'selfshared'	=> $sid != null
-			));
+			array_push($files, $this->cache_get($fid, $uid));
+			/*array_push($files, array(
+				'id'          => $fid,
+				'filename'    => $filename,
+				'parent'      => $parent,
+				'type'        => $type,
+				'size'        => $size,
+				'owner'       => $owner,
+				'edit'        => $edit,
+				'md5'         => $md5,
+				'sharestatus' => ($sid) ? SELF_SHARED : ($share_root ? SHARED : NOT_SHARED)
+			));*/
 		}
 
 		return $files;
@@ -2109,20 +2118,20 @@ class Database {
 	 * @param int $uid
 	 * @return array
 	 */
-	public function cache_hierarchy($fid, $uid) {
+	public function cache_parents($fid, $uid) {
 		$file = $this->cache_get($fid, $uid);
-		$share_base = $this->share_get_base($fid, $uid);
-		$hierarchy = array(array('id' => $file['id'], 'filename' => $file['filename']));
+		$share_root = $this->share_get_root($fid, $uid);
+		$parents = array(array('id' => $file['id'], 'filename' => $file['filename'], 'owner' => $file['ownerid']));
 
 		while ($parent = $this->cache_parent($fid)) {
-			if ($fid == $share_base && $uid != $parent['owner']) {
+			if ($fid == $share_root && $uid != $parent['owner']) {
 				break;
 			}
-			array_unshift($hierarchy, $parent);
+			array_unshift($parents, $parent);
 			$fid = $parent['id'];
 		}
 
-		return $hierarchy;
+		return $parents;
 	}
 
 	/**

@@ -57,7 +57,7 @@ class Response {
 			$public		= ($section == 'pub' || isset($_REQUEST['public']));
 			$code		= (isset($_GET['code'])) ? $_GET['code'] : "";
 			$base		= self::base();
-			$lang		= self::lang();
+			$lang		= Util::get_browser_language();
 
 			if ($need_user && !$public && !$user) {
 				$location = $base . 'core/login';
@@ -164,16 +164,6 @@ class Response {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Get interface language
-	 *
-	 * @return array Language array
-	 */
-	private static function lang() {
-		$lang_code = (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && file_exists('lang/' . substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) . '.json')) ? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en';
-		return json_decode(file_get_contents('lang/' . $lang_code . '.json'), true);
 	}
 
 	/**

@@ -357,7 +357,7 @@ var VaultModel = new function() {
 		}
 
 		// Check if title already exists
-		var index = Util.searchArrayForKey(self.list.getAll(), 'title', origTitle);
+		var index = Util.arraySearchForKey(self.list.getAll(), 'title', origTitle);
 		if (!item.title && index != null) {
 			Util.showFormError('entry-' + type, 'Entry already exists');
 			return;

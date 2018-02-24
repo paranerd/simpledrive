@@ -188,7 +188,7 @@ var Util = new function() {
 	}
 
 	this.endBusy = function(busyId) {
-		var id = self.searchArrayForKey(self.busyMessages, 'id', busyId);
+		var id = self.arraySearchForKey(self.busyMessages, 'id', busyId);
 
 		if (id) {
 			self.busyMessages.splice(id, 1);
@@ -561,7 +561,7 @@ var Util = new function() {
 	 * Search an array for a value to a specific key
 	 * @return int|null
 	 */
-	this.searchArrayForKey = function(arr, key, value) {
+	this.arraySearchForKey = function(arr, key, value) {
 		for (var i in arr) {
 			if (arr[i][key] == value) {
 				return i;
@@ -585,6 +585,16 @@ var Util = new function() {
 		}
 
 		return unique;
+	}
+
+	this.arrayExtractKey = function(arr, key) {
+		var result = [];
+
+		arr.forEach(function(elem) {
+			result.push(elem[key]);
+		});
+
+		return result;
 	}
 
 	this.autofill = function(id, value, callback) {

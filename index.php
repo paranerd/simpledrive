@@ -39,11 +39,15 @@ define('PUBLIC_USER_ID', 1);
 define('PERMISSION_NONE', 0);
 define('PERMISSION_READ', 1);
 define('PERMISSION_WRITE', 2);
+define('SELF_SHARED', 2);
+define('SHARED', 1);
+define('NOT_SHARED', 0);
 define('TOKEN_EXPIRATION', 60 * 60 * 24 * 7); // 1 week
 define('TFA_EXPIRATION', 30);
 define('TFA_MAX_ATTEMPTS', 3);
 define('LOGIN_MAX_ATTEMPTS', 3);
 define('CONFIG', 'config/config.json');
+define('LANG', 'lang/');
 define('VERSION', 'config/version.json');
 define('CONTROLLER', $controller);
 define('ACTION', $action);

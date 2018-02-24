@@ -18,13 +18,15 @@ class File_Model {
 	 * @param string $token
 	 */
 	public function __construct($token) {
-		$this->token    = $token;
-		$this->config   = json_decode(file_get_contents(CONFIG), true);
-		$this->log      = new Log(get_class());
-		$this->db       = Database::get_instance();
-		$this->user     = ($this->db) ? $this->db->user_get_by_token($token) : null;
-		$this->uid      = ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
-		$this->username = ($this->user) ? $this->user['username'] : "";
+		$this->token     = $token;
+		$this->config    = json_decode(file_get_contents(CONFIG), true);
+		$this->log       = new Log(get_class());
+		$this->db        = Database::get_instance();
+		$this->user      = ($this->db) ? $this->db->user_get_by_token($token) : null;
+		$this->uid       = ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
+		$this->username  = ($this->user) ? $this->user['username'] : "";
+		$this->lang_code = ($this->user) ? $this->user['lang'] : 'en';
+		$this->lang      = Util::get_browser_language();
 
 		$this->init();
 	}
@@ -366,20 +368,21 @@ class File_Model {
 	 * Return children of a folder or shared or trashed files
 	 *
 	 * @param string $target FileID
-	 * @param string $mode ("sharein", "shareout", etc.)
+	 * @param string $mode ("sharein", "shareout", "trash", or "files")
 	 * @throws Exception
 	 * @return array
 	 */
-	public function children($target, $mode) {
-		$file = $this->get_cached($target, PERMISSION_READ);
+	public function children($folder_id, $mode) {
+		$this->log->debug("children");
+		$folder = $this->get_cached($folder_id, PERMISSION_READ);
 
-		if (!$file) {
-			throw new Exception('Error accessing file', 403);
+		if (!$folder) {
+			throw new Exception('Error accessing folder', 403);
 		}
 
 		// Scan folder if autoscan is enabled
-		if ($this->db->user_get_by_id($file['ownerid'])['autoscan']) {
-			$this->scan($file['id']);
+		if ($this->db->user_get_by_id($folder['ownerid'])['autoscan']) {
+			$this->scan($folder['id']);
 		}
 
 		// SYNC DEMO
@@ -387,27 +390,34 @@ class File_Model {
 		//$files_to_sync = $this->sync($target, $clientfiles, "0");
 
 		$files = array();
-		$hierarchy = $this->db->cache_hierarchy($file['id'], $this->uid);
 		$current = array();
-		$root_id = $this->db->cache_get_root_id($file['ownerid']);
+		$parents = $this->db->cache_parents($folder['id'], $this->uid);
+		$root_id = $this->db->cache_get_root_id($folder['ownerid']);
 
 		if ($mode == 'trash') {
+			$parents[0] = array('id' => '', 'filename' => $this->lang['trash']);
 			$files = $this->db->cache_get_trash($this->uid);
 		}
-		else if ($mode == "shareout" && $file['id'] == $root_id) {
+		else if ($mode == "shareout" && $folder['id'] == $root_id) {
+			$parents[0] = array('id' => '', 'filename' => $this->lang['shareout']);
 			$files = $this->db->share_get_from($this->uid);
 		}
-		else if ($mode == "sharein" && $file['id'] == $root_id) {
+		else if ($mode == "sharein" && $folder['id'] == $root_id) {
+			$parents[0] = array('id' => '', 'filename' => $this->lang['sharein']);
 			$files = $this->db->share_get_with($this->uid);
 		}
 		else {
-			$files = $this->db->cache_children($file['id'], $this->uid, $file['ownerid']);
-			$current = Util::array_remove_keys($file, array('parent', 'path'));
+			$parents[0]['filename'] = ($parents[0]['id'] == $root_id) ? "Homefolder" : $parents[0]['filename'];
+			$files = $this->db->cache_children($folder['id'], $this->uid, $folder['ownerid']);
+			$current = Util::array_remove_keys($folder, array('parent', 'path'));
 		}
+
+		$this->log->debug("parents");
+		$this->log->debug($parents);
 
 		return array(
 			'files'		=> $files,
-			'hierarchy'	=> $hierarchy,
+			'parents'	=> $parents,
 			'current'	=> $current
 		);
 	}
@@ -647,7 +657,7 @@ class File_Model {
 			}
 		}
 
-		throw new Exception('Error accessing file', 403);
+		throw new Exception('File not found or not publicly shared', 400);
 	}
 
 	/**
@@ -1046,9 +1056,9 @@ class File_Model {
 			if ($token && $this->db->share_unlock($token, $sid)) {
 				return array(
 					'share' => array(
-						'id' => $file['id'],
+						'id'       => $file['id'],
 						'filename' => $file['filename'],
-						'type' => $file['type']
+						'type'     => $file['type']
 					),
 					'token' => $token
 				);
@@ -1279,7 +1289,7 @@ class File_Model {
 		// Get proper ID
 		$fid = ($fid && $fid != "0") ? $fid : $this->db->cache_get_root_id($this->uid);
 		// Get file from database
-		$file = $this->db->cache_get($fid, $this->uid);
+		$file = $this->db->cache_get($fid, $this->uid, true);
 
 		// Only return the file if owned or shared
 		return ($file && ($file['ownerid'] == $this->uid || $this->db->share_is_unlocked($file['id'], $access, $this->token))) ? $file : null;
