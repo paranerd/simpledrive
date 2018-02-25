@@ -29,8 +29,8 @@ Header set Strict-Transport-Security "max-age=31536000" env=HTTPS
 <IfModule mod_rewrite.c>
 RewriteEngine on
 
-RewriteCond %{HTTPS} off
-RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [QSA,NC,L]
+#RewriteCond %{HTTPS} off
+#RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [QSA,NC,L]
 #RewriteRule .* - [env=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 RewriteCond %{REQUEST_FILENAME} !-d

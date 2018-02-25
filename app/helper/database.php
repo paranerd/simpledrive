@@ -368,7 +368,7 @@ class Database {
 	 */
 	private function user_get($column, $value, $full = false) {
 		$stmt = $this->link->prepare(
-			'SELECT id, user, pass, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan, lang
+			'SELECT id, user, pass, admin, max_storage, color, fileview, login_attempts, last_login_attempt, last_login, autoscan
 			FROM sd_users
 			WHERE ' . $column . ' = ?'
 		);
@@ -383,7 +383,7 @@ class Database {
 		$stmt->store_result();
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($uid, $username, $pass, $admin, $max_storage, $color, $fileview, $login_attempts, $last_login_attempt, $last_login, $autoscan, $lang);
+		$stmt->bind_result($uid, $username, $pass, $admin, $max_storage, $color, $fileview, $login_attempts, $last_login_attempt, $last_login, $autoscan);
 
 		if ($stmt->fetch()) {
 			// Filter user data
@@ -395,8 +395,7 @@ class Database {
 				'color'       => $color,
 				'fileview'    => $fileview,
 				'last_login'  => $last_login,
-				'autoscan'    => $autoscan,
-				'lang'        => $lang
+				'autoscan'    => $autoscan
 			);
 
 			if ($full) {
@@ -458,6 +457,7 @@ class Database {
 			AND fingerprint = ?
 			AND expires > ?'
 		);
+
 		$stmt->bind_param('ssi', $token, $this->fingerprint, $time);
 		$stmt->execute();
 		$stmt->store_result();
@@ -1170,7 +1170,7 @@ class Database {
 	 * @return boolean
 	 */
 	public function share_is_unlocked($fid, $access, $token) {
-		$uid = $this->user_get_id_by_token($token) | PUBLIC_USER_ID;
+		$uid = $this->user_get_id_by_token($token);
 		$public_uid = PUBLIC_USER_ID;
 		$share_root = $this->share_get_root($fid, $uid);
 
@@ -2092,7 +2092,7 @@ class Database {
 	 * @param string $fid
 	 * @return string
 	 */
-	private function cache_parent($fid) {
+	private function cache_parent($fid, $uid) {
 		$stmt = $this->link->prepare(
 			'SELECT id, filename, owner
 			FROM sd_cache
@@ -2108,7 +2108,7 @@ class Database {
 		$stmt->store_result();
 		$stmt->bind_result($id, $filename, $owner);
 
-		return ($stmt->fetch()) ? array('id' => $id, 'filename' => $filename, 'owner' => $owner) : null;
+		return ($stmt->fetch()) ? $this->cache_get($id, $uid) : null;
 	}
 
 	/**
@@ -2121,10 +2121,10 @@ class Database {
 	public function cache_hierarchy($fid, $uid) {
 		$file = $this->cache_get($fid, $uid);
 		$share_root = $this->share_get_root($fid, $uid);
-		$hierarchy = array(array('id' => $file['id'], 'filename' => $file['filename'], 'owner' => $file['ownerid']));
+		$hierarchy = array($file);
 
-		while ($parent = $this->cache_parent($fid)) {
-			if ($fid == $share_root && $uid != $parent['owner']) {
+		while ($parent = $this->cache_parent($fid, $uid)) {
+			if ($fid == $share_root && $uid != $parent['ownerid']) {
 				break;
 			}
 			array_unshift($hierarchy, $parent);

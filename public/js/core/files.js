@@ -494,7 +494,7 @@ var FileView = new function() {
 	this.galleryMode = false;
 	this.originalFileview = '';
 	this.scrollTimeout = null;
-	this.blockInfopanel = false;
+	this.blockFileinfo = false;
 
 	this.init = function(view) {
 		self.view = (view) ? view : "files";
@@ -508,9 +508,9 @@ var FileView = new function() {
 		$(window).resize();
 	}
 
-	this.setView = function(view, blockInfopanel) {
+	this.setView = function(view, blockFileinfo) {
 		self.view = view;
-		self.blockInfopanel = (blockInfopanel || view == 'trash');
+		self.blockFileinfo = (blockFileinfo || view != 'files');
 		Util.sidebarFocus(self.view);
 	}
 
@@ -734,7 +734,7 @@ var FileView = new function() {
 	 * Display the fileinfo-panel
 	 */
 	this.showFileInfo = function(id) {
-		if (self.blockInfopanel || FileModel.getCurrentFolder().length == 0) {
+		if (self.blockFileinfo || FileModel.getCurrentFolder().length == 0) {
 			self.hideFileinfo();
 			return;
 		}
@@ -932,9 +932,9 @@ var FileModel = new function() {
 			data: {target: id, mode: FileView.view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.id = (data.msg.current.id) ? data.msg.current.id : '';
+			//self.id = (data.msg.current.id) ? data.msg.current.id : '';
 			self.hierarchy = data.msg.hierarchy;
-			self.currentFolder = data.msg.current;
+			self.id = self.getCurrentFolder().id;
 
 			// Set view to "files" when browsing own shares
 			if (FileView.view == "shareout" && self.hierarchy.length > 1) {
@@ -955,7 +955,7 @@ var FileModel = new function() {
 	}
 
 	this.getCurrentFolder = function() {
-		return self.currentFolder;
+		return self.hierarchy[self.hierarchy.length - 1];
 	}
 
 	this.getLink = function(elem) {

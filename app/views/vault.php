@@ -30,7 +30,7 @@
 	<div id="header">
 		<!-- Nav back -->
 		<div id="logo" title="Return to files">
-			<a href="files" class="back"><span class="icon icon-arrow-left"></span>Vault</a>
+			<a href="files" class="back"><span class="icon icon-arrow-left"></span><span>Vault</span></a>
 		</div>
 		<!-- Title -->
 		<div id="title">
@@ -44,9 +44,9 @@
 		<!-- Sidebar -->
 		<div id="sidebar">
 			<ul class="menu">
-				<li id="sidebar-create" class="popup-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span><?php echo $lang['new']; ?></li>
-				<li id="sidebar-entries" class="sidebar-navigation focus" title="Entries" data-action="entries"><span class="icon icon-info"></span>Entries</li>
-				<li id="sidebar-passgen" class="popup-trigger" title="Entries" data-target="password-generator"><span class="icon icon-key"></span>Password Generator</li>
+				<li id="sidebar-create" class="popup-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span><span><?php echo $lang['new']; ?></span></li>
+				<li id="sidebar-entries" class="sidebar-navigation focus" title="Entries" data-action="entries"><span class="icon icon-info"></span><span>Entries</span></li>
+				<li id="sidebar-passgen" class="popup-trigger" title="Entries" data-target="password-generator"><span class="icon icon-key"></span><span>Password Generator</span></li>
 			</ul>
 		</div>
 
@@ -71,32 +71,32 @@
 	<!-- Create menu -->
 	<div id="create-menu" class="popup popup-menu hidden">
 		<ul class="menu">
-			<li class="create-trigger" data-type="website"><span class="icon icon-key"></span><?php echo $lang['new website']; ?></li>
-			<li class="create-trigger" data-type="note"><span class="icon icon-key"></span><?php echo $lang['new note']; ?></li>
+			<li class="create-trigger" data-type="website"><span class="icon icon-key"></span><span><?php echo $lang['new website']; ?></span></li>
+			<li class="create-trigger" data-type="note"><span class="icon icon-key"></span><span><?php echo $lang['new note']; ?></span></li>
 		</ul>
 	</div>
 
 	<!-- Menu -->
 	<div id="menu" class="popup popup-menu hidden">
 		<ul class="menu">
-			<li><a href="files"><span class="icon icon-files"></span>Files</a></li>
-			<li><a href="user"><span class="icon icon-settings"></span>Settings</a></li>
+			<li><a href="files"><span class="icon icon-files"></span><span>Files</span></a></li>
+			<li><a href="user"><span class="icon icon-settings"></span><span>Settings</span></a></li>
 			<?php if ($admin) : ?>
-			<li><a href="system"><span class="icon icon-admin"></span>System</a></li>
+			<li><a href="system"><span class="icon icon-admin"></span><span>System</span></a></li>
 			<?php endif; ?>
-			<li><a href="vault"><span class="icon icon-key"></span>Vault</a></li>
-			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><?php echo $lang['info']; ?></li>
-			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><?php echo $lang['logout']; ?></a></li>
+			<li><a href="vault"><span class="icon icon-key"></span><span>Vault</span></a></li>
+			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><span><?php echo $lang['info']; ?></span></li>
+			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><span><?php echo $lang['logout']; ?></span></a></li>
 		</ul>
 	</div>
 
 	<!-- Context menu -->
 	<div id="contextmenu" class="popup popup-menu hidden">
 		<ul class="menu">
-			<li id="context-passphrase" class="hidden"><span class="icon icon-key"></span>Change password</li>
+			<li id="context-passphrase" class="hidden"><span class="icon icon-key"></span><span>Change password</span></li>
 			<hr class="hidden">
-			<li id="context-edit" class="hidden"><span class="icon icon-rename"></span>Edit</li>
-			<li id="context-delete" class="hidden"><span class="icon icon-trash"></span><?php echo $lang['delete']; ?></li>
+			<li id="context-edit" class="hidden"><span class="icon icon-rename"></span><span>Edit</span></li>
+			<li id="context-delete" class="hidden"><span class="icon icon-trash"></span><span><?php echo $lang['delete']; ?></span></li>
 		</ul>
 	</div>
 

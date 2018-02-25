@@ -27,7 +27,6 @@ class File_Model {
 		$this->user      = ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid       = ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
 		$this->username  = ($this->user) ? $this->user['username'] : "";
-		$this->lang_code = ($this->user) ? $this->user['lang'] : 'en';
 		$this->lang      = Util::get_browser_language();
 
 		$this->init();
@@ -375,10 +374,6 @@ class File_Model {
 	 * @return array
 	 */
 	public function children($folder_id, $mode) {
-		$backup = new Google_Api($this->token);
-		$children = $backup->children('root');
-		$this->log->debug($children);
-
 		$folder_id = ($folder_id == "") ? "0" : $folder_id;
 		$folder = $this->get_cached($folder_id, PERMISSION_READ);
 
@@ -396,7 +391,6 @@ class File_Model {
 		//$files_to_sync = $this->sync($target, $clientfiles, "0");
 
 		$files = array();
-		$current = array();
 		$hierarchy = $this->db->cache_hierarchy($folder['id'], $this->uid);
 		$root_id = $this->db->cache_get_root_id($folder['ownerid']);
 
@@ -413,15 +407,13 @@ class File_Model {
 			$files = $this->db->share_get_with($this->uid);
 		}
 		else {
-			$hierarchy[0]['filename'] = ($hierarchy[0]['id'] == $root_id) ? "Homefolder FROM SERVER" : $hierarchy[0]['filename'];
+			$hierarchy[0]['filename'] = ($hierarchy[0]['id'] == $root_id) ? "Homefolder" : $hierarchy[0]['filename'];
 			$files = $this->db->cache_children($folder['id'], $this->uid, $folder['ownerid']);
-			$current = Util::array_remove_keys($folder, array('parent', 'path'));
 		}
 
 		return array(
 			'files'     => $files,
-			'hierarchy' => $hierarchy,
-			'current'   => $current
+			'hierarchy' => $hierarchy
 		);
 	}
 

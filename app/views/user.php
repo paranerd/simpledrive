@@ -30,7 +30,7 @@
 	<div id="header">
 		<!-- Nav back -->
 		<div id="logo" title="Return to files">
-			<a href="files" class="back"><span class="icon icon-arrow-left"></span>Settings</a>
+			<a href="files" class="back"><span class="icon icon-arrow-left"></span><span>Settings</span></a>
 		</div>
 		<!-- Title -->
 		<div id="title">
@@ -44,7 +44,7 @@
 		<!-- Sidebar -->
 		<div id="sidebar">
 			<ul class="menu">
-				<li id="sidebar-general" class="sidebar-navigation focus" title="Status info" data-action="general"><span class="icon icon-info"></span> Status</li>
+				<li id="sidebar-general" class="sidebar-navigation focus" title="Status info" data-action="general"><span class="icon icon-info"></span><span>Status</span></li>
 			</ul>
 		</div>
 
@@ -129,14 +129,14 @@
 	<!-- Menu -->
 	<div id="menu" class="popup popup-menu hidden">
 		<ul class="menu">
-			<li><a href="files"><span class="icon icon-files"></span>Files</a></li>
-			<li><a href="user"><span class="icon icon-settings"></span>Settings</a></li>
+			<li><a href="files"><span class="icon icon-files"></span><span>Files</span></a></li>
+			<li><a href="user"><span class="icon icon-settings"></span><span>Settings</span></a></li>
 			<?php if ($admin) : ?>
-			<li><a href="system"><span class="icon icon-admin"></span>System</a></li>
+			<li><a href="system"><span class="icon icon-admin"></span><span>System</span></a></li>
 			<?php endif; ?>
-			<li><a href="vault"><span class="icon icon-key"></span>Vault</a></li>
-			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><?php echo $lang['info']; ?></li>
-			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><?php echo $lang['logout']; ?></a></li>
+			<li><a href="vault"><span class="icon icon-key"></span><span>Vault</span></a></li>
+			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><span><?php echo $lang['info']; ?></span></li>
+			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><span><?php echo $lang['logout']; ?></span></a></li>
 		</ul>
 	</div>
 
