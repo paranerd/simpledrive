@@ -31,10 +31,10 @@ var FileController = new function() {
 			var pos = parseInt(this.value);
 
 			if (!isNaN(pos) && FileModel.list.getSelectedCount() > 0) {
-				FileModel.move(FileModel.parents[pos].id);
+				FileModel.move(FileModel.hierarchy[pos].id);
 			}
 			else if (!isNaN(pos)) {
-				FileModel.fetch(FileModel.parents[pos].id);
+				FileModel.fetch(FileModel.hierarchy[pos].id);
 			}
 		});
 
@@ -807,7 +807,7 @@ var FileModel = new function() {
 
 	this.current = null;
 	this.list = new List("files", FileView.displayFiles, true, FileView.updateStats);
-	this.parents = [];
+	this.hierarchy = [];
 	this.clipboard = {};
 
 	this.downloadPub = false;
@@ -868,8 +868,8 @@ var FileModel = new function() {
 	}
 
 	this.dirUp = function() {
-		if (self.parents.length > 1) {
-			self.fetch(self.parents[self.parents.length - 2].id);
+		if (self.hierarchy.length > 1) {
+			self.fetch(self.hierarchy[self.hierarchy.length - 2].id);
 		}
 	}
 
@@ -933,15 +933,15 @@ var FileModel = new function() {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.id = (data.msg.current.id) ? data.msg.current.id : '';
-			self.parents = data.msg.parents;
+			self.hierarchy = data.msg.hierarchy;
 			self.currentFolder = data.msg.current;
 
 			// Set view to "files" when browsing own shares
-			if (FileView.view == "shareout" && self.parents.length > 1) {
+			if (FileView.view == "shareout" && self.hierarchy.length > 1) {
 				FileView.setView('files');
 			}
 
-			FileView.setTitle(Util.arrayExtractKey(self.parents, 'filename'));
+			FileView.setTitle(Util.arrayExtractKey(self.hierarchy, 'filename'));
 			self.list.setItems(data.msg.files, 'filename');
 
 			if (!back) {
@@ -1005,7 +1005,7 @@ var FileModel = new function() {
 			data: {hash: self.id, key: key},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.parents = [];
+			self.hierarchy = [];
 			Util.setToken(data.msg.token);
 
 			if (data.msg.share.type == "folder") {

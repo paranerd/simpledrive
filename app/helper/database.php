@@ -2112,26 +2112,26 @@ class Database {
 	}
 
 	/**
-	 * Get all parents for file
+	 * Get hierarchy for file
 	 *
 	 * @param string $fid
 	 * @param int $uid
 	 * @return array
 	 */
-	public function cache_parents($fid, $uid) {
+	public function cache_hierarchy($fid, $uid) {
 		$file = $this->cache_get($fid, $uid);
 		$share_root = $this->share_get_root($fid, $uid);
-		$parents = array(array('id' => $file['id'], 'filename' => $file['filename'], 'owner' => $file['ownerid']));
+		$hierarchy = array(array('id' => $file['id'], 'filename' => $file['filename'], 'owner' => $file['ownerid']));
 
 		while ($parent = $this->cache_parent($fid)) {
 			if ($fid == $share_root && $uid != $parent['owner']) {
 				break;
 			}
-			array_unshift($parents, $parent);
+			array_unshift($hierarchy, $parent);
 			$fid = $parent['id'];
 		}
 
-		return $parents;
+		return $hierarchy;
 	}
 
 	/**

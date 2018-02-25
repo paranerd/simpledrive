@@ -11,6 +11,8 @@ require_once 'app/helper/ogg.class.php';
 require_once 'app/helper/sync.php';
 require_once 'app/model/user.php';
 
+require_once 'app/helper/googleapi.php';
+
 class File_Model {
 	/**
 	 * Constructor
@@ -373,7 +375,11 @@ class File_Model {
 	 * @return array
 	 */
 	public function children($folder_id, $mode) {
-		$this->log->debug("children");
+		$backup = new Google_Api($this->token);
+		$children = $backup->children('root');
+		$this->log->debug($children);
+
+		$folder_id = ($folder_id == "") ? "0" : $folder_id;
 		$folder = $this->get_cached($folder_id, PERMISSION_READ);
 
 		if (!$folder) {
@@ -391,34 +397,31 @@ class File_Model {
 
 		$files = array();
 		$current = array();
-		$parents = $this->db->cache_parents($folder['id'], $this->uid);
+		$hierarchy = $this->db->cache_hierarchy($folder['id'], $this->uid);
 		$root_id = $this->db->cache_get_root_id($folder['ownerid']);
 
 		if ($mode == 'trash') {
-			$parents[0] = array('id' => '', 'filename' => $this->lang['trash']);
+			$hierarchy[0] = array('id' => '', 'filename' => $this->lang['trash']);
 			$files = $this->db->cache_get_trash($this->uid);
 		}
 		else if ($mode == "shareout" && $folder['id'] == $root_id) {
-			$parents[0] = array('id' => '', 'filename' => $this->lang['shareout']);
+			$hierarchy[0] = array('id' => '', 'filename' => $this->lang['shareout']);
 			$files = $this->db->share_get_from($this->uid);
 		}
 		else if ($mode == "sharein" && $folder['id'] == $root_id) {
-			$parents[0] = array('id' => '', 'filename' => $this->lang['sharein']);
+			$hierarchy[0] = array('id' => '', 'filename' => $this->lang['sharein']);
 			$files = $this->db->share_get_with($this->uid);
 		}
 		else {
-			$parents[0]['filename'] = ($parents[0]['id'] == $root_id) ? "Homefolder" : $parents[0]['filename'];
+			$hierarchy[0]['filename'] = ($hierarchy[0]['id'] == $root_id) ? "Homefolder FROM SERVER" : $hierarchy[0]['filename'];
 			$files = $this->db->cache_children($folder['id'], $this->uid, $folder['ownerid']);
 			$current = Util::array_remove_keys($folder, array('parent', 'path'));
 		}
 
-		$this->log->debug("parents");
-		$this->log->debug($parents);
-
 		return array(
-			'files'		=> $files,
-			'parents'	=> $parents,
-			'current'	=> $current
+			'files'     => $files,
+			'hierarchy' => $hierarchy,
+			'current'   => $current
 		);
 	}
 

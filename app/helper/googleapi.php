@@ -180,6 +180,9 @@ class Google_Api {
 				. "+in+parents&fields=files(contentHints%2Fthumbnail%2Fimage%2C"
 				. "id%2CmimeType%2Cname%2Cowners%2FdisplayName%2Cparents%2Cshared%2Ctrashed)";
 
+		$log = new Log(get_class());
+		$log->debug($url);
+
 		$response = $this->execute_request($url, $header, null, 'GET');
 	}
 
