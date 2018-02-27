@@ -949,7 +949,7 @@ var FileModel = new function() {
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
-			Util.endBusy(bId);
+			//Util.endBusy(bId);
 		});
 	}
 

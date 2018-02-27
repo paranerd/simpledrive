@@ -349,8 +349,8 @@ label {
 
 #busy {
 	position: absolute;
-	right: 20px;
-	bottom: 20px;
+	right: 30px;
+	bottom: 30px;
 	width: 100px;
 	height: 100px;
 	border-radius: 999px;
@@ -358,6 +358,7 @@ label {
 	line-height: 100px;
 	z-index: 1003;
 }
+
 #busy .busy-indicator {
 	position:absolute;
 	width: 100px;
