@@ -379,4 +379,15 @@ class Util {
 		$lang_code = (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && file_exists('lang/' . substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) . '.json')) ? substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) : 'en';
 		return json_decode(file_get_contents('lang/' . $lang_code . '.json'), true);
 	}
+
+	/**
+	 * Translate string
+	 *
+	 * @return string
+	 */
+	 public static function translate($str) {
+		 $lang = self::get_browser_language();
+
+		 return (array_key_exists($str, $lang)) ? $lang[$str] : $str;
+	 }
 }

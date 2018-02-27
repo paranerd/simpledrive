@@ -312,7 +312,7 @@ var FileController = new function() {
 
 		$(".sidebar-navigation").on('click', function(e) {
 			FileView.setView($(this).data('action'));
-			FileModel.fetch('0');
+			FileModel.fetch('');
 		});
 
 		$("#upload .close").on('click', function(e) {
@@ -932,7 +932,6 @@ var FileModel = new function() {
 			data: {target: id, mode: FileView.view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			//self.id = (data.msg.current.id) ? data.msg.current.id : '';
 			self.hierarchy = data.msg.hierarchy;
 			self.id = self.getCurrentFolder().id;
 

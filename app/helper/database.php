@@ -1325,7 +1325,7 @@ class Database {
 	 */
 	public function share_get_from($uid) {
 		$stmt = $this->link->prepare(
-			'SELECT sd_cache.id, filename, type, size, sd_users.user, edit, md5, sd_shares.file
+			'SELECT sd_cache.id
 			FROM sd_shares
 			LEFT JOIN sd_cache ON sd_shares.file = sd_cache.id
 			LEFT JOIN sd_users ON sd_cache.owner = sd_users.id
@@ -1335,21 +1335,11 @@ class Database {
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($fid, $filename, $type, $size, $owner, $edit, $md5, $sid);
+		$stmt->bind_result($fid);
 
 		$files = array();
 		while ($stmt->fetch()) {
 			array_push($files, $this->cache_get($fid, $uid));
-			/*array_push($files, array(
-				'id'          => $fid,
-				'filename'    => $filename,
-				'type'        => $type,
-				'size'        => $size,
-				'owner'       => $owner,
-				'edit'        => $edit,
-				'md5'         => $md5,
-				'sharestatus' => SELF_SHARED
-			));*/
 		}
 		return $files;
 	}
@@ -1362,7 +1352,7 @@ class Database {
 	 */
 	public function share_get_with($uid) {
 		$stmt = $this->link->prepare(
-			'SELECT filename, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.file
+			'SELECT sd_cache.id
 			FROM sd_cache
 			LEFT JOIN sd_shares ON sd_shares.file = sd_cache.id
 			LEFT JOIN sd_users ON sd_cache.owner = sd_users.id
@@ -1377,16 +1367,6 @@ class Database {
 		$files = array();
 		while ($stmt->fetch()) {
 			array_push($files, $this->cache_get($fid, $uid));
-			/*array_push($files, array(
-				'id'          => $fid,
-				'filename'    => $filename,
-				'type'        => $type,
-				'size'        => $size,
-				'owner'       => $owner,
-				'edit'        => $edit,
-				'md5'         => $md5,
-				'sharestatus' => SELF_SHARED
-			));*/
 		}
 		return $files;
 	}
@@ -1732,7 +1712,7 @@ class Database {
 	 */
 	public function cache_get_trash($uid) {
 		$stmt = $this->link->prepare(
-			'SELECT sd_cache.filename, sd_cache.parent, sd_cache.type, sd_cache.size, sd_users.user, sd_cache.edit, sd_cache.md5, sd_cache.id
+			'SELECT sd_cache.id
 			FROM sd_users
 			RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner
 			RIGHT JOIN sd_trash ON sd_cache.id = sd_trash.id
@@ -1741,21 +1721,11 @@ class Database {
 		$stmt->bind_param('i', $uid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $fid);
+		$stmt->bind_result($fid);
 
 		$files = array();
 		while ($stmt->fetch()) {
 			array_push($files, $this->cache_get($fid, $uid));
-			/*array_push($files, array(
-				'id'       => $fid,
-				'filename' => $filename,
-				'parent'   => $parent,
-				'type'     => $type,
-				'size'     => $size,
-				'owner'    => $owner,
-				'edit'     => $edit,
-				'md5'      => $md5
-			));*/
 		}
 
 		return $files;
@@ -1945,7 +1915,7 @@ class Database {
 		}
 
 		$stmt = $this->link->prepare(
-			'SELECT filename, parent, type, size, sd_users.user, edit, md5, sd_cache.id, sd_shares.file
+			'SELECT sd_cache.id
 			FROM sd_users
 			RIGHT JOIN sd_cache ON sd_users.id = sd_cache.owner
 			LEFT JOIN sd_shares ON sd_cache.id = sd_shares.file
@@ -1959,22 +1929,11 @@ class Database {
 		$stmt->bind_param('si', $fid, $oid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($filename, $parent, $type, $size, $owner, $edit, $md5, $fid, $sid);
+		$stmt->bind_result($fid);
 
 		$files = array();
 		while ($stmt->fetch()) {
 			array_push($files, $this->cache_get($fid, $uid));
-			/*array_push($files, array(
-				'id'          => $fid,
-				'filename'    => $filename,
-				'parent'      => $parent,
-				'type'        => $type,
-				'size'        => $size,
-				'owner'       => $owner,
-				'edit'        => $edit,
-				'md5'         => $md5,
-				'sharestatus' => ($sid) ? SELF_SHARED : ($share_root ? SHARED : NOT_SHARED)
-			));*/
 		}
 
 		return $files;
@@ -2079,6 +2038,7 @@ class Database {
 			$stmt->bind_result($fid, $filename);
 
 			if ($stmt->fetch()) {
+				//$filename = ($fid == null) ? "" : $filename;
 				array_unshift($path, $filename);
 			}
 		} while ($stmt->num_rows > 0);
@@ -2118,7 +2078,16 @@ class Database {
 	 * @param int $uid
 	 * @return array
 	 */
-	public function cache_hierarchy($fid, $uid) {
+	public function cache_hierarchy($fid, $uid, $mode) {
+		if ($mode == "trash" || (($mode == "sharein" || $mode == "shareout") && $fid == $this->cache_get_root_id($uid))) {
+			return array(
+				array(
+					'id' => '',
+					'filename' => Util::translate($mode)
+				)
+			);
+		}
+
 		$file = $this->cache_get($fid, $uid);
 		$share_root = $this->share_get_root($fid, $uid);
 		$hierarchy = array($file);
@@ -2129,6 +2098,10 @@ class Database {
 			}
 			array_unshift($hierarchy, $parent);
 			$fid = $parent['id'];
+		}
+
+		if ($hierarchy[0]['id'] == $this->cache_get_root_id($uid)) {
+			$hierarchy[0]['filename'] = "Homefolder";
 		}
 
 		return $hierarchy;
@@ -2334,7 +2307,11 @@ class Database {
 
 		while ($stmt->fetch()) {
 			if ($deleted || !$only_deleted) {
-				array_push($entries, array('path' => $path, 'deleted' => $deleted, 'timestamp' => $timestamp));
+				array_push($entries, array(
+					'path' => $path,
+					'deleted' => $deleted,
+					'timestamp' => $timestamp)
+				);
 			}
 		}
 

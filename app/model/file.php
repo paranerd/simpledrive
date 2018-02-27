@@ -27,7 +27,6 @@ class File_Model {
 		$this->user      = ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid       = ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
 		$this->username  = ($this->user) ? $this->user['username'] : "";
-		$this->lang      = Util::get_browser_language();
 
 		$this->init();
 	}
@@ -391,23 +390,19 @@ class File_Model {
 		//$files_to_sync = $this->sync($target, $clientfiles, "0");
 
 		$files = array();
-		$hierarchy = $this->db->cache_hierarchy($folder['id'], $this->uid);
+		$hierarchy = $this->db->cache_hierarchy($folder['id'], $this->uid, $mode);
 		$root_id = $this->db->cache_get_root_id($folder['ownerid']);
 
 		if ($mode == 'trash') {
-			$hierarchy[0] = array('id' => '', 'filename' => $this->lang['trash']);
 			$files = $this->db->cache_get_trash($this->uid);
 		}
 		else if ($mode == "shareout" && $folder['id'] == $root_id) {
-			$hierarchy[0] = array('id' => '', 'filename' => $this->lang['shareout']);
 			$files = $this->db->share_get_from($this->uid);
 		}
 		else if ($mode == "sharein" && $folder['id'] == $root_id) {
-			$hierarchy[0] = array('id' => '', 'filename' => $this->lang['sharein']);
 			$files = $this->db->share_get_with($this->uid);
 		}
 		else {
-			$hierarchy[0]['filename'] = ($hierarchy[0]['id'] == $root_id) ? "Homefolder" : $hierarchy[0]['filename'];
 			$files = $this->db->cache_children($folder['id'], $this->uid, $folder['ownerid']);
 		}
 
@@ -1283,6 +1278,7 @@ class File_Model {
 
 		// Get proper ID
 		$fid = ($fid && $fid != "0") ? $fid : $this->db->cache_get_root_id($this->uid);
+
 		// Get file from database
 		$file = $this->db->cache_get($fid, $this->uid, true);
 
