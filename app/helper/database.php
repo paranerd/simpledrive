@@ -1988,7 +1988,7 @@ class Database {
 	 * @return string|null
 	 */
 	public function cache_id_for_path($uid, $path) {
-		$path = explode("/", $path);
+		$path = explode("/", rtrim($path, "/"));
 		array_shift($path);
 		$fid = $this->cache_get_root_id($uid);
 

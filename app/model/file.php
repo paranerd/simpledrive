@@ -928,8 +928,11 @@ class File_Model {
 			$max_upload = Util::convert_size(ini_get('upload_max_filesize'));
 			$parent = $this->get_cached($target, PERMISSION_WRITE);
 
-			if (!$parent || !$this->filename_valid($_FILES[0]['name'])) {
+			if (!$parent) {
 				throw new Exception('Access denied', 403);
+			}
+			else if (!$this->filename_valid($_FILES[0]['name'])) {
+				throw new Exception('Filename not allowed', 400);
 			}
 
 			$u = new User_Model($this->token);
@@ -943,7 +946,7 @@ class File_Model {
 			$parent_id = $parent['id'];
 
 			$upload_relative_path = rtrim(trim($_POST['paths'], '/'), '/');
-			$upload_relative_path_arr = explode('/', $upload_relative_path);
+			$upload_relative_path_arr = preg_split('/\//', $upload_relative_path, null, PREG_SPLIT_NO_EMPTY);
 
 			// Create folder if not exists and user has the permission (for each sub-folder)
 			while (sizeof($upload_relative_path_arr) > 0) {
@@ -968,7 +971,7 @@ class File_Model {
 				}
 			}
 
-			$rel_path .= ($_POST['paths']) ? "/" . $_FILES[0]['name'] : $_FILES[0]['name'];
+			$rel_path = rtrim($rel_path, '/') .  "/" . $_FILES[0]['name'];
 			$fid = $this->db->cache_id_for_path($parent['ownerid'], $rel_path);
 
 			// Actually write the file
