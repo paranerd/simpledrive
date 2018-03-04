@@ -1620,7 +1620,7 @@ class Database {
 		$stmt->execute();
 
 		$this->history_add($fid, $path, $oid, $timestamp, false);
-		return $fid;
+		return $this->cache_get($fid, $oid, true);
 	}
 
 	/**
@@ -1960,40 +1960,41 @@ class Database {
 	}
 
 	/**
-	 * Get restore path for trashed file
+	 * Get original parent for trashed file
 	 *
 	 * @param string $fid
 	 * @return string|null
 	 */
-	public function cache_get_restore_path($fid) {
+	public function cache_get_restore_parent($fid) {
 		$stmt = $this->link->prepare(
-			'SELECT restorepath
+			'SELECT restorepath, owner
 			FROM sd_trash
-			WHERE id = ?'
+			JOIN sd_cache ON sd_trash.id = sd_cache.id
+			WHERE sd_trash.id = ?'
 		);
 		$stmt->bind_param('s', $fid);
 		$stmt->execute();
 		$stmt->store_result();
-		$stmt->bind_result($path);
+		$stmt->bind_result($path, $oid);
 		$stmt->fetch();
 
-		return ($stmt->affected_rows == 1) ? $path : null;
+		return ($stmt->affected_rows == 1) ? $this->cache_file_for_path($oid, $path) : null;
 	}
 
 	/**
 	 * Get FileID for path from cache
 	 *
-	 * @param int $uid
+	 * @param int $oid
 	 * @param string $path (must start and not end with "/")
 	 * @return string|null
 	 */
-	public function cache_id_for_path($uid, $path) {
+	public function cache_file_for_path($oid, $path) {
 		$path = explode("/", rtrim($path, "/"));
 		array_shift($path);
-		$fid = $this->cache_get_root_id($uid);
+		$fid = $this->cache_get_root_id($oid);
 
 		if (!$path[0]) {
-			return $fid;
+			return $this->cache_get($fid, $oid, true);
 		}
 
 		do {
@@ -2007,14 +2008,14 @@ class Database {
 				AND sd_cache.filename = ?
 				AND sd_trash.id IS NULL'
 			);
-			$stmt->bind_param('iss', $uid, $fid, $filename);
+			$stmt->bind_param('iss', $oid, $fid, $filename);
 			$stmt->execute();
 			$stmt->store_result();
 			$stmt->bind_result($fid);
 			$stmt->fetch();
 		} while ($stmt->num_rows > 0 && sizeof($path) > 0 && $fid != null);
 
-		return $fid;
+		return $this->cache_get($fid, $oid, true);
 	}
 
 	/**

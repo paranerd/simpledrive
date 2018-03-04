@@ -453,7 +453,7 @@ class File_Model {
 			($type == 'folder' && mkdir($path . "/" . $filename, 0777, true)))
 		{
 			$md5 = (is_dir($path . "/" . $filename)) ? "0" : md5_file($path . "/" . $filename);
-			return $this->db->cache_add(
+			$file = $this->db->cache_add(
 				$filename,
 				$parent['id'],
 				self::type($path . "/" . $filename),
@@ -463,6 +463,8 @@ class File_Model {
 				$md5,
 				$parent['path'] . "/" . $filename
 			);
+
+			return $file['id'];
 		}
 
 		throw new Exception('Error creating file', 403);
@@ -770,7 +772,7 @@ class File_Model {
 				return $destination;
 			}
 
-			return $this->db->cache_add(
+			$file = $this->db->cache_add(
 				basename($destination),
 				$targetfile['id'],
 				self::type($destination),
@@ -780,6 +782,8 @@ class File_Model {
 				md5_file($destination),
 				$targetfile['path'] . "/" . basename($destination)
 			);
+
+			return $file['id'];
 		}
 
 		throw new Exception('Error creating zip file', 500);
@@ -834,7 +838,17 @@ class File_Model {
 				continue;
 			}
 
-			$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
+			$trash_path = $this->config['datadir'] . $file['owner'] . TRASH . $file['id'];
+			$orig_parent = $this->db->cache_get_restore_parent($file['id']);
+			$restore_parent = ($orig_parent) ? $orig_parent : $this->get_cached("", PERMISSION_WRITE);
+			$destination = $this->config['datadir'] . $file['owner'] . FILES . $restore_parent['path'] . "/" . $file['filename'];
+
+			if (!file_exists($destination) && rename($trash_path, $destination)) {
+				$this->db->cache_restore($file['id'], $restore_parent['id'], $file['ownerid'], $restore_parent['path'] . "/" . $file['filename']);
+				continue;
+			}
+
+			/*$path = $this->config['datadir'] . $file['owner'] . FILES . $file['path'];
 			$home_path = $this->config['datadir'] . $file['owner'] . FILES . "/" . $file['filename'];
 			$trash_path = $this->config['datadir'] . $file['owner'] . TRASH . $file['id'];
 
@@ -853,7 +867,7 @@ class File_Model {
 			else if (!file_exists($home_path) && rename($trash_path, $home_path)) {
 				$this->db->cache_restore($file['id'], $this->db->cache_get_root_id($file['ownerid']), $file['owner'], "/" . $file['filename']);
 				continue;
-			}
+			}*/
 
 			$errors++;
 		}
@@ -943,41 +957,58 @@ class File_Model {
 			$userdir = $this->config['datadir'] . $parent['owner'] . FILES;
 			$rel_path = $parent['path'];
 
-			$parent_id = $parent['id'];
-
 			$upload_relative_path = rtrim(trim($_POST['paths'], '/'), '/');
 			$upload_relative_path_arr = preg_split('/\//', $upload_relative_path, null, PREG_SPLIT_NO_EMPTY);
 
+			$this->log->debug("parent before:");
+			$this->log->debug($parent);
+
 			// Create folder if not exists and user has the permission (for each sub-folder)
 			while (sizeof($upload_relative_path_arr) > 0) {
+				$this->log->debug("in while");
 				$next = array_shift($upload_relative_path_arr);
 				$rel_path .= "/" . $next;
+				//$path = $parent['path'] . "/" . array_shift($upload_relative_path_arr);
+				$this->log->debug("rel_path: " . $rel_path);
 
 				if (!file_exists($userdir . $rel_path)) {
-					if (mkdir($userdir . $rel_path, 0755) && $this->get_cached($parent_id, PERMISSION_WRITE)) {
-						$parent_id = $this->add($userdir . $rel_path, $rel_path, $parent_id, $parent['ownerid']);
+					if (mkdir($userdir . $rel_path, 0755) && $this->get_cached($parent['id'], PERMISSION_WRITE)) {
+						$parent = $this->add($userdir . $rel_path, $rel_path, $parent['id'], $parent['ownerid']);
 					}
 					else {
 						throw new Exception('Error uploading', 500);
 					}
 				}
 				else {
-					$parent_id = $this->db->cache_id_for_path($parent['ownerid'], $rel_path);
+					$this->log->debug("ELSE | get new parent");
+					$parent = $this->db->cache_file_for_path($parent['ownerid'], $rel_path);
+					$this->log->debug($parent);
 					// Only need write access for the last directory
 					$access_required = (sizeof($upload_relative_path_arr) == 0) ? PERMISSION_WRITE : PERMISSION_READ;
-					if (!$this->get_cached($parent_id, $access_required)) {
+					if (!$this->get_cached($parent['id'], $access_required)) {
 						throw new Exception('Access denied', 403);
 					}
 				}
 			}
 
-			$rel_path = rtrim($rel_path, '/') .  "/" . $_FILES[0]['name'];
-			$fid = $this->db->cache_id_for_path($parent['ownerid'], $rel_path);
+			$this->log->debug("parent after:");
+			$this->log->debug($parent);
+
+			//$rel_path = rtrim($rel_path, '/') .  "/" . $_FILES[0]['name'];
+			//$destination = $this->db->cache_file_for_path($parent['ownerid'], $rel_path);
+			$rel_path = rtrim($parent['path'], '/') .  "/" . $_FILES[0]['name'];
+			$this->log->debug("ask for file_for_path");
+			$destination = $this->db->cache_file_for_path($parent['ownerid'], $rel_path);
+
+			$this->log->debug("parent:");
+			$this->log->debug($parent);
+			$this->log->debug("rel_path: " . $rel_path);
+			$this->log->debug($destination);
 
 			// Actually write the file
 			if (move_uploaded_file($_FILES[0]['tmp_name'], $userdir . $rel_path)) {
-				if ($fid) {
-					$this->update($fid);
+				if ($destination) {
+					$this->update($destination['id']);
 				}
 				else {
 					$this->add($userdir . $rel_path, $rel_path, $parent['id'], $parent['ownerid']);
@@ -1388,7 +1419,7 @@ class File_Model {
 	 */
 	public function add($path, $rel_path, $parent_id, $oid, $include_childs = false) {
 		$md5 = (is_dir($path)) ? "0" : md5_file($path);
-		$child_id = $this->db->cache_add(
+		$child = $this->db->cache_add(
 			basename($path),
 			$parent_id,
 			self::type($path),
@@ -1403,7 +1434,7 @@ class File_Model {
 			$this->add_folder($path . "/", $rel_path . "/", $child_id, $oid);
 		}
 
-		return $child_id;
+		return $child;
 	}
 
 	/**
@@ -1420,7 +1451,7 @@ class File_Model {
 		foreach ($files as $file) {
 			if (is_readable($path . $file) && substr($file, 0, 1) != ".") {
 				$md5 = (is_dir($path . $file)) ? "0" : md5_file($path . $file);
-				$child_id = $this->db->cache_add(
+				$child = $this->db->cache_add(
 					$file,
 					$fid,
 					self::type($path . $file),
@@ -1432,7 +1463,7 @@ class File_Model {
 				);
 
 				if (is_dir($path . $file)) {
-					$this->add_folder($path . $file . "/", $rel_path . $file . "/", $child_id, $oid);
+					$this->add_folder($path . $file . "/", $rel_path . $file . "/", $child['id'], $oid);
 				}
 			}
 		}

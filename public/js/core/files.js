@@ -1337,14 +1337,14 @@ var FileModel = new function() {
 		});
 
 		xhr.upload.onload = function(ev) {
-			if (self.uploadQueue.length) {
-				setTimeout(function() {
+			setTimeout(function() {
+				if (self.uploadQueue.length) {
 					self.upload();
-				}, 1000);
-			}
-			else {
-				self.uploadFinish();
-			}
+				}
+				else {
+					self.uploadFinish();
+				}
+			}, 1000);
 		}
 
 		xhr.open("POST", "api/files/upload", true);
@@ -1361,6 +1361,7 @@ var FileModel = new function() {
 		if (abort) {
 			Util.notify("Upload aborted", true, false);
 		}
+
 		self.uploadRunning = false;
 		self.uploadQueue = [];
 		self.uploadBytesLoaded = 0;
