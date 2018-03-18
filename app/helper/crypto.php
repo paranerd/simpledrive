@@ -8,9 +8,10 @@
  */
 
 class Crypto {
-	static $encryption_method	= 'aes-256-cbc';
-	static $block_size			= 16;
-	static $key_size			= 32; // in bytes - so 256 bit for aes-256
+	static $encryption_method = 'aes-256-cbc';
+	static $block_size        = 16;
+	static $key_size          = 32; // in bytes - so 256 bit for aes-256
+	static $iterations        = 2048;
 
 	/**
 	 * Encrypt string
@@ -211,7 +212,7 @@ class Crypto {
 	 * @return string
 	 */
 	private static function generate_key($secret, $salt) {
-		return hash_pbkdf2('sha1', $secret, $salt, 2048, self::$key_size, true);
+		return hash_pbkdf2('sha1', $secret, $salt, self::$iterations, self::$key_size, true);
 	}
 
 	/**

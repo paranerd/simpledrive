@@ -8,6 +8,7 @@
 var Crypto = {
 	blockSize: 128,
 	keySize: 256,
+	iterations: 2048,
 
 	encrypt: function(msg, secret, sign) {
 		// Generate IV (16 Bytes)
@@ -56,7 +57,7 @@ var Crypto = {
 			salt,
 			{
 				keySize: this.keySize / 32,
-				iterations: 2048,
+				iterations: this.iterations,
 				hasher: CryptoJS.algo.SHA1
 			}
 		);
