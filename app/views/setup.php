@@ -8,8 +8,8 @@
  */
 
 if (file_exists(CONFIG)) {
-	header('Location: ' . $base . 'core/login');
-	exit();
+	//header('Location: ' . $base . 'core/login');
+	//exit();
 }
 
 ?>
@@ -30,6 +30,12 @@ if (file_exists(CONFIG)) {
 	</head>
 <body class="dark">
 	<div class="brand" title="simpleDrive"><div>simpleDrive</div></div>
+
+	<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; overflow: auto; flex-direction: column; padding: 40px 0 40px 0;">
+		<div>start</div>
+		<div style="height: 500px; width: 300px; background: red; flex-shrink: 0;"></div>
+		<div>end</div>
+	</div>
 
 	<form id="setup" class="major-form center" action="#">
 		<div class="title">Setup</div>

@@ -330,6 +330,8 @@ class Database {
 	 * @return array
 	 */
 	public function user_get_by_name($username, $full = false) {
+		$log = new Log();
+		$log->debug("user_get_by_name");
 		return $this->user_get("user", $username, $full);
 	}
 

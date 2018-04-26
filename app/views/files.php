@@ -36,7 +36,7 @@
 		<div id="title"></div>
 		<!-- Username -->
 		<?php if ($section != 'pub') : ?>
-		<div id="username" class="popup-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
+		<div id="username" class="menu-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
 		<?php endif; ?>
 	</div>
 
@@ -44,8 +44,8 @@
 		<!-- Sidebar -->
 		<div id="sidebar">
 			<ul class="menu">
-				<li id="sidebar-create" class="popup-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span><span><?php echo $lang['new']; ?></span></li>
-				<li id="sidebar-upload" class="popup-trigger" title="Upload file(s)" data-target="upload-menu"><span class="icon icon-upload"></span><span>Upload</span></li>
+				<li id="sidebar-create" class="menu-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span><span><?php echo $lang['new']; ?></span></li>
+				<li id="sidebar-upload" class="menu-trigger" title="Upload file(s)" data-target="upload-menu"><span class="icon icon-upload"></span><span>Upload</span></li>
 				<?php if ($section != 'pub') : ?>
 				<hr>
 				<li id="sidebar-files" class="sidebar-navigation focus" title="Show all files" data-action="files"><span class="icon icon-files"></span><span class="label"><?php echo $lang['myfiles']; ?></span></li>
@@ -123,7 +123,11 @@
 				<span class="col5" data-sortby="edit"><span id="file-edit-ord" class="order-direction"></span><span><?php echo $lang['edit']; ?> </span></span>
 			</div>
 
-			<div id="files" class="content"></div>
+			<div id="files" class="content">
+				<div class="center">
+					<p class="empty">Nothing to see here</p>
+				</div>
+			</div>
 		</div>
 
 		<!-- File Info Panel -->
@@ -147,7 +151,7 @@
 	</div>
 
 	<!-- Upload menu -->
-	<div id="upload-menu" class="popup popup-menu hidden">
+	<div id="upload-menu" class="popup-menu hidden">
 		<ul class="menu">
 			<li id="upload-file" class="upload-button">
 				<span class="icon icon-unknown"></span><span><?php echo "Upload " . $lang['file']; ?></span>
@@ -161,7 +165,7 @@
 	</div>
 
 	<!-- Create menu -->
-	<div id="create-menu" class="popup popup-menu hidden">
+	<div id="create-menu" class="popup-menu hidden">
 		<ul class="menu">
 			<li class="popup-trigger" data-target="create" data-type="file"><span class="icon icon-unknown"></span><span><?php echo $lang['new file']; ?></span></li>
 			<li class="popup-trigger" data-target="create" data-type="folder"><span class="icon icon-folder"></span><span><?php echo $lang['new folder']; ?></span></li>
@@ -169,7 +173,7 @@
 	</div>
 
 	<!-- Context menu -->
-	<div id="contextmenu" class="popup popup-menu hidden">
+	<div id="contextmenu" class="popup-menu hidden">
 		<ul class="menu">
 			<li id="context-add" class="hidden"><span class="icon icon-add"></span><span><?php echo $lang['new']; ?></span>
 				<ul>
@@ -198,7 +202,7 @@
 	</div>
 
 	<!-- Menu -->
-	<div id="menu" class="popup popup-menu hidden">
+	<div id="menu" class="popup-menu hidden">
 		<ul class="menu">
 			<li><a href="files"><span class="icon icon-files"></span><span>Files</span></a></li>
 			<li><a href="user"><span class="icon icon-settings"></span><span>Settings</span></a></li>
@@ -214,84 +218,91 @@
 	<!-- Cursor Info -->
 	<div id="cursorinfo" class="hidden"></div>
 
-	<!-- Shield -->
-	<div id="shield" class="overlay hidden"></div>
-
 	<!-- Create popup -->
-	<form id="create" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div class="title"><?php echo $lang['create']; ?></div>
+	<div id="create" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div class="title"><?php echo $lang['create']; ?></div>
 
-		<label for="create-input"><?php echo $lang['filename']; ?></label>
-		<input id="create-input" type="text" placeholder="<?php echo $lang['filename']; ?>" />
+			<label for="create-input"><?php echo $lang['filename']; ?></label>
+			<input id="create-input" type="text" placeholder="<?php echo $lang['filename']; ?>" />
 
-		<div class="error hidden"></div>
-		<input id="create-type" type="hidden" name="type" />
-		<button class="btn">OK</button>
-	</form>
+			<div class="error hidden"></div>
+			<input id="create-type" type="hidden" name="type" />
+			<button class="btn">OK</button>
+		</form>
+	</div>
 
 	<!-- Search popup -->
-	<form id="search" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div class="title"><?php echo $lang['search']; ?></div>
+	<div id="search" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div class="title"><?php echo $lang['search']; ?></div>
 
-		<label for="search-input"><?php echo $lang['filename']; ?></label>
-		<input id="search-input" type="text" placeholder="<?php echo $lang['filename']; ?>" />
+			<label for="search-input"><?php echo $lang['filename']; ?></label>
+			<input id="search-input" type="text" placeholder="<?php echo $lang['filename']; ?>" />
 
-		<div class="error hidden"></div>
-		<button class="btn">OK</button>
-	</form>
+			<div class="error hidden"></div>
+			<button class="btn">OK</button>
+		</form>
+	</div>
 
 	<!-- Encrypt popup -->
-	<form id="encrypt" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div class="title"><?php echo $lang['encrypt']; ?></div>
+	<div id="encrypt" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div class="title"><?php echo $lang['encrypt']; ?></div>
 
-		<label for="encrypt-input"><?php echo $lang['password']; ?></label>
-		<input id="encrypt-input" type="password" placeholder="<?php echo $lang['password']; ?>" />
+			<label for="encrypt-input"><?php echo $lang['password']; ?></label>
+			<input id="encrypt-input" type="password" placeholder="<?php echo $lang['password']; ?>" />
 
-		<div class="error hidden"></div>
-		<button class="btn">OK</button>
-	</form>
+			<div class="error hidden"></div>
+			<button class="btn">OK</button>
+		</form>
+	</div>
 
 	<!-- Decrypt popup -->
-	<form id="decrypt" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div class="title"><?php echo $lang['decrypt']; ?></div>
+	<div id="decrypt" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div class="title"><?php echo $lang['decrypt']; ?></div>
 
-		<label for="decrypt-input"><?php echo $lang['password']; ?></label>
-		<input id="decrypt-input" type="password" placeholder="<?php echo $lang['decrypt']; ?>" />
+			<label for="decrypt-input"><?php echo $lang['password']; ?></label>
+			<input id="decrypt-input" type="password" placeholder="<?php echo $lang['decrypt']; ?>" />
 
-		<div class="error hidden"></div>
-		<button class="btn">OK</button>
-	</form>
+			<div class="error hidden"></div>
+			<button class="btn">OK</button>
+		</form>
+	</div>
 
 	<!-- Share popup -->
-	<form id="share" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div class="title"><?php echo $lang['share']; ?></div>
+	<div id="share" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div class="title"><?php echo $lang['share']; ?></div>
 
-		<label><?php echo $lang['username']; ?></label>
-		<input id="share-user" class="input-indent" type="text" tabindex=1 placeholder="<?php echo $lang['username']; ?>">
+			<label><?php echo $lang['username']; ?></label>
+			<input id="share-user" class="input-indent" type="text" tabindex=1 placeholder="<?php echo $lang['username']; ?>">
 
-		<label for="share-key" class="hidden form-hidden"><?php echo $lang['password']; ?></label>
-		<input id="share-key" type="text" class="hidden form-hidden" tabindex=2 placeholder="<?php echo $lang['password']; ?> (optional)" autocomplete="off">
+			<label for="share-key" class="hidden form-hidden"><?php echo $lang['password']; ?></label>
+			<input id="share-key" type="text" class="hidden form-hidden" tabindex=2 placeholder="<?php echo $lang['password']; ?> (optional)" autocomplete="off">
 
-		<label for="share-mail" class="hidden form-hidden">Mail</label>
-		<input id="share-mail" type="text" class="hidden form-hidden" tabindex=3 placeholder="Mail (optional)">
+			<label for="share-mail" class="hidden form-hidden">Mail</label>
+			<input id="share-mail" type="text" class="hidden form-hidden" tabindex=3 placeholder="Mail (optional)">
 
-		<div class="checkbox">
-			<span id="share-write" class="checkbox-box" tabindex=4></span>
-			<span class="checkbox-label"><?php echo $lang['write']; ?></span>
-		</div>
-		<div class="checkbox">
-			<span id="share-public" class="checkbox-box toggle-hidden" tabindex=5></span>
-			<span class="checkbox-label"><?php echo $lang['public']; ?></span>
-		</div>
+			<div class="checkbox">
+				<span id="share-write" class="checkbox-box" tabindex=4></span>
+				<span class="checkbox-label"><?php echo $lang['write']; ?></span>
+			</div>
+			<div class="checkbox">
+				<span id="share-public" class="checkbox-box toggle-hidden" tabindex=5></span>
+				<span class="checkbox-label"><?php echo $lang['public']; ?></span>
+			</div>
 
-		<div class="error hidden"></div>
-		<button class="btn">OK</button>
-	</form>
+			<div class="error hidden"></div>
+			<button class="btn">OK</button>
+		</form>
+	</div>
 
 	<!-- Image Viewer -->
 	<div id="img-viewer" class="overlay hidden">
@@ -307,10 +318,12 @@
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<div id="info-title" class="title title-large">simpleDrive</div>
-		<div class="subtitle">Private. Secure. Simple.</div>
-		<hr>
-		<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		<div>
+			<div id="info-title" class="title title-large">simpleDrive</div>
+			<div class="subtitle">Private. Secure. Simple.</div>
+			<hr>
+			<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		</div>
 	</div>
 
 	<!-- Video player -->
@@ -329,13 +342,15 @@
 	</div>
 
 	<!-- Confirm -->
-	<form id="confirm" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div id="confirm-title" class="title">Confirm</div>
+	<div id="confirm" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div id="confirm-title" class="title">Confirm</div>
 
-		<button id="confirm-no" class="btn btn-inverted cancel" tabindex=2>Cancel</button>
-		<button id="confirm-yes" class="btn" tabindex=1>OK</button>
-	</form>
+			<button id="confirm-no" class="btn btn-inverted cancel" tabindex=2>Cancel</button>
+			<button id="confirm-yes" class="btn" tabindex=1>OK</button>
+		</form>
+	</div>
 
 	<!-- Public share overlay -->
 	<?php if ($public && strlen($id) == 8) : ?>
@@ -358,7 +373,6 @@
 	<?php endif; ?>
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
-	<script type="text/javascript" src="public/js/util/simplescroll.js"></script>
 	<script type="text/javascript" src="public/js/util/util.js"></script>
 	<script type="text/javascript" src="public/js/util/list.js"></script>
 

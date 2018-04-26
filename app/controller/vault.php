@@ -44,6 +44,8 @@ class Vault_Controller {
 	}
 
 	public function save() {
-		return $this->model->save($_REQUEST['vault']);
+		$file = $_FILES[0] ?? null;
+		$filehash = $_REQUEST['filehash'] ?? "";
+		return $this->model->save($_REQUEST['vault'], $file, $filehash);
 	}
 }

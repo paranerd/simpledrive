@@ -247,10 +247,6 @@ var FileController = new function() {
 			if (e.target.id != "renameinput") {
 				FileView.closeRename();
 			}
-
-			if (e.which != 3) {
-				Util.closePopup('contextmenu');
-			}
 		});
 
 		$(document).on('mousedown', '.item', function(e) {
@@ -532,7 +528,7 @@ var FileView = new function() {
 
 	this.enableLazyLoad = function() {
 		// Enable lazyloading of thumbnail images
-		var ssc = document.getElementById('simpleScrollContainer0');
+		var ssc = document.getElementById('files');
 		ssc.addEventListener('scroll', function() {
 			if (self.scrollTimeout) clearTimeout(self.scrollTimeout);
 
@@ -546,13 +542,13 @@ var FileView = new function() {
 		$('#sidebar, #logo').addClass('hidden');
 		self.originalFileview = ($('#content-container').hasClass('list')) ? 'list' : 'grid';
 		$('#content-container').removeClass('list').addClass('grid');
-		FileModel.list.masterFilter('image', ['type']);
+		FileModel.list.filter('image', ['type'], 'gallery');
 		self.galleryMode = true;
 	}
 
 	this.closeGallery = function() {
 		self.galleryMode = false;
-		FileModel.list.masterFilterRemove();
+		FileModel.list.removeFilter('gallery');
 		$("#sidebar, #logo").removeClass("hidden");
 		$('#content-container').removeClass('list grid').addClass(self.originalFileview);
 	}
@@ -568,7 +564,7 @@ var FileView = new function() {
 			listItem.id = "item" + i;
 			listItem.value = i;
 			listItem.className = "item";
-			simpleScroll.append("files", listItem);
+			$("#files").append(listItem);
 
 			// Thumbnail
 			var thumbnailWrapper = document.createElement("span");
@@ -581,7 +577,6 @@ var FileView = new function() {
 			thumbnailWrapper.appendChild(thumbnail);
 
 			// Shared icon
-			//if (item.shared) {
 			if (item.sharestatus != 0) {
 				var shareIcon = document.createElement("span");
 				shareIcon.className = "shared icon-users";
@@ -1288,7 +1283,7 @@ var FileModel = new function() {
 
 		$(elem).val(''); // Remove files from DOM
 
-		Util.closePopup('upload-menu');
+		Util.closeMenu();
 
 		if (!self.uploadRunning) {
 			$("#upload-percent, #upload-filename, #upload-title").text('');

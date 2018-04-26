@@ -37,14 +37,14 @@
 			<div class="title-element title-element-current">Entries</div>
 		</div>
 		<!-- Username -->
-		<div id="username" class="popup-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
+		<div id="username" class="menu-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
 	</div>
 
 	<div class="main">
 		<!-- Sidebar -->
 		<div id="sidebar">
 			<ul class="menu">
-				<li id="sidebar-create" class="popup-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span><span><?php echo $lang['new']; ?></span></li>
+				<li id="sidebar-create" class="menu-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span><span><?php echo $lang['new']; ?></span></li>
 				<li id="sidebar-entries" class="sidebar-navigation focus" title="Entries" data-action="entries"><span class="icon icon-info"></span><span>Entries</span></li>
 				<li id="sidebar-passgen" class="popup-trigger" title="Entries" data-target="password-generator"><span class="icon icon-key"></span><span>Password Generator</span></li>
 			</ul>
@@ -64,20 +64,24 @@
 				<span class="col5" data-sortby="edit"><span id="edit-ord" class="order-direction"></span><span><?php echo $lang['edit']; ?> </span></span>
 			</div>
 
-			<div id="entries" class="content"></div>
+			<div id="entries" class="content">
+				<div class="center">
+					<p class="empty">Nothing to see here</p>
+				</div>
+			</div>
 		</div>
 	</div>
 
 	<!-- Create menu -->
-	<div id="create-menu" class="popup popup-menu hidden">
+	<div id="create-menu" class="popup-menu hidden">
 		<ul class="menu">
-			<li class="create-trigger" data-type="website"><span class="icon icon-key"></span><span><?php echo $lang['new website']; ?></span></li>
-			<li class="create-trigger" data-type="note"><span class="icon icon-key"></span><span><?php echo $lang['new note']; ?></span></li>
+			<li class="create-trigger" data-type="website"><span class="icon icon-website"></span><span><?php echo $lang['new website']; ?></span></li>
+			<li class="create-trigger" data-type="note"><span class="icon icon-note"></span><span><?php echo $lang['new note']; ?></span></li>
 		</ul>
 	</div>
 
 	<!-- Menu -->
-	<div id="menu" class="popup popup-menu hidden">
+	<div id="menu" class="popup-menu hidden">
 		<ul class="menu">
 			<li><a href="files"><span class="icon icon-files"></span><span>Files</span></a></li>
 			<li><a href="user"><span class="icon icon-settings"></span><span>Settings</span></a></li>
@@ -91,7 +95,7 @@
 	</div>
 
 	<!-- Context menu -->
-	<div id="contextmenu" class="popup popup-menu hidden">
+	<div id="contextmenu" class="popup-menu hidden">
 		<ul class="menu">
 			<li id="context-passphrase" class="hidden"><span class="icon icon-key"></span><span>Change password</span></li>
 			<hr class="hidden">
@@ -101,140 +105,154 @@
 	</div>
 
 	<!-- Website-Entry popup -->
-	<form id="entry-website" class="popup center hidden" action="#" data-type="website">
-		<span class="close">&times;</span>
-		<div id="website-title-new" class="title">New Login-Info</div>
-		<div id="website-title-edit" class="title">Edit Login-Info</div>
+	<div id="entry-website" class="popup center hidden" data-type="website">
+		<form class="hidden" action="#">
+			<span class="close">&times;</span>
+			<div id="website-title-new" class="title">New Login-Info</div>
+			<div id="website-title-edit" class="title">Edit Login-Info</div>
 
-		<label>Title</label>
-		<input id="entry-website-title" class="input-indent" type="text" placeholder="Title">
+			<label>Title</label>
+			<input id="entry-website-title" class="input-indent" type="text" placeholder="Title">
 
-		<label>Category</label>
-		<input id="entry-website-category" class="input-indent" type="text" placeholder="Category" list="categories">
-		<datalist id="categories"><option value="test">Test</option></datalist>
+			<label>Category</label>
+			<input id="entry-website-category" class="input-indent" type="text" placeholder="Category" list="categories">
+			<datalist id="categories"><option value="test">Test</option></datalist>
 
-		<label>URL</label>
-		<input id="entry-website-url" class="input-indent" type="text" placeholder="URL">
+			<label>URL</label>
+			<div class="input-with-button input-indent">
+				<input id="entry-website-url" type="text" placeholder="URL" />
+				<span id="entry-website-open-url" class="icon icon-redo"><a style="display: block;" target="_blank" href="#"></a></span>
+			</div>
 
-		<label>Username</label>
-		<input id="entry-website-user" class="input-indent" type="text" placeholder="Username">
+			<label>Username</label>
+			<div class="input-with-button input-indent">
+				<input id="entry-website-user" type="text" placeholder="Username" />
+				<span id="entry-website-copy-user" class="icon icon-copy"></span>
+			</div>
 
-		<label>Password</label>
-		<div class="input-password">
-			<input id="entry-website-pass" class="input-indent" type="password" placeholder="Password">
-			<span class="icon icon-visible"></span>
-		</div>
+			<label>Password</label>
+			<div class="input-with-button">
+				<input id="entry-website-pass" class="input-indent password" type="password" placeholder="Password">
+				<span class="icon icon-visible password-toggle"></span>
+				<span id="entry-website-copy-pass" class="icon icon-copy"></span>
+			</div>
 
-		<label>Notes</label>
-		<div>
-			<textarea id="entry-website-notes" class="input-indent" placeholder="Notes"></textarea>
-		</div>
+			<label>Notes</label>
+			<div>
+				<textarea id="entry-website-notes" class="input-indent" placeholder="Notes"></textarea>
+			</div>
 
-		<div style="width: 100%; height: 50px; margin-top: 15px; margin-bottom: 15px;">
-			<div id="entry-website-copy-pass" class="btn">Copy Pass</div>
-			<div id="entry-website-copy-user" class="btn">Copy User</div>
-			<div id="entry-website-open-url" class="btn"><a target="_blank" href="#">Go to URL</a></div>
-		</div>
-
-		<div class="error hidden"></div>
-		<button class="btn">Save</button>
-	</form>
+			<div class="error hidden"></div>
+			<span id="add-file" class="btn">
+				Add File
+				<input class="upload-input hidden" type="file" enctype="multipart/form-data" name="files[]">
+			</span>
+			<button class="btn">Save</button>
+		</form>
+	</div>
 
 	<!-- Note-Entry popup -->
-	<form id="entry-note" class="popup center hidden" action="#" data-type="note">
-		<span class="close">&times;</span>
-		<div id="note-title-new" class="title">New Note</div>
-		<div id="note-title-edit" class="title">Edit Note</div>
+	<div id="entry-note" class="popup center hidden" data-type="note">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div id="note-title-new" class="title">New Note</div>
+			<div id="note-title-edit" class="title">Edit Note</div>
 
-		<label>Title</label>
-		<input id="entry-note-title" class="input-indent" type="text" placeholder="Title">
+			<label>Title</label>
+			<input id="entry-note-title" class="input-indent" type="text" placeholder="Title">
 
-		<label>Category</label>
-		<input id="entry-note-category" class="input-indent" type="text" placeholder="Category">
+			<label>Category</label>
+			<input id="entry-note-category" class="input-indent" type="text" placeholder="Category">
 
-		<label>Content</label>
-		<textarea id="entry-note-content" placeholder="Content"></textarea>
+			<label>Content</label>
+			<textarea id="entry-note-content" placeholder="Content"></textarea>
 
-		<div class="error hidden"></div>
-		<button class="btn">Save</button>
-	</form>
+			<div class="error hidden"></div>
+			<button class="btn">Save</button>
+		</form>
+	</div>
 
 	<!-- Password Generator popup -->
-	<form id="password-generator" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div class="title">Password Generator</div>
+	<div id="password-generator" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div class="title">Password Generator</div>
 
-		<label for="passgen-password">Password:</label>
-		<div id="passgen-password" class="output center-hor"></div>
+			<label for="passgen-password">Password:</label>
+			<div id="passgen-password" class="output center-hor"></div>
 
-		<label for="passgen-length">Length</label>
-		<input id="passgen-length" class="input-indent" type="text" placeholder="Length">
+			<label for="passgen-length">Length</label>
+			<input id="passgen-length" class="input-indent" type="text" placeholder="Length">
 
-		<div class="checkbox">
-			<span id="passgen-upper" class="checkbox-box"></span>
-			<span class="checkbox-label">Uppercase</span>
-		</div>
-		<div class="checkbox">
-			<span id="passgen-lower" class="checkbox-box toggle-hidden"></span>
-			<span class="checkbox-label">Lowercase</span>
-		</div>
-		<div class="checkbox">
-			<span id="passgen-numbers" class="checkbox-box toggle-hidden"></span>
-			<span class="checkbox-label">Numbers</span>
-		</div>
-		<div class="checkbox">
-			<span id="passgen-specials" class="checkbox-box toggle-hidden"></span>
-			<span class="checkbox-label">Special characters</span>
-		</div>
+			<div class="checkbox">
+				<span id="passgen-upper" class="checkbox-box"></span>
+				<span class="checkbox-label">Uppercase</span>
+			</div>
+			<div class="checkbox">
+				<span id="passgen-lower" class="checkbox-box toggle-hidden"></span>
+				<span class="checkbox-label">Lowercase</span>
+			</div>
+			<div class="checkbox">
+				<span id="passgen-numbers" class="checkbox-box toggle-hidden"></span>
+				<span class="checkbox-label">Numbers</span>
+			</div>
+			<div class="checkbox">
+				<span id="passgen-specials" class="checkbox-box toggle-hidden"></span>
+				<span class="checkbox-label">Special characters</span>
+			</div>
 
-		<div id="passgen-copy" class="btn">Copy</div>
+			<div id="passgen-copy" class="btn">Copy</div>
 
-		<div class="error hidden"></div>
-		<button class="btn">Generate</button>
-	</form>
+			<div class="error hidden"></div>
+			<button class="btn">Generate</button>
+		</form>
+	</div>
 
 	<!-- Unlock popup -->
-	<form id="unlock" class="popup center hidden" action="#">
-		<div class="title">Unlock</div>
+	<div id="unlock" class="popup center hidden">
+		<form class="hidden" action="#">
+			<div class="title">Unlock</div>
 
-		<label for="unlock-passphrase">Passphrase</label>
-		<input id="unlock-passphrase" type="password" placeholder="Passphrase" />
+			<label for="unlock-passphrase">Passphrase</label>
+			<input id="unlock-passphrase" type="password" placeholder="Passphrase" />
 
-		<div class="error hidden"></div>
-		<a href="files" class="btn btn-inverted">Exit</a>
-		<button class="btn">OK</button>
-	</form>
+			<div class="error hidden"></div>
+			<a href="files" class="btn btn-inverted">Exit</a>
+			<button class="btn">OK</button>
+		</form>
+	</div>
 
 	<!-- Passphrase popup -->
-	<form id="passphrase" class="popup center hidden" action="#">
-		<div class="title">Set Passphrase</div>
+	<div id="passphrase" class="popup center hidden">
+		<form class="hidden" action="#">
+			<div class="title">Set Passphrase</div>
 
-		<label for="passphrase-passphrase">Passphrase</label>
-		<input id="passphrase-passphrase" type="password" placeholder="Passphrase" />
+			<label for="passphrase-passphrase">Passphrase</label>
+			<input id="passphrase-passphrase" type="password" placeholder="Passphrase" />
 
-		<div class="error hidden"></div>
-		<a href="files" class="btn btn-inverted">Exit</a>
-		<button class="btn">OK</button>
-	</form>
+			<div class="error hidden"></div>
+			<a href="files" class="btn btn-inverted">Exit</a>
+			<button class="btn">OK</button>
+		</form>
+	</div>
 
 	<!-- Change password popup -->
-	<form id="change-passphrase" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div class="title">Change passphrase</div>
+	<div id="change-passphrase" class="popup center hidden">
+		<form class="hidden" action="#">
+			<span class="close">&times;</span>
+			<div class="title">Change passphrase</div>
 
-		<label for="change-passphrase-pass1">New password</label>
-		<input id="change-passphrase-pass1" class="password-check" type="password" data-strength="change-strength" placeholder="New passphrase"></input>
-		<div id="change-passphrase-strength" class="password-strength hidden"></div>
+			<label for="change-passphrase-pass1">New password</label>
+			<input id="change-passphrase-pass1" class="password-check" type="password" data-strength="change-strength" placeholder="New passphrase"></input>
+			<div id="change-passphrase-strength" class="password-strength hidden"></div>
 
-		<label for="change-passphrase-pass2">New password (repeat)</label>
-		<input id="change-passphrase-pass2" type="password" placeholder="New passphrase (repeat)"></input>
+			<label for="change-passphrase-pass2">New password (repeat)</label>
+			<input id="change-passphrase-pass2" type="password" placeholder="New passphrase (repeat)"></input>
 
-		<div class="error hidden"></div>
-		<button class="btn">OK</button>
-	</form>
-
-	<!-- Shield -->
-	<div id="shield" class="overlay hidden"></div>
+			<div class="error hidden"></div>
+			<button class="btn">OK</button>
+		</form>
+	</div>
 
 	<!-- Progress circle -->
 	<div id="busy" class="hidden">
@@ -251,16 +269,17 @@
 	</div>
 
 	<!-- Confirm -->
-	<form id="confirm" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div id="confirm-title" class="title">Confirm</div>
+	<div id="confirm" class="popup center hidden">
+		<form class="hidden" action="#">
+			<span class="close">&times;</span>
+			<div id="confirm-title" class="title">Confirm</div>
 
-		<button id="confirm-no" class="btn btn-inverted cancel" tabindex=2>Cancel</button>
-		<button id="confirm-yes" class="btn" tabindex=1>OK</button>
-	</form>
+			<button id="confirm-no" class="btn btn-inverted cancel" tabindex=2>Cancel</button>
+			<button id="confirm-yes" class="btn" tabindex=1>OK</button>
+		</form>
+	</div>
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
-	<script type="text/javascript" src="public/js/util/simplescroll.js"></script>
 	<script type="text/javascript" src="public/js/util/util.js"></script>
 	<script type="text/javascript" src="public/js/util/list.js"></script>
 

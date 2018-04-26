@@ -25,7 +25,7 @@
  * Important: Client must be logged in to the same account
  * because the unlock-call goes to the current connected server
  */
-class Twofactor_Model {
+class Twofactor_Model extends Model {
 	static $FIREBASE_API_KEY = "AAAAQpBzHQY:APA91bGBXIzXD5-Ycc78zWDLhUB589ky-Ck-R45maLyfjOvZAfScaUb6qSDZJy9fAL--YWIryu0X4u07YtINUk9vU9GBZRXalon8xENm35TVSWpMSuPHgrVqSpWE-Onwi1JtHR1x37rG";
 
 	/**
@@ -34,8 +34,7 @@ class Twofactor_Model {
 	 * @param string $token
 	 */
 	public function __construct($token) {
-		$this->log  = new Log(get_class());
-		$this->db   = Database::get_instance();
+		parent::__construct();
 		$this->user = ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid  = ($this->user) ? $this->user['id'] : null;
 	}

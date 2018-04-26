@@ -143,5 +143,10 @@ var Crypto = {
 		}
 
 		return "";
+	},
+
+	sha1: function(string) {
+		var hash = CryptoJS.SHA1(string);
+		return CryptoJS.enc.Hex.stringify(hash);
 	}
 }

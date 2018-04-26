@@ -9,11 +9,12 @@ var List = (function() {
 
 		// Items
 		this.items = [];
-		this.masterFiltered = [];
+
+		// Filter
 		this.filtered = [];
-		this.filterNeedle = '';
-		this.filterKeys = null;
-		this.defaultFilterKeys = null;
+		this.filters = {};
+
+		// Sorting
 		this.sortKey = null;
 		this.sortOrder = 1; // 1: asc, -1: desc
 
@@ -34,7 +35,7 @@ var List = (function() {
 	List.prototype = {
 		init: function() {
 			$(document).on('keydown', function(e) {
-				if ($("#" + self.id).is(":visible") && $("#shield").hasClass("hidden")) {
+				if ($("#" + self.id).is(":visible") && $(".popup").length == $(".popup.hidden").length) {
 					// Filter
 					if (!e.shiftKey && !e.ctrlKey &&
 						$(":focus").length == 0 &&
@@ -75,7 +76,7 @@ var List = (function() {
 			$(document).on('keyup', function(e) {
 				switch(e.keyCode) {
 					case 27: // Esc
-						self.filterRemove();
+						self.removeFilter();
 						break;
 				}
 			});
@@ -87,14 +88,12 @@ var List = (function() {
 			});
 
 			$("#" + self.id + "-filter .close").on('click', function(e) {
-				self.filterRemove();
+				self.removeFilter();
 			});
 
 			$("#" + this.id + "-filter .filter-input").on('input', function(e) {
 				self.filter($(this).val());
 			});
-
-			simpleScroll.init(self.id);
 		},
 
 		/**
@@ -105,12 +104,10 @@ var List = (function() {
 		 */
 		setItems: function(items, orderBy) {
 			this.items = items;
-			this.masterFiltered = items;
-			this.filtered = items;
-			this.defaultFilterKeys = (orderBy) ? [orderBy] : [];
+			var keys = (orderBy) ? [orderBy] : [];
+			this.filters = {};
+			this.filters['default'] = {needle: '', keys: keys};
 			this.currentSelected = -1;
-
-			this.filterRemove();
 
 			if (orderBy || this.sortKey) {
 				this.order(orderBy, this.sortOrder);
@@ -133,7 +130,7 @@ var List = (function() {
 		 */
 		add: function(item) {
 			this.items.push(item);
-			this.filter(this.filterNeedle, this.filterKeys);
+			this.filter();
 			this.display();
 		},
 
@@ -164,7 +161,7 @@ var List = (function() {
 			for (var d in this.items) {
 				if (this.filtered[id] == this.items[d]) {
 					this.items.splice(d, 1);
-					this.filter(this.filterNeedle, this.filterKeys);
+					this.filter();
 					this.display();
 					break;
 				}
@@ -366,13 +363,8 @@ var List = (function() {
 		 * @param string msg
 		 */
 		setEmptyView: function(msg) {
-			simpleScroll.empty(self.id);
-			var empty = document.createElement("div");
-			empty.style.lineHeight = $("#" + self.id).height() + "px";
-			empty.className = "empty";
-			empty.innerHTML = (msg) ? msg : "Nothing to see here...";
-			simpleScroll.append(self.id, empty);
-			simpleScroll.update();
+			$("#" + self.id + " > .item").remove();
+			$("#" + self.id + " .empty").show();
 		},
 
 		/**
@@ -400,27 +392,16 @@ var List = (function() {
 		},
 
 		/**
-		 * A filter before the filter
-		 * e.g. for filtering in gallery mode
-		 *
-		 * @param string needle
-		 * @param array keys
-		 */
-		masterFilter: function(needle, keys) {
-			this.masterFiltered = this.filter(needle, keys);
-		},
-
-		/**
-		 * Set empty view or nvoke displayCallback
+		 * Set empty view or invoke displayCallback
 		 */
 		display: function() {
 			if (!this.filtered || this.filtered.length == 0) {
 				this.setEmptyView();
 			}
 			else if (this.displayCallback) {
-				simpleScroll.empty(self.id);
+				$("#" + self.id + " > .item").remove();
+				$("#" + self.id + " .empty").hide();
 				this.displayCallback(this.filtered);
-				simpleScroll.update(self.id);
 			}
 		},
 
@@ -429,42 +410,66 @@ var List = (function() {
 		 *
 		 * @param string needle
 		 * @param array keys
+		 * @param string name
+		 *
+		 * @return array
 		 */
-		filter: function(needle, keys) {
-			this.filterNeedle = needle;
-			this.filterKeys = (keys) ? keys : this.defaultFilterKeys;
-			this.filtered = Util.filter(this.masterFiltered, needle, this.filterKeys);
-			this.display();
+		filter: function(needle, keys, name) {
+			name = (name) ? name : 'default';
 
-			if (needle) {
-				this.select(0);
+			if (!this.filters.hasOwnProperty(name)) {
+				this.filters[name] = {needle: '', keys: []};
 			}
-			else {
-				this.unselectAll();
-				$("#" + this.id + "-filter").addClass("hidden");
-				if (document.activeElement) {
-					document.activeElement.blur();
+
+			if (typeof needle !== "undefined") {
+				this.filters[name].needle = needle;
+			}
+
+			if (typeof keys !== "undefined") {
+				this.filters[name].keys = keys;
+			}
+
+			this.filtered = this.items;
+
+			// Apply all filters
+			for (var name in this.filters) {
+				if (!this.filters.hasOwnProperty(name)) continue;
+
+				var filter = this.filters[name];
+				this.filtered = Util.filter(this.filtered, filter.needle, filter.keys);
+			}
+
+			this.display();
+			this.unselectAll();
+
+			if (name == 'default') {
+				if (this.filters[name].needle) {
+					this.select(0);
+				}
+				else {
+					if ($(document.activeElement).parents("#" + this.id + "-filter").length > 0) {
+						document.activeElement.blur();
+					}
+					$("#" + this.id + "-filter").addClass("hidden");
 				}
 			}
 
 			return this.filtered;
 		},
 
-		/**
-		 * Remove master filter
-		 */
-		masterFilterRemove: function() {
-			this.masterFiltered = this.items;
-			this.filterRemove();
-		},
+		removeFilter: function(name) {
+			name = (name) ? name : 'default';
 
-		/**
-		 * Remove filter
-		 */
-		filterRemove: function() {
-			$("#" + this.id + "-filter").addClass("hidden");
-			$(".filter-input").val('');
-			return this.filter('');
+			if (this.filters.hasOwnProperty(name)) {
+				delete this.filters[name];
+			}
+
+			if (name == 'default') {
+				$("#" + this.id + "-filter").addClass("hidden");
+				$(".filter-input").val('');
+			}
+
+			return this.filter();
 		},
 
 		/**
@@ -481,7 +486,7 @@ var List = (function() {
 			var text = (this.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
 			$(".order-direction").text('');
 			$("#" + key + "-ord").html(text);
-			this.filter(this.filterNeedle, this.filterKeys);
+			this.filter();
 		},
 
 		/**

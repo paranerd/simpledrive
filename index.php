@@ -16,6 +16,7 @@ require_once 'app/helper/util.php';
 require_once 'app/helper/log.php';
 require_once 'app/helper/crypto.php';
 require_once 'app/helper/response.php';
+require_once 'app/helper/model.php';
 
 // Differentiate between api- and render-calls
 // Extract controller and action

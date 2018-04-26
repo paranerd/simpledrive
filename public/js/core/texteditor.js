@@ -115,7 +115,9 @@ var EditorModel = new function() {
 				data: {target: self.id, data: content},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
-				$(".title-element-current").text(self.filename);
+				if (!self.changed) {
+					$(".title-element-current").text(self.filename);
+				}
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(xhr.statusText, true, true);
 			});

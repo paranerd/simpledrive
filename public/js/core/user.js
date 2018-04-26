@@ -27,8 +27,6 @@ $(document).ready(function() {
 
 var UserController = new function() {
 	this.init = function() {
-		simpleScroll.init("status");
-
 		$("#fileview").on('change', function(e) {
 			UserModel.setFileview($(this).val());
 		});
@@ -89,14 +87,6 @@ var UserController = new function() {
 		$("#setupbackup").on('submit', function(e) {
 			e.preventDefault();
 			Backup.enable();
-		});
-
-		$(document).on('keyup', function(e) {
-			switch(e.keyCode) {
-				case 27: // Esc
-					Util.closePopup();
-					break;
-			}
 		});
 	}
 }

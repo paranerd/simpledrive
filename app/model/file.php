@@ -13,17 +13,15 @@ require_once 'app/model/user.php';
 
 require_once 'app/helper/googleapi.php';
 
-class File_Model {
+class File_Model extends Model {
 	/**
 	 * Constructor
 	 *
 	 * @param string $token
 	 */
 	public function __construct($token) {
+		parent::__construct();
 		$this->token     = $token;
-		$this->config    = json_decode(file_get_contents(CONFIG), true);
-		$this->log       = new Log(get_class());
-		$this->db        = Database::get_instance();
 		$this->user      = ($this->db) ? $this->db->user_get_by_token($token) : null;
 		$this->uid       = ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
 		$this->username  = ($this->user) ? $this->user['username'] : "";

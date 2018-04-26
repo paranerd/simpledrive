@@ -37,7 +37,7 @@
 		</div>
 		<!-- Username -->
 		<?php if ($username) : ?>
-		<div id="username" class="popup-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
+		<div id="username" class="menu-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
 		<?php endif; ?>
 	</div>
 

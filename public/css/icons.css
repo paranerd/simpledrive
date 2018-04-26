@@ -230,3 +230,7 @@
 .icon-website:before {
   content: "\e9ca";
 }
+
+.icon-redo:before {
+  content: "\e968";
+}

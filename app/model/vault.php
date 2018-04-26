@@ -7,16 +7,16 @@
  * @link		https://simpledrive.org
  */
 
-class Vault_Model {
+class Vault_Model extends Model {
 	/**
 	 * Constructor
 	 *
 	 * @param string $token
 	 */
 	public function __construct($token) {
+		parent::__construct();
+
 		$this->token      = $token;
-		$this->config     = json_decode(file_get_contents(CONFIG), true);
-		$this->db         = Database::get_instance();
 		$this->user       = $this->db->user_get_by_token($token);
 		$this->uid        = ($this->user) ? $this->user['id'] : 0;
 		$this->username   = ($this->user) ? $this->user['username'] : "";
@@ -93,9 +93,34 @@ class Vault_Model {
 	 * @param string $client_vault
 	 * @return boolean
 	 */
-	public function save($client_vault) {
+	public function save($client_vault, $file = null, $filehash = "") {
 		$this->check_if_logged_in();
 
-		return (file_put_contents($this->vault_path, $client_vault) !== false);
+		if (!empty($file) && $filehash) {
+			$this->add_file($file, $filehash);
+		}
+
+		if (file_put_contents($this->vault_path, $client_vault) !== false) {
+			return null;
+		}
+
+		throw new Exception("Error saving", 500);
 	}
+
+	/**
+	 * Add file
+	 */
+	 public function add_file($file, $hash) {
+		$max_upload = Util::convert_size(ini_get('upload_max_filesize'));
+
+		if ($file['size'] > $max_upload) {
+			throw new Exception('File too big', 500);
+		}
+
+		if (move_uploaded_file($file['tmp_name'], dirname($this->vault_path) . "/" . $hash)) {
+			return null;
+		}
+
+		throw new Exception('Unknown error while uploading', 500);
+	 }
 }

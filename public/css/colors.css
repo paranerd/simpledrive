@@ -17,10 +17,6 @@ h2 {
 	color: #2e8b5e;
 }
 
-.input-password span:hover {
-	color: #2e8b5e;
-}
-
 .btn {
 	color: white;
 	background-color: #2e8b5e;
@@ -106,12 +102,12 @@ h2 {
 	background-color: #2e8b5e !important;
 }
 
-.popup .menu li,
+.popup-menu li,
 .menu ul li {
 	border-left: 4px solid transparent;
 }
 
-.popup .menu li:hover,
+.popup-menu li:hover,
 .menu ul li:hover {
 	/*color: white;*/
 	border-left: 4px solid #2e8b5e;
@@ -327,11 +323,15 @@ body.light .menu ul {
 }
 
 .light input,
-.light .input-password {
+.light .input-with-button {
 	border-bottom: 1px dotted #555;
 }
 
-.light .input-password input {
+.input-with-button span:hover {
+	background: rgba(0,0,0,0.2);
+}
+
+.light .input-with-button input {
 	border: none;
 	margin: 0;
 }
@@ -340,7 +340,7 @@ body.light .menu ul {
 	border: 1px solid lightgrey !important;
 }
 
-.light #shield {
+.light .popup {
 	background-color: rgba(242,242,242,0.7);
 }
 
@@ -348,7 +348,8 @@ body.light .menu ul {
 	color: #555;
 }
 
-.light .popup,
+.light .popup > *,
+.light .popup-menu,
 .light .notification,
 .light .menu ul {
 	background-color: white;
@@ -520,7 +521,7 @@ body.light .menu ul {
 	border: 1px solid #555 !important;
 }
 
-.dark #shield {
+.dark .popup {
 	background-color: rgba(0,0,0,0.4);
 }
 
@@ -528,7 +529,8 @@ body.light .menu ul {
 	color: white;
 }
 
-.dark .popup,
+.dark .popup > *,
+.dark .popup-menu,
 .dark .notification,
 .dark .menu ul {
 	background-color: #444;

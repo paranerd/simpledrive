@@ -7,16 +7,15 @@
  * @link		https://simpledrive.org
  */
 
-class System_Model {
+class System_Model extends Model {
 	/**
 	 * Constructor
 	 *
 	 * @param string $token
 	 */
 	public function __construct($token) {
+		parent::__construct();
 		$this->token  = $token;
-		$this->config = json_decode(file_get_contents(CONFIG), true);
-		$this->db     = Database::get_instance();
 	}
 
 	/**

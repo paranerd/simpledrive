@@ -160,9 +160,7 @@ var SystemView = new function() {
 		self.view = view;
 
 		// Hide all
-		simpleScroll.empty("users");
-		simpleScroll.empty("log");
-		$("#log-pages").empty();
+		$("#users, #log, #log-pages").empty();
 		$("#status, #users, #log, #plugins, .content-header, .content-footer, #plugins button").addClass("hidden");
 
 		// Set right view
@@ -226,7 +224,7 @@ var SystemView = new function() {
 			var listItem = document.createElement("div");
 			listItem.id = "item" + i;
 			listItem.className = "item";
-			simpleScroll.append("log", listItem);
+			$("#log").append(listItem);
 
 			// Thumbnail
 			var thumbnailWrapper = document.createElement("span");
@@ -291,7 +289,7 @@ var SystemView = new function() {
 			listItem.id = "item" + i;
 			listItem.value = i;
 			listItem.className = "item";
-			simpleScroll.append("users", listItem);
+			$("#users").append(listItem);
 
 			// Thumbnail
 			var thumbnailWrapper = document.createElement("span");

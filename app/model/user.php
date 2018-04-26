@@ -7,16 +7,15 @@
  * @link		https://simpledrive.org
  */
 
-class User_Model {
+class User_Model extends Model {
 	/**
 	 * Constructor
 	 *
 	 * @param string $token
 	 */
 	public function __construct($token) {
+		parent::__construct();
 		$this->token     = $token;
-		$this->config    = json_decode(file_get_contents(CONFIG), true);
-		$this->db        = Database::get_instance();
 		$this->user      = $this->db->user_get_by_token($token);
 		$this->uid       = ($this->user) ? $this->user['id'] : null;
 		$this->username  = ($this->user) ? $this->user['username'] : "";

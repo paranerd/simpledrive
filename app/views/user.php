@@ -37,7 +37,7 @@
 			<div class="title-element title-element-current">User Settings</div>
 		</div>
 		<!-- Username -->
-		<div id="username" class="popup-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
+		<div id="username" class="menu-trigger" data-target="menu"><?php echo htmlentities($username) . " &#x25BF"; ?></div>
 	</div>
 
 	<div class="main">
@@ -197,7 +197,6 @@
 	</div>
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
-	<script type="text/javascript" src="public/js/util/simplescroll.js"></script>
 	<script type="text/javascript" src="public/js/util/util.js"></script>
 
 	<script type="text/javascript" src="public/js/core/user.js"></script>

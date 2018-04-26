@@ -15,7 +15,7 @@ class Core_Model {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->log = new Log(get_class());
+		$this->log = new Log();
 		$this->db  = null;
 	}
 
