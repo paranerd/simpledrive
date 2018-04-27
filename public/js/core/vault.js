@@ -533,7 +533,6 @@ var VaultModel = new function() {
 				Util.closePopup("unlock", false, true);
 				Util.endBusy(bId);
 			} catch(e) {
-				console.log(e);
 				Util.showFormError("unlock", "Error decrypting");
 				Util.endBusy(bId);
 			}
