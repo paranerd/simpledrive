@@ -67,7 +67,8 @@ var VaultController = new function() {
 		});
 
 		$(".create-trigger").on('click', function() {
-			VaultView.showCreateEntry($(this).data('type'));
+			//VaultView.showCreateEntry($(this).data('type'));
+			VaultView.showEntry();
 		});
 
 		$(document).on('click', '#checker', function(e) {
@@ -80,7 +81,7 @@ var VaultController = new function() {
 			}
 		});
 
-		$(document).on('mousedown', '#shield', function(e) {
+		$(document).on('mousedown', '.popup', function(e) {
 			if (!VaultModel.preventClipboardClear) {
 				Util.copyToClipboard("");
 			}
@@ -180,10 +181,16 @@ var VaultController = new function() {
 
 			$("#contextmenu").addClass("hidden");
 		});
+
+		$("#entry-add").on('click', function(e) {
+			if ($("#entry-fields").val()) {
+				$("#entry-" + $("#entry-fields").val() + "-cont").removeClass('hidden');
+			}
+		});
 	}
 
 	this.addFormEvents = function() {
-		$("#unlock form").on('submit', function(e) {
+		$("#unlock").on('submit', function(e) {
 			e.preventDefault();
 			VaultModel.unlock($("#unlock-passphrase").val());
 		});
@@ -198,9 +205,14 @@ var VaultController = new function() {
 			VaultModel.changePassphrase($("#change-passphrase-pass1").val(), $("#change-passphrase-pass2").val());
 		});
 
-		$("div[id^='entry']").on('submit', function(e) {
+		/*$("div[id^='entry']").on('submit', function(e) {
 			e.preventDefault();
-			VaultModel.saveEntry($(this).data('type'));
+			VaultModel.saveEntry_old($(this).data('type'));
+		});*/
+
+		$("#entry").on('submit', function(e) {
+			e.preventDefault();
+			VaultModel.saveEntry();
 		});
 
 		$("#password-generator").on('submit', function(e) {
@@ -247,6 +259,7 @@ var VaultView = new function() {
 	}
 
 	this.showCreateEntry = function(type) {
+		console.log("show create entry");
 		$("#" + type + "-title-edit").addClass('hidden');
 		$("#" + type + "-title-new").removeClass('hidden');
 		$("#entry-website-open-url").addClass("hidden");
@@ -254,6 +267,67 @@ var VaultView = new function() {
 	}
 
 	this.showEntry = function() {
+		var selection = VaultModel.list.getFirstSelected();
+		var item = (selection) ? selection.item : {};
+
+		if (Object.keys(item).length === 0) {
+			$("#entry-edit-title").addClass("hidden");
+			$("#entry-create-title").removeClass("hidden");
+		}
+		else {
+			$("#entry-edit-title").removeClass("hidden");
+			$("#entry-create-title").addClass("hidden");
+		}
+
+		Util.showPopup("entry");
+
+		if (item.title) {
+			$("#entry-title").val(item.title);
+		}
+		if (item.category) {
+			$("#entry-category").val(item.category);
+		}
+		if (item.url) {
+			$("#entry-url-cont").removeClass("hidden")
+			$("#entry-url").val(item.url);
+		}
+		if (item.username) {
+			$("#entry-username-cont").removeClass("hidden");
+			$("#entry-username").val(item.username);
+		}
+		if (item.password) {
+			$("#entry-password-cont").removeClass("hidden");
+			$("#entry-password").val(item.url);
+		}
+		if (item.note) {
+			$("#entry-note-cont").removeClass("hidden");
+			$("#entry-note").val(item.note);
+		}
+
+		/*if (item.type == 'website') {
+			$("#entry-website-url").val(item.url);
+			$("#entry-website-userword").val(item.username);
+			$("#entry-website-password").val(item.password);
+			$("#entry-website-note").val(item.note);
+			$("#entry-website-open-url a").attr("href", Util.generateFullURL(item.url));
+
+			$("#entry-website-copy-user").off('click').on('click', function() {
+				VaultModel.preventClipboardClear = false;
+				Util.copyToClipboard(item.username);
+			});
+
+			$("#entry-website-copy-pass").off('click').on('click', function() {
+				VaultModel.preventClipboardClear = false;
+				Util.copyToClipboard(item.pass);
+			});
+		}
+		else if (item.type == 'note') {
+			$("#entry-" + item.type + "-content").val(item.content);
+		}*/
+	}
+
+	this.showEntry_old = function() {
+		console.log("show entry");
 		var selection = VaultModel.list.getFirstSelected();
 		var item = selection.item;
 
@@ -359,7 +433,59 @@ var VaultModel = new function() {
 	this.list = new List("entries", VaultView.display);
 	this.clipboard = {};
 
-	this.saveEntry = function(type) {
+	this.saveEntry = function() {
+		var item = (self.list.getSelectedCount() > 0) ? self.list.getFirstSelected().item : {};
+
+		// Require title
+		var origTitle = (item.title) ? item.title : $("#entry-title").val();
+		if (!$("#entry-title").val()) {
+			Util.showFormError('entry', 'No title provided');
+			return;
+		}
+
+		// Check if title already exists
+		var index = Util.arraySearchForKey(self.list.getAll(), 'title', origTitle);
+		if (!item.title && index != null) {
+			Util.showFormError('entry', 'Entry already exists');
+			return;
+		}
+
+		// Block form submit
+		$("#entry .btn").prop('disabled', true);
+
+		// Set data
+		item.title = $("#entry-title").val();
+		item.category = $("#entry-category").val();
+		item.logo = "";
+		item.edit = Date.now();
+		item.files = (item.files) ? item.files : [];
+		item.url = Util.generateFullURL($("#entry-url").val());
+		item.username = $("#entry-username").val();
+		item.password = $("#entry-password").val();
+		item.note = $("#entry-notes").val();
+
+		if (self.pendingFile) {
+			var hash = self.getUniqueFileHash(self.pendingFile.name);
+			item.files.push({filename: self.pendingFile.name, hash: hash});
+		}
+
+		// Update/create entry
+		if (index) {
+			self.list.update(index, item);
+		}
+		else {
+			self.list.add(item);
+		}
+
+		// Unblock submit and close popup
+		$("#entry .btn").prop('disabled', false);
+		Util.closePopup('entry', true);
+
+		// Save
+		self.save(hash);
+	}
+
+	this.saveEntry_old = function(type) {
 		// Get item if editing - empty object if creating
 		var item = (self.list.getSelectedCount() > 0) ? self.list.getFirstSelected().item : {};
 
@@ -478,7 +604,7 @@ var VaultModel = new function() {
 				$.ajax({
 					url: 'api/vault/save',
 					type: 'post',
-					data: fd, //{vault: encryptedVault},
+					data: fd,
 					processData: false,
 					contentType: false,
 					dataType: "json"
@@ -526,7 +652,9 @@ var VaultModel = new function() {
 			try {
 				var dec = Crypto.decrypt(self.encrypted, passphrase);
 				self.passphrase = passphrase;
+
 				if (dec) {
+					console.log(JSON.parse(dec));
 					self.list.setItems(JSON.parse(dec), 'title');
 				}
 

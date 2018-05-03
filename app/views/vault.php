@@ -75,8 +75,10 @@
 	<!-- Create menu -->
 	<div id="create-menu" class="popup-menu hidden">
 		<ul class="menu">
-			<li class="create-trigger" data-type="website"><span class="icon icon-website"></span><span><?php echo $lang['new website']; ?></span></li>
-			<li class="create-trigger" data-type="note"><span class="icon icon-note"></span><span><?php echo $lang['new note']; ?></span></li>
+			<!-- <li class="popup-trigger icon icon-website" data-target="entry">New Entry</li> -->
+			<li class="create-trigger icon icon-website">New Entry</li>
+			<li class="create-trigger icon icon-website" data-type="website"><?php echo $lang['new website']; ?></li>
+			<li class="create-trigger icon icon-note" data-type="note"><?php echo $lang['new note']; ?></li>
 		</ul>
 	</div>
 
@@ -104,9 +106,79 @@
 		</ul>
 	</div>
 
+	<div id="entry" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div id="entry-create-title" class="title">Create</div>
+			<div id="entry-edit-title" class="title">Edit</div>
+
+			<label>Title</label>
+			<input id="entry-title" class="input-indent" type="text" placeholder="Title">
+
+			<div id="entry-category-cont">
+				<label>Category</label>
+				<input id="entry-category" class="input-indent" type="text" placeholder="Category" list="categories">
+				<datalist id="categories"><option value="test">Test</option></datalist>
+			</div>
+
+			<div id="entry-url-cont" class="form-hidden hidden">
+				<label>URL</label>
+				<div class="input-with-button input-indent">
+					<input id="entry-url" type="text" placeholder="URL" />
+					<span id="entry-open-url" class="icon icon-redo"><a style="display: block;" target="_blank" href="#"></a></span>
+				</div>
+			</div>
+
+			<div id="entry-username-cont" class="form-hidden hidden">
+				<label>Username</label>
+				<div class="input-with-button input-indent">
+					<input id="entry-user" type="text" placeholder="Username" />
+					<span class="copy-input icon icon-copy"></span>
+				</div>
+			</div>
+
+			<div id="entry-password-cont" class="form-hidden hidden">
+				<label>Password</label>
+				<div class="input-with-button">
+					<input id="entry-pass" class="input-indent password" type="password" placeholder="Password">
+					<span class="icon icon-visible password-toggle"></span>
+					<span class="copy-input icon icon-copy"></span>
+				</div>
+			</div>
+
+			<div id="entry-note-cont" class="form-hidden hidden">
+				<label>Note</label>
+				<div>
+					<textarea id="entry-notes" class="input-indent" placeholder="Notes"></textarea>
+				</div>
+			</div>
+
+			<div style="display: flex;">
+				<select id="entry-fields" style="width: 100%; height: 50px; outline: none;">
+					<option value="" selected>- Add field -</option>
+					<option value="url">URL</option>
+					<option value="username" disabled>Username</option>
+					<option value="password">Password</option>
+					<option value="note">Note</option>
+				</select>
+
+				<div id="entry-add" class="icon icon-add" style="height: 50px; width: 50px; line-height: 50px; text-align: center;"></div>
+			</div>
+
+			<!-- <span id="add-file" class="btn">
+				Add File
+				<input class="upload-input hidden" type="file" enctype="multipart/form-data" name="files[]">
+			</span> -->
+
+			<div class="error hidden"></div>
+
+			<button class="btn" style="margin-top: 10px;">Save</button>
+		</form>
+	</div>
+
 	<!-- Website-Entry popup -->
 	<div id="entry-website" class="popup center hidden" data-type="website">
-		<form class="hidden" action="#">
+		<form action="#">
 			<span class="close">&times;</span>
 			<div id="website-title-new" class="title">New Login-Info</div>
 			<div id="website-title-edit" class="title">Edit Login-Info</div>

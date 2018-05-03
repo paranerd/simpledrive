@@ -30,7 +30,7 @@
 	<div id="header">
 		<!-- Nav -->
 		<div id="logo">
-			<a href="files"><span class="icon icon-cloud"></span>Files</a>
+			<a class="icon icon-cloud" href="files">Files</a>
 		</div>
 		<!-- Title -->
 		<div id="title"></div>
@@ -44,14 +44,14 @@
 		<!-- Sidebar -->
 		<div id="sidebar">
 			<ul class="menu">
-				<li id="sidebar-create" class="menu-trigger" title="Create new element" data-target="create-menu"><span class="icon icon-add"></span><span><?php echo $lang['new']; ?></span></li>
-				<li id="sidebar-upload" class="menu-trigger" title="Upload file(s)" data-target="upload-menu"><span class="icon icon-upload"></span><span>Upload</span></li>
+				<li id="sidebar-create" class="menu-trigger icon icon-add" title="Create new element" data-target="create-menu"><?php echo $lang['new']; ?></li>
+				<li id="sidebar-upload" class="menu-trigger icon icon-upload" title="Upload file(s)" data-target="upload-menu">Upload</li>
 				<?php if ($section != 'pub') : ?>
 				<hr>
-				<li id="sidebar-files" class="sidebar-navigation focus" title="Show all files" data-action="files"><span class="icon icon-files"></span><span class="label"><?php echo $lang['myfiles']; ?></span></li>
-				<li id="sidebar-shareout" class="sidebar-navigation" title="Show your shares" data-action="shareout"><span class="icon icon-users"></span><span><?php echo $lang['yourshares']; ?></span></li>
-				<li id="sidebar-sharein" class="sidebar-navigation" title="Show files shared with you" data-action="sharein"><span class="icon icon-share"></span><span><?php echo $lang['sharedwithyou']; ?></span></li>
-				<li id="sidebar-trash" class="sidebar-navigation" title="Show trash" data-action="trash"><span class="icon icon-trash"></span><span><?php echo $lang['trash']; ?></span></li>
+				<li id="sidebar-files" class="sidebar-navigation focus icon icon-files" title="Show all files" data-action="files"><?php echo $lang['myfiles']; ?></li>
+				<li id="sidebar-shareout" class="sidebar-navigation icon icon-users" title="Show your shares" data-action="shareout"><?php echo $lang['yourshares']; ?></li>
+				<li id="sidebar-sharein" class="sidebar-navigation icon icon-share" title="Show files shared with you" data-action="sharein"><?php echo $lang['sharedwithyou']; ?></li>
+				<li id="sidebar-trash" class="sidebar-navigation icon icon-trash" title="Show trash" data-action="trash"><?php echo $lang['trash']; ?></li>
 				<?php endif; ?>
 			</ul>
 
@@ -101,10 +101,10 @@
 			<!-- Folder size -->
 			<div id="sidebar-footer">
 				<hr>
-				<span id="toggle-sidebar" class="icon icon-menu"></span>
 				<span id="scan" class="icon icon-sync"></span>
 				<span id="change-fileview" class="icon icon-grid"></span>
 				<span id="show-info" class="icon icon-search popup-trigger" data-target="search"></span>
+				<span id="toggle-sidebar" class="icon icon-menu"></span>
 			</div>
 		</div>
 
@@ -134,13 +134,12 @@
 		<div id="fileinfo" class="hidden">
 			<span class="close">&times;</span>
 
-			<div class="fileinfo-elem"><span id="fileinfo-icon" class="icon icon-files"></span><span id="fileinfo-name">Filename</span></div>
-			<div class="fileinfo-elem"><span id="fileinfo-header">Details:</span></div>
+			<div id="fileinfo-name" class="fileinfo-elem icon icon-files">Filename</div>
 
-			<div class="fileinfo-elem"><span class="icon icon-files"></span><span id="fileinfo-size"></span></div>
-			<div class="fileinfo-elem"><span class="icon icon-info"></span><span id="fileinfo-type"></span></div>
-			<div class="fileinfo-elem"><span class="icon icon-rename"></span><span id="fileinfo-edit"></span></div>
-			<div class="fileinfo-elem" id="fileinfo-link"><span class="icon icon-share"></span>Show Link</div>
+			<div id="fileinfo-size" class="fileinfo-elem icon icon-files"></div>
+			<div id="fileinfo-type" class="fileinfo-elem icon icon-info"></div>
+			<div id="fileinfo-edit" class="fileinfo-elem icon icon-rename"></div>
+			<div id="fileinfo-link" class="fileinfo-elem icon icon-share">Show Link</div>
 
 			<div id="fileinfo-footer">
 				<hr>
@@ -153,12 +152,12 @@
 	<!-- Upload menu -->
 	<div id="upload-menu" class="popup-menu hidden">
 		<ul class="menu">
-			<li id="upload-file" class="upload-button">
-				<span class="icon icon-unknown"></span><span><?php echo "Upload " . $lang['file']; ?></span>
+			<li id="upload-file" class="icon icon-unknown upload-button">
+				<?php echo "Upload " . $lang['file']; ?>
 				<input class="upload-input hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="">
 			</li>
-			<li id="upload-folder" class="upload-button">
-				<span class="icon icon-folder"></span><span><?php echo "Upload " . $lang['folder']; ?></span>
+			<li id="upload-folder" class="icon icon-folder upload-button">
+				<?php echo "Upload " . $lang['folder']; ?>
 				<input class="upload-input hidden" type="file" enctype="multipart/form-data" name="files[]" multiple="" directory="" webkitdirectory="" mozdirectory="">
 			</li>
 		</ul>
@@ -167,51 +166,51 @@
 	<!-- Create menu -->
 	<div id="create-menu" class="popup-menu hidden">
 		<ul class="menu">
-			<li class="popup-trigger" data-target="create" data-type="file"><span class="icon icon-unknown"></span><span><?php echo $lang['new file']; ?></span></li>
-			<li class="popup-trigger" data-target="create" data-type="folder"><span class="icon icon-folder"></span><span><?php echo $lang['new folder']; ?></span></li>
+			<li class="icon icon-unknown popup-trigger" data-target="create" data-type="file"><?php echo $lang['new file']; ?></li>
+			<li class="icon icon-folder popup-trigger" data-target="create" data-type="folder"><?php echo $lang['new folder']; ?></li>
 		</ul>
 	</div>
 
-	<!-- Context menu -->
 	<div id="contextmenu" class="popup-menu hidden">
 		<ul class="menu">
-			<li id="context-add" class="hidden"><span class="icon icon-add"></span><span><?php echo $lang['new']; ?></span>
+			<li id="context-add" class="icon icon-add hidden">
+				<?php echo $lang['new']; ?>
 				<ul>
-					<li id="context-file" data-type="file"><span class="icon icon-unknown"></span><span><?php echo $lang['file']; ?></span></li>
-					<li id="context-folder" data-type="folder"><span class="icon icon-folder"></span><span><?php echo $lang['folder']; ?></span></li>
+					<li id="context-file" class="icon icon-unknown" data-type="file"><?php echo $lang['file']; ?></li>
+					<li id="context-folder" class="icon icon-folder" data-type="folder"><?php echo $lang['folder']; ?></li>
 				</ul>
 			</li>
-			<li id="context-gallery" class="hidden"><span class="icon icon-image"></span><span><?php echo $lang['gallery']; ?></span></li>
-			<li id="context-closegallery" class="hidden"><span class="icon icon-image"></span><span><?php echo $lang['close gallery']; ?></span></li>
-			<li id="context-restore" class="hidden"><span class="icon icon-restore"></span><span><?php echo $lang['restore']; ?></span></li>
-			<li id="context-copy" class="hidden"><span class="icon icon-copy"></span><span><?php echo $lang['copy']; ?></span></li>
-			<li id="context-cut" class="hidden"><span class="icon icon-cut"></span><span><?php echo $lang['cut']; ?></span></li>
-			<li id="context-paste" class="hidden"><span class="icon icon-paste"></span><span><?php echo $lang['paste']; ?></span></li>
-			<li id="context-share" class="hidden"><span class="icon icon-share"></span><span><?php echo $lang['share']; ?></span></li>
-			<li id="context-encrypt" class="hidden"><span class="icon icon-key"></span><span><?php echo $lang['encrypt']; ?></span></li>
-			<li id="context-unshare" class="hidden"><span class="icon icon-share"></span><span><?php echo $lang['unshare']; ?></span></li>
-			<li id="context-decrypt" class="hidden"><span class="icon icon-key"></span><span><?php echo $lang['decrypt']; ?></span></li>
+			<li id="context-gallery" class="icon icon-image hidden"><?php echo $lang['gallery']; ?></li>
+			<li id="context-closegallery" class="icon icon-image hidden"><?php echo $lang['close gallery']; ?></li>
+			<li id="context-restore" class="icon icon-restore hidden"><?php echo $lang['restore']; ?></li>
+			<li id="context-copy" class="icon icon-copy hidden"><?php echo $lang['copy']; ?></li>
+			<li id="context-cut" class="icon icon-cut hidden"><?php echo $lang['cut']; ?></li>
+			<li id="context-paste" class="icon icon-paste hidden"><?php echo $lang['paste']; ?></li>
+			<li id="context-share" class="icon icon-share hidden"><?php echo $lang['share']; ?></li>
+			<li id="context-encrypt" class="icon icon-key hidden"><?php echo $lang['encrypt']; ?></li>
+			<li id="context-unshare" class="icon icon-share hidden"><?php echo $lang['unshare']; ?></li>
+			<li id="context-decrypt" class="icon icon-key hidden"><?php echo $lang['decrypt']; ?></li>
 			<hr class="hidden">
-			<li id="context-rename" class="hidden"><span class="icon icon-rename"></span><span><?php echo $lang['rename']; ?></span></li>
-			<li id="context-zip" class="hidden"><span class="icon icon-archive"></span><span><?php echo $lang['zip']; ?></span></li>
-			<li id="context-unzip" class="hidden"><span class="icon icon-archive"></span><span><?php echo $lang['unzip']; ?></span></li>
-			<li id="context-download" class="hidden"><span class="icon icon-download"></span><span><?php echo $lang['download']; ?></span></li>
+			<li id="context-rename" class="icon icon-rename hidden"><?php echo $lang['rename']; ?></li>
+			<li id="context-zip" class="icon icon-archive hidden"><?php echo $lang['zip']; ?></li>
+			<li id="context-unzip" class="icon icon-archive hidden"><?php echo $lang['unzip']; ?></li>
+			<li id="context-download" class="icon icon-download hidden"><?php echo $lang['download']; ?></li>
 			<hr class="hidden">
-			<li id="context-delete" class="hidden"><span class="icon icon-trash"></span><span><?php echo $lang['delete']; ?></span></li>
+			<li id="context-delete" class="icon icon-trash hidden"><?php echo $lang['delete']; ?></li>
 		</ul>
 	</div>
 
 	<!-- Menu -->
 	<div id="menu" class="popup-menu hidden">
 		<ul class="menu">
-			<li><a href="files"><span class="icon icon-files"></span><span>Files</span></a></li>
-			<li><a href="user"><span class="icon icon-settings"></span><span>Settings</span></a></li>
+			<li><a class="icon icon-files" href="files">Files</a></li>
+			<li><a class="icon icon-settings" href="user">Settings</a></li>
 			<?php if ($admin) : ?>
-			<li><a href="system"><span class="icon icon-admin"></span><span>System</span></a></li>
+			<li><a class="icon icon-admin" href="system">System</a></li>
 			<?php endif; ?>
-			<li><a href="vault"><span class="icon icon-key"></span><span>Vault</span></a></li>
-			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><span><?php echo $lang['info']; ?></span></li>
-			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><span><?php echo $lang['logout']; ?></span></a></li>
+			<li><a class="icon icon-key" href="vault">Vault</a></li>
+			<li class="icon icon-info popup-trigger" data-target="info"><?php echo $lang['info']; ?></li>
+			<li><a class="icon icon-logout" href="core/logout?token=<?php echo $token; ?>"><?php echo $lang['logout']; ?></a></li>
 		</ul>
 	</div>
 
@@ -306,13 +305,13 @@
 
 	<!-- Image Viewer -->
 	<div id="img-viewer" class="overlay hidden">
-		<button id="img-close" class="btn-circle btn-overlay close"><span class="icon icon-arrow-left"></span></button>
+		<button id="img-close" class="btn-circle btn-overlay close icon icon-arrow-left"></button>
 
-		<button id="img-slideshow" class="btn-circle btn-overlay overlay-action"><span class="icon icon-play"></span></button>
-		<button id="img-delete" class="btn-circle btn-overlay overlay-action"><span class="icon icon-trash"></span></button>
+		<button id="img-slideshow" class="btn-circle btn-overlay overlay-action icon icon-play"></button>
+		<button id="img-delete" class="btn-circle btn-overlay overlay-action icon icon-trash"></button>
 
-		<button id="img-prev" class="btn-circle btn-overlay overlay-nav"><span class="icon icon-prev"></span></button>
-		<button id="img-next" class="btn-circle btn-overlay overlay-nav"><span class="icon icon-next"></span></button>
+		<button id="img-prev" class="btn-circle btn-overlay overlay-nav icon icon-prev"></button>
+		<button id="img-next" class="btn-circle btn-overlay overlay-nav icon icon-next"></button>
 		<div id="img-title"></div>
 	</div>
 

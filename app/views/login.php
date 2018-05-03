@@ -27,31 +27,39 @@
 <body class="dark">
 	<div class="brand" title="simpleDrive"><div>simpleDrive</div></div>
 
-	<form id="login" class="major-form center" action="#">
-		<div class="title">Login</div>
+	<div id="login" class="center">
+		<form class="major-form" action="#">
+			<div class="title">Login</div>
 
-		<input id="user" type="text" class="input-large" placeholder="Username" value="" autofocus>
-		<input id="pass" type="password" class="input-large" placeholder="Password" value="">
+			<input id="user" type="text" class="input-large" placeholder="Username" value="" autofocus>
+			<input id="pass" type="password" class="input-large" placeholder="Password" value="">
 
-		<div class="error error-large hidden"></div>
+			<div class="error error-large center-hor hidden"></div>
 
-		<button class="btn btn-large center-hor">Login</button>
-	</form>
+			<div class="center-hor">
+				<button class="btn btn-large">Login</button>
+			</div>
+		</form>
+	</div>
 
-	<form id="tfa" class="major-form center hidden" action="#">
-		<div class="title">Two-Factor-Authentication</div>
+	<div id="tfa" class="center hidden">
+		<form class="major-form" action="#">
+			<div class="title">Two-Factor-Authentication</div>
 
-		<input id="code" type="text" class="input-large" placeholder="Access code" value="" autocomplete="off" tabindex=1>
+			<input id="code" type="text" class="input-large" placeholder="Access code" value="" autocomplete="off" tabindex=1>
 
-		<div id="remember-wrapper" class="checkbox">
-			<span id="remember" class="checkbox-box" tabindex=2></span>
-			<span class="checkbox-label">Remember this device</span>
-		</div>
+			<div id="remember-wrapper" class="checkbox">
+				<span id="remember" class="checkbox-box" tabindex=2></span>
+				<span class="checkbox-label">Remember this device</span>
+			</div>
 
-		<div class="error error-large hidden"></div>
+			<div class="error error-large center-hor hidden"></div>
 
-		<button class="btn btn-large center-hor">Unlock</button>
-	</form>
+			<div class="center-hor">
+				<button class="btn btn-large">Unlock</button>
+			</div>
+		</form>
+	</div>
 
 	<div class="footer">simpleDrive by paranerd | 2013-2018</div>
 

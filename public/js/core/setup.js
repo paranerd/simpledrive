@@ -9,7 +9,7 @@ $(document).ready(function() {
 	$(window).resize();
 });
 
-$("#setup").on('submit', function(e) {
+$("#setup form").on('submit', function(e) {
 	e.preventDefault();
 	setup();
 });

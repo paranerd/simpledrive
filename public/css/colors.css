@@ -17,6 +17,10 @@ h2 {
 	color: #2e8b5e;
 }
 
+button:focus {
+	outline: 0;
+}
+
 .btn {
 	color: white;
 	background-color: #2e8b5e;
@@ -309,9 +313,8 @@ body.light .menu ul {
 	color: #555;
 }
 
-.light .menu li:hover > span,
-.light li a:hover > span {
-	/*background-color: #eee;*/
+.light .menu li:hover,
+.light .menu li:hover > * {
 	color: #2e8b5e;
 	font-family: robotoregular, Arial;
 }

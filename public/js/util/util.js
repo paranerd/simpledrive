@@ -82,7 +82,10 @@ var Util = new function() {
 		});
 
 		$(document).on('click', '.close, .cancel', function(e) {
-			if ($(this).parents('.popup, .overlay').length) {
+			if ($(this).parents('.overlay').length) {
+				$(this).closest('.overlay').addClass("hidden");
+			}
+			else if ($(this).parents('.popup').length) {
 				self.closePopup($(this).parent().attr('id'), false, true);
 			}
 			else if ($(this).parents('.widget').length) {
@@ -111,6 +114,18 @@ var Util = new function() {
 				$(input).prop('type', 'text');
 				$(this).removeClass().addClass('password-toggle icon icon-invisible');
 			}
+		});
+
+		$(".accordion-trigger").on('click', function(e) {
+			var panel = document.getElementById($(this).data('target'));
+			panel.style.maxHeight = (panel.style.maxHeight) ? null : panel.scrollHeight + "px";
+		});
+
+		$(document).on('click', '.copy-input', function(e) {
+			console.log("click");
+			var input = $(this).siblings("input");
+			console.log("copying " + $(input).val());
+			Util.copyToClipboard($(input).val());
 		});
 	}
 
@@ -227,7 +242,7 @@ var Util = new function() {
 		document.body.removeChild(textArea);
 
 		if (text) {
-			self.notify("Copied to clipboard", true, false);
+			self.notify("Copied to clipboard", false, false);
 		}
 	}
 
@@ -469,15 +484,14 @@ var Util = new function() {
 		}
 		var type = (warning) ? "warning" : "info";
 		var note = $('<div class="notification notification-' + type + '"></div>');
-		var icon = $('<span class="icon icon-' + type + ' note-icon"></span>');
-		var text = $('<span class="note-msg">' + msg + '</span>');
+		var content = $('<span class="icon icon-' + type + ' note-msg">' + msg + '</span>');
 		var close = $('<span class="close">&times;</span>');
 
 		if (autohide) {
 			$(note).delay(2000).queue(function() { $(this).remove(); });
 		}
 
-		$(note).append(icon, text, close);
+		$(note).append(content, close);
 		$('#notification-area').append(note);
 	}
 

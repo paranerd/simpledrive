@@ -88,6 +88,10 @@ input {
 	flex-shrink: 0;
 }
 
+.input-with-button .icon::before {
+	width: 50px;
+}
+
 select {
 	position: relative;
 	margin: 0;
@@ -177,7 +181,7 @@ hr {
 	z-index: 1;
 }
 
-.btn-circle .icon {
+.btn-circle.icon::before {
 	font-size: 1.5rem !important;
 }
 
@@ -186,7 +190,7 @@ hr {
 	border: none !important;
 }
 
-.btn-circle-small .icon {
+.btn-circle-small .icon::before {
 	color: #999;
 	font-size: 0.8rem !important;
 }
@@ -279,8 +283,7 @@ hr {
 	transform: scale(0);
 }
 
-.icon {
-	font-family: icomoon;
+.icon::before {
 	text-align: center;
 	font-size: 0.8rem;
 	display: inline-block;
@@ -414,17 +417,24 @@ label {
 	white-space: nowrap;
 }
 
+.menu li::before {
+	width: 54px;
+	height: 100%;
+	display: inline-block;
+}
+
 /* Hover effect for menu */
 .menu li:hover > ul {
 	display: block;
 }
 
-.menu li .icon {
+.menu li .icon::before {
 	width: 54px;
 }
 
 .menu li a {
-	display: block;
+	width: 100%;
+	display: inline-block;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -446,7 +456,7 @@ label {
 	float: left;
 }
 
-#logo .icon {
+#logo .icon::before {
 	font-size: 1rem;
 	width: 54px;
 	height: 80px;
@@ -516,7 +526,7 @@ label {
 	flex: 0 0 auto;
 }
 
-#sidebar .icon {
+#sidebar .icon::before {
 	width: 54px;
 	font-size: 0.8rem;
 }
@@ -804,7 +814,7 @@ label {
 	z-index: 1003;
 }
 
-.note-icon {
+.notification .icon::before {
 	width: 30px;
 }
 
@@ -832,16 +842,11 @@ label {
 	white-space: nowrap;
 }
 
-#fileinfo-header {
-	margin-left: 20px;
-	font-family: robotoregular, sans-serif;
-}
-
 #fileinfo-icon {
 	font-size: 1rem;
 }
 
-#fileinfo .icon {
+#fileinfo .icon::before {
 	width: 50px;
 }
 
@@ -1085,7 +1090,13 @@ label {
 	text-align: center;
 }
 
-#advanced:hover {
+.accordion {
+    overflow: hidden;
+	max-height: 0;
+    transition: max-height 0.2s linear;
+}
+
+.accordion-trigger:hover {
 	cursor: pointer;
 	font-family: robotoregular, sans-serif;
 }
@@ -1101,9 +1112,16 @@ label {
 
 @media screen and (max-width: 1000px) {
 	#logo,
-	#sidebar,
-	#sidebar .menu li {
-		width: 54px !important;
+	#sidebar {
+		width: 54px;
+	}
+
+	#sidebar .menu li * {
+		display: none;
+	}
+
+	#sidebar .menu li::before {
+		display: block;
 	}
 
 	#foldersize,
@@ -1146,4 +1164,12 @@ label {
 .center > * {
 	flex: 0 0 auto;
   	margin: 40px 0 40px 0;
+}
+
+.center-hor {
+	position: relative;
+	width: 100%;
+	display: flex;
+	overflow: auto;
+	justify-content: center;
 }

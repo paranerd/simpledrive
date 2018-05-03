@@ -8,8 +8,8 @@
  */
 
 if (file_exists(CONFIG)) {
-	//header('Location: ' . $base . 'core/login');
-	//exit();
+	header('Location: ' . $base . 'core/login');
+	exit();
 }
 
 ?>
@@ -31,34 +31,34 @@ if (file_exists(CONFIG)) {
 <body class="dark">
 	<div class="brand" title="simpleDrive"><div>simpleDrive</div></div>
 
-	<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; overflow: auto; flex-direction: column; padding: 40px 0 40px 0;">
-		<div>start</div>
-		<div style="height: 500px; width: 300px; background: red; flex-shrink: 0;"></div>
-		<div>end</div>
+	<div id="setup" class="center">
+		<form class="major-form" action="#">
+			<div class="title">Setup</div>
+			<div class="subtitle">Admin</div>
+			<input id="user" class="input-medium" type="text" placeholder="Username" value="" required autocomplete="off" autofocus>
+			<input id="pass" class="input-medium password-check" data-strength="setup-strength" type="password" placeholder="Password" value="" required>
+			<div id="setup-strength" class="password-strength hidden"></div>
+
+			<div class="subtitle">Database</div>
+			<input id="dbuser" class="input-medium" type="text" placeholder="Database Username" value="" required>
+			<input id="dbpass" class="input-medium" type="password" placeholder="Database Password" value="" required>
+
+			<div class="subtitle accordion-trigger" data-target="advanced">Advanced &#x25BE;</div>
+			<div id="advanced" class="accordion">
+				<input id="mail" class="input-medium" type="text" placeholder="Mail Address" value="">
+				<input id="mailpass" class="input-medium" type="password" placeholder="Mail password" value="">
+				<input id="datadir" class="input-medium" type="text" placeholder="Data Directory" value="<?php echo dirname(dirname(__DIR__)) . "/docs/"; ?>">
+				<input id="dbserver" class="input-medium" type="text" placeholder="Database Server" value="localhost">
+				<input id="dbname" class="input-medium" type="text" placeholder="Database Name" value="simpledrive">
+			</div>
+
+			<div class="error error-large center-hor hidden"></div>
+
+			<div class="center-hor">
+				<button id="submit" class="btn btn-large">Setup</button>
+			</div>
+		</form>
 	</div>
-
-	<form id="setup" class="major-form center" action="#">
-		<div class="title">Setup</div>
-		<div class="subtitle">Admin</div>
-		<input id="user" class="input-medium" type="text" placeholder="Username" value="" required autocomplete="off" autofocus>
-		<input id="pass" class="input-medium password-check" data-strength="setup-strength" type="password" placeholder="Password" value="" required>
-		<div id="setup-strength" class="password-strength hidden"></div>
-
-		<div class="subtitle">Database</div>
-		<input id="dbuser" class="input-medium" type="text" placeholder="Database Username" value="" required>
-		<input id="dbpass" class="input-medium" type="password" placeholder="Database Password" value="" required>
-
-		<div id="advanced" class="subtitle toggle-hidden">Advanced &#x25BE;</div>
-
-		<input id="mail" class="input-medium hidden form-hidden" type="text" placeholder="Mail Address" value="">
-		<input id="mailpass" class="input-medium hidden form-hidden" type="password" placeholder="Mail password" value="">
-		<input id="datadir" class="input-medium hidden form-hidden" type="text" placeholder="Data Directory" value="<?php echo dirname(dirname(__DIR__)) . "/docs/"; ?>">
-		<input id="dbserver" class="input-medium hidden form-hidden" type="text" placeholder="Database Server" value="localhost">
-		<input id="dbname" class="input-medium hidden form-hidden" type="text" placeholder="Database Name" value="simpledrive">
-
-		<div class="error error-large hidden"></div>
-		<button id="submit" class="btn btn-large center-hor">Setup</button>
-	</form>
 
 	<div class="footer">simpleDrive by paranerd | 2013-2018</div>
 

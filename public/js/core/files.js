@@ -739,7 +739,7 @@ var FileView = new function() {
 		var size = (elem.type == 'folder') ? elem.size + " File(s)" : Util.byteToString(elem.size);
 		var filename = (elem.filename) ? elem.filename : "Homefolder";
 
-		$("#fileinfo-icon").removeClass().addClass('icon icon-' + elem.type);
+		$("#fileinfo-name").removeClass().addClass('fileinfo-elem icon icon-' + elem.type);
 		$("#fileinfo-name").text(filename);
 		$("#fileinfo-size").text(size);
 		$("#fileinfo-type").text(elem.type);

@@ -277,7 +277,8 @@ var List = (function() {
 		 */
 		getFirstSelected: function() {
 			for (var first in this.selected) break;
-			return {id: first, item: this.selected[first]};
+
+			return (first) ? {id: first, item: this.selected[first]} : null;
 		},
 
 		/**
