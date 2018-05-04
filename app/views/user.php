@@ -127,7 +127,7 @@
 	</div>
 
 	<!-- Menu -->
-	<div id="menu" class="popup popup-menu hidden">
+	<div id="menu" class="popup-menu hidden">
 		<ul class="menu">
 			<li><a href="files"><span class="icon icon-files"></span><span>Files</span></a></li>
 			<li><a href="user"><span class="icon icon-settings"></span><span>Settings</span></a></li>
@@ -140,47 +140,48 @@
 		</ul>
 	</div>
 
-	<!-- Shield -->
-	<div id="shield" class="overlay hidden"></div>
-
 	<!-- Backup password popup -->
-	<form id="setupbackup" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div class="title">Enable cloud backup</div>
+	<div id="setupbackup" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div class="title">Enable cloud backup</div>
 
-		<label for="setupbackup-pass1">Password</label>
-		<input id="setupbackup-pass1" class="password-check" data-strength="backup-strength" type="password" placeholder="Password" />
-		<div id="backup-strength" class="password-strength hidden"></div>
+			<label for="setupbackup-pass1">Password</label>
+			<input id="setupbackup-pass1" class="password-check" data-strength="backup-strength" type="password" placeholder="Password" />
+			<div id="backup-strength" class="password-strength hidden"></div>
 
-		<label for="setupbackup-pass2">Password (repeat)</label>
-		<input id="setupbackup-pass2" type="password" placeholder="Password (repeat)" />
+			<label for="setupbackup-pass2">Password (repeat)</label>
+			<input id="setupbackup-pass2" type="password" placeholder="Password (repeat)" />
 
-		<div class="checkbox">
-			<div id="setupbackup-encrypt" class="checkbox-box"></div>
-			<div class="checkbox-label">Encrypt filenames</div>
-		</div>
-		<div class="error hidden"></div>
-		<button class="btn">OK</button>
-	</form>
+			<div class="checkbox">
+				<div id="setupbackup-encrypt" class="checkbox-box"></div>
+				<div class="checkbox-label">Encrypt filenames</div>
+			</div>
+			<div class="error hidden"></div>
+			<button class="btn">OK</button>
+		</form>
+	</div>
 
 	<!-- User password popup -->
-	<form id="change-password" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div class="title">Change password</div>
+	<div id="change-password" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div class="title">Change password</div>
 
-		<label for="change-password-pass0">Current password</label>
-		<input id="change-password-pass0" type="password" placeholder="Current password"></input>
+			<label for="change-password-pass0">Current password</label>
+			<input id="change-password-pass0" type="password" placeholder="Current password"></input>
 
-		<label for="change-password-pass1">New password</label>
-		<input id="change-password-pass1" class="password-check" type="password" data-strength="change-strength" placeholder="New password"></input>
-		<div id="change-strength" class="password-strength hidden"></div>
+			<label for="change-password-pass1">New password</label>
+			<input id="change-password-pass1" class="password-check" type="password" data-strength="change-strength" placeholder="New password"></input>
+			<div id="change-strength" class="password-strength hidden"></div>
 
-		<label for="change-password-pass2">New password (repeat)</label>
-		<input id="change-password-pass2" type="password" placeholder="New password (repeat)"></input>
+			<label for="change-password-pass2">New password (repeat)</label>
+			<input id="change-password-pass2" type="password" placeholder="New password (repeat)"></input>
 
-		<div class="error hidden"></div>
-		<button class="btn">OK</button>
-	</form>
+			<div class="error hidden"></div>
+			<button class="btn">OK</button>
+		</form>
+	</div>
 
 	<!-- Progress circle -->
 	<div id="busy" class="hidden">
@@ -190,10 +191,12 @@
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<div id="info-title" class="title title-large">simpleDrive</div>
-		<div class="subtitle">Private. Secure. Simple.</div>
-		<hr>
-		<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		<div>
+			<div id="info-title" class="title title-large">simpleDrive</div>
+			<div class="subtitle">Private. Secure. Simple.</div>
+			<hr>
+			<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		</div>
 	</div>
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>

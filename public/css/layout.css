@@ -181,18 +181,12 @@ hr {
 	z-index: 1;
 }
 
-.btn-circle.icon::before {
+.btn-overlay.icon::before {
 	font-size: 1.5rem !important;
 }
 
-.btn-circle-small {
-	background: transparent !important;
-	border: none !important;
-}
-
-.btn-circle-small .icon::before {
-	color: #999;
-	font-size: 0.8rem !important;
+.btn-inline {
+	flex-shrink: 0;
 }
 
 .title {
@@ -308,6 +302,27 @@ label {
 	margin-bottom: 10px;
 	font-family: robotolight, sans-serif;
 	font-size: 1rem;
+}
+
+label .icon {
+	padding-left: 5px;
+	height: 20px;
+	width: 20px;
+	line-height: 20px;
+	cursor: pointer;
+	display: inline-block;
+}
+
+label .icon:hover {
+	transform: scale(1.2);
+}
+
+label .icon.toggle {
+	visibility: hidden;
+}
+
+label:hover .icon.toggle {
+	visibility: visible;
 }
 
 #cursorinfo {

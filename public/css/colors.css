@@ -28,6 +28,14 @@ button:focus {
 	outline: 0px solid transparent;
 }
 
+.btn:hover {
+	background-color: #287952;
+	-webkit-transform: scale(1.01);
+	-moz-transform: scale(1.01);
+	-o-transform: scale(1.01);
+	-ms-transform: scale(1.01);
+}
+
 .btn:focus {
 	box-shadow: 0px 0px 1px 1px #2e8b5e;
 }
@@ -38,14 +46,6 @@ button:focus {
 
 .btn:hover a {
 	color: white;
-}
-
-.btn:hover {
-	background-color: #287952;
-	-webkit-transform: scale(1.01);
-	-moz-transform: scale(1.01);
-	-o-transform: scale(1.01);
-	-ms-transform: scale(1.01);
 }
 
 .btn:disabled,
@@ -65,8 +65,8 @@ button:focus {
 	background-color: #eee;
 }
 
-.overlay {
-	background-color: black;
+.btn-circle:hover {
+	background: rgba(0,0,0,0.2);
 }
 
 .btn-overlay {
@@ -78,6 +78,10 @@ button:focus {
 .btn-overlay:hover {
 	color: white;
 	background-color: rgba(255,255,255,0.2);
+}
+
+.overlay {
+	background-color: black;
 }
 
 .error-page-code {

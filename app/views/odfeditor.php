@@ -44,9 +44,6 @@
 		<div id="editor-container"></div>
 	</div>
 
-	<!-- Shield -->
-	<div id="shield" class="overlay hidden"></div>
-
 	<!-- Menu -->
 	<?php if ($username) : ?>
 	<div id="menu" class="popup popup-menu hidden">
@@ -65,10 +62,12 @@
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<div id="info-title" class="title title-large">simpleDrive</div>
-		<div class="subtitle">Private. Secure. Simple.</div>
-		<hr>
-		<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		<div>
+			<div id="info-title" class="title title-large">simpleDrive</div>
+			<div class="subtitle">Private. Secure. Simple.</div>
+			<hr>
+			<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		</div>
 	</div>
 
 	<!-- Progress circle -->

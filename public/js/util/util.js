@@ -45,10 +45,12 @@ var Util = new function() {
 		});
 
 		$(document).on('mouseup', function(e) {
-			self.closeMenu();
+			if (e.which != 3) {
+				self.closeMenu();
+			}
 		});
 
-		$(".popup-menu").on('mouseup', function(e) {
+		$(document).on('mouseup', ".popup-menu", function(e) {
 			e.stopPropagation();
 			self.closeMenu();
 		});

@@ -182,10 +182,31 @@ var VaultController = new function() {
 			$("#contextmenu").addClass("hidden");
 		});
 
-		$("#entry-add").on('click', function(e) {
-			if ($("#entry-fields").val()) {
-				$("#entry-" + $("#entry-fields").val() + "-cont").removeClass('hidden');
+		$("#entry-fields").on('change', function() {
+			var type = $(this).val();
+			if (type) {
+				$("#entry-" + type + "-cont").removeClass('hidden');
+				$("#entry-fields option[value=" + type + "]").addClass("hidden");
 			}
+
+			$("#entry-fields").val("");
+		});
+
+		$("#entry-add").on('click', function(e) {
+			var type = $("#entry-fields").val();
+			if (type) {
+				$("#entry-" + type + "-cont").removeClass('hidden');
+				$("#entry-fields option[value=" + type + "]").addClass("hidden");
+			}
+
+			$("#entry-fields").val("");
+		});
+
+		$(".remove-field").on('click', function() {
+			var type = $(this).data('type');
+			$("#entry-" + type).val("");
+			$("#entry-" + type + "-cont").addClass('hidden');
+			$("#entry-fields option[value=" + type + "]").removeClass("hidden");
 		});
 	}
 
@@ -204,11 +225,6 @@ var VaultController = new function() {
 			e.preventDefault();
 			VaultModel.changePassphrase($("#change-passphrase-pass1").val(), $("#change-passphrase-pass2").val());
 		});
-
-		/*$("div[id^='entry']").on('submit', function(e) {
-			e.preventDefault();
-			VaultModel.saveEntry_old($(this).data('type'));
-		});*/
 
 		$("#entry").on('submit', function(e) {
 			e.preventDefault();
@@ -259,7 +275,6 @@ var VaultView = new function() {
 	}
 
 	this.showCreateEntry = function(type) {
-		console.log("show create entry");
 		$("#" + type + "-title-edit").addClass('hidden');
 		$("#" + type + "-title-new").removeClass('hidden');
 		$("#entry-website-open-url").addClass("hidden");
@@ -281,90 +296,12 @@ var VaultView = new function() {
 
 		Util.showPopup("entry");
 
-		if (item.title) {
-			$("#entry-title").val(item.title);
-		}
-		if (item.category) {
-			$("#entry-category").val(item.category);
-		}
-		if (item.url) {
-			$("#entry-url-cont").removeClass("hidden")
-			$("#entry-url").val(item.url);
-		}
-		if (item.username) {
-			$("#entry-username-cont").removeClass("hidden");
-			$("#entry-username").val(item.username);
-		}
-		if (item.password) {
-			$("#entry-password-cont").removeClass("hidden");
-			$("#entry-password").val(item.url);
-		}
-		if (item.note) {
-			$("#entry-note-cont").removeClass("hidden");
-			$("#entry-note").val(item.note);
-		}
-
-		/*if (item.type == 'website') {
-			$("#entry-website-url").val(item.url);
-			$("#entry-website-userword").val(item.username);
-			$("#entry-website-password").val(item.password);
-			$("#entry-website-note").val(item.note);
-			$("#entry-website-open-url a").attr("href", Util.generateFullURL(item.url));
-
-			$("#entry-website-copy-user").off('click').on('click', function() {
-				VaultModel.preventClipboardClear = false;
-				Util.copyToClipboard(item.username);
-			});
-
-			$("#entry-website-copy-pass").off('click').on('click', function() {
-				VaultModel.preventClipboardClear = false;
-				Util.copyToClipboard(item.pass);
-			});
-		}
-		else if (item.type == 'note') {
-			$("#entry-" + item.type + "-content").val(item.content);
-		}*/
-	}
-
-	this.showEntry_old = function() {
-		console.log("show entry");
-		var selection = VaultModel.list.getFirstSelected();
-		var item = selection.item;
-
-		$("#" + item.type + "-title-edit").removeClass('hidden');
-		$("#" + item.type + "-title-new").addClass('hidden');
-		Util.showPopup("entry-" + item.type);
-
-		$("#entry-" + item.type + "-title").val(item.title);
-		$("#entry-" + item.type + "-type").val(item.type);
-		$("#entry-" + item.type + "-category").val(item.category);
-
-		if (item.type == 'website') {
-			$("#entry-website-url").val(item.url);
-			$("#entry-website-user").val(item.user);
-			$("#entry-website-pass").val(item.pass);
-			$("#entry-website-notes").val(item.notes);
-			$("#entry-website-open-url a").attr("href", Util.generateFullURL(item.url));
-
-			if (item.url) {
-				$("#entry-website-open-url").removeClass("hidden");
+		for (var field in item) {
+			if (item[field] && item[field].length) {
+				$("#entry-" + field + "-cont").removeClass("hidden");
+				$("#entry-fields option[value=" + field + "]")
+				$("#entry-" + field).val(item[field]);
 			}
-			else {
-				$("#entry-website-open-url").addClass("hidden");
-			}
-
-			$("#entry-website-copy-user").off('click').on('click', function() {
-				VaultModel.preventClipboardClear = false;
-				Util.copyToClipboard(item.user);
-			});
-
-			$("#entry-website-copy-pass").off('click').on('click', function() {
-				VaultModel.preventClipboardClear = false;
-				Util.copyToClipboard(item.pass);
-			});
-		}
-		else if (item.type == 'note') {
-			$("#entry-" + item.type + "-content").val(item.content);
 		}
 	}
 
@@ -394,7 +331,7 @@ var VaultView = new function() {
 			listItem.appendChild(thumbnailWrapper);
 
 			var thumbnail = document.createElement('span');
-			thumbnail.className = "thumbnail icon-" + item.type;
+			thumbnail.className = "thumbnail icon-key";
 			thumbnailWrapper.appendChild(thumbnail);
 
 			// Title
@@ -408,12 +345,6 @@ var VaultView = new function() {
 			category.className = "item-elem col2";
 			category.innerHTML = item.category;
 			listItem.appendChild(category);
-
-			// Type
-			var type = document.createElement("span");
-			type.className = "item-elem col3";
-			type.innerHTML = item.type;
-			listItem.appendChild(type);
 
 			// Edit
 			var edit = document.createElement("span");
@@ -480,66 +411,6 @@ var VaultModel = new function() {
 		// Unblock submit and close popup
 		$("#entry .btn").prop('disabled', false);
 		Util.closePopup('entry', true);
-
-		// Save
-		self.save(hash);
-	}
-
-	this.saveEntry_old = function(type) {
-		// Get item if editing - empty object if creating
-		var item = (self.list.getSelectedCount() > 0) ? self.list.getFirstSelected().item : {};
-
-		// Require title
-		var origTitle = (item.title) ? item.title : $("#entry-" + type + "-title").val();
-		if (!$("#entry-" + type + "-title").val()) {
-			Util.showFormError('entry-' + type, 'No title provided');
-			return;
-		}
-
-		// Check if title already exists
-		var index = Util.arraySearchForKey(self.list.getAll(), 'title', origTitle);
-		if (!item.title && index != null) {
-			Util.showFormError('entry-' + type, 'Entry already exists');
-			return;
-		}
-
-		// Block form submit
-		$("#entry-" + type + " .btn").prop('disabled', true);
-
-		// Set data
-		item.title = $("#entry-" + type + "-title").val();
-		item.category = $("#entry-" + type + "-category").val();
-		item.type = type;
-		item.logo = "";
-		item.edit = Date.now();
-		item.files = (item.files) ? item.files : [];
-
-		if (self.pendingFile) {
-			var hash = self.getUniqueFileHash(self.pendingFile.name);
-			item.files.push({filename: self.pendingFile.name, hash: hash});
-		}
-
-		if (item.type == 'website') {
-				item.url = Util.generateFullURL($("#entry-" + type + "-url").val());
-				item.user = $("#entry-" + type + "-user").val();
-				item.pass = $("#entry-" + type + "-pass").val();
-				item.notes = $("#entry-" + type + "-notes").val();
-		}
-		else if (item.type == 'note') {
-			item.content = $("#entry-" + type + "-content").val();
-		}
-
-		// Update/create entry
-		if (index) {
-			self.list.update(index, item);
-		}
-		else {
-			self.list.add(item);
-		}
-
-		// Unblock submit and close popup
-		$("#entry-" + type + " .btn").prop('disabled', false);
-		Util.closePopup('entry-' + type, true);
 
 		// Save
 		self.save(hash);

@@ -164,7 +164,7 @@
 	</div>
 
 	<!-- Context Menu -->
-	<div id="contextmenu" class="popup popup-menu hidden">
+	<div id="contextmenu" class="popup-menu hidden">
 		<ul class="menu">
 			<li id="context-create" class="hidden"><span class="icon icon-user-plus"></span><span>Create User</span></li>
 			<li id="context-delete" class="hidden"><span class="icon icon-user-minus"></span><span>Delete User</span></li>
@@ -173,7 +173,7 @@
 	</div>
 
 	<!-- Menu -->
-	<div id="menu" class="popup popup-menu hidden">
+	<div id="menu" class="popup-menu hidden">
 		<ul class="menu">
 			<li><a href="files"><span class="icon icon-files"></span><span>Files</span></a></li>
 			<li><a href="user"><span class="icon icon-settings"></span><span>Settings</span></a></li>
@@ -186,51 +186,54 @@
 		</ul>
 	</div>
 
-	<!-- Shield -->
-	<div id="shield" class="overlay hidden"></div>
-
 	<!-- New user -->
-	<form id="createuser" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div class="title">New User</div>
+	<div id="createuser" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div class="title">New User</div>
 
-		<label for="createuser-name">Username</label>
-		<input id="createuser-name" type="text" name="username" autocomplete="off" placeholder="Username" autofocus />
+			<label for="createuser-name">Username</label>
+			<input id="createuser-name" type="text" name="username" autocomplete="off" placeholder="Username" autofocus />
 
-		<label for="createuser-pass1">Password</label>
-		<input id="createuser-pass1" class="password-check" data-strength="createuser-strength" type="password" placeholder="Password"/>
-		<div id="createuser-strength" class="password-strength hidden"></div>
+			<label for="createuser-pass1">Password</label>
+			<input id="createuser-pass1" class="password-check" data-strength="createuser-strength" type="password" placeholder="Password"/>
+			<div id="createuser-strength" class="password-strength hidden"></div>
 
-		<label for="createuser-pass2">Repeat Password</label>
-		<input id="createuser-pass2" type="password" placeholder="Repeat Password"/>
+			<label for="createuser-pass2">Repeat Password</label>
+			<input id="createuser-pass2" type="password" placeholder="Repeat Password"/>
 
-		<label for="createuser-mail">E-Mail</label>
-		<input id="createuser-mail" type="text" placeholder="E-Mail (optional)"/>
+			<label for="createuser-mail">E-Mail</label>
+			<input id="createuser-mail" type="text" placeholder="E-Mail (optional)"/>
 
-		<div class="checkbox">
-			<span id="createuser-admin" class="checkbox-box"></span>
-			<span class="checkbox-label">Admin</span>
-		</div>
-		<div class="error hidden"></div>
-		<button class="btn">OK</button>
-	</form>
+			<div class="checkbox">
+				<span id="createuser-admin" class="checkbox-box"></span>
+				<span class="checkbox-label">Admin</span>
+			</div>
+			<div class="error hidden"></div>
+			<button class="btn">OK</button>
+		</form>
+	</div>
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<div id="info-title" class="title title-large">simpleDrive</div>
-		<div class="subtitle">Private. Secure. Simple.</div>
-		<hr>
-		<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		<div>
+			<div id="info-title" class="title title-large">simpleDrive</div>
+			<div class="subtitle">Private. Secure. Simple.</div>
+			<hr>
+			<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		</div>
 	</div>
 
 	<!-- Confirm -->
-	<form id="confirm" class="popup center hidden" action="#">
-		<span class="close">&times;</span>
-		<div id="confirm-title" class="title">Confirm</div>
+	<div id="confirm" class="popup center hidden">
+		<form action="#">
+			<span class="close">&times;</span>
+			<div id="confirm-title" class="title">Confirm</div>
 
-		<button id="confirm-no" class="btn btn-inverted cancel" tabindex=2>Cancel</button>
-		<button id="confirm-yes" class="btn" tabindex=1>OK</button>
-	</form>
+			<button id="confirm-no" class="btn btn-inverted cancel" tabindex=2>Cancel</button>
+			<button id="confirm-yes" class="btn" tabindex=1>OK</button>
+		</form>
+	</div>
 
 	<!-- Progress circle -->
 	<div id="busy" class="hidden">

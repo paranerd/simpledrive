@@ -122,7 +122,7 @@
 			</div>
 
 			<div id="entry-url-cont" class="form-hidden hidden">
-				<label>URL</label>
+				<label>URL<span class="remove-field toggle icon icon-trash" data-type="url"></span></label>
 				<div class="input-with-button input-indent">
 					<input id="entry-url" type="text" placeholder="URL" />
 					<span id="entry-open-url" class="icon icon-redo"><a style="display: block;" target="_blank" href="#"></a></span>
@@ -130,7 +130,7 @@
 			</div>
 
 			<div id="entry-username-cont" class="form-hidden hidden">
-				<label>Username</label>
+				<label>Username<span class="remove-field toggle icon icon-trash" data-type="username"></span></label>
 				<div class="input-with-button input-indent">
 					<input id="entry-user" type="text" placeholder="Username" />
 					<span class="copy-input icon icon-copy"></span>
@@ -138,7 +138,7 @@
 			</div>
 
 			<div id="entry-password-cont" class="form-hidden hidden">
-				<label>Password</label>
+				<label>Password<span class="remove-field toggle icon icon-trash" data-type="password"></span></label>
 				<div class="input-with-button">
 					<input id="entry-pass" class="input-indent password" type="password" placeholder="Password">
 					<span class="icon icon-visible password-toggle"></span>
@@ -147,28 +147,25 @@
 			</div>
 
 			<div id="entry-note-cont" class="form-hidden hidden">
-				<label>Note</label>
+				<label>Note<span class="remove-field toggle icon icon-trash" data-type="note"></span></label>
 				<div>
-					<textarea id="entry-notes" class="input-indent" placeholder="Notes"></textarea>
+					<textarea id="entry-note" class="input-indent" placeholder="Notes"></textarea>
 				</div>
 			</div>
 
-			<div style="display: flex;">
-				<select id="entry-fields" style="width: 100%; height: 50px; outline: none;">
-					<option value="" selected>- Add field -</option>
-					<option value="url">URL</option>
-					<option value="username" disabled>Username</option>
-					<option value="password">Password</option>
-					<option value="note">Note</option>
-				</select>
+			<div id="entry-file-cont" class="form-hidden hidden">
+				<label>Files<span class="remove-field toggle icon icon-trash" data-type="password"></span><span id="add-file" class="remove-field toggle icon icon-add"><input class="upload-input hidden" type="file" enctype="multipart/form-data" name="files[]"></span></label>
 
-				<div id="entry-add" class="icon icon-add" style="height: 50px; width: 50px; line-height: 50px; text-align: center;"></div>
 			</div>
 
-			<!-- <span id="add-file" class="btn">
-				Add File
-				<input class="upload-input hidden" type="file" enctype="multipart/form-data" name="files[]">
-			</span> -->
+			<select id="entry-fields" style="width: 100%; height: 50px; outline: none;">
+				<option value="" selected>- Add field -</option>
+				<option value="url">URL</option>
+				<option value="username">Username</option>
+				<option value="password">Password</option>
+				<option value="note">Note</option>
+				<option value="file">File</option>
+			</select>
 
 			<div class="error hidden"></div>
 
