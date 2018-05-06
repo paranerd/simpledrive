@@ -11,7 +11,7 @@ class Vault_Model extends Model {
 	/**
 	 * Constructor
 	 *
-	 * @param string $token
+	 * @param  string  $token
 	 */
 	public function __construct($token) {
 		parent::__construct();
@@ -65,7 +65,6 @@ class Vault_Model extends Model {
 			throw new Exception('Vault does not exist', 404);
 		}
 		else {
-			$vault = file_get_contents($this->vault_path);
 			return file_get_contents($this->vault_path);
 		}
 	}
@@ -73,8 +72,9 @@ class Vault_Model extends Model {
 	/**
 	 * Sync vault (keep last edited)
 	 *
-	 * @param string $client_vault Encrypted client_vault
-	 * @param int $last_edit
+	 * @param  string  $client_vault Encrypted client_vault
+	 * @param  int     $last_edit
+	 *
 	 * @return string The most up-to-date vault
 	 */
 	public function sync($client_vault, $last_edit) {
@@ -90,14 +90,20 @@ class Vault_Model extends Model {
 	/**
 	 * Save vault
 	 *
-	 * @param string $client_vault
+	 * @param  string  $client_vault
+	 *
 	 * @return boolean
 	 */
-	public function save($client_vault, $file = null, $filehash = "") {
+	public function save($client_vault, $files = null, $delete = null) {
+		$this->log->debug($_REQUEST);
 		$this->check_if_logged_in();
 
-		if (!empty($file) && $filehash) {
-			$this->add_file($file, $filehash);
+		if (!empty($files)) {
+			$this->add_files($files);
+		}
+
+		if (!empty($delete)) {
+			$this->delete_files($delete);
 		}
 
 		if (file_put_contents($this->vault_path, $client_vault) !== false) {
@@ -109,18 +115,59 @@ class Vault_Model extends Model {
 
 	/**
 	 * Add file
+	 *
+	 * @param  array  $files
 	 */
-	 public function add_file($file, $hash) {
+	 private function add_files($files) {
 		$max_upload = Util::convert_size(ini_get('upload_max_filesize'));
+		$errors = [];
 
-		if ($file['size'] > $max_upload) {
-			throw new Exception('File too big', 500);
+		foreach ($files as $hash => $file) {
+			if ($file['size'] > $max_upload) {
+				throw new Exception('File too big', 500);
+			}
+
+			if (!move_uploaded_file($file['tmp_name'], dirname($this->vault_path) . "/" . $hash)) {
+				$errors[] = $file['name'];
+			}
 		}
 
-		if (move_uploaded_file($file['tmp_name'], dirname($this->vault_path) . "/" . $hash)) {
+		if (empty($errors)) {
 			return null;
 		}
 
-		throw new Exception('Unknown error while uploading', 500);
+		throw new Exception("Error uploading " . implode(', ', $errors), 500);
 	 }
+
+	 /**
+	  * Get file
+	  *
+	  * @param  string  $hash
+	  */
+	 public function get_file($hash, $filename) {
+		 $path = dirname($this->vault_path) . "/" . $hash;
+
+		 if (file_exists($path)) {
+			 Response::set_download($path, false, $filename);
+			 return null;
+		 }
+
+		 throw new Exception('File not found', 404);
+	 }
+
+	 /**
+	  * Delete file
+	  *
+	  * @param  array  $hashes
+	  */
+	  private function delete_files($hashes) {
+		  $this->log->debug("hashes");
+		  $this->log->debug($hashes);
+		  foreach ($hashes as $hash) {
+			  $path = dirname($this->vault_path) . "/" . $hash;
+			  if (file_exists($path)) {
+				  unlink($path);
+			  }
+		  }
+	  }
 }

@@ -65,8 +65,9 @@ button:focus {
 	background-color: #eee;
 }
 
-.btn-circle:hover {
-	background: rgba(0,0,0,0.2);
+.btn-circle:hover,
+.btn-circle-small:hover {
+	background: rgba(0,0,0,0.1);
 }
 
 .btn-overlay {
@@ -332,10 +333,6 @@ body.light .menu ul {
 .light input,
 .light .input-with-button {
 	border-bottom: 1px dotted #555;
-}
-
-.input-with-button span:hover {
-	background: rgba(0,0,0,0.2);
 }
 
 .light .input-with-button input {

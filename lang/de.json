@@ -4,6 +4,7 @@
 	"new folder": "Neuer Ordner",
 	"logout": "Abmelden",
 	"settings": "Einstellungen",
+	"system": "System",
 	"yourshares": "Freigaben",
 	"shareout": "Freigaben",
 	"sharedwithyou": "Mit dir geteilt",
@@ -15,7 +16,8 @@
 	"folder": "Ordner",
 	"name": "Name",
 	"size": "Größe",
-	"edit": "Geändert",
+	"edit": "Ändern",
+	"edited": "Geändert",
 	"owner": "Eigentümer",
 	"type": "Typ",
 	"showsharelink": "Link abrufen",
@@ -45,5 +47,6 @@
 	"new note": "Neue Notiz",
 	"encrypt": "Verschlüsseln",
 	"decrypt": "Entschlüsseln",
-	"homefolder": "Homefolder"
+	"homefolder": "Homefolder",
+	"change password": "Passwort ändern"
 }

@@ -45,7 +45,7 @@ h2 {
 
 input {
 	margin: 0;
-	margin-bottom: 10px;
+	/* margin-bottom: 10px; */
 	padding: 0;
 	height: 50px;
 	width: 100%;
@@ -72,24 +72,21 @@ input {
 }
 
 .input-with-button {
-	margin-bottom: 10px;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 }
 
-.input-with-button span {
-	height: 50px;
-	width: 50px;
-	line-height: 50px;
-	border-radius: 50px;
-	/* display: inline-block; */
+.input-with-button .icon {
+	border-radius: 25px;
 	cursor: pointer;
 	flex-shrink: 0;
 }
 
 .input-with-button .icon::before {
+	height: 100%;
 	width: 50px;
+	line-height: 50px;
 }
 
 select {
@@ -162,6 +159,20 @@ hr {
 	cursor: default;
 }
 
+.btn-icon {
+	height: 50px;
+	width: 50px;
+	line-height: 50px;
+	text-align: center;
+	display: inline-block;
+}
+
+.btn-small {
+	height: 25px;
+	width: 25px;
+	line-hieght: 25px;
+}
+
 .btn-large {
 	margin-top: 10px;
 	width: 200px;
@@ -181,6 +192,19 @@ hr {
 	z-index: 1;
 }
 
+.btn-circle-small {
+	height: 25px;
+	width: 25px;
+	border: none;
+	border-radius: 25px;
+	font-size: 1rem;
+	line-height: 25px;
+	text-align: center;
+	cursor: pointer;
+	z-index: 1;
+	display: inline-block;
+}
+
 .btn-overlay.icon::before {
 	font-size: 1.5rem !important;
 }
@@ -196,6 +220,21 @@ hr {
 	padding: 0;
 	font-size: 2rem;
 	font-family: robotolight, sans-serif;
+}
+
+form .title {
+	margin: 0;
+}
+
+form .form-buttons {
+	margin-top: 10px;
+}
+
+form .form-list {
+	margin-top: 10px;
+	height: 100px;
+	overflow: auto;
+	border: 1px dotted;
 }
 
 .title-large {
@@ -277,11 +316,24 @@ hr {
 	transform: scale(0);
 }
 
+.icon {
+	position: relative;
+}
+
 .icon::before {
 	text-align: center;
 	font-size: 0.8rem;
 	display: inline-block;
 	vertical-align: top;
+}
+
+.icon a {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
 }
 
 .error {
@@ -297,9 +349,16 @@ hr {
 	font-size: 1.3rem;
 }
 
+form label {
+	/* margin: 10px 0 10px 0; */
+	margin-top: 20px;
+	/* margin-bottom: 10px; */
+	display: inline-block;
+}
+
 label {
 	position: relative;
-	margin-bottom: 10px;
+	/* margin-bottom: 10px; */
 	font-family: robotolight, sans-serif;
 	font-size: 1rem;
 }
@@ -1022,7 +1081,7 @@ label:hover .icon.toggle {
 	padding-top: 10px;
 	padding-left: 1% !important;
 	margin-top: 10px;
-	margin-bottom: 20px;
+	/* margin-bottom: 20px; */
 	font-size: 1rem;
 	font-family: robotolight, sans-serif;
 	border: 1px dotted black;
@@ -1187,4 +1246,16 @@ label:hover .icon.toggle {
 	display: flex;
 	overflow: auto;
 	justify-content: center;
+}
+
+.select-with-icon {
+	width: 40px;
+	height: 40px;
+	outline: 0;
+	border: none !important;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-indent: 1px;
+    text-overflow: '';
+	font-family: icomoon, sans-serif;
 }

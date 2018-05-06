@@ -29,7 +29,7 @@
 	<div id="header" class="dark">
 		<!-- Nav back -->
 		<div id="logo" title="Return to files">
-			<a href="files" class="back"><span class="icon icon-arrow-left"></span>ODF-Editor</a>
+			<a href="files" class="back icon icon-arrow-left">ODF-Editor</a>
 		</div>
 		<!-- Title -->
 		<div id="title">
@@ -46,18 +46,18 @@
 
 	<!-- Menu -->
 	<?php if ($username) : ?>
-	<div id="menu" class="popup popup-menu hidden">
-		<ul class="menu">
-			<li><a href="files"><span class="icon icon-files"></span>Files</a></li>
-			<li><a href="user"><span class="icon icon-settings"></span>Settings</a></li>
-			<?php if ($admin) : ?>
-			<li><a href="system"><span class="icon icon-admin"></span>System</a></li>
-			<?php endif; ?>
-			<li><a href="vault"><span class="icon icon-key"></span>Vault</a></li>
-			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><?php echo $lang['info']; ?></li>
-			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><?php echo $lang['logout']; ?></a></li>
-		</ul>
-	</div>
+		<div id="menu" class="popup-menu hidden">
+			<ul class="menu">
+				<li><a class="icon icon-files" href="files">Files</a></li>
+				<li><a class="icon icon-settings" href="user">Settings</a></li>
+				<?php if ($admin) : ?>
+				<li><a class="icon icon-admin" href="system">System</a></li>
+				<?php endif; ?>
+				<li><a class="icon icon-key" href="vault">Vault</a></li>
+				<li class="icon icon-info popup-trigger" data-target="info"><?php echo $lang['info']; ?></li>
+				<li><a class="icon icon-logout" href="core/logout?token=<?php echo $token; ?>"><?php echo $lang['logout']; ?></a></li>
+			</ul>
+		</div>
 	<?php endif; ?>
 
 	<!-- Version info -->

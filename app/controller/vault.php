@@ -17,7 +17,8 @@ class Vault_Controller {
 
 	public $required = array(
 		'sync' => array('vault', 'lastedit'),
-		'save' => array('vault')
+		'save' => array('vault'),
+		'file' => array('hash', 'filename')
 	);
 
 	public function __construct($token) {
@@ -44,8 +45,12 @@ class Vault_Controller {
 	}
 
 	public function save() {
-		$file = $_FILES[0] ?? null;
-		$filehash = $_REQUEST['filehash'] ?? "";
-		return $this->model->save($_REQUEST['vault'], $file, $filehash);
+		$files = $_FILES ?? null;
+		$delete = isset($_REQUEST['delete']) ? json_decode($_REQUEST['delete']) : null;
+		return $this->model->save($_REQUEST['vault'], $files, $delete);
+	}
+
+	public function file() {
+		return $this->model->get_file($_REQUEST['hash'], $_REQUEST['filename']);
 	}
 }

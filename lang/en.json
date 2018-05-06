@@ -4,6 +4,7 @@
 	"new folder": "New Folder",
 	"logout": "Logout",
 	"settings": "Settings",
+	"system": "System",
 	"yourshares": "Your shares",
 	"shareout": "Your shares",
 	"sharedwithyou": "Shared with you",
@@ -16,6 +17,7 @@
 	"name": "Name",
 	"size": "Size",
 	"edit": "Edit",
+	"edited": "Edited",
 	"owner": "Owner",
 	"type": "Type",
 	"showsharelink": "Show share link",
@@ -45,5 +47,6 @@
 	"new note": "New Note",
 	"encrypt": "Encrypt",
 	"decrypt": "Decrypt",
-	"homefolder": "Homefolder"
+	"homefolder": "Homefolder",
+	"change password": "Change password"
 }

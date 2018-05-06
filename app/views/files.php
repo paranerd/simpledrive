@@ -48,7 +48,7 @@
 				<li id="sidebar-upload" class="menu-trigger icon icon-upload" title="Upload file(s)" data-target="upload-menu">Upload</li>
 				<?php if ($section != 'pub') : ?>
 				<hr>
-				<li id="sidebar-files" class="sidebar-navigation focus icon icon-files" title="Show all files" data-action="files"><?php echo $lang['myfiles']; ?></li>
+				<li id="sidebar-files" class="sidebar-navigation focus icon icon-folder" title="Show all files" data-action="files"><?php echo $lang['myfiles']; ?></li>
 				<li id="sidebar-shareout" class="sidebar-navigation icon icon-users" title="Show your shares" data-action="shareout"><?php echo $lang['yourshares']; ?></li>
 				<li id="sidebar-sharein" class="sidebar-navigation icon icon-share" title="Show files shared with you" data-action="sharein"><?php echo $lang['sharedwithyou']; ?></li>
 				<li id="sidebar-trash" class="sidebar-navigation icon icon-trash" title="Show trash" data-action="trash"><?php echo $lang['trash']; ?></li>
@@ -120,7 +120,7 @@
 				<span class="col2" data-sortby="owner"><span><?php echo $lang['owner']; ?></span><span id="owner-ord" class="order-direction"></span></span>
 				<span class="col3" data-sortby="type"><span><?php echo $lang['type']; ?> </span><span id="type-ord" class="order-direction"></span></span>
 				<span class="col4" data-sortby="size"><span><?php echo $lang['size']; ?> </span><span id="size-ord" class="order-direction"></span></span>
-				<span class="col5" data-sortby="edit"><span id="file-edit-ord" class="order-direction"></span><span><?php echo $lang['edit']; ?> </span></span>
+				<span class="col5" data-sortby="edit"><span id="file-edit-ord" class="order-direction"></span><span><?php echo $lang['edited']; ?> </span></span>
 			</div>
 
 			<div id="files" class="content">
@@ -138,7 +138,7 @@
 
 			<div id="fileinfo-size" class="fileinfo-elem icon icon-files"></div>
 			<div id="fileinfo-type" class="fileinfo-elem icon icon-info"></div>
-			<div id="fileinfo-edit" class="fileinfo-elem icon icon-rename"></div>
+			<div id="fileinfo-edit" class="fileinfo-elem icon icon-edit"></div>
 			<div id="fileinfo-link" class="fileinfo-elem icon icon-share">Show Link</div>
 
 			<div id="fileinfo-footer">
@@ -191,7 +191,7 @@
 			<li id="context-unshare" class="icon icon-share hidden"><?php echo $lang['unshare']; ?></li>
 			<li id="context-decrypt" class="icon icon-key hidden"><?php echo $lang['decrypt']; ?></li>
 			<hr class="hidden">
-			<li id="context-rename" class="icon icon-rename hidden"><?php echo $lang['rename']; ?></li>
+			<li id="context-rename" class="icon icon-edit hidden"><?php echo $lang['rename']; ?></li>
 			<li id="context-zip" class="icon icon-archive hidden"><?php echo $lang['zip']; ?></li>
 			<li id="context-unzip" class="icon icon-archive hidden"><?php echo $lang['unzip']; ?></li>
 			<li id="context-download" class="icon icon-download hidden"><?php echo $lang['download']; ?></li>
@@ -203,7 +203,7 @@
 	<!-- Menu -->
 	<div id="menu" class="popup-menu hidden">
 		<ul class="menu">
-			<li><a class="icon icon-files" href="files">Files</a></li>
+			<li><a class="icon icon-folder" href="files">Files</a></li>
 			<li><a class="icon icon-settings" href="user">Settings</a></li>
 			<?php if ($admin) : ?>
 			<li><a class="icon icon-admin" href="system">System</a></li>

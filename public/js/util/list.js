@@ -148,6 +148,26 @@ var List = (function() {
 		},
 
 		/**
+		 * Add to / update list
+		 *
+		 * @param  object  item
+		 * @param  int     pos
+		 */
+		update2: function(item, pos) {
+			if (pos) {
+				if (this.items.length > id) {
+					this.items[id] = item;
+				}
+			}
+			else {
+				this.items.push(item);
+			}
+
+			this.filter();
+			this.display();
+		},
+
+		/**
 		 * Remove item from list
 		 *
 		 * @param int id

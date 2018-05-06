@@ -124,9 +124,7 @@ var Util = new function() {
 		});
 
 		$(document).on('click', '.copy-input', function(e) {
-			console.log("click");
 			var input = $(this).siblings("input");
-			console.log("copying " + $(input).val());
 			Util.copyToClipboard($(input).val());
 		});
 	}
@@ -185,25 +183,7 @@ var Util = new function() {
 
 	this.addOtherEvents = function() {
 		$(window).resize(function() {
-			// Position centered divs
-			/*$('.center').each(function(i, obj) {
-				$(this).css({
-					top: ($(this).outerHeight() < $(this).parent().height()) ? ($(this).parent().height() - $(this).outerHeight()) / 2 : 0,
-					left: ($(this).outerWidth() < $(this).parent().width()) ? ($(this).parent().width() - $(this).outerWidth()) / 2 : 0
-				});
-			});
-
-			$('.center-hor').each(function(i, obj) {
-				$(this).css({
-					left: ($(this).outerWidth() < $(this).parent().width()) ? ($(this).parent().width() - $(this).outerWidth()) / 2 : 0
-				});
-			});
-
-			$('.center-ver').each(function(i, obj) {
-				$(this).css({
-					top: ($(this).outerHeight() < $(this).parent().height()) ? ($(this).parent().height() - $(this).outerHeight()) / 2 : 0,
-				});
-			});*/
+			// Do something
 		});
 	}
 
@@ -664,5 +644,17 @@ var Util = new function() {
 				}
 			}
 		}, 100);
+	}
+
+	this.download = function(uri, args) {
+		var form = $('<form class="hidden" action="' + uri + '"></form>');
+
+		for (var arg in args) {
+			$('<input name="' + arg + '"/>').appendTo(form);
+			$(form).find('[name="' + arg + '"]').val(args[arg]);
+		}
+
+		$(form).append('<input name="token" value="' + self.getToken() + '"/>');
+		$(form).appendTo('body').submit().remove();
 	}
 }

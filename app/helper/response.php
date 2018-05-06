@@ -10,6 +10,7 @@
 class Response {
 	static $DOWNLOAD_RATE = 1024; // Send files in 1-MB-chunks
 	static $DOWNLOAD_PATH;
+	static $DOWNLOAD_FILENAME;
 	static $DOWNLOAD_DEL = false;
 
 	/**
@@ -70,7 +71,7 @@ class Response {
 			require_once 'app/views/' . $info . '.php';
 		}
 		else if (self::$DOWNLOAD_PATH) {
-			return self::download(self::$DOWNLOAD_PATH, self::$DOWNLOAD_DEL);
+			return self::download(self::$DOWNLOAD_PATH, self::$DOWNLOAD_DEL, self::$DOWNLOAD_FILENAME);
 		}
 		else {
 			return json_encode(array('msg' => $info));
@@ -127,9 +128,10 @@ class Response {
 	 * @param string $path
 	 * @param boolean $delete_flag
 	 */
-	public static function set_download($path, $delete_flag) {
+	public static function set_download($path, $delete_flag, $filename = "") {
 		self::$DOWNLOAD_PATH = $path;
 		self::$DOWNLOAD_DEL = $delete_flag;
+		self::$DOWNLOAD_FILENAME = $filename;
 	}
 
 	/**
@@ -139,15 +141,15 @@ class Response {
 	 * @param boolean $delete_flag Whether or not the file should be deletet after download
 	 * @return null
 	 */
-	public static function download($destination, $delete_flag) {
-		//self::$DOWNLOAD_FLAG = true;
+	public static function download($destination, $delete_flag, $filename) {
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
+		$filename = ($filename) ? $filename : basename($destination);
 		header('Cache-control: private, max-age=86400, no-transform');
 		header('Expires: Fri, 01 Jan 1990 00:00:00 GMT');
 		header("Connection: keep-alive");
 		header("Content-Type: " . finfo_file($finfo, $destination));
 		header('Content-Length: ' . filesize($destination));
-		header("Content-Disposition: attachment; filename=" . urlencode(basename($destination)));
+		header("Content-Disposition: attachment; filename=" . urlencode($filename));
 
 		finfo_close($finfo);
 		flush();
