@@ -25,6 +25,11 @@ var Util = new function() {
 		self.copyToClipboard('');
 	}
 
+	/**
+	 * Set CSRF-token and add it to each ajax-request
+	 *
+	 * @param  string  token
+	 */
 	this.setToken = function(token) {
 		self.token = token;
 		$.ajaxSetup({
@@ -33,6 +38,11 @@ var Util = new function() {
 		});
 	}
 
+	/**
+	 * Get CSRF-token
+	 *
+	 * @return string
+	 */
 	this.getToken = function() {
 		return this.token;
 	}
@@ -575,6 +585,10 @@ var Util = new function() {
 	/**
 	 * Calculate if an element currently in the viewport
 	 * Important not to use jQuery's offset().top (relative to document)!
+	 *
+	 * @param  DOMElement  elem
+	 *
+	 * @return boolean
 	 */
 	this.isVisible = function(elem) {
 		if (elem.length > 0) {
@@ -588,12 +602,24 @@ var Util = new function() {
 		return false;
 	}
 
+	/**
+	 * Add http(s) to url if not exists
+	 *
+	 * @param  string  url
+	 *
+	 * @return string
+	 */
 	this.generateFullURL = function(url) {
 		return (url == "" || url.match("^http://") || url.match("^https://")) ? url : "http://" + url;
 	}
 
 	/**
 	 * Search an array for a value to a specific key
+	 *
+	 * @param  array   arr
+	 * @param  string  key
+	 * @param  string  value
+	 *
 	 * @return int|null
 	 */
 	this.arraySearchForKey = function(arr, key, value) {
@@ -608,6 +634,7 @@ var Util = new function() {
 
 	/**
 	 * Remove duplicate entries from array
+	 *
 	 * @return array
 	 */
 	this.arrayRemoveDuplicates = function(arr) {
@@ -630,6 +657,35 @@ var Util = new function() {
 		});
 
 		return result;
+	}
+
+	/**
+	 * Get all elements of arr1 that don't exist in arr2
+	 *
+	 * @param  array  arr1
+	 * @param  array  arr2
+	 *
+	 * @return array
+	 */
+	this.arrayDiff = function(arr1, arr2) {
+		let diff = arr1.filter(x => !arr2.find(function(y) { return JSON.stringify(x) == JSON.stringify(y)}));
+		return diff;
+	}
+
+	/**
+	 * Get all elements that are neither in arr1 nor in arr2
+	 *
+	 * @param  array  arr1
+	 * @param  array  arr2
+	 *
+	 * @return array
+	 */
+	this.arrayDiffBoth = function(arr1, arr2) {
+		let diff = arr1
+					.filter(x => !arr2.find(function(y) { return JSON.stringify(x) == JSON.stringify(y)}))
+					.concat(arr2.filter(x => !arr1.find(function(y) { return JSON.stringify(x) == JSON.stringify(y)})));
+
+		return diff
 	}
 
 	this.autofill = function(id, value, callback) {

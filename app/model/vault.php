@@ -96,6 +96,7 @@ class Vault_Model extends Model {
 	 */
 	public function save($client_vault, $files = null, $delete = null) {
 		$this->log->debug($_REQUEST);
+		$this->log->debug($_FILES);
 		$this->check_if_logged_in();
 
 		if (!empty($files)) {

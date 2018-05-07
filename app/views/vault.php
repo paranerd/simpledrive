@@ -44,7 +44,7 @@
 		<!-- Sidebar -->
 		<div id="sidebar">
 			<ul class="menu">
-				<li id="sidebar-create" class="menu-trigger icon icon-add" title="Create new element" data-target="entry"><?php echo $lang['new']; ?></li>
+				<li id="sidebar-create" class="menu-trigger icon icon-add" title="Create new element"><?php echo $lang['new']; ?></li>
 				<li id="sidebar-entries" class="sidebar-navigation icon icon-info focus" title="Entries" data-action="entries">Entries</li>
 				<li id="sidebar-passgen" class="popup-trigger icon icon-key" title="Entries" data-target="password-generator">Password Generator</li>
 			</ul>
@@ -100,7 +100,7 @@
 		<form action="#">
 			<span class="close">&times;</span>
 			<div id="entry-create-title" class="title"><?php echo $lang['create']; ?></div>
-			<div id="entry-edit-title" class="title"><?php echo $lang['edit']; ?></div>
+			<div id="entry-edit-title" class="title hidden"><?php echo $lang['edit']; ?></div>
 
 			<label>Title</label>
 			<input id="entry-title" class="input-indent" type="text" placeholder="Title">
@@ -143,7 +143,7 @@
 				</div>
 			</div>
 
-			<div id="entry-files-cont" class="form-hidden">
+			<div id="entry-files-cont" class="form-hidden hidden">
 				<label>Files
 					<span class="remove-field toggle icon icon-trash" data-type="files"></span>
 					<span id="add-file" class="toggle icon icon-add"></span>

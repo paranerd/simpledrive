@@ -123,9 +123,7 @@ var VaultController = new function() {
 			Util.copyToClipboard($("#passgen-password").text());
 		});
 
-		/**
-		 * Prepare contextmenu
-		 */
+		// Prepare contextmenu
 		$(document).on('contextmenu', '#content-container', function(e) {
 			e.preventDefault();
 			var target = (typeof e.target.value != "undefined") ? VaultModel.list.get(e.target.value) : ((typeof e.target.parentNode.value != "undefined") ? VaultModel.list.get(e.target.parentNode.value) : null);
@@ -150,9 +148,7 @@ var VaultController = new function() {
 			Util.showContextmenu(e);
 		});
 
-		/**
-		 * Contextmenu action
-		 */
+		// Contextmenu action
 		$("#contextmenu .menu li").on('click', function(e) {
 			var id = $(this).attr('id')
 			var action = id.substr(id.indexOf('-') + 1);
@@ -176,11 +172,11 @@ var VaultController = new function() {
 		$("#entry-fields").on('change', function() {
 			var type = $(this).val();
 
-			if (type && type != "file") {
+			if (type && type != "files") {
 				$("#entry-" + type + "-cont").removeClass('hidden');
 				$("#entry-fields option[value=" + type + "]").addClass("hidden");
 			}
-			else if (type == "file") {
+			else if (type == "files") {
 				$("#entry-files-cont input").trigger('click');
 			}
 
@@ -192,6 +188,10 @@ var VaultController = new function() {
 			$("#entry-" + type).val("");
 			$("#entry-" + type + "-cont").addClass('hidden');
 			$("#entry-fields option[value=" + type + "]").removeClass("hidden");
+
+			if (type == 'files') {
+				$("#entry-files-cont .remove-file").trigger('click');
+			}
 		});
 
 		$(document).on('click', ".download-trigger", function() {
@@ -199,12 +199,23 @@ var VaultController = new function() {
 		});
 
 		$(document).on('click', '.remove-file', function() {
-			VaultModel.filesDelete.push($(this).parent().data('hash'));
+			if ($(this).parent('[data-pending]').length != 0) {
+				delete VaultModel.pendingUploads[$(this).parent().data('hash')];
+			}
+			else {
+				VaultModel.pendingDeletions.push($(this).parent().data('hash'));
+			}
+
 			$(this).parent().remove();
 
 			if ($("#entry-files").children().length == 0) {
 				$("#entry-files-cont .remove-field").trigger('click');
 			};
+		});
+
+		// Show new entry popup
+		$("#sidebar-create").on('click', function() {
+			VaultView.showEntry();
 		});
 	}
 
@@ -251,12 +262,13 @@ var VaultController = new function() {
 
 		$("#entry-files-cont input").on('change', function(e) {
 			$("#entry-files-cont").removeClass("hidden");
+			$("#entry-fields option[value=files]").addClass("hidden");
 
 			for (var i = 0; i < this.files.length; i++) {
 				var file = this.files[i];
-				//file['hash'] = VaultModel.getUniqueFileHash();
-				VaultModel.filesUpload.push(file);
-				$("#entry-files").append('<div data-filename="' + file.name + '">' + file.name + '</div>')
+				var hash = VaultModel.getUniqueFileHash();
+				VaultModel.pendingUploads[hash] = file;
+				$("#entry-files").append('<div data-pending="true" data-hash="' + hash + '" data-filename="' + file.name + '"><span class="btn-circle-small icon icon-trash remove-file"></span>' + file.name + '</div>')
 			}
 		});
 	}
@@ -283,6 +295,8 @@ var VaultView = new function() {
 		var selection = VaultModel.list.getFirstSelected();
 		var item = (selection) ? selection.item : {};
 
+		Util.showPopup("entry");
+
 		if (Object.keys(item).length === 0) {
 			$("#entry-edit-title").addClass("hidden");
 			$("#entry-create-title").removeClass("hidden");
@@ -294,8 +308,6 @@ var VaultView = new function() {
 
 		$("#entry-open-url").find('a').attr('href', '#');
 		$("#entry-files").empty();
-
-		Util.showPopup("entry");
 
 		for (var field in item) {
 			if (item[field] && item[field].length) {
@@ -375,20 +387,10 @@ var VaultModel = new function() {
 	this.list = new List("entries", VaultView.display);
 	this.clipboard = {};
 
-	this.filesUpload = [];
-	this.filesDelete = [];
+	this.pendingUploads = {};
+	this.pendingDeletions = [];
 
 	this.saveEntry = function() {
-		//var uploads = $("#entry-files-cont input").prop('files');
-		//console.log(uploads);
-		//return;
-
-		/*$("#entry-files-cont input").on('change', function(e) {
-			$("#entry-files-cont").removeClass("hidden");
-
-			for (var i = 0; i < this.files.length; i++) {
-				var file = this.files[i];*/
-
 		var item = (self.list.getSelectedCount() > 0) ? self.list.getFirstSelected().item : {};
 
 		// Require title
@@ -400,11 +402,6 @@ var VaultModel = new function() {
 
 		// Check if title already exists
 		var index = Util.arraySearchForKey(self.list.getAll(), 'title', origTitle);
-
-		/*console.log(item);
-		console.log(item.title);
-		console.log(origTitle);
-		console.log(index);*/
 
 		if (!item.title && index != null) {
 			Util.showFormError('entry', 'Entry already exists');
@@ -419,37 +416,15 @@ var VaultModel = new function() {
 		item.category = $("#entry-category").val();
 		item.logo = "";
 		item.edit = Date.now();
-		item.files = (item.files) ? item.files : [];
+		item.files = [];
 		item.url = Util.generateFullURL($("#entry-url").val());
 		item.username = $("#entry-username").val();
 		item.password = $("#entry-password").val();
 		item.note = $("#entry-notes").val();
 
-		var files = [];
-		$("#entry-files > [data-hash]").each(function() {
-			files.push({filename: $(this).data('filename'), hash: $(this).data('hash')})
-		});
-
-		console.log("existing:");
-		console.log(files);
-
-		self.filesUpload.forEach(function(file) {
-			file['hash'] = VaultModel.getUniqueFileHash();
-			files.push({filename: file.name, hash: file.hash});
-		});
-
-		console.log("all:");
-		console.log(files);
-
-		/*var uploads = [];
+		item.files = [];
 		$("#entry-files").children().each(function() {
-			if (!$(this).attr('data-hash')) {
-				uploads.push({filename: $(this).data('filename'), hash: self.getUniqueFileHash()});
-			}
-		});*/
-
-		self.filesUpload.forEach(function(file) {
-			item.files.push({filename: file.name, hash: file.hash});
+			item.files.push({filename: $(this).data('filename'), hash: $(this).data('hash')})
 		});
 
 		// Update/create entry
@@ -465,7 +440,6 @@ var VaultModel = new function() {
 		Util.closePopup('entry', true);
 
 		// Save
-		return;
 		self.save();
 	}
 
@@ -501,6 +475,18 @@ var VaultModel = new function() {
 				}
 			});
 
+			for (var existingHash in self.pendingUploads) {
+				if (existingHash == hash) {
+					found = true;
+				}
+			}
+
+			/*self.pendingUploads.forEach(function(upload) {
+				if (upload.hash == hash) {
+					found = true;
+				}
+			});*/
+
 			if (!found) {
 				return hash;
 			}
@@ -533,12 +519,12 @@ var VaultModel = new function() {
 
 				var fd = new FormData();
 				fd.append('vault', encryptedVault)
-				fd.append('delete', JSON.stringify(self.filesDelete));
+				fd.append('delete', JSON.stringify(self.pendingDeletions));
 				fd.append('token', Util.getToken());
 
-				self.filesUpload.forEach(function(file) {
-					fd.append(file.hash, file);
-				});
+				for (var hash in self.pendingUploads) {
+					fd.append(hash, self.pendingUploads[hash]);
+				}
 
 				$.ajax({
 					url: 'api/vault/save',
@@ -551,14 +537,13 @@ var VaultModel = new function() {
 					Util.notify("Saved.", true, false);
 				}).fail(function(xhr, statusText, error) {
 					Util.notify(xhr.statusText, true, true);
-				}).always(function() {
-					Util.endBusy(bId);
-					self.filesUpload = [];
 				});
 			} catch(e) {
-				Util.notify("Error encrypting", true, true);
+				Util.notify("Error saving", true, true);
+			} finally {
 				Util.endBusy(bId);
-				return;
+				self.pendingUploads = {};
+				self.pendingDeletions = [];
 			}
 		}, 100);
 	}

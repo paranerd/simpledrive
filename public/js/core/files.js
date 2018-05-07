@@ -5,60 +5,9 @@
  * @link		https://simpledrive.org
  */
 
-var arr1 = [{filename: 'test', hash: '123'}, {filename: 'ting', hash: '234'}];
-var arr2 = [{filename: 'test', hash: '123'}, {filename: 'ting', hash: '23'}];
-
-function diff(arr1, arr2) {
-	let diff = arr1.filter(x => !arr2.find(function(y) { return JSON.stringify(x) == JSON.stringify(y)}));
-	return diff;
-}
-
-var theDiff = diff(arr1, arr2);
-console.log(theDiff);
-
 var	username;
 
 $(document).ready(function() {
-	/*var arr1 = [{filename: 'test', hash: '123'}, {filename: 'ting', hash: '234'}];
-	var arr2 = [{filename: 'test', hash: '123'}, {filename: 'ting', hash: '235'}];
-
-	//var myDiff = arr1.filter(x => arr2.find(function(x) { return x;}));
-	var myDiff = arr1.filter(myFilter);
-	console.log(myDiff);
-	return;
-
-	var obj = objArray.find(function (obj) { return obj; });
-
-	return;
-	var arr1 = [{filename: 'test', hash: '123'}, {filename: 'ting', hash: '234'}];
-	var arr2 = [{filename: 'test', hash: '123'}, {filename: 'ting', hash: '235'}];
-
-	console.log(arr1.indexOf({filename: 'test', hash: '123'}));
-
-	var arr1 = [1,2,3];
-	var arr2 = [2,3,4];
-
-	//let difference = arr1.filter(x => !arr2.includes(x));
-	let difference = arr1
-			 .filter(x => !arr2.includes(x))
-			 .concat(arr2.filter(x => !arr1.includes(x)));
-	console.log(difference);
-	return;
-
-	//let result = arr.some(val => {
-	//	return typeof val == “object”;
-	//});
-
-	//var arr1 = [1,2,3];
-	//var arr2 = [2,3,4];
-
-	var arr3 = Util.arrayDifferenceBoth(arr1, arr2);
-	console.log(arr3);
-
-	if (arr1.includes({filename: 'test', hash: '123'})) {
-		console.log("includes");
-	}*/
-
 	username = $('head').data('username');
 	Util.getVersion();
 
