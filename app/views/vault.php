@@ -121,8 +121,8 @@
 
 			<div id="entry-username-cont" class="form-hidden hidden">
 				<label>Username<span class="remove-field toggle icon icon-trash" data-type="username"></span></label>
-				<div class="input-with-button input-indent">
-					<input id="entry-username" type="text" placeholder="Username" />
+				<div class="input-with-button">
+					<input id="entry-username" class="input-indent" type="text" placeholder="Username" />
 					<span class="btn-circle copy-input icon icon-copy"></span>
 				</div>
 			</div>

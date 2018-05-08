@@ -385,7 +385,6 @@ var VaultModel = new function() {
 	this.preventClipboardClear = false;
 
 	this.list = new List("entries", VaultView.display);
-	this.clipboard = {};
 
 	this.pendingUploads = {};
 	this.pendingDeletions = [];
@@ -395,6 +394,7 @@ var VaultModel = new function() {
 
 		// Require title
 		var origTitle = (item.title) ? item.title : $("#entry-title").val();
+
 		if (!$("#entry-title").val()) {
 			Util.showFormError('entry', 'No title provided');
 			return;

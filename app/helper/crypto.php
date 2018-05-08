@@ -19,6 +19,7 @@ class Crypto {
 	 * @param string $plaintext to be encrypted
 	 * @param string $secret passphrase
 	 * @param boolean $sign whether or not to prepend hmac-hash for integrity
+	 *
 	 * @return string encrypted string
 	 */
 	public static function encrypt($plaintext, $secret, $sign = false) {
@@ -49,6 +50,7 @@ class Crypto {
 	 * Encode string as base64
 	 *
 	 * @param string $str
+	 *
 	 * @return string
 	 */
 	private static function base64_url_encode($str) {
@@ -59,6 +61,7 @@ class Crypto {
 	 * Decode base64-encoded string
 	 *
 	 * @param string $str
+	 *
 	 * @return string
 	 */
 	private static function base64_url_decode($str) {
@@ -73,6 +76,7 @@ class Crypto {
 	 * @param boolean $sign Whether or not to prepend hmac-hash for integrity
 	 * @param boolean $encrypt_filename Whether or not to encrypt the filename
 	 * @param string $destination Directory to create encrypted file in (with trailing slash!)
+	 *
 	 * @return string Absolute path to encrypted file
 	 */
 	public static function encrypt_file($path, $secret, $sign = false, $encrypt_filename = false, $destination = "") {
@@ -99,6 +103,7 @@ class Crypto {
 	 *
 	 * @param string $data64 Base64-encoded encrypted
 	 * @param string $secret Passphrase
+	 *
 	 * @return string Decrypted string
 	 */
 	public static function decrypt($data64, $secret) {
@@ -143,6 +148,7 @@ class Crypto {
 	 * @param string $secret Passphrase
 	 * @param boolean $filename_encrypted Whether or not the filename is encrypted
 	 * @param string $destination directory To create decrypted file in (with trailing slash!)
+	 *
 	 * @return string Absolute path to decrypted file
 	 */
 	public static function decrypt_file($path, $secret, $filename_encrypted = false, $destination = "") {
@@ -173,6 +179,7 @@ class Crypto {
 	 *
 	 * @param string $text plaintext
 	 * @param int $blocksize
+	 *
 	 * @return string Padded plaintext
 	 */
 	public static function pkcs5_pad($text, $blocksize) {
@@ -184,6 +191,7 @@ class Crypto {
 	 * Remove PKCS5-Padding
 	 *
 	 * @param string $text Plaintext
+	 *
 	 * @return string Unpadded plaintext
 	 */
 	public static function pkcs5_unpad($text) {
@@ -198,6 +206,7 @@ class Crypto {
 	 *
 	 * @param string $data String to be signed
 	 * @param string $key Secret passphrase
+	 *
 	 * @return string HMAC
 	 */
 	public static function sign($data, $key) {
@@ -209,6 +218,7 @@ class Crypto {
 	 *
 	 * @param string $secret
 	 * @param string $salt
+	 *
 	 * @return string
 	 */
 	private static function generate_key($secret, $salt) {
@@ -219,6 +229,7 @@ class Crypto {
 	 * Generate a cryptographically secure password-hash
 	 *
 	 * @param string $pass
+	 *
 	 * @return string Password-hash
 	 */
 	public static function generate_password($pass) {
@@ -232,6 +243,7 @@ class Crypto {
 	 *
 	 * @param string $pass
 	 * @param string $hash
+	 *
 	 * @return boolean
 	 */
 	public static function verify_password($pass, $hash) {
@@ -242,6 +254,7 @@ class Crypto {
 	 * Validate authorization token
 	 *
 	 * @param string $token
+	 *
 	 * @return string|null Authorization token
 	 */
 	public static function validate_token($token) {
@@ -257,6 +270,7 @@ class Crypto {
 	* Generate a random byte-sequence
 	*
 	* @param int $length
+	*
 	* @return string
 	*/
 	public static function random_bytes($length) {
@@ -267,6 +281,7 @@ class Crypto {
 	* Generate a random string
 	*
 	* @param int $length
+	*
 	* @return string
 	*/
 	public static function random_string($length) {
@@ -277,6 +292,7 @@ class Crypto {
 	* Generate a random number
 	*
 	* @param int $length
+	*
 	* @return int
 	*/
 	public static function random_number($length) {

@@ -681,3 +681,9 @@ body.light .menu ul {
 .dark .grid .item {
 	background-color: #353535;
 }
+
+.label-highlight {
+	color: #2e8b5e;
+	transition: all 150ms linear;
+	transform: scale(1.05);
+}

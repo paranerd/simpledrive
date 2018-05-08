@@ -192,6 +192,12 @@ var Util = new function() {
 	}
 
 	this.addOtherEvents = function() {
+		$('form input').focus(function() {
+			$(this).prev('label').addClass("label-highlight");
+		}).focusout(function() {
+			$(this).prev('label').removeClass("label-highlight");
+		});
+
 		$(window).resize(function() {
 			// Do something
 		});
