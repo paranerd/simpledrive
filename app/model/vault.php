@@ -21,8 +21,6 @@ class Vault_Model extends Model {
 		$this->uid        = ($this->user) ? $this->user['id'] : 0;
 		$this->username   = ($this->user) ? $this->user['username'] : "";
 		$this->vault_path = ($this->user) ? $this->config['datadir'] . $this->username . VAULT . VAULT_FILE : "";
-
-		$this->init();
 	}
 
 	/**
@@ -40,8 +38,6 @@ class Vault_Model extends Model {
 	 * Create vault-dir and vault-file
 	 */
 	private function init() {
-		$this->check_if_logged_in();
-
 		if ($this->vault_path) {
 			if (!file_exists(dirname($this->vault_path))) {
 				mkdir(dirname($this->vault_path), 0777, true);
@@ -60,6 +56,7 @@ class Vault_Model extends Model {
 	 */
 	public function get() {
 		$this->check_if_logged_in();
+		$this->init();
 
 		if (!file_exists($this->vault_path)) {
 			throw new Exception('Vault does not exist', 404);
@@ -79,6 +76,7 @@ class Vault_Model extends Model {
 	 */
 	public function sync($client_vault, $last_edit) {
 		$this->check_if_logged_in();
+		$this->init();
 
 		if ($last_edit > filemtime($this->vault_path)) {
 			file_put_contents($this->vault_path, $client_vault);
@@ -95,9 +93,8 @@ class Vault_Model extends Model {
 	 * @return boolean
 	 */
 	public function save($client_vault, $files = null, $delete = null) {
-		$this->log->debug($_REQUEST);
-		$this->log->debug($_FILES);
 		$this->check_if_logged_in();
+		$this->init();
 
 		if (!empty($files)) {
 			$this->add_files($files);
@@ -143,35 +140,36 @@ class Vault_Model extends Model {
 		throw new Exception("Error uploading " . implode(', ', $errors), 500);
 	 }
 
-	 /**
-	  * Get file
-	  *
-	  * @param  string  $hash
-	  */
-	 public function get_file($hash, $filename) {
-		 $path = dirname($this->vault_path) . "/" . $hash;
+	/**
+	 * Get file
+	 *
+	 * @param  string  $hash
+	 */
+	public function get_file($hash, $filename) {
+		$this->check_if_logged_in();
+		$this->init();
 
-		 if (file_exists($path)) {
-			 Response::set_download($path, false, $filename);
-			 return null;
-		 }
+		$path = dirname($this->vault_path) . "/" . $hash;
 
-		 throw new Exception('File not found', 404);
-	 }
+		if (file_exists($path)) {
+			Response::set_download($path, false, $filename);
+			return null;
+		}
 
-	 /**
-	  * Delete file
-	  *
-	  * @param  array  $hashes
-	  */
-	  private function delete_files($hashes) {
-		  $this->log->debug("hashes");
-		  $this->log->debug($hashes);
-		  foreach ($hashes as $hash) {
-			  $path = dirname($this->vault_path) . "/" . $hash;
-			  if (file_exists($path)) {
-				  unlink($path);
-			  }
-		  }
-	  }
+		throw new Exception('File not found', 404);
+	}
+
+	/**
+	 * Delete file
+	 *
+	 * @param  array  $hashes
+	 */
+	private function delete_files($hashes) {
+		foreach ($hashes as $hash) {
+			$path = dirname($this->vault_path) . "/" . $hash;
+			if (file_exists($path)) {
+				unlink($path);
+			}
+		}
+	}
 }
