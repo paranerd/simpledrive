@@ -115,7 +115,7 @@
 				<label>URL<span class="remove-field toggle icon icon-trash" data-type="url"></span></label>
 				<div class="input-with-button input-indent">
 					<input id="entry-url" type="text" placeholder="URL" />
-					<span id="entry-open-url" class="icon icon-redo"><a target="_blank" href="#"></a></span>
+					<span id="entry-open-url" class="btn-circle icon icon-redo"><a target="_blank" href="#"></a></span>
 				</div>
 			</div>
 
@@ -139,7 +139,7 @@
 			<div id="entry-note-cont" class="form-hidden hidden">
 				<label>Note<span class="remove-field toggle icon icon-trash" data-type="note"></span></label>
 				<div>
-					<textarea id="entry-note" class="input-indent" placeholder="Notes"></textarea>
+					<textarea id="entry-note" class="input-indent" placeholder="Note"></textarea>
 				</div>
 			</div>
 
@@ -179,22 +179,22 @@
 			<div id="passgen-password" class="output center-hor"></div>
 
 			<label for="passgen-length">Length</label>
-			<input id="passgen-length" class="input-indent" type="text" placeholder="Length">
+			<input id="passgen-length" class="input-indent keep" type="text" placeholder="Length" value="12">
 
 			<div class="checkbox">
-				<span id="passgen-upper" class="checkbox-box"></span>
+				<span id="passgen-upper" class="checkbox-box checkbox-checked keep"></span>
 				<span class="checkbox-label">Uppercase</span>
 			</div>
 			<div class="checkbox">
-				<span id="passgen-lower" class="checkbox-box toggle-hidden"></span>
+				<span id="passgen-lower" class="checkbox-box checkbox-checked keep"></span>
 				<span class="checkbox-label">Lowercase</span>
 			</div>
 			<div class="checkbox">
-				<span id="passgen-numbers" class="checkbox-box toggle-hidden"></span>
+				<span id="passgen-numbers" class="checkbox-box checkbox-checked keep"></span>
 				<span class="checkbox-label">Numbers</span>
 			</div>
 			<div class="checkbox">
-				<span id="passgen-specials" class="checkbox-box toggle-hidden"></span>
+				<span id="passgen-specials" class="checkbox-box"></span>
 				<span class="checkbox-label">Special characters</span>
 			</div>
 
@@ -214,8 +214,10 @@
 			<input id="unlock-passphrase" type="password" placeholder="Passphrase" />
 
 			<div class="error hidden"></div>
-			<a href="files" class="btn btn-inverted">Exit</a>
-			<button class="btn">OK</button>
+			<div class="form-buttons">
+				<a href="files" class="btn btn-inverted">Exit</a>
+				<button class="btn">OK</button>
+			</div>
 		</form>
 	</div>
 
@@ -259,10 +261,12 @@
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<div id="info-title" class="title title-large">simpleDrive</div>
-		<div class="subtitle">Private. Secure. Simple.</div>
-		<hr>
-		<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		<div>
+			<div id="info-title" class="title title-large">simpleDrive</div>
+			<div class="subtitle">Private. Secure. Simple.</div>
+			<hr>
+			<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		</div>
 	</div>
 
 	<!-- Confirm -->

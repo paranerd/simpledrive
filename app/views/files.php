@@ -203,10 +203,10 @@
 	<!-- Menu -->
 	<div id="menu" class="popup-menu hidden">
 		<ul class="menu">
-			<li><a class="icon icon-folder" href="files">Files</a></li>
-			<li><a class="icon icon-settings" href="user">Settings</a></li>
+			<li><a class="icon icon-files" href="files"><?php echo $lang['files']; ?></a></li>
+			<li><a class="icon icon-settings" href="user"><?php echo $lang['settings']; ?></a></li>
 			<?php if ($admin) : ?>
-			<li><a class="icon icon-admin" href="system">System</a></li>
+			<li><a class="icon icon-admin" href="system"><?php echo $lang['system']; ?></a></li>
 			<?php endif; ?>
 			<li><a class="icon icon-key" href="vault">Vault</a></li>
 			<li class="icon icon-info popup-trigger" data-target="info"><?php echo $lang['info']; ?></li>

@@ -405,6 +405,8 @@ var VaultModel = new function() {
 
 		if (!item.title && index != null) {
 			Util.showFormError('entry', 'Entry already exists');
+			console.log(item);
+			console.log(index);
 			return;
 		}
 
@@ -420,7 +422,7 @@ var VaultModel = new function() {
 		item.url = Util.generateFullURL($("#entry-url").val());
 		item.username = $("#entry-username").val();
 		item.password = $("#entry-password").val();
-		item.note = $("#entry-notes").val();
+		item.note = $("#entry-note").val();
 
 		item.files = [];
 		$("#entry-files").children().each(function() {
@@ -462,7 +464,7 @@ var VaultModel = new function() {
 		var items = self.list.getAll();
 
 		while (true) {
-			var hash = Crypto.sha1("test" + Date.now());
+			var hash = Crypto.sha1(Date.now().toString());
 			var found = false;
 
 			items.forEach(function(item) {
@@ -480,12 +482,6 @@ var VaultModel = new function() {
 					found = true;
 				}
 			}
-
-			/*self.pendingUploads.forEach(function(upload) {
-				if (upload.hash == hash) {
-					found = true;
-				}
-			});*/
 
 			if (!found) {
 				return hash;
@@ -575,8 +571,7 @@ var VaultModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			if (data.msg) {
 				self.encrypted = data.msg;
-				//VaultView.showUnlock();
-				self.unlock("test");
+				VaultView.showUnlock();
 			}
 			else {
 				VaultView.showSetPassphrase();

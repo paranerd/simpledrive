@@ -29,7 +29,7 @@
 	<div id="header">
 		<!-- Nav back -->
 		<div id="logo" title="Return to files">
-			<a href="files" class="back"><span class="icon icon-arrow-left"></span><span>Texteditor</span></a>
+			<a href="files" class="back icon icon-arrow-left">Texteditor</a>
 		</div>
 		<!-- Title -->
 		<div id="title" title="Click to rename" class="popup-trigger" data-target="rename">
@@ -54,16 +54,16 @@
 
 	<!-- Menu -->
 	<?php if ($username) : ?>
-	<div id="menu" class="popup popup-menu hidden">
+	<div id="menu" class="popup-menu hidden">
 		<ul class="menu">
-			<li><a href="files"><span class="icon icon-files"></span><span>Files</span></a></li>
-			<li><a href="user"><span class="icon icon-settings"></span><span>Settings</span></a></li>
+			<li><a class="icon icon-files" href="files"><?php echo $lang['files']; ?></a></li>
+			<li><a class="icon icon-settings" href="user"><?php echo $lang['settings']; ?></a></li>
 			<?php if ($admin) : ?>
-			<li><a href="system"><span class="icon icon-admin"></span><span>System</span></a></li>
+			<li><a class="icon icon-admin" href="system"><?php echo $lang['system']; ?></a></li>
 			<?php endif; ?>
-			<li><a href="vault"><span class="icon icon-key"></span><span>Vault</span></a></li>
-			<li class="popup-trigger" data-target="info"><span class="icon icon-info"></span><span><?php echo $lang['info']; ?></span></li>
-			<li><a href="core/logout?token=<?php echo $token; ?>"><span class="icon icon-logout"></span><span><?php echo $lang['logout']; ?></span></a></li>
+			<li><a class="icon icon-key" href="vault">Vault</a></li>
+			<li class="icon icon-info popup-trigger" data-target="info"><?php echo $lang['info']; ?></li>
+			<li><a class="icon icon-logout" href="core/logout?token=<?php echo $token; ?>"><?php echo $lang['logout']; ?></a></li>
 		</ul>
 	</div>
 	<?php endif; ?>
@@ -88,10 +88,12 @@
 
 	<!-- Version info -->
 	<div id="info" class="popup center hidden">
-		<div id="info-title" class="title title-large">simpleDrive</div>
-		<div class="subtitle">Private. Secure. Simple.</div>
-		<hr>
-		<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		<div>
+			<div id="info-title" class="title title-large">simpleDrive</div>
+			<div class="subtitle">Private. Secure. Simple.</div>
+			<hr>
+			<div id="info-footer">paranerd 2013-2018 | <a href="mailto:paranerd.development@gmail.com">Contact Me!</a></div>
+		</div>
 	</div>
 
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>

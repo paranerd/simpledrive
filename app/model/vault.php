@@ -128,7 +128,6 @@ class Vault_Model extends Model {
 			$destination = dirname($this->vault_path) . "/" . $hash;
 
 			if (!move_uploaded_file($file['tmp_name'], $destination)) {
-				Crypto::encrypt_file($destination, $secret, true);
 				$errors[] = $file['name'];
 			}
 		}

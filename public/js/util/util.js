@@ -369,15 +369,15 @@ var Util = new function() {
 		$(".form-hidden").addClass("hidden");
 
 		$(".popup").addClass("hidden").removeClass("locked");
-		$(".popup .checkbox-box").removeClass("checkbox-checked");
+		$(".popup .checkbox-box:not(.keep)").removeClass("checkbox-checked");
 		$(".popup .password-strength, .popup .error").addClass("hidden").text('');
 
 		if (keepHiddenInputs) {
 			// Don't clear hidden form-inputs
-			$(".popup input[type!='hidden']").val('');
+			$(".popup input:not(.keep)[type!='hidden']").val('');
 		}
 		else {
-			$(".popup input").val('');
+			$(".popup input:not(.keep)").val('');
 		}
 
 		return true;
