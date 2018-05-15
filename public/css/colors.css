@@ -42,6 +42,9 @@ button:focus {
 
 .btn a {
 	color: white !important;
+	display: inline-block;
+	width: 100%;
+	height: 100%;
 }
 
 .btn:hover a {
@@ -59,6 +62,10 @@ button:focus {
 	color: #2e8b5e;
 	background-color: white;
 	border: 1px solid #2e8b5e;
+}
+
+.btn-inverted a {
+	color: #2e8b5e !important;
 }
 
 .btn-inverted:hover {

@@ -40,14 +40,15 @@ var List = (function() {
 					if (!e.shiftKey && !e.ctrlKey &&
 						$(":focus").length == 0 &&
 						$("#" + self.id + "-filter").hasClass('hidden') &&
-						String.fromCharCode(e.keyCode).toLowerCase().match(/^[\wöäüß]+$/i))
+						(String.fromCharCode(e.keyCode).toLowerCase().match(/^[\w]+$/i) || [192, 219, 222, 186].includes(e.keyCode)))
 					{
 						$("#" + self.id + "-filter").removeClass('hidden');
 						$("#" + self.id + "-filter .filter-input").focus();
 
 						setTimeout(function() {
 							// Place cursor behind text
-							$("#" + self.id + "-filter .filter-input").val(String.fromCharCode(e.keyCode).toLowerCase());
+							var input = $("#" + self.id + "-filter .filter-input").val();
+							$("#" + self.id + "-filter .filter-input").val(input);
 						}, 10);
 					}
 

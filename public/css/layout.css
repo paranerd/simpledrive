@@ -226,8 +226,12 @@ form .title {
 	margin: 0;
 }
 
-form .form-buttons {
-	margin-top: 10px;
+form button {
+	margin-top: 10px !important;
+}
+
+.form-buttons *:not(button) {
+	margin-top: 10px !important;
 }
 
 form .form-list {

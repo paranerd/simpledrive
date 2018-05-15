@@ -307,6 +307,7 @@ var VaultView = new function() {
 		}
 
 		$("#entry-open-url").find('a').attr('href', '#');
+		$("#entry-fields option").removeClass("hidden");
 		$("#entry-files").empty();
 
 		for (var field in item) {
@@ -363,9 +364,15 @@ var VaultView = new function() {
 			title.innerHTML = Util.escape(item.title);
 			listItem.appendChild(title);
 
+			// URL
+			var url = document.createElement("span");
+			url.className = "item-elem col2";
+			url.innerHTML = item.url.match(/^https?:\/\/[^\/?]+/);
+			listItem.appendChild(url);
+
 			// Category
 			var category = document.createElement("span");
-			category.className = "item-elem col2";
+			category.className = "item-elem col3";
 			category.innerHTML = item.category;
 			listItem.appendChild(category);
 
@@ -392,13 +399,13 @@ var VaultModel = new function() {
 	this.saveEntry = function() {
 		var item = (self.list.getSelectedCount() > 0) ? self.list.getFirstSelected().item : {};
 
-		// Require title
-		var origTitle = (item.title) ? item.title : $("#entry-title").val();
-
 		if (!$("#entry-title").val()) {
 			Util.showFormError('entry', 'No title provided');
 			return;
 		}
+
+		// Require title
+		var origTitle = (item.title) ? item.title : $("#entry-title").val();
 
 		// Check if title already exists
 		var index = Util.arraySearchForKey(self.list.getAll(), 'title', origTitle);
@@ -423,8 +430,8 @@ var VaultModel = new function() {
 		item.username = $("#entry-username").val();
 		item.password = $("#entry-password").val();
 		item.note = $("#entry-note").val();
-
 		item.files = [];
+
 		$("#entry-files").children().each(function() {
 			item.files.push({filename: $(this).data('filename'), hash: $(this).data('hash')})
 		});

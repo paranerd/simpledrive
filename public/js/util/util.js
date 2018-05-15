@@ -240,7 +240,7 @@ var Util = new function() {
 		document.body.removeChild(textArea);
 
 		if (text) {
-			self.notify("Copied to clipboard", false, false);
+			self.notify("Copied to clipboard", true, false);
 		}
 	}
 

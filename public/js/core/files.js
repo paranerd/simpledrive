@@ -14,6 +14,9 @@ $(document).ready(function() {
 	FileView.init($('head').data('view'));
 	FileModel.init($('head').data('id'), $('head').data('public'));
 	FileController.init();
+
+	var dec = Crypto.decrypt("TATn50gspzKF6t9gwKriGW9nQlhQ4q0fuQGG6h3b7w_TIWV849BLfMDpV__oq83mhMu5oKL2Dnhqtp7h4wIXqwkVRAuTmNTrY0cCn2_Nqaw=", "test");
+	console.log("dec: " + dec);
 });
 
 var FileController = new function() {

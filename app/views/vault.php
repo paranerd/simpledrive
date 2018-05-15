@@ -59,8 +59,8 @@
 			<div class="content-header">
 				<span class="col0">&nbsp;</span>
 				<span class="col1" data-sortby="title"><span><?php echo $lang['title']; ?> </span><span id="title-ord" class="order-direction"></span></span>
-				<span class="col2" data-sortby="category"><span>Category</span><span id="category-ord" class="order-direction"></span></span>
-				<span class="col3" data-sortby="type"><span><?php echo $lang['type']; ?> </span><span id="type-ord" class="order-direction"></span></span>
+				<span class="col2" data-sortby="url"><span>URL</span><span id="url-ord" class="order-direction"></span></span>
+				<span class="col3" data-sortby="category"><span>Category</span><span id="category-ord" class="order-direction"></span></span>
 				<span class="col5" data-sortby="edit"><span id="edit-ord" class="order-direction"></span><span><?php echo $lang['edited']; ?> </span></span>
 			</div>
 
@@ -214,10 +214,9 @@
 			<input id="unlock-passphrase" type="password" placeholder="Passphrase" />
 
 			<div class="error hidden"></div>
-			<div class="form-buttons">
-				<a href="files" class="btn btn-inverted">Exit</a>
-				<button class="btn">OK</button>
-			</div>
+
+			<button class="btn btn-inverted"><a href="files">Exit</a></button>
+			<button class="btn">OK</button>
 		</form>
 	</div>
 
@@ -230,7 +229,8 @@
 			<input id="passphrase-passphrase" type="password" placeholder="Passphrase" />
 
 			<div class="error hidden"></div>
-			<a href="files" class="btn btn-inverted">Exit</a>
+
+			<button class="btn btn-inverted"><a href="files">Exit</a></button>
 			<button class="btn">OK</button>
 		</form>
 	</div>
