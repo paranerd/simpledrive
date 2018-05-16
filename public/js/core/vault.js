@@ -447,9 +447,13 @@ var VaultModel = new function() {
 		// Block form submit
 		$("#entry .btn").prop('disabled', true);
 
+		if ($("#entry-group").val()) {
+			console.log("group is set");
+		}
+
 		// Set data
 		item.title = $("#entry-title").val();
-		item.group = $("#entry-group").val();
+		item.group = ($("#entry-group").val()) ? $("#entry-group").val() : "General";
 		item.logo = $("#entry-logo").val();
 		item.edit = Date.now();
 		item.files = [];
@@ -656,6 +660,7 @@ var VaultModel = new function() {
 				self.passphrase = passphrase;
 
 				if (dec) {
+					console.log(dec);
 					self.vault = JSON.parse(dec);
 					var groups = self.extractGroups();
 					self.list.setItems(groups, 'title');
