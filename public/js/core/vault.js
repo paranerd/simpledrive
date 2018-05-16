@@ -296,8 +296,16 @@ var VaultView = new function() {
 	}
 
 	this.showEntry = function() {
+		console.log("showEntry");
 		var selection = VaultModel.list.getFirstSelected();
 		var item = (selection) ? selection.item : {};
+
+		if (Object.keys(item).length !== 0 && !VaultModel.currentGroup) {
+			console.log("open group");
+			console.log(item);
+			VaultModel.openGroup(item.title);
+			return;
+		}
 
 		Util.showPopup("entry");
 
@@ -332,20 +340,24 @@ var VaultView = new function() {
 				$("#entry-files").append('<div data-hash="' + item.files[i].hash + '" data-filename="' + item.files[i].filename + '"><span class="btn-circle-small icon icon-download download-trigger"></span><span class="btn-circle-small icon icon-trash remove-file"></span>' + item.files[i].filename + '</div>');
 			}
 		}
+
+		$("#entry-group").val(VaultModel.currentGroup);
 	}
 
 	this.display = function(entries) {
-		var datalist = $("#categories").empty();
-		var categories = [];
+		console.log("display");
+		var datalist = $("#groups").empty();
+		var groups = [];
 
 		for (var i in entries) {
 			var item = entries[i];
+			console.log(item);
 
-			if (!categories.includes(item.category)) {
+			if (item.group && !groups.includes(item.group)) {
 				var option = document.createElement('option');
-				option.value = item.category;
-				$("#categories").append(option);
-				categories.push(item.category)
+				option.value = item.group;
+				$("#groups").append(option);
+				groups.push(item.group);
 			}
 
 			var listItem = document.createElement("div");
@@ -370,28 +382,38 @@ var VaultView = new function() {
 			listItem.appendChild(title);
 
 			// URL
-			var url = document.createElement("span");
-			url.className = "item-elem col2";
-			url.innerHTML = item.url.match(/^https?:\/\/[^\/?]+/);
-			listItem.appendChild(url);
+			if (item.url) {
+				var url = document.createElement("span");
+				console.log("url: " + item.url);
+				url.className = "item-elem col2";
+				url.innerHTML = item.url.match(/^https?:\/\/[^\/?]+/);
+				listItem.appendChild(url);
+			}
 
-			// Category
-			var category = document.createElement("span");
-			category.className = "item-elem col3";
-			category.innerHTML = item.category;
-			listItem.appendChild(category);
+			// Group
+			if (item.group) {
+				var group = document.createElement("span");
+				group.className = "item-elem col3";
+				group.innerHTML = item.group;
+				listItem.appendChild(group);
+			}
 
 			// Edit
-			var edit = document.createElement("span");
-			edit.className = "item-elem col5";
-			edit.innerHTML = Util.timestampToDate(item.edit);
-			listItem.appendChild(edit);
+			if (item.edit) {
+				var edit = document.createElement("span");
+				edit.className = "item-elem col5";
+				edit.innerHTML = Util.timestampToDate(item.edit);
+				listItem.appendChild(edit);
+			}
 		}
 	}
 }
 
 var VaultModel = new function() {
 	var self = this;
+	this.vault = "";
+	this.currentGroup = "";
+
 	this.passphrase = "";
 	this.encrypted = "";
 	this.preventClipboardClear = false;
@@ -427,7 +449,7 @@ var VaultModel = new function() {
 
 		// Set data
 		item.title = $("#entry-title").val();
-		item.category = $("#entry-category").val();
+		item.group = $("#entry-group").val();
 		item.logo = $("#entry-logo").val();
 		item.edit = Date.now();
 		item.files = [];
@@ -574,6 +596,34 @@ var VaultModel = new function() {
 		});
 	}
 
+	this.openGroup = function(title) {
+		var entries = [];
+
+		for (var i in self.vault) {
+			var entry = self.vault[i];
+
+			if (entry.group == title) {
+				entries.push(entry);
+			}
+		}
+
+		self.currentGroup = title;
+		self.list.setItems(entries, 'title');
+	}
+
+	this.extractGroups = function() {
+		var groups = [];
+
+		for (var i in self.vault) {
+			var entry = self.vault[i];
+			if (entry.group) {
+				groups.push({title: entry.group, logo: 'folder'});
+			}
+		}
+
+		return groups;
+	}
+
 	this.fetch = function() {
 		var bId = Util.startBusy("Loading...");
 
@@ -584,7 +634,8 @@ var VaultModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			if (data.msg) {
 				self.encrypted = data.msg;
-				VaultView.showUnlock();
+				self.unlock("test");
+				//VaultView.showUnlock();
 			}
 			else {
 				VaultView.showSetPassphrase();
@@ -605,7 +656,9 @@ var VaultModel = new function() {
 				self.passphrase = passphrase;
 
 				if (dec) {
-					self.list.setItems(JSON.parse(dec), 'title');
+					self.vault = JSON.parse(dec);
+					var groups = self.extractGroups();
+					self.list.setItems(groups, 'title');
 				}
 
 				Util.closePopup("unlock", false, true);
@@ -640,7 +693,7 @@ var VaultModel = new function() {
 
 		if (pass1 != self.passphrase) {
 			self.passphrase = pass1;
-			this.save();
+			self.save();
 		}
 
 		Util.closePopup('change-passphrase');

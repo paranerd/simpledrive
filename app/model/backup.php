@@ -17,10 +17,7 @@ class Backup_Model extends Model {
 	 * @param string $token
 	 */
 	public function __construct($token) {
-		parent::__construct();
-		$this->user				= ($this->db) ? $this->db->user_get_by_token($token) : null;
-		$this->uid				= ($this->user) ? $this->user['id'] : PUBLIC_USER_ID;
-		$this->username			= ($this->user) ? $this->user['username'] : "";
+		parent::__construct($token);
 
 		$this->cache			= ($this->user) ? $this->config['datadir'] . $this->username . CACHE : "";
 		$this->lock				= ($this->user) ? $this->config['datadir'] . $this->username . LOCK . "backup" : "";
@@ -31,7 +28,7 @@ class Backup_Model extends Model {
 
 		$this->api				= new Google_Api($token);
 
-		if (!$this->uid) {
+		if (!$this->user) {
 			throw new Exception('Permission denied', 403);
 		}
 	}
@@ -42,7 +39,7 @@ class Backup_Model extends Model {
 	 * @throws Exception
 	 */
 	private function check_if_logged_in() {
-		if (!$this->uid) {
+		if (!$this->user) {
 			throw new Exception('Permission denied', 403);
 		}
 	}

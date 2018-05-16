@@ -34,9 +34,7 @@ class Twofactor_Model extends Model {
 	 * @param string $token
 	 */
 	public function __construct($token) {
-		parent::__construct();
-		$this->user = ($this->db) ? $this->db->user_get_by_token($token) : null;
-		$this->uid  = ($this->user) ? $this->user['id'] : null;
+		parent::__construct($token);
 	}
 
 	/**
@@ -45,7 +43,7 @@ class Twofactor_Model extends Model {
 	 * @throws Exception
 	 */
 	private function check_if_logged_in() {
-		if (!$this->uid) {
+		if (!$this->user) {
 			throw new Exception('Permission denied', 403);
 		}
 	}

@@ -60,7 +60,7 @@
 				<span class="col0">&nbsp;</span>
 				<span class="col1" data-sortby="title"><span><?php echo $lang['title']; ?> </span><span id="title-ord" class="order-direction"></span></span>
 				<span class="col2" data-sortby="url"><span>URL</span><span id="url-ord" class="order-direction"></span></span>
-				<span class="col3" data-sortby="category"><span>Category</span><span id="category-ord" class="order-direction"></span></span>
+				<span class="col3" data-sortby="group"><span>Group</span><span id="group-ord" class="order-direction"></span></span>
 				<span class="col5" data-sortby="edit"><span id="edit-ord" class="order-direction"></span><span><?php echo $lang['edited']; ?> </span></span>
 			</div>
 
@@ -127,10 +127,10 @@
 				</optgroup>
 			</select>
 
-			<div id="entry-category-cont">
-				<label>Category</label>
-				<input id="entry-category" class="input-indent" type="text" placeholder="Category" list="categories">
-				<datalist id="categories"><option value="test">Test</option></datalist>
+			<div id="entry-group-cont">
+				<label>Group</label>
+				<input id="entry-group" class="input-indent" type="text" placeholder="Group" list="groups" autocomplete="off">
+				<datalist id="groups"><option value="test">Test</option></datalist>
 			</div>
 
 			<div id="entry-url-cont" class="form-hidden hidden">

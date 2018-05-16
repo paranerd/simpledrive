@@ -14,12 +14,8 @@ class Vault_Model extends Model {
 	 * @param  string  $token
 	 */
 	public function __construct($token) {
-		parent::__construct();
+		parent::__construct($token);
 
-		$this->token      = $token;
-		$this->user       = $this->db->user_get_by_token($token);
-		$this->uid        = ($this->user) ? $this->user['id'] : 0;
-		$this->username   = ($this->user) ? $this->user['username'] : "";
 		$this->vault_path = ($this->user) ? $this->config['datadir'] . $this->username . VAULT . VAULT_FILE : "";
 	}
 

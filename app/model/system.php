@@ -14,8 +14,7 @@ class System_Model extends Model {
 	 * @param string $token
 	 */
 	public function __construct($token) {
-		parent::__construct();
-		$this->token  = $token;
+		parent::__construct($token);
 	}
 
 	/**

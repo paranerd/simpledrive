@@ -14,11 +14,8 @@ class User_Model extends Model {
 	 * @param string $token
 	 */
 	public function __construct($token) {
-		parent::__construct();
-		$this->token     = $token;
-		$this->user      = $this->db->user_get_by_token($token);
-		$this->uid       = ($this->user) ? $this->user['id'] : null;
-		$this->username  = ($this->user) ? $this->user['username'] : "";
+		parent::__construct($token);
+
 		$this->installed = count($this->db->user_get_all()) > 1;
 	}
 
@@ -28,7 +25,7 @@ class User_Model extends Model {
 	 * @throws Exception
 	 */
 	private function check_if_logged_in() {
-		if ($this->installed && !$this->uid) {
+		if ($this->installed && !$this->user) {
 			throw new Exception('Permission denied (Not logged in)', 403);
 		}
 	}
