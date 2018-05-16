@@ -1263,3 +1263,12 @@ label:hover .icon.toggle {
     text-overflow: '';
 	font-family: icomoon, sans-serif;
 }
+
+option {
+	padding: 15px 0;
+	height: 50px;
+}
+
+select {
+	padding: 5px;
+}

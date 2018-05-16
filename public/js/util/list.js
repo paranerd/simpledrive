@@ -245,6 +245,7 @@ var List = (function() {
 		 */
 		unselectAll: function() {
 			this.selected = {};
+			this.currentSelected = -1;
 
 			this.updateSelections();
 			if (this.updateCallback) {
@@ -258,7 +259,6 @@ var List = (function() {
 		 * @param int id
 		 */
 		selectNext: function() {
-			this.unselectAll();
 			this.currentSelected = (this.currentSelected < this.filtered.length - 1) ? this.currentSelected + 1 : this.filtered.length -1;
 			this.select(this.currentSelected);
 		},
@@ -269,7 +269,6 @@ var List = (function() {
 		 * @param int id
 		 */
 		selectPrev: function() {
-			this.unselectAll();
 			this.currentSelected = (this.currentSelected > 0) ? this.currentSelected - 1 : 0;
 			this.select(this.currentSelected);
 		},

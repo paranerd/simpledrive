@@ -105,6 +105,28 @@
 			<label>Title</label>
 			<input id="entry-title" class="input-indent" type="text" placeholder="Title">
 
+			<label>Logo</label>
+			<select id="entry-logo" class="select-with-icon">
+				<optgroup label="Banking">
+					<option value="dollar">&#xf155;</option>
+					<option value="credit-card">&#xf09d;</option>
+				</optgroup>
+				<optgroup label="Websites">
+					<option value="amazon">&#xf270;</option>
+					<option value="ebay">&#xf4f4;</option>
+					<option value="facebook">&#xf082;</option>
+					<option value="paypal">&#xf1ed;</option>
+					<option value="twitter">&#xf099;</option>
+				</optgroup>
+				<optgroup label="Misc">
+					<option value="key" selected>&#xe98d;</option>
+					<option value="earth">&#xe9ca;</option>
+					<option value="mobile">&#xf3cd;</option>
+					<option value="envelope">&#xf0e0;</option>
+					<option value="id-card">&#xf2c2;</option>
+				</optgroup>
+			</select>
+
 			<div id="entry-category-cont">
 				<label>Category</label>
 				<input id="entry-category" class="input-indent" type="text" placeholder="Category" list="categories">

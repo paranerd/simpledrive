@@ -29,6 +29,16 @@ var VaultController = new function() {
 					}
 					break;
 
+				case 46: // Del
+					if (!$(e.target).is('input')) {
+						VaultModel.remove();
+					}
+					break;
+			}
+		});
+
+		$(document).on('keyup', function(e) {
+			switch (e.keyCode) {
 				case 13: // Return
 					// Open file if item is selected and nothing or filter has focus
 					if (VaultModel.list.getSelectedCount() == 1 &&
@@ -37,14 +47,8 @@ var VaultController = new function() {
 						VaultView.showEntry();
 					}
 					break;
-
-				case 46: // Del
-					if (!$(e.target).is('input')) {
-						VaultModel.remove();
-					}
-					break;
 			}
-		});
+		})
 	}
 
 	this.addMouseEvents = function() {
@@ -309,6 +313,7 @@ var VaultView = new function() {
 		$("#entry-open-url").find('a').attr('href', '#');
 		$("#entry-fields option").removeClass("hidden");
 		$("#entry-files").empty();
+		$("#entry-logo").val('key');
 
 		for (var field in item) {
 			if (item[field] && item[field].length) {
@@ -355,7 +360,7 @@ var VaultView = new function() {
 			listItem.appendChild(thumbnailWrapper);
 
 			var thumbnail = document.createElement('span');
-			thumbnail.className = "thumbnail icon-key";
+			thumbnail.className = "thumbnail icon-" + item.logo;
 			thumbnailWrapper.appendChild(thumbnail);
 
 			// Title
@@ -423,7 +428,7 @@ var VaultModel = new function() {
 		// Set data
 		item.title = $("#entry-title").val();
 		item.category = $("#entry-category").val();
-		item.logo = "";
+		item.logo = $("#entry-logo").val();
 		item.edit = Date.now();
 		item.files = [];
 		item.url = Util.generateFullURL($("#entry-url").val());
@@ -447,6 +452,7 @@ var VaultModel = new function() {
 		// Unblock submit and close popup
 		$("#entry .btn").prop('disabled', false);
 		Util.closePopup('entry', true);
+		self.list.unselectAll();
 
 		// Save
 		self.save();
