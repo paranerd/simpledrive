@@ -763,31 +763,6 @@ var FileView = new function() {
 		$("#fileinfo").addClass("hidden");
 		$(window).resize();
 	}
-
-	/**
-	 * Build current title from array
-	 */
-	this.setTitle = function(arr) {
-		$("#title").empty();
-
-		for (var s = 0; s < arr.length; s++) {
-			if (s > 0) {
-				var titleSep = document.createElement("span");
-				titleSep.className = "title-element title-separator";
-				titleSep.innerHTML = "&#x25B9";
-				$("#title").append(titleSep);
-			}
-
-			var titleItem = document.createElement("span");
-			titleItem.value = parseInt(s);
-			titleItem.className = (s == arr.length - 1) ? 'title-element title-element-current' : 'title-element';
-			titleItem.innerHTML = Util.escape(arr[s]);
-
-			$("#title").append(titleItem);
-		}
-
-		document.title = titleItem.innerHTML + " | simpleDrive";
-	}
 }
 
 /**
@@ -932,7 +907,7 @@ var FileModel = new function() {
 				FileView.setView('files');
 			}
 
-			FileView.setTitle(Util.arrayExtractKey(self.hierarchy, 'filename'));
+			Util.setTitle(Util.arrayExtractKey(self.hierarchy, 'filename'));
 			self.list.setItems(data.msg.files, 'filename');
 
 			if (!back) {
@@ -1414,7 +1389,7 @@ var FileModel = new function() {
 			FileView.setView('files', true);
 			self.list.setItems(data.msg.files, 'filename');
 			FileView.hideFileinfo();
-			FileView.setTitle(['Search results: "' + needle + '"']);
+			Util.setTitle(['Search results: "' + needle + '"']);
 			Util.closePopup('search');
 		}).fail(function(xhr, statusText, error) {
 			Util.showFormError('search', xhr.statusText);

@@ -216,7 +216,7 @@ var Util = new function() {
 	}
 
 	this.endBusy = function(busyId) {
-		var id = self.arraySearchForKey(self.busyMessages, 'id', busyId);
+		var id = self.arraySearchObject(self.busyMessages, {id: busyId});
 
 		if (id) {
 			self.busyMessages.splice(id, 1);
@@ -638,6 +638,33 @@ var Util = new function() {
 		return null;
 	}
 
+    /**
+	 * Search an array for an object matching key-value-pairs
+	 *
+	 * @param  array   arr
+	 * @param  array   conditions
+	 *
+	 * @return int|null
+	 */
+    this.arraySearchObject = function(arr, conditions) {
+        for (var i in arr) {
+            var element = arr[i];
+            var found = true;
+
+            for (condition in conditions) {
+                if (element[condition] != conditions[condition]) {
+                    found = false;
+                }
+            }
+
+            if (found) {
+                return i;
+            }
+        }
+
+        return null;
+    }
+
 	/**
 	 * Remove duplicate entries from array
 	 *
@@ -694,6 +721,19 @@ var Util = new function() {
 		return diff
 	}
 
+    this.arrayRemove = function(arr, value) {
+        var needle = JSON.stringify(value);
+        var result = []
+
+        arr.forEach(function(element) {
+            if (JSON.stringify(element) != needle) {
+                result.push(element);
+            }
+        });
+
+        return result;
+    }
+
 	this.autofill = function(id, value, callback) {
 		var i = 0;
 		var fill = setInterval(function() {
@@ -719,4 +759,31 @@ var Util = new function() {
 		$(form).append('<input name="token" value="' + self.getToken() + '"/>');
 		$(form).appendTo('body').submit().remove();
 	}
+
+    /**
+     * Build current title from array
+     */
+    this.setTitle = function(arr) {
+        $("#title").empty();
+
+        for (var s = 0; s < arr.length; s++) {
+            if (s > 0) {
+                var titleSep = document.createElement("span");
+                titleSep.className = "title-element title-separator";
+                titleSep.innerHTML = "&#x25B9";
+                $("#title").append(titleSep);
+            }
+
+            var titleItem = document.createElement("span");
+            titleItem.value = parseInt(s);
+            titleItem.dataset.pos = parseInt(s);
+            titleItem.dataset.name = arr[s];
+            titleItem.className = (s == arr.length - 1) ? 'title-element title-element-current' : 'title-element';
+            titleItem.innerHTML = Util.escape(arr[s]);
+
+            $("#title").append(titleItem);
+        }
+
+        document.title = titleItem.innerHTML + " | simpleDrive";
+    }
 }

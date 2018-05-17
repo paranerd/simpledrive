@@ -44,7 +44,7 @@ var VaultController = new function() {
 					if (VaultModel.list.getSelectedCount() == 1 &&
 						($(":focus").length == 0 || $(":focus").hasClass("filter-input")))
 					{
-						VaultView.showEntry();
+						VaultModel.open();
 					}
 					break;
 			}
@@ -52,6 +52,17 @@ var VaultController = new function() {
 	}
 
 	this.addMouseEvents = function() {
+        $(document).on('mouseup', '.title-element', function(e) {
+            var pos = parseInt(this.value);
+
+            if (isNaN(pos) || pos == 0) {
+                VaultModel.showGroups();
+            }
+            else {
+                VaultModel.openGroup($(".title-element[data-pos=" + pos + "]").data('name'));
+            }
+        });
+
 		$("#autoscan.checkbox-box").on('click', function(e) {
 			// This fires before checkbox-status has been changed
 			var enable = $("#autoscan").hasClass("checkbox-checked") ? 0 : 1;
@@ -113,7 +124,7 @@ var VaultController = new function() {
 			if (e.which == 1) {
 				VaultModel.list.unselectAll();
 				VaultModel.list.select(this.value);
-				VaultView.showEntry();
+                VaultModel.open();
 			}
 		});
 
@@ -296,16 +307,8 @@ var VaultView = new function() {
 	}
 
 	this.showEntry = function() {
-		console.log("showEntry");
 		var selection = VaultModel.list.getFirstSelected();
 		var item = (selection) ? selection.item : {};
-
-		if (Object.keys(item).length !== 0 && !VaultModel.currentGroup) {
-			console.log("open group");
-			console.log(item);
-			VaultModel.openGroup(item.title);
-			return;
-		}
 
 		Util.showPopup("entry");
 
@@ -345,13 +348,11 @@ var VaultView = new function() {
 	}
 
 	this.display = function(entries) {
-		console.log("display");
 		var datalist = $("#groups").empty();
 		var groups = [];
 
 		for (var i in entries) {
 			var item = entries[i];
-			console.log(item);
 
 			if (item.group && !groups.includes(item.group)) {
 				var option = document.createElement('option');
@@ -384,7 +385,6 @@ var VaultView = new function() {
 			// URL
 			if (item.url) {
 				var url = document.createElement("span");
-				console.log("url: " + item.url);
 				url.className = "item-elem col2";
 				url.innerHTML = item.url.match(/^https?:\/\/[^\/?]+/);
 				listItem.appendChild(url);
@@ -411,7 +411,7 @@ var VaultView = new function() {
 
 var VaultModel = new function() {
 	var self = this;
-	this.vault = "";
+	this.vault = [];
 	this.currentGroup = "";
 
 	this.passphrase = "";
@@ -425,17 +425,17 @@ var VaultModel = new function() {
 
 	this.saveEntry = function() {
 		var item = (self.list.getSelectedCount() > 0) ? self.list.getFirstSelected().item : {};
+        var title = (item.title) ? item.title : $("#entry-title").val();
+        var group = ($("#entry-group").val()) ? $("#entry-group").val() : "General";
 
-		if (!$("#entry-title").val()) {
+		// Require title
+		if (!title) {
 			Util.showFormError('entry', 'No title provided');
 			return;
 		}
 
-		// Require title
-		var origTitle = (item.title) ? item.title : $("#entry-title").val();
-
 		// Check if title already exists
-		var index = Util.arraySearchForKey(self.list.getAll(), 'title', origTitle);
+		var index = Util.arraySearchObject(self.vault, {title: title, group: group});
 
 		if (!item.title && index != null) {
 			Util.showFormError('entry', 'Entry already exists');
@@ -447,13 +447,9 @@ var VaultModel = new function() {
 		// Block form submit
 		$("#entry .btn").prop('disabled', true);
 
-		if ($("#entry-group").val()) {
-			console.log("group is set");
-		}
-
 		// Set data
 		item.title = $("#entry-title").val();
-		item.group = ($("#entry-group").val()) ? $("#entry-group").val() : "General";
+		item.group = group;
 		item.logo = $("#entry-logo").val();
 		item.edit = Date.now();
 		item.files = [];
@@ -468,11 +464,11 @@ var VaultModel = new function() {
 		});
 
 		// Update/create entry
-		if (index) {
-			self.list.update(index, item);
+		if (index != null) {
+            self.vault[index] = item;
 		}
 		else {
-			self.list.add(item);
+            self.vault.push(item);
 		}
 
 		// Unblock submit and close popup
@@ -531,8 +527,10 @@ var VaultModel = new function() {
 	this.remove = function() {
 		Util.showConfirm('Delete entry?', function() {
 			var selected = self.list.getAllSelected();
+
 			for (var s in selected) {
 				self.list.remove(s);
+                self.vault = Util.arrayRemove(self.vault, selected[s]);
 			}
 
 			self.save();
@@ -549,8 +547,7 @@ var VaultModel = new function() {
 
 		setTimeout(function() {
 			try {
-				var vaultString = JSON.stringify(self.list.getAll());
-				var encryptedVault = Crypto.encrypt(vaultString, self.passphrase.toString());
+				var encryptedVault = Crypto.encrypt(JSON.stringify(self.vault), self.passphrase.toString());
 
 				var fd = new FormData();
 				fd.append('vault', encryptedVault)
@@ -579,6 +576,7 @@ var VaultModel = new function() {
 				Util.endBusy(bId);
 				self.pendingUploads = {};
 				self.pendingDeletions = [];
+                self.showGroups();
 			}
 		}, 100);
 	}
@@ -613,19 +611,32 @@ var VaultModel = new function() {
 
 		self.currentGroup = title;
 		self.list.setItems(entries, 'title');
+        Util.setTitle(['Vault', title]);
 	}
 
-	this.extractGroups = function() {
+	this.showGroups = function() {
+        var groupNames = [];
 		var groups = [];
 
 		for (var i in self.vault) {
 			var entry = self.vault[i];
-			if (entry.group) {
-				groups.push({title: entry.group, logo: 'folder'});
+			if (entry.group && !groupNames.includes(entry.group)) {
+                groupNames.push(entry.group);
 			}
 		}
 
-		return groups;
+        for (var group in groupNames) {
+            groups.push({title: groupNames[group], logo: 'folder', isGroup: true});
+        }
+
+        if (groups.length == 1) {
+            self.openGroup(groups[0].title);
+        }
+        else {
+            self.currentGroup = "General";
+            self.list.setItems(groups, 'title');
+            Util.setTitle(['Vault']);
+        }
 	}
 
 	this.fetch = function() {
@@ -651,6 +662,17 @@ var VaultModel = new function() {
 		});
 	}
 
+    this.open = function() {
+        var selected = VaultModel.list.getFirstSelected();
+
+        if (selected.item.isGroup) {
+            VaultModel.openGroup(selected.item.title);
+        }
+        else {
+            VaultView.showEntry();
+        }
+    }
+
 	this.unlock = function(passphrase) {
 		var bId = Util.startBusy("Decrypting...");
 
@@ -660,10 +682,8 @@ var VaultModel = new function() {
 				self.passphrase = passphrase;
 
 				if (dec) {
-					console.log(dec);
 					self.vault = JSON.parse(dec);
-					var groups = self.extractGroups();
-					self.list.setItems(groups, 'title');
+                    self.showGroups();
 				}
 
 				Util.closePopup("unlock", false, true);
