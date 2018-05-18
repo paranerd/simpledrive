@@ -220,10 +220,12 @@
 				<span class="checkbox-label">Special characters</span>
 			</div>
 
-			<div id="passgen-copy" class="btn">Copy</div>
-
 			<div class="error hidden"></div>
-			<button class="btn">Generate</button>
+
+            <div class="form-buttons">
+                <div id="passgen-copy" class="btn">Copy</div>
+                <button class="btn">Generate</button>
+            </div>
 		</form>
 	</div>
 

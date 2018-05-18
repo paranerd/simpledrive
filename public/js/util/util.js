@@ -371,6 +371,7 @@ var Util = new function() {
 		$(".popup").addClass("hidden").removeClass("locked");
 		$(".popup .checkbox-box:not(.keep)").removeClass("checkbox-checked");
 		$(".popup .password-strength, .popup .error").addClass("hidden").text('');
+        $(".popup textarea").val('');
 
 		if (keepHiddenInputs) {
 			// Don't clear hidden form-inputs
@@ -383,10 +384,21 @@ var Util = new function() {
 		return true;
 	}
 
+    /**
+     * Display error in form
+     *
+     * @param  int     id
+     * @param  string  msg
+     */
 	this.showFormError = function(id, msg) {
 		$("#" + id + " .error").removeClass("hidden").text(msg);
 	}
 
+    /**
+     * Display context-menu at cursor
+     *
+     * @param  Event  e
+     */
 	this.showContextmenu = function(e) {
 		// Position context menu at mouse
 		var menuHeight = document.getElementById("contextmenu").scrollHeight;
@@ -399,6 +411,12 @@ var Util = new function() {
 		self.showMenu('contextmenu');
 	}
 
+    /**
+     * Display confirm dialog
+     *
+     * @param  string    title
+     * @param  function  successCallback
+     */
 	this.showConfirm = function(title, successCallback) {
 		$("#confirm-title").text(title);
 
@@ -407,6 +425,11 @@ var Util = new function() {
 		$("#confirm-yes").focus();
 	}
 
+    /**
+     * Close widget
+     *
+     * @param  int     id
+     */
 	this.closeWidget = function(id) {
 		if (id) {
 			$("#" + id).addClass("hidden");
@@ -423,6 +446,12 @@ var Util = new function() {
 		$("#sidebar-" + id).addClass("focus");
 	}
 
+    /**
+     * Display text at cursor
+     *
+     * @param  Event   e
+     * @param  string  text
+     */
 	this.showCursorInfo = function(e, text) {
 		$("#cursorinfo").css({
 			'top' : e.pageY + 10,
@@ -430,18 +459,42 @@ var Util = new function() {
 		}).removeClass("hidden").text(text);
 	}
 
+    /**
+     * Hide cursor info
+     */
 	this.hideCursorInfo = function() {
 		$("#cursorinfo").addClass("hidden");
 	}
 
+    /**
+     * Escape text
+     *
+     * @param  string  text
+     *
+     * @return string
+     */
 	this.escape = function(text) {
 		return $("<div>").text(text).html();
 	}
 
+    /**
+     * Display error in form
+     *
+     * @param  XHR  xhr
+     *
+     * @return
+     */
 	this.getError = function(xhr) {
 		return (xhr.responseText && JSON.parse(xhr.responseText).msg) ? JSON.parse(xhr.responseText).msg : "Unknown error";
 	}
 
+    /**
+     * Get URL-Parameter
+     *
+     * @param  string  searchKey
+     *
+     * @return string|null
+     */
 	this.getUrlParameter = function(searchKey) {
 		var paramRaw = window.location.search.replace("?", "");
 		var params = paramRaw.split("&");
@@ -455,6 +508,9 @@ var Util = new function() {
 		return null;
 	}
 
+    /**
+     * Get current version and notify if update available
+     */
 	this.getVersion = function() {
 		$.ajax({
 			url: 'api/core/version',
@@ -470,11 +526,23 @@ var Util = new function() {
 		});
 	}
 
+    /**
+     * Check if browser supports directory-upload
+     *
+     * @return boolean
+     */
 	this.isDirectorySupported = function() {
 		var tmpInput = document.createElement('input');
 		return ('webkitdirectory' in tmpInput || 'mozdirectory' in tmpInput || 'odirectory' in tmpInput || 'msdirectory' in tmpInput || 'directory' in tmpInput);
 	}
 
+    /**
+     * Display notification
+     *
+     * @param  string   msg
+     * @param  boolean  autohide
+     * @param  boolean  warning
+     */
 	this.notify = function(msg, autohide, warning) {
 		if (!$("#notification-area").length) {
 			var area = $('<div id="notification-area" class="notification-area"></div>');
@@ -493,18 +561,40 @@ var Util = new function() {
 		$('#notification-area').append(note);
 	}
 
+    /**
+     * Remove notification
+     *
+     * @param  DOMElement  elem
+     */
 	this.removeNotification = function(elem) {
 		elem.remove();
 	}
 
+    /**
+     * Display warning before browser-refresh if uploads are running
+     *
+     * @return string
+     */
 	this.refreshWarning = function() {
 		return "There are uploads running! If you refresh, those will be aborted.";
 	}
 
+    /**
+     * Display warning before browser-refresh if there is unsaved content
+     *
+     * @return string
+     */
 	this.unsavedWarning = function() {
 		return "There is unsaved content! Do you want to continue?";
 	}
 
+    /**
+     * Select text in inputs/textareas
+     *
+     * @param  int  id
+     * @param  int  start
+     * @param  int  end
+     */
 	this.selectRange = function(id, start, end) {
 		var elem = document.getElementById(id);
 
@@ -524,11 +614,13 @@ var Util = new function() {
 		}
 	}
 
-	this.confirm = function(title) {
-		$("#confirm-title").text(title);
-		$("#confirm").removeClass("hidden");
-	}
-
+    /**
+     * Convert size-string to bytes
+     *
+     * @param  int  size
+     *
+     * @return string
+     */
 	this.stringToByte = function(size) {
 		if (!isNaN(parseInt(size))) {
 			var dim = "" + size.substr(-2).toLowerCase();
@@ -548,6 +640,13 @@ var Util = new function() {
 		return false;
 	}
 
+    /**
+     * Convert timestamp to date-string
+     *
+     * @param  string  timestamp
+     *
+     * @return string
+     */
 	this.timestampToDate = function(timestamp) {
 		timestamp = (timestamp.toString().length > 10) ? timestamp / 1000 : timestamp;
 		var date = new Date(timestamp * 1000);
@@ -557,6 +656,13 @@ var Util = new function() {
 		return day + "." + month + "." + year;
 	}
 
+    /**
+     * Convert timestamp to date-string including time
+     *
+     * @param  string  timestamp
+     *
+     * @return string
+     */
 	this.timestampToString = function(timestamp) {
 		var duration = parseInt(timestamp);
 		var hours = parseInt(duration / 3600) % 24;
@@ -565,6 +671,13 @@ var Util = new function() {
 		return (hours > 0 ?(hours < 10 ? "0" + hours + ":" : hours + ":") : "") + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
 	}
 
+    /**
+     * Convert date to timestamp
+     *
+     * @param  string  date
+     *
+     * @return int
+     */
 	this.dateToTimestamp = function(date) {
 		date = date.split(".");
 		var newDate = date[1] + "," + date[0] + "," + date[2];
@@ -619,30 +732,11 @@ var Util = new function() {
 		return (url == "" || url.match("^http://") || url.match("^https://")) ? url : "http://" + url;
 	}
 
-	/**
-	 * Search an array for a value to a specific key
-	 *
-	 * @param  array   arr
-	 * @param  string  key
-	 * @param  string  value
-	 *
-	 * @return int|null
-	 */
-	this.arraySearchForKey = function(arr, key, value) {
-		for (var i in arr) {
-			if (arr[i][key] == value) {
-				return i;
-			}
-		}
-
-		return null;
-	}
-
     /**
 	 * Search an array for an object matching key-value-pairs
 	 *
-	 * @param  array   arr
-	 * @param  array   conditions
+	 * @param  array  arr
+	 * @param  array  conditions  Key-value-pairs
 	 *
 	 * @return int|null
 	 */

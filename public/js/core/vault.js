@@ -31,24 +31,23 @@ var VaultController = new function() {
 
 				case 46: // Del
 					if (!$(e.target).is('input')) {
-						VaultModel.remove();
+						VaultModel.removeEntry();
 					}
 					break;
-			}
-		});
 
-		$(document).on('keyup', function(e) {
-			switch (e.keyCode) {
-				case 13: // Return
+                case 13: // Return
 					// Open file if item is selected and nothing or filter has focus
 					if (VaultModel.list.getSelectedCount() == 1 &&
 						($(":focus").length == 0 || $(":focus").hasClass("filter-input")))
 					{
-						VaultModel.open();
+                        // Prevent immediate submission
+                        setTimeout(function() {
+                            VaultModel.open();
+                        }, 10);
 					}
 					break;
 			}
-		})
+		});
 	}
 
 	this.addMouseEvents = function() {
@@ -177,7 +176,7 @@ var VaultController = new function() {
 					break;
 
 				case 'delete':
-					VaultModel.remove();
+					VaultModel.removeEntry();
 					break;
 			}
 
@@ -252,7 +251,7 @@ var VaultController = new function() {
 
 		$("#entry").on('submit', function(e) {
 			e.preventDefault();
-			VaultModel.saveEntry();
+            VaultModel.saveEntry();
 		});
 
 		$("#password-generator").on('submit', function(e) {
@@ -306,6 +305,16 @@ var VaultView = new function() {
 		Util.showPopup("change-passphrase");
 	}
 
+    this.fillGroupSelector = function() {
+        var groups = VaultModel.getAllGroups();
+
+        for (var group in groups) {
+            var option = document.createElement('option');
+            option.value = groups[group];
+            $("#groups").append(option);
+        }
+    }
+
 	this.showEntry = function() {
 		var selection = VaultModel.list.getFirstSelected();
 		var item = (selection) ? selection.item : {};
@@ -348,18 +357,8 @@ var VaultView = new function() {
 	}
 
 	this.display = function(entries) {
-		var datalist = $("#groups").empty();
-		var groups = [];
-
 		for (var i in entries) {
 			var item = entries[i];
-
-			if (item.group && !groups.includes(item.group)) {
-				var option = document.createElement('option');
-				option.value = item.group;
-				$("#groups").append(option);
-				groups.push(item.group);
-			}
 
 			var listItem = document.createElement("div");
 			listItem.id = "item" + i;
@@ -425,31 +424,10 @@ var VaultModel = new function() {
 
 	this.saveEntry = function() {
 		var item = (self.list.getSelectedCount() > 0) ? self.list.getFirstSelected().item : {};
-        var title = (item.title) ? item.title : $("#entry-title").val();
-        var group = ($("#entry-group").val()) ? $("#entry-group").val() : "General";
-
-		// Require title
-		if (!title) {
-			Util.showFormError('entry', 'No title provided');
-			return;
-		}
-
-		// Check if title already exists
-		var index = Util.arraySearchObject(self.vault, {title: title, group: group});
-
-		if (!item.title && index != null) {
-			Util.showFormError('entry', 'Entry already exists');
-			console.log(item);
-			console.log(index);
-			return;
-		}
-
-		// Block form submit
-		$("#entry .btn").prop('disabled', true);
 
 		// Set data
 		item.title = $("#entry-title").val();
-		item.group = group;
+		item.group = ($("#entry-group").val()) ? $("#entry-group").val() : "General";
 		item.logo = $("#entry-logo").val();
 		item.edit = Date.now();
 		item.files = [];
@@ -459,26 +437,78 @@ var VaultModel = new function() {
 		item.note = $("#entry-note").val();
 		item.files = [];
 
+        // Make sure there is a title
+        if (!item.title) {
+            Util.showFormError('entry', 'No title provided');
+            return;
+        }
+
+        // Add files
 		$("#entry-files").children().each(function() {
 			item.files.push({filename: $(this).data('filename'), hash: $(this).data('hash')})
 		});
 
 		// Update/create entry
-		if (index != null) {
+        if (item.id) {
+            var index = Util.arraySearchObject(self.vault, {id: item.id});
             self.vault[index] = item;
 		}
 		else {
+            item.id = self.getUniqueId();
             self.vault.push(item);
 		}
 
-		// Unblock submit and close popup
-		$("#entry .btn").prop('disabled', false);
 		Util.closePopup('entry', true);
 		self.list.unselectAll();
+        self.currentGroup = item.group;
 
 		// Save
 		self.save();
 	}
+
+    this.save = function() {
+        if (self.passphrase == '') {
+            VaultView.showSetPassphrase();
+            return;
+        }
+
+        var bId = Util.startBusy("Saving...");
+
+        setTimeout(function() {
+            try {
+                var encryptedVault = Crypto.encrypt(JSON.stringify(self.vault), self.passphrase.toString());
+
+                var fd = new FormData();
+                fd.append('vault', encryptedVault)
+                fd.append('delete', JSON.stringify(self.pendingDeletions));
+                fd.append('token', Util.getToken());
+
+                for (var hash in self.pendingUploads) {
+                    fd.append(hash, self.pendingUploads[hash]);
+                }
+
+                $.ajax({
+                    url: 'api/vault/save',
+                    type: 'post',
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    dataType: "json"
+                }).done(function(data, statusText, xhr) {
+                    Util.notify("Saved.", true, false);
+                }).fail(function(xhr, statusText, error) {
+                    Util.notify(xhr.statusText, true, true);
+                });
+            } catch(e) {
+                Util.notify("Error saving", true, true);
+            } finally {
+                Util.endBusy(bId);
+                self.pendingUploads = {};
+                self.pendingDeletions = [];
+                self.openGroup(self.currentGroup);
+            }
+        }, 100);
+    }
 
 	this.getAllFileHashes = function() {
 		var items = self.list.getAll();
@@ -494,6 +524,24 @@ var VaultModel = new function() {
 
 		return hashes;
 	}
+
+    this.getUniqueId = function() {
+        var found = false;
+
+        while (true) {
+            var id = Date.now().toString();
+
+            for (var entry in self.vault) {
+                if (self.vault[entry].id == id) {
+                    found = true;
+                }
+            }
+
+            if (!found) {
+                return id;
+            }
+        }
+    }
 
 	this.getUniqueFileHash = function() {
 		var items = self.list.getAll();
@@ -524,61 +572,17 @@ var VaultModel = new function() {
 		}
 	}
 
-	this.remove = function() {
+	this.removeEntry = function() {
 		Util.showConfirm('Delete entry?', function() {
 			var selected = self.list.getAllSelected();
 
 			for (var s in selected) {
-				self.list.remove(s);
-                self.vault = Util.arrayRemove(self.vault, selected[s]);
+                var index = Util.arraySearchObject(self.vault, {id: selected[s].id});
+                self.vault.splice(index, 1);
 			}
 
 			self.save();
 		});
-	}
-
-	this.save = function() {
-		if (self.passphrase == '') {
-			VaultView.showSetPassphrase();
-			return;
-		}
-
-		var bId = Util.startBusy("Saving...");
-
-		setTimeout(function() {
-			try {
-				var encryptedVault = Crypto.encrypt(JSON.stringify(self.vault), self.passphrase.toString());
-
-				var fd = new FormData();
-				fd.append('vault', encryptedVault)
-				fd.append('delete', JSON.stringify(self.pendingDeletions));
-				fd.append('token', Util.getToken());
-
-				for (var hash in self.pendingUploads) {
-					fd.append(hash, self.pendingUploads[hash]);
-				}
-
-				$.ajax({
-					url: 'api/vault/save',
-					type: 'post',
-					data: fd,
-					processData: false,
-					contentType: false,
-					dataType: "json"
-				}).done(function(data, statusText, xhr) {
-					Util.notify("Saved.", true, false);
-				}).fail(function(xhr, statusText, error) {
-					Util.notify(xhr.statusText, true, true);
-				});
-			} catch(e) {
-				Util.notify("Error saving", true, true);
-			} finally {
-				Util.endBusy(bId);
-				self.pendingUploads = {};
-				self.pendingDeletions = [];
-                self.showGroups();
-			}
-		}, 100);
 	}
 
 	this.download = function(hash, filename) {
@@ -614,16 +618,23 @@ var VaultModel = new function() {
         Util.setTitle(['Vault', title]);
 	}
 
-	this.showGroups = function() {
-        var groupNames = [];
-		var groups = [];
+    this.getAllGroups = function() {
+        var groups = [];
 
-		for (var i in self.vault) {
-			var entry = self.vault[i];
-			if (entry.group && !groupNames.includes(entry.group)) {
-                groupNames.push(entry.group);
-			}
-		}
+        for (var i in VaultModel.vault) {
+            var item = VaultModel.vault[i];
+
+            if (item.group && !groups.includes(item.group)) {
+                groups.push(item.group);
+            }
+        }
+
+        return groups;
+    }
+
+	this.showGroups = function() {
+        var groupNames = self.getAllGroups();
+		var groups = [];
 
         for (var group in groupNames) {
             groups.push({title: groupNames[group], logo: 'folder', isGroup: true});
@@ -633,7 +644,6 @@ var VaultModel = new function() {
             self.openGroup(groups[0].title);
         }
         else {
-            self.currentGroup = "General";
             self.list.setItems(groups, 'title');
             Util.setTitle(['Vault']);
         }
@@ -684,6 +694,7 @@ var VaultModel = new function() {
 				if (dec) {
 					self.vault = JSON.parse(dec);
                     self.showGroups();
+                    VaultView.fillGroupSelector();
 				}
 
 				Util.closePopup("unlock", false, true);
