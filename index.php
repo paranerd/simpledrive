@@ -53,6 +53,10 @@ define('VERSION', 'config/version.json');
 define('CONTROLLER', $controller);
 define('ACTION', $action);
 
+$log = new Log();
+$log->debug("controller: " . $controller);
+$log->debug("action: " . $action);
+
 // Not installed - redirect to setup
 if (!file_exists(CONFIG) && ($controller != 'core' || $action != 'setup')) {
 	exit (Response::redirect('core/setup'));
@@ -62,9 +66,9 @@ else if (!$request && $render) {
 	exit (Response::redirect('files'));
 }
 // Check if controller exists
-else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('app/controller/' . $controller . '.php')) {
+else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('modules/' . $controller . '/controllers/' . $controller . '.php')) {
 	try {
-		require_once 'app/controller/' . $controller . '.php';
+		require_once 'modules/' . $controller . '/controllers/' . $controller . '.php';
 		// Extract token
 		$token = (isset($token_source['token'])) ? Crypto::validate_token($token_source['token']) : '';
 		$c     = new $name($token);

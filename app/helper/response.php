@@ -68,7 +68,9 @@ class Response {
 				exit();
 			}
 
-			require_once 'app/views/' . $info . '.php';
+			//require_once 'app/views/' . $info . '.php';
+            $view = (ACTION) ? ACTION : "index";
+            require_once 'modules/' . CONTROLLER . '/views/' . $view . '.php';
 		}
 		else if (self::$DOWNLOAD_PATH) {
 			return self::download(self::$DOWNLOAD_PATH, self::$DOWNLOAD_DEL, self::$DOWNLOAD_FILENAME);
