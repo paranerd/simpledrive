@@ -109,7 +109,7 @@
 			<select id="entry-logo" class="select-with-icon">
 				<optgroup label="Banking">
 					<option value="dollar">&#xf155;</option>
-					<option value="credit-card">&#xf09d;</option>
+					<option value="creditcard">&#xf09d;</option>
 				</optgroup>
 				<optgroup label="Websites">
 					<option value="amazon">&#xf270;</option>
@@ -123,7 +123,7 @@
 					<option value="earth">&#xe9ca;</option>
 					<option value="mobile">&#xf3cd;</option>
 					<option value="envelope">&#xf0e0;</option>
-					<option value="id-card">&#xf2c2;</option>
+					<option value="idcard">&#xf2c2;</option>
 				</optgroup>
 			</select>
 

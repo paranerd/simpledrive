@@ -372,7 +372,7 @@ var VaultView = new function() {
 			listItem.appendChild(thumbnailWrapper);
 
 			var thumbnail = document.createElement('span');
-			thumbnail.className = "thumbnail icon-" + item.logo;
+			thumbnail.className = "thumbnail icon-" + ((item.logo) ? item.logo : VaultModel.defaultLogo);
 			thumbnailWrapper.appendChild(thumbnail);
 
 			// Title
@@ -411,7 +411,9 @@ var VaultView = new function() {
 var VaultModel = new function() {
 	var self = this;
 	this.vault = [];
+	this.defaultGroup = "General";
 	this.currentGroup = "";
+	this.defaultLogo = "key";
 
 	this.passphrase = "";
 	this.encrypted = "";
@@ -427,7 +429,7 @@ var VaultModel = new function() {
 
 		// Set data
 		item.title = $("#entry-title").val();
-		item.group = ($("#entry-group").val()) ? $("#entry-group").val() : "General";
+		item.group = ($("#entry-group").val()) ? $("#entry-group").val() : self.defaultGroup;
 		item.logo = $("#entry-logo").val();
 		item.edit = Date.now();
 		item.files = [];
@@ -613,6 +615,11 @@ var VaultModel = new function() {
 			}
 		}
 
+		if (entries.length == 0) {
+			self.showGroups();
+			return;
+		}
+
 		self.currentGroup = title;
 		self.list.setItems(entries, 'title');
         Util.setTitle(['Vault', title]);
@@ -659,8 +666,7 @@ var VaultModel = new function() {
 		}).done(function(data, statusText, xhr) {
 			if (data.msg) {
 				self.encrypted = data.msg;
-				self.unlock("test");
-				//VaultView.showUnlock();
+				VaultView.showUnlock();
 			}
 			else {
 				VaultView.showSetPassphrase();

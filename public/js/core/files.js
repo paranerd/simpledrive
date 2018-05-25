@@ -374,6 +374,12 @@ var FileController = new function() {
 			}
 
 			switch(e.keyCode) {
+				case 8: // Backspace
+					if (!$(e.target).is('input')) {
+						FileModel.dirUp();
+					}
+					break;
+
 				case 13: // Return
 					// Open file if item is selected and nothing or filter has focus
 					if (FileModel.list.getSelectedCount() == 1 &&
@@ -394,11 +400,11 @@ var FileController = new function() {
 
 		$(document).on('keyup', function(e) {
 			switch(e.keyCode) {
-				case 8: // Backspace
+				/*case 8: // Backspace
 					if (!$(e.target).is('input')) {
 						FileModel.dirUp();
 					}
-					break;
+					break;*/
 
 				case 27: // Esc
 					ImageManager.close();
