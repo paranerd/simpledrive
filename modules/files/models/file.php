@@ -7,11 +7,9 @@
  * @link		https://simpledrive.org
  */
 
-require_once 'app/helper/ogg.class.php';
-require_once 'app/helper/sync.php';
-require_once 'app/model/user.php';
-
-require_once 'app/helper/googleapi.php';
+require_once __DIR__ . '/ogg.php';
+require_once __DIR__ . '/sync.php';
+require_once 'modules/user/models/user.php';
 
 class File_Model extends Model {
 	/**
@@ -588,7 +586,7 @@ class File_Model extends Model {
 		// If the share is supposed to be public, do that
 		if ($public == 1) {
 			if (($share_id = $this->db->share($file['id'], PUBLIC_USER_ID, Crypto::generate_password($pass), $access)) !== null) {
-				$link = $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/pub/" . $share_id;
+				$link = $this->config['protocol'] . $this->config['domain'] . $this->config['installdir'] . "files/public/" . $share_id;
 				// Regex for verifying email: '/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/'
 				/*if (isset($_POST['mail']) && $_POST['mail'] != "" && $this->config['mailuser'] != '' && $this->config['mailpass'] != '') {
 					$subject = $this->username . " wants to share a file";
@@ -1158,9 +1156,7 @@ class File_Model extends Model {
 		}
 
 		if (file_exists($destination) && is_file($destination)) {
-			if (!Response::set_cache_header(filemtime($destination))) {
-				Response::set_download($destination, $delete_flag);
-			}
+			Response::download($destination, $delete_flag);
 
 			return null;
 		}

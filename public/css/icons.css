@@ -1,6 +1,6 @@
 @font-face {
 	font-family: 'icomoon';
-	src: url('../font/icomoon.woff?ybqfnd') format('woff');
+	src: url('../font/icomoon.woff?nxn9fs') format('woff');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -23,39 +23,6 @@
 
 /* Icons */
 
-.icon-dollar:before {
-  content: "\f155";
-}
-.icon-mobile:before {
-  content: "\f3cd";
-}
-.icon-server:before {
-  content: "\f233";
-}
-.icon-creditcard:before {
-  content: "\f09d";
-}
-.icon-envelope:before {
-  content: "\f0e0";
-}
-.icon-idcard:before {
-  content: "\f2c2";
-}
-.icon-amazon:before {
-  content: "\f270";
-}
-.icon-ebay:before {
-  content: "\f4f4";
-}
-.icon-facebook:before {
-  content: "\f082";
-}
-.icon-paypal:before {
-  content: "\f1ed";
-}
-.icon-twitter:before {
-  content: "\f099";
-}
 .icon-edit:before {
   content: "\e905";
 }
@@ -95,8 +62,8 @@
 .icon-restore:before {
   content: "\e965";
 }
-.icon-redo2:before {
-  content: "\e968";
+.icon-redo:before {
+  content: "\e969";
 }
 .icon-user:before {
   content: "\e971";
@@ -164,6 +131,9 @@
 .icon-add:before {
   content: "\ea0a";
 }
+.icon-minus:before {
+  content: "\ea0b";
+}
 .icon-info:before {
   content: "\ea0c";
 }
@@ -206,6 +176,42 @@
 .icon-pdf:before {
   content: "\eadf";
 }
-.icon-minus:before {
-  content: "\ea0b";
+.icon-facebook:before {
+  content: "\f082";
+}
+.icon-twitter:before {
+  content: "\f099";
+}
+.icon-creditcard:before {
+  content: "\f09d";
+}
+.icon-envelope:before {
+  content: "\f0e0";
+}
+.icon-dollar:before {
+  content: "\f155";
+}
+.icon-paypal:before {
+  content: "\f1ed";
+}
+.icon-server:before {
+  content: "\f233";
+}
+.icon-amazon:before {
+  content: "\f270";
+}
+.icon-idcard:before {
+  content: "\f2c2";
+}
+.icon-mobile:before {
+  content: "\f3cd";
+}
+.icon-ebay:before {
+  content: "\f4f4";
+}
+.icon-book:before {
+  content: "\f02d";
+}
+.icon-redo2:before {
+  content: "\e968";
 }

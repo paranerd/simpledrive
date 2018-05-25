@@ -11,19 +11,22 @@ date_default_timezone_set('Europe/Berlin');
 header('Content-Type: text/html; charset=UTF-8');
 
 // Include helpers
-require_once 'app/helper/database.php';
-require_once 'app/helper/util.php';
-require_once 'app/helper/log.php';
-require_once 'app/helper/crypto.php';
-require_once 'app/helper/response.php';
-require_once 'app/helper/model.php';
+require_once 'helpers/database.php';
+require_once 'helpers/util.php';
+require_once 'helpers/log.php';
+require_once 'helpers/crypto.php';
+require_once 'helpers/response.php';
+require_once 'helpers/controller.php';
+require_once 'helpers/model.php';
 
 // Differentiate between api- and render-calls
 // Extract controller and action
-$render       = (!isset($_REQUEST['api']) && !(isset($_REQUEST['request']) && $_REQUEST['request'] == 'api'));
-$token_source = ($render) ? $_COOKIE : $_REQUEST;
+
+//$render       = (!isset($_REQUEST['api']) && !(isset($_REQUEST['request']) && $_REQUEST['request'] == 'api'));
 $request      = (isset($_REQUEST['request'])) ? $_REQUEST['request'] : null;
 $args         = ($request) ? explode('/', rtrim($request, '/')) : array();
+$render       = (sizeof($args) == 0 || $args[0] != 'api') ? true : array_shift($args) == null;
+$token_source = ($render) ? $_COOKIE : $_REQUEST;
 $controller   = (sizeof($args) > 0) ? array_shift($args) : 'files';
 $action       = (sizeof($args) > 0) ? array_shift($args) : '';
 $name         = ucfirst($controller) . "_Controller";
@@ -52,10 +55,7 @@ define('LANG', 'lang/');
 define('VERSION', 'config/version.json');
 define('CONTROLLER', $controller);
 define('ACTION', $action);
-
-$log = new Log();
-$log->debug("controller: " . $controller);
-$log->debug("action: " . $action);
+define('RENDER', $render);
 
 // Not installed - redirect to setup
 if (!file_exists(CONFIG) && ($controller != 'core' || $action != 'setup')) {
@@ -74,20 +74,23 @@ else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('modules/' . $con
 		$c     = new $name($token);
 
 		// Call to render
-		if ($render && method_exists($name, 'render')) {
+		if ($render) {
 			exit ($c->render($action, $args));
 		}
 		// Call to API
-		else if (!$render && method_exists($name, $action)) {
+		else if (method_exists($name, $action)) {
 			// Check if every required parameter has been set
 			if (array_key_exists($action, $c->required) && $missing = Util::array_has_keys($_REQUEST, $c->required[$action])) {
-				exit (Response::error('400', 'Missing argument: ' . $missing, $render));
+				exit (Response::error('400', 'Missing argument: ' . $missing));
 			}
 
 			exit (Response::success($c->$action()));
 		}
+		else {
+			exit (Response::error('404', 'Unknown request'));
+		}
 	} catch (Exception $e) {
-		exit (Response::error($e->getCode(), $e->getMessage(), $render));
+		exit (Response::error($e->getCode(), $e->getMessage()));
 	}
 }
 

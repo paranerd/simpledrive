@@ -54,8 +54,8 @@
 				<li><a class="icon icon-admin" href="system">System</a></li>
 				<?php endif; ?>
 				<li><a class="icon icon-key" href="vault">Vault</a></li>
-				<li class="icon icon-info popup-trigger" data-target="info"><?php echo $lang['info']; ?></li>
-				<li><a class="icon icon-logout" href="core/logout?token=<?php echo $token; ?>"><?php echo $lang['logout']; ?></a></li>
+				<li class="icon icon-info popup-trigger" data-target="info"><?= Util::translate('info']; ?></li>
+				<li><a class="icon icon-logout" href="core/logout?token=<?php echo $token; ?>"><?= Util::translate('logout'); ?></a></li>
 			</ul>
 		</div>
 	<?php endif; ?>

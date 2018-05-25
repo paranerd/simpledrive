@@ -7,6 +7,8 @@
  * @link      https://simpledrive.org
  */
 
+$id = (sizeof($args) > 0) ? array_shift($args) : "0";
+
 ?>
 
 <!DOCTYPE html>
@@ -56,14 +58,14 @@
 	<?php if ($username) : ?>
 	<div id="menu" class="popup-menu hidden">
 		<ul class="menu">
-			<li><a class="icon icon-files" href="files"><?php echo $lang['files']; ?></a></li>
-			<li><a class="icon icon-settings" href="user"><?php echo $lang['settings']; ?></a></li>
+			<li><a class="icon icon-files" href="files"><?= Util::translate('files'); ?></a></li>
+			<li><a class="icon icon-settings" href="user"><?= Util::translate('settings'); ?></a></li>
 			<?php if ($admin) : ?>
-			<li><a class="icon icon-admin" href="system"><?php echo $lang['system']; ?></a></li>
+			<li><a class="icon icon-admin" href="system"><?= Util::translate('system'); ?></a></li>
 			<?php endif; ?>
 			<li><a class="icon icon-key" href="vault">Vault</a></li>
-			<li class="icon icon-info popup-trigger" data-target="info"><?php echo $lang['info']; ?></li>
-			<li><a class="icon icon-logout" href="core/logout?token=<?php echo $token; ?>"><?php echo $lang['logout']; ?></a></li>
+			<li class="icon icon-info popup-trigger" data-target="info"><?= Util::translate('info'); ?></li>
+			<li><a class="icon icon-logout" href="core/logout?token=<?php echo $token; ?>"><?= Util::translate('logout'); ?></a></li>
 		</ul>
 	</div>
 	<?php endif; ?>
@@ -99,6 +101,6 @@
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util/util.js"></script>
 
-	<script type="text/javascript" src="public/js/core/texteditor.js"></script>
+	<script type="text/javascript" src="modules/files/public/js/texteditor.js"></script>
 </body>
 </HTML>

@@ -9,11 +9,10 @@
 
 require_once dirname(__DIR__) . '/models/file.php';
 
-class Files_Controller {
+class Files_Controller extends Controller {
 	protected $model;
-	protected $default_section = "files";
-	protected $default_view    = "files";
-	protected $valid_sections  = array('files', 'sharein', 'shareout', 'trash', 'pub', 'webdav', 'texteditor', 'odfeditor');
+	protected $default_view = "files";
+	protected $need_user = (ACTION != "webdav" && ACTION != "public");
 
 	public $required = array(
 		'audioinfo' => array('target'),
@@ -23,7 +22,7 @@ class Files_Controller {
 		'decrypt'   => array('target', 'source', 'secret'),
 		'delete'    => array('target'),
 		'encrypt'   => array('target', 'source', 'secret'),
-		'get'       => array('target'),
+		'get'       => array('targets'),
 		'getlink'   => array('target'),
 		'getpub'    => array('hash', 'key'),
 		'loadtext'  => array('target'),
@@ -43,20 +42,10 @@ class Files_Controller {
 	);
 
 	public function __construct($token) {
+		parent::__construct();
+
 		$this->token = $token;
 		$this->model = new File_Model($token);
-	}
-
-	public function render($section, $args) {
-		$section = ($section) ? $section : $this->default_section;
-		if (in_array($section, $this->valid_sections)) {
-			$view = ($section == "files" || $section == "sharein" || $section == "shareout" || $section == "trash" || $section == "pub") ? $this->default_view : $section;
-			$need_user = (ACTION != "webdav");
-			return Response::success($view, true, $this->token, $section, $args, $need_user);
-		}
-		else {
-			return Response::error('404', 'The requested site could not be found...', true);
-		}
 	}
 
 	public function children() {
@@ -111,7 +100,7 @@ class Files_Controller {
 		$width = (isset($_REQUEST['width'])) ? $_REQUEST['width'] : null;
 		$height = (isset($_REQUEST['height'])) ? $_REQUEST['height'] : null;
 		$thumb = (isset($_REQUEST['thumbnail'])) ? $_REQUEST['thumbnail'] : null;
-		return $this->model->get(json_decode($_REQUEST['target'], true), $width, $height, $thumb);
+		return $this->model->get(json_decode($_REQUEST['targets'], true), $width, $height, $thumb);
 	}
 
 	public function upload() {

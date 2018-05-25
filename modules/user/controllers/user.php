@@ -9,9 +9,8 @@
 
 require_once dirname(__DIR__) . '/models/user.php';
 
-class User_Controller {
+class User_Controller extends Controller {
 	protected $model;
-	protected $default_view = 'index';
 
 	public $required = array(
 		'create'        => array('user', 'pass', 'admin'),
@@ -28,18 +27,10 @@ class User_Controller {
 	);
 
 	public function __construct($token) {
+		parent::__construct();
+
 		$this->token	= $token;
 		$this->model	= new User_Model($token);
-	}
-
-	public function render($view, $args) {
-		$view = ($view) ? $view : $this->default_view;
-		if (file_exists(dirname(__DIR__) . '/views/' . $view . '.php')) {
-			return Response::success($this->default_view, true, $this->token, $section, $args);
-		}
-		else {
-			return Response::error('404', 'The requested site could not be found...', true);
-		}
 	}
 
 	public function get() {

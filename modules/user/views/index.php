@@ -7,6 +7,8 @@
  * @link      https://simpledrive.org
  */
 
+$code = $_GET['code'] ?? "";
+
 ?>
 
 <!DOCTYPE html>
@@ -30,7 +32,7 @@
 	<div id="header">
 		<!-- Nav back -->
 		<div id="logo" title="Return to files">
-			<a href="files" class="back icon icon-arrow-left">Settings2</a>
+			<a href="files" class="back icon icon-arrow-left">Settings</a>
 		</div>
 		<!-- Title -->
 		<div id="title">
@@ -129,14 +131,14 @@
 	<!-- Menu -->
 	<div id="menu" class="popup-menu hidden">
 		<ul class="menu">
-			<li><a class="icon icon-files" href="files"><?php echo $lang['files']; ?></a></li>
-			<li><a class="icon icon-settings" href="user"><?php echo $lang['settings']; ?></a></li>
+			<li><a class="icon icon-files" href="files"><?= Util::translate('files'); ?></a></li>
+			<li><a class="icon icon-settings" href="user"><?= Util::translate('settings'); ?></a></li>
 			<?php if ($admin) : ?>
-			<li><a class="icon icon-admin" href="system"><?php echo $lang['system']; ?></a></li>
+			<li><a class="icon icon-admin" href="system"><?= Util::translate('system'); ?></a></li>
 			<?php endif; ?>
 			<li><a class="icon icon-key" href="vault">Vault</a></li>
-			<li class="icon icon-info popup-trigger" data-target="info"><?php echo $lang['info']; ?></li>
-			<li><a class="icon icon-logout" href="core/logout?token=<?php echo $token; ?>"><?php echo $lang['logout']; ?></a></li>
+			<li class="icon icon-info popup-trigger" data-target="info"><?= Util::translate('info'); ?></li>
+			<li><a class="icon icon-logout" href="core/logout?token=<?php echo $token; ?>"><?= Util::translate('logout'); ?></a></li>
 		</ul>
 	</div>
 

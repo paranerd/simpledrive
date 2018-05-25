@@ -9,10 +9,10 @@
 
 // Check if sabredav plugin is installed
 if (!file_exists('plugins/sabredav')) {
-	exit (Response::error('404', 'Missing plugin.', true));
+	exit (Response::error('404', 'Missing plugin'));
 }
 
-require_once 'app/model/core.php';
+require_once 'modules/core/model/core.php';
 require_once 'plugins/sabredav/vendor/autoload.php';
 
 use

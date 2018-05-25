@@ -30,6 +30,6 @@
 	<script type="text/javascript" src="public/js/util/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="public/js/util/util.js"></script>
 
-	<script type="text/javascript" src="public/js/core/logout.js"></script>
+	<script type="text/javascript" src="modules/core/public/js/logout.js"></script>
 </body>
 </html>

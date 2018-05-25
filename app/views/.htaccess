@@ -1,4 +1,0 @@
-IndexIgnore *
-
-Order Allow,Deny
-Allow from all

@@ -7,8 +7,8 @@
  * @link		https://simpledrive.org
  */
 
-require_once 'app/model/user.php';
-require_once 'app/model/twofactor.php';
+require_once 'modules/user/models/user.php';
+require_once 'modules/twofactor/models/twofactor.php';
 
 class Core_Model {
 	/**

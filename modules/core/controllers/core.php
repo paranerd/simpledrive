@@ -9,11 +9,10 @@
 
 require_once dirname(__DIR__) . '/models/core.php';
 
-class Core_Controller {
+class Core_Controller extends Controller {
 	protected $model;
-	protected $default_section = "login";
-	protected $default_view    = "login";
-	protected $valid_sections  = array('login', 'logout', 'setup');
+	protected $default_view = "login";
+	protected $need_user = false;
 
 	public $required = array(
 		'login'  => array('user', 'pass'),
@@ -22,18 +21,10 @@ class Core_Controller {
 	);
 
 	public function __construct($token) {
+		parent::__construct();
+
 		$this->token	= $token;
 		$this->model	= new Core_Model();
-	}
-
-	public function render($section, $args) {
-		$section = ($section) ? $section : $this->default_section;
-		if (in_array($section, $this->valid_sections)) {
-			return Response::success($section, true, $this->token, $section, $args, false);
-		}
-		else {
-			return Response::error('404', 'The requested site could not be found...', true);
-		}
 	}
 
 	public function setup() {

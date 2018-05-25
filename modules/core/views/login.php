@@ -7,11 +7,13 @@
  * @link      https://simpledrive.org
  */
 
+$demo = (strpos($_SERVER['HTTP_HOST'], 'simpledrive.org') !== false);
+
 ?>
 
 <!DOCTYPE html>
 <html>
-<head data-base="<?php echo $base; ?>" data-demo="<?php echo $demo; ?>" data-target="<?php echo (isset($_GET['target'])) ? $_GET['target'] : 'files/files'; ?>">
+<head data-base="<?php echo $base; ?>" data-demo="<?php echo $demo; ?>" data-target="<?php echo (isset($_GET['target'])) ? $_GET['target'] : 'files'; ?>">
 	<title>Login | simpleDrive</title>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 	<meta name="viewport" content="width=device-width,initial-scale=1">

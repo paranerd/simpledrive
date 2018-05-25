@@ -482,7 +482,7 @@ var List = (function() {
 		order: function(key, order) {
 			this.sortKey = key;
 			this.sortOrder = (order) ? order : this.sortOrder *= -1;
-			this.items = this.items.sort(this.compare(this.sortKey, this.sortOrder));
+			this.items = self.items.sort(this.compare(this.sortKey, this.sortOrder));
 
 			var text = (this.sortOrder === 1) ? "&nbsp &#x25B4" : "&nbsp &#x25BE";
 			$(".order-direction").text('');
