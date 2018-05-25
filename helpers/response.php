@@ -65,7 +65,7 @@ class Response {
             require_once 'modules/' . CONTROLLER . '/views/' . $info . '.php';
 		}
 		else {
-			return json_encode(array('msg' => $info));
+			return json_encode($info);
 		}
 	}
 

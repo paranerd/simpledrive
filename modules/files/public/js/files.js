@@ -904,7 +904,7 @@ var FileModel = new function() {
 			data: {target: id, mode: FileView.view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.hierarchy = data.msg.hierarchy;
+			self.hierarchy = data.hierarchy;
 			self.id = self.getCurrentFolder().id;
 
 			// Set view to "files" when browsing own shares
@@ -913,7 +913,7 @@ var FileModel = new function() {
 			}
 
 			Util.setTitle(Util.arrayExtractKey(self.hierarchy, 'filename'));
-			self.list.setItems(data.msg.files, 'filename');
+			self.list.setItems(data.files, 'filename');
 
 			if (!back) {
 				window.history.pushState({id: self.id, view: FileView.view}, '', 'files/' + FileView.view + '/' + self.id);

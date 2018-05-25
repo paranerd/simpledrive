@@ -485,7 +485,7 @@ var Util = new function() {
      * @return
      */
 	this.getError = function(xhr) {
-		return (xhr.responseText && JSON.parse(xhr.responseText).msg) ? JSON.parse(xhr.responseText).msg : "Unknown error";
+		return (xhr.responseText && JSON.parse(xhr.responseText)) ? JSON.parse(xhr.responseText) : "Unknown error";
 	}
 
     /**
@@ -517,10 +517,10 @@ var Util = new function() {
 			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			if (data.msg.recent) {
-				self.notify("Update available! Get " + data.msg.recent + " from simpledrive.org", false, false);
+			if (data.recent) {
+				self.notify("Update available! Get " + data.recent + " from simpledrive.org", false, false);
 			}
-			$("#info-title").append(" " + data.msg.current);
+			$("#info-title").append(" " + data.current);
 		}).fail(function(xhr, statusText, error) {
 			self.notify(xhr.statusText, true, true);
 		});
