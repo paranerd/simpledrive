@@ -19,6 +19,7 @@ class Response {
 	 * @param int $code HTTP-Status-Code
 	 * @param string $msg Error message
 	 * @param boolean $render
+	 *
 	 * @return string
 	 */
 	public static function error($code, $msg) {
@@ -35,38 +36,42 @@ class Response {
 	/**
 	 * Return method-result to api or set parameters for rendering
 	 * If a user is required, client will be redirected to login/setup if none is found
-	 * Setup and login don't require a user
 	 *
-	 * @param string $info Result-message
-	 * @param boolean $render
+	 * @param string $view View-name
 	 * @param string|null $token For authorization
-	 * @param string $section
-	 * @param string $args Additional arguments (e.g. FileID)
+	 * @param string|null $args Additional arguments (e.g. FileID)
 	 * @param boolean $need_user
+	 *
 	 * @return string|null
 	 */
-	public static function success($info, $token = null, $args = null, $need_user = true) {
-		if (RENDER) {
-			$db			= ($need_user) ? Database::get_instance() : null;
-			$user		= ($db) ? $db->user_get_by_token($token) : null;
-			$username 	= ($user) ? $user['username'] : '';
-			$admin		= ($user) ? $user['admin'] : false;
-			$color		= ($user) ? $user['color'] : 'light';
-			$base		= self::base();
+	public static function render($view, $token = null, $args = null, $need_user = true) {
+		$db			= ($need_user) ? Database::get_instance() : null;
+		$user		= ($db) ? $db->user_get_by_token($token) : null;
+		$username 	= ($user) ? $user['username'] : '';
+		$admin		= ($user) ? $user['admin'] : false;
+		$color		= ($user) ? $user['color'] : 'light';
+		$base		= self::base();
 
-			if ($need_user && !$user) {
-				$location = $base . 'core/login';
-				$location .= ((CONTROLLER . "/" . ACTION) !== ('files/files')) ? "?target=" . CONTROLLER . "/" . ACTION : "";
-				header('Location: ' . $location);
+		if ($need_user && !$user) {
+			$location = $base . 'core/login';
+			$location .= ((CONTROLLER . "/" . ACTION) !== ('files/files')) ? "?target=" . CONTROLLER . "/" . ACTION : "";
+			header('Location: ' . $location);
 
-				exit();
-			}
-
-            require_once 'modules/' . CONTROLLER . '/views/' . $info . '.php';
+			exit();
 		}
-		else {
-			return json_encode($info);
-		}
+
+		require_once 'modules/' . CONTROLLER . '/views/' . $view . '.php';
+	}
+
+	/**
+	 * Return method-result via api
+	 *
+	 * @param string $msg
+	 *
+	 * @return string
+	 */
+	public static function respond($msg) {
+		return json_encode($msg);
 	}
 
 	/**
@@ -76,6 +81,7 @@ class Response {
 	 * @param int $timestamp
 	 * @param string $identifier
 	 * @param boolean $strict
+	 *
 	 * @return boolean
 	 */
 	private static function is_cached($timestamp, $identifier = "", $strict = false) {
@@ -118,6 +124,7 @@ class Response {
 	 *
 	 * @param string $destination Filepath
 	 * @param boolean $delete_flag Whether or not the file should be deletet after download
+	 *
 	 * @return null
 	 */
 	public static function download($destination, $delete_flag, $filename = "") {

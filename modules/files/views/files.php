@@ -14,7 +14,7 @@ $id = (sizeof($args) > 0) ? array_shift($args) : "0";
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
-<head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-view="<?php echo $info; ?>" data-id="<?php echo $id; ?>" data-public="<?php echo isset($public) ? "true" : "false"; ?>">
+<head data-username="<?php echo $username; ?>" data-token="<?php echo $token; ?>" data-view="<?php echo $view; ?>" data-id="<?php echo $id; ?>" data-public="<?php echo isset($public) ? "true" : "false"; ?>">
 	<title>Files | simpleDrive</title>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">

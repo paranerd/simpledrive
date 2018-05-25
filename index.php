@@ -84,7 +84,7 @@ else if (!preg_match('/(\.\.\/)/', $controller) && file_exists('modules/' . $con
 				exit (Response::error('400', 'Missing argument: ' . $missing));
 			}
 
-			exit (Response::success($c->$action()));
+			exit (Response::respond($c->$action()));
 		}
 		else {
 			exit (Response::error('404', 'Unknown request'));

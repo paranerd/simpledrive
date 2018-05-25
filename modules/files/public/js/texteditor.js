@@ -132,10 +132,10 @@ var EditorModel = new function() {
 			data: {target: self.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.filename = data.msg.filename;
+			self.filename = data.filename;
 			document.title = Util.escape(self.filename + " | simpleDrive");
 			$(".title-element-current").text(self.filename);
-			$("#texteditor").text(data.msg.content).focus().scrollTop(0);
+			$("#texteditor").text(data.content).focus().scrollTop(0);
 			self.autosave();
 			window.onbeforeunload = Util.unsavedWarning();
 		}).fail(function(xhr, statusText, error) {

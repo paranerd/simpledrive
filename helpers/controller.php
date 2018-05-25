@@ -12,8 +12,10 @@ class Controller {
 	public function render($view, $args) {
 		$view = ($view) ? $view : $this->default_view;
 
+		$this->log->debug("render " . $view);
+
 		if (file_exists('modules/' . CONTROLLER . "/views/" . $view . ".php")) {
-			return Response::success($view, $this->token, $args, $this->need_user);
+			return Response::render($view, $this->token, $args, $this->need_user);
 		}
 		else {
 			return Response::error('404', 'The requested site could not be found...', true);

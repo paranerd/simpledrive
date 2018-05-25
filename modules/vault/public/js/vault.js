@@ -1,4 +1,4 @@
-/**
+data/**
  * @author		Kevin Schulz <paranerd.development@gmail.com>
  * @copyright	(c) 2018, Kevin Schulz. All Rights Reserved
  * @license		Affero General Public License <http://www.gnu.org/licenses/agpl>
@@ -664,8 +664,8 @@ var VaultModel = new function() {
 			type: 'get',
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			if (data.msg) {
-				self.encrypted = data.msg;
+			if (data) {
+				self.encrypted = data;
 				VaultView.showUnlock();
 			}
 			else {

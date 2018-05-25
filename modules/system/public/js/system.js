@@ -191,13 +191,13 @@ var SystemView = new function() {
 
 	this.displayStatus = function(data) {
 		self.update('status');
-		$("#users-count").text(data.msg.users);
-		$("#upload-max").val(Util.byteToString(data.msg.upload_max));
-		$("#domain").val(data.msg.domain);
-		$("#storage-total").text(Util.byteToString(data.msg.storage_total));
-		$("#storage-used").text(Util.byteToString(data.msg.storage_used) + " (" + (data.msg.storage_used / data.msg.storage_total * 100).toFixed(0) + "%)");
-		$("#status-version").text(data.msg.version);
-		if (data.msg.ssl) { $("#force-ssl").addClass("checkbox-checked"); }
+		$("#users-count").text(data.users);
+		$("#upload-max").val(Util.byteToString(data.upload_max));
+		$("#domain").val(data.domain);
+		$("#storage-total").text(Util.byteToString(data.storage_total));
+		$("#storage-used").text(Util.byteToString(data.storage_used) + " (" + (data.storage_used / data.storage_total * 100).toFixed(0) + "%)");
+		$("#status-version").text(data.version);
+		if (data.ssl) { $("#force-ssl").addClass("checkbox-checked"); }
 	}
 
 	this.displayLog = function(log) {
@@ -455,8 +455,8 @@ var LogModel = new function() {
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			self.pageCurrent = page;
-			self.pageTotal = data.msg.total;
-			self.list.setItems(data.msg.log);
+			self.pageTotal = data.total;
+			self.list.setItems(data.log);
 			SystemView.update('log');
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
@@ -491,7 +491,7 @@ var PluginsModel = new function() {
 			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			SystemView.displayPlugins(data.msg.plugins);
+			SystemView.displayPlugins(data.plugins);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
 		});
@@ -567,7 +567,7 @@ var UsersModel = new function() {
 			type: 'get',
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.list.setItems(data.msg, 'id');
+			self.list.setItems(data, 'id');
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
 		});
@@ -581,8 +581,8 @@ var UsersModel = new function() {
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			var user = self.list.getByKey("username", username);
-			user['quotaused'] = data.msg.used;
-			user['quotamax'] = data.msg.max;
+			user['quotaused'] = data.used;
+			user['quotamax'] = data.max;
 			self.list.update(id, user);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
