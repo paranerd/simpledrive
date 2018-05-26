@@ -377,7 +377,7 @@ var Status = new function() {
 			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			SystemView.displayStatus(data);
+			SystemView.displayStatus(data.msg);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
 		});
@@ -455,8 +455,8 @@ var LogModel = new function() {
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			self.pageCurrent = page;
-			self.pageTotal = data.total;
-			self.list.setItems(data.log);
+			self.pageTotal = data.msg.total;
+			self.list.setItems(data.msg.log);
 			SystemView.update('log');
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
@@ -491,7 +491,7 @@ var PluginsModel = new function() {
 			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			SystemView.displayPlugins(data.plugins);
+			SystemView.displayPlugins(data.msg.plugins);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
 		});
@@ -581,8 +581,8 @@ var UsersModel = new function() {
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
 			var user = self.list.getByKey("username", username);
-			user['quotaused'] = data.used;
-			user['quotamax'] = data.max;
+			user['quotaused'] = data.msg.used;
+			user['quotamax'] = data.msg.max;
 			self.list.update(id, user);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);

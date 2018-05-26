@@ -157,7 +157,7 @@ var Backup = new function() {
 				data: {pass: pass, enc: enc},
 				dataType: 'json'
 			}).done(function(data, statusText, xhr) {
-				window.location = data;
+				window.location = data.msg;
 			}).fail(function(xhr, statusText, error) {
 				Util.notify(xhr.statusText, true, true);
 			});
@@ -214,12 +214,12 @@ var Backup = new function() {
 			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			self.enabled = data.enabled;
-			self.running = data.running;
+			self.enabled = data.msg.enabled;
+			self.running = data.msg.running;
 
-			if (data.enabled) {
+			if (data.msg.enabled) {
 				$("#backup-enable-button").text("Disable");
-				var text = (data.running) ? "Cancel" : "Start";
+				var text = (data.msg.running) ? "Cancel" : "Start";
 				$("#backup-toggle-button").text(text).removeClass('hidden');
 			}
 			else {
@@ -241,7 +241,7 @@ var TwoFactor = new function() {
 			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			$("#twofactor").prop('disabled', !data);
+			$("#twofactor").prop('disabled', !data.msg);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
 		});
@@ -288,7 +288,7 @@ var UserModel = new function() {
 			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			$("#active-token").text(data);
+			$("#active-token").text(data.msg);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
 		});
@@ -306,9 +306,9 @@ var UserModel = new function() {
 			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			$("#fileview").val(data.fileview);
-			$("#color").val(data.color);
-			if (data.autoscan) { $("#autoscan").addClass("checkbox-checked"); }
+			$("#fileview").val(data.msg.fileview);
+			$("#color").val(data.msg.color);
+			if (data.msg.autoscan) { $("#autoscan").addClass("checkbox-checked"); }
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
@@ -362,11 +362,11 @@ var UserModel = new function() {
 			data: {value: 0},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			var percent = ((data.used / data.max) * 100).toFixed(0);
-			$("#mem-used").text(Util.byteToString(data.used) + " (" + percent + "%)");
-			$("#mem-total").text(Util.byteToString(data.max));
-			$("#cache-size").text(Util.byteToString(data.cache));
-			$("#trash-size").text(Util.byteToString(data.trash));
+			var percent = ((data.msg.used / data.msg.max) * 100).toFixed(0);
+			$("#mem-used").text(Util.byteToString(data.msg.used) + " (" + percent + "%)");
+			$("#mem-total").text(Util.byteToString(data.msg.max));
+			$("#cache-size").text(Util.byteToString(data.msg.cache));
+			$("#trash-size").text(Util.byteToString(data.msg.trash));
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
 		});
@@ -421,7 +421,7 @@ var UserModel = new function() {
 			data: {currpass: currpass, newpass: newpass1},
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			Util.setToken(data);
+			Util.setToken(data.msg);
 			Util.notify("Password changed", true);
 			$("#change-password-pass0, #change-password-pass1, #change-password-pass2").val('');
 			Util.closePopup('change-password');

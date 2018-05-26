@@ -12,8 +12,6 @@ class Controller {
 	public function render($view, $args) {
 		$view = ($view) ? $view : $this->default_view;
 
-		$this->log->debug("render " . $view);
-
 		if (file_exists('modules/' . CONTROLLER . "/views/" . $view . ".php")) {
 			return Response::render($view, $this->token, $args, $this->need_user);
 		}

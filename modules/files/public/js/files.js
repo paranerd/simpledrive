@@ -904,7 +904,7 @@ var FileModel = new function() {
 			data: {target: id, mode: FileView.view},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.hierarchy = data.hierarchy;
+			self.hierarchy = data.msg.hierarchy;
 			self.id = self.getCurrentFolder().id;
 
 			// Set view to "files" when browsing own shares
@@ -913,7 +913,7 @@ var FileModel = new function() {
 			}
 
 			Util.setTitle(Util.arrayExtractKey(self.hierarchy, 'filename'));
-			self.list.setItems(data.files, 'filename');
+			self.list.setItems(data.msg.files, 'filename');
 
 			if (!back) {
 				window.history.pushState({id: self.id, view: FileView.view}, '', 'files/' + FileView.view + '/' + self.id);
@@ -937,7 +937,7 @@ var FileModel = new function() {
 			data: {target: elem.id},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.notify(data, false, false);
+			Util.notify(data.msg, false, false);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
 		}).always(function() {
@@ -977,18 +977,18 @@ var FileModel = new function() {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			self.hierarchy = [];
-			Util.setToken(data.token);
+			Util.setToken(data.msg.token);
 
-			if (data.share.type == "folder") {
+			if (data.msg.share.type == "folder") {
 				$("#pubfile").animate({'top' : '-' + window.innerHeight + 'px'}, 500, function () {$("#pubfile").addClass("hidden");});
-				self.fetch(data.share.id);
+				self.fetch(data.msg.share.id);
 			}
 			else {
 				$("#pubfile").removeClass("hidden");
 				$("#pub-key").addClass("hidden");
-				$("#pub-filename").removeClass("hidden").text(data.share.filename);
+				$("#pub-filename").removeClass("hidden").text(data.msg.share.filename);
 				$("#pubfile button").text("Download");
-				self.downloadPub = [data.share];
+				self.downloadPub = [data.msg.share];
 			}
 			$(window).resize();
 		}).fail(function(xhr, statusText, error) {
@@ -1017,7 +1017,7 @@ var FileModel = new function() {
 			data: {source: JSON.stringify(self.list.getAllSelectedIDs()), target: target, trash: 'false'},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.notify(data, true);
+			Util.notify(data.msg, true);
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, false, true);
 		}).always(function() {
@@ -1180,7 +1180,7 @@ var FileModel = new function() {
 			data: {target: JSON.stringify(self.list.getAllSelectedIDs())},
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			Util.notify(data, true);
+			Util.notify(data.msg, true);
 			self.fetch();
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
@@ -1208,7 +1208,7 @@ var FileModel = new function() {
 				data: {target: target.id, mail: mail, key: key, userto: user, pubAcc: pubAcc, write: write},
 				dataType: "json"
 			}).done(function(data, statusText, xhr) {
-				var msg = (pubAcc) ? data : target.filename + " shared with " + user;
+				var msg = (pubAcc) ? data.msg : target.filename + " shared with " + user;
 				Util.notify(msg, !pubAcc);
 				Util.closePopup('share');
 				self.fetch();
@@ -1391,7 +1391,7 @@ var FileModel = new function() {
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
 			FileView.setView('files', true);
-			self.list.setItems(data.files, 'filename');
+			self.list.setItems(data.msg.files, 'filename');
 			FileView.hideFileinfo();
 			Util.setTitle(['Search results: "' + needle + '"']);
 			Util.closePopup('search');

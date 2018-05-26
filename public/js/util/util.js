@@ -517,10 +517,10 @@ var Util = new function() {
 			type: 'get',
 			dataType: 'json'
 		}).done(function(data, statusText, xhr) {
-			if (data.recent) {
-				self.notify("Update available! Get " + data.recent + " from simpledrive.org", false, false);
+			if (data.msg.recent) {
+				self.notify("Update available! Get " + data.msg.recent + " from simpledrive.org", false, false);
 			}
-			$("#info-title").append(" " + data.current);
+			$("#info-title").append(" " + data.msg.current);
 		}).fail(function(xhr, statusText, error) {
 			self.notify(xhr.statusText, true, true);
 		});

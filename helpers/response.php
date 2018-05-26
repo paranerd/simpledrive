@@ -71,7 +71,7 @@ class Response {
 	 * @return string
 	 */
 	public static function respond($msg) {
-		return json_encode($msg);
+		return json_encode(['msg' => $info]);
 	}
 
 	/**
