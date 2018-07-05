@@ -9,9 +9,7 @@
 
 class Response {
 	static $DOWNLOAD_RATE = 1024; // Send files in 1-MB-chunks
-	static $DOWNLOAD_PATH;
-	static $DOWNLOAD_FILENAME;
-	static $DOWNLOAD_DEL = false;
+	static $DO_DOWNLOAD = false;
 
 	/**
 	 * Return error message to client
@@ -71,7 +69,7 @@ class Response {
 	 * @return string
 	 */
 	public static function respond($msg) {
-		return json_encode(['msg' => $msg]);
+		return (self::$DO_DOWNLOAD) ? null : json_encode(['msg' => $msg]);
 	}
 
 	/**
@@ -123,14 +121,20 @@ class Response {
 	 * Send file to client
 	 *
 	 * @param string $destination Filepath
-	 * @param boolean $delete_flag Whether or not the file should be deletet after download
+	 * @param boolean $temporary Whether or not the file should be deletet after download
 	 *
 	 * @return null
 	 */
-	public static function download($destination, $delete_flag, $filename = "") {
+	public static function download($destination, $temporary, $filename = "") {
+		// Set download flag to prevent response message from being appended
+		self::$DO_DOWNLOAD = true;
+
+		// Check if file is already cached
 		if (self::is_cached(filemtime($destination))) {
 			return;
 		}
+
+		// Download
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
 		$filename = ($filename) ? $filename : basename($destination);
 		header('Cache-control: private, max-age=86400, no-transform');
@@ -150,7 +154,8 @@ class Response {
 		}
 		fclose($f);
 
-		if ($delete_flag) {
+		// Remove temporary download
+		if ($temporary) {
 			unlink($destination);
 		}
 
