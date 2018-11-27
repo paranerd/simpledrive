@@ -567,7 +567,7 @@ var UsersModel = new function() {
 			type: 'get',
 			dataType: "json"
 		}).done(function(data, statusText, xhr) {
-			self.list.setItems(data, 'id');
+			self.list.setItems(data.msg, 'id');
 		}).fail(function(xhr, statusText, error) {
 			Util.notify(xhr.statusText, true, true);
 		});
