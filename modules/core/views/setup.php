@@ -47,7 +47,7 @@ if (file_exists(CONFIG)) {
 			<div id="advanced" class="accordion">
 				<input id="mail" class="input-medium" type="text" placeholder="Mail Address" value="">
 				<input id="mailpass" class="input-medium" type="password" placeholder="Mail password" value="">
-				<input id="datadir" class="input-medium" type="text" placeholder="Data Directory" value="<?php echo (dirname(dirname(__DIR__))) . "/docs/"; ?>">
+				<input id="datadir" class="input-medium" type="text" placeholder="Data Directory" value="<?php echo dirname((dirname(dirname(__DIR__)))) . "/docs/"; ?>">
 				<input id="dbserver" class="input-medium" type="text" placeholder="Database Server" value="localhost">
 				<input id="dbname" class="input-medium" type="text" placeholder="Database Name" value="simpledrive">
 			</div>
