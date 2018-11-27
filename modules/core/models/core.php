@@ -41,7 +41,7 @@ class Core_Model {
 		$db_name	= (strlen($db_name) > 0) ? $db_name : 'simpledrive';
 
 		// Check if datadir contains '.' or '../'
-		if (preg_match('/(\.\.\/|\.)/', $datadir)) {
+		if (preg_match('/(\.\.\/|\/\.\.)/', $datadir)) {
 			throw new Exception('Path for data directory not allowed', 400);
 		}
 
