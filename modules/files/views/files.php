@@ -137,9 +137,8 @@ $id = (sizeof($args) > 0) ? array_shift($args) : "0";
 
 		<!-- File Info Panel -->
 		<div id="fileinfo" class="hidden">
-			<span class="close">&times;</span>
-
 			<div id="fileinfo-name" class="fileinfo-elem icon icon-files">Filename</div>
+			<span class="close">&times;</span>
 
 			<div id="fileinfo-size" class="fileinfo-elem icon icon-files"></div>
 			<div id="fileinfo-type" class="fileinfo-elem icon icon-info"></div>
