@@ -715,14 +715,15 @@ label:hover .icon.toggle {
 /* Content */
 
 .main {
-  flex: 1;
-  display: flex;
+	min-height: 0;
+	flex: 1;
+	display: flex;
 }
 
 .filter {
-  position: relative;
-  height: 50px;
-  flex: 0 0 auto;
+	position: relative;
+	height: 50px;
+	flex: 0 0 auto;
 	border-radius: 2px;
 }
 
@@ -735,17 +736,17 @@ label:hover .icon.toggle {
 }
 
 .content {
-  position: relative;
-  flex: 1;
-  overflow: auto;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
+	position: relative;
+	flex: 1;
+	overflow: auto;
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-    width: 10px;
+	width: 10px;
 }
 
 /* Track */
